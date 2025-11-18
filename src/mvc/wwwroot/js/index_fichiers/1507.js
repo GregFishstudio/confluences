@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[1507],{2896:function(n,e,s){"use strict";s.r(e),e.default="// ensure Vue CLI is >= 3.0\n$ vue --version\n\n// Then start the UI\n$ vue ui\n"}}]);

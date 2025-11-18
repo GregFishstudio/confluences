@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[1499],{2888:function(n,a,c){"use strict";c.r(a),a.default="# Install\n$ vue add @nklayman/capacitor\n\n# Usage\n$ yarn capacitor:serve\n"}}]);

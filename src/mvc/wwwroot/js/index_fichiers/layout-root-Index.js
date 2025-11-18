@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[1453],{3065:function(e,t,n){"use strict";n.r(t);var o={name:"LayoutsRoot"},u=n(0),r=Object(u.a)(o,(function(){var e=this.$createElement;return(this._self._c||e)("router-view")}),[],!1,null,null,null);t.default=r.exports}}]);

@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[1514],{2903:function(n,d,i){"use strict";i.r(d),d.default="$ yarn add @mdi/font -D\n// OR\n$ npm install @mdi/font -D\n"}}]);

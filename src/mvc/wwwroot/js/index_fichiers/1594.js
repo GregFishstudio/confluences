@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[1594],{2983:function(n,u,i){"use strict";i.r(u),u.default="// nuxt.config.js\n{\n  buildModules: [\n    // Simple usage\n    '@nuxtjs/vuetify',\n\n    // With options\n    ['@nuxtjs/vuetify', { /* module options */ }]\n  ]\n}\n"}}]);

@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[1521],{2910:function(n,i,t){"use strict";t.r(i),i.default="$ yarn add vuetify\n// OR\n$ npm install vuetify\n"}}]);

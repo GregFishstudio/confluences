@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[1501],{2890:function(n,e,r){"use strict";r.r(e),e.default="\n# Install\n$ vue add electron-builder\n\n# Usage\n$ yarn electron:build\n$ yarn electron:serve\n"}}]);
