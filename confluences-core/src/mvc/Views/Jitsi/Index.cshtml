@@ -1,0 +1,178 @@
+﻿@model mvc.Models.JitsiConfiguration
+
+<br />
+<br />
+<br />
+<br />
+<div id="meet">
+    
+</div>
+
+@section Scripts {
+    <script>
+        var timerInterval;
+
+        function sendOpenRoomMessage() {
+            var roomName = '@(Model.RoomName)';
+
+            $.ajax({
+                type: "POST",
+                url: "/Jitsi/SendMessageClassRoom",
+                data: { roomName: roomName },
+                success: function (data) {
+                    console.log(roomName);
+                    console.log("SUCCESS SEND TIMER MESSAGE");
+                },
+                error: function (xhr, status, error) {
+                    console.error(error);
+                }
+            })
+        }
+
+        function sendPeriodicMessage() {
+            // Déclenche l'envoi du message périodiquement toutes les 3 secondes
+            const timerInterval = setInterval(function () {
+                sendOpenRoomMessage();
+            }, 3000); // 3000 millisecondes = 3 secondes
+
+            // Arrête l'envoi périodique après 50 secondes
+            setTimeout(function () {
+                clearInterval(timerInterval);
+                console.log("L'envoi des messages périodiques a été arrêté après 50 secondes.");
+            },60000);
+        }
+
+        function stopMeeting() {
+            var message = 'ConfClose';
+            var roomName = '@(Model.RoomName)';
+            clearInterval(timerInterval);
+            sessionStorage.setItem('isPrivateButtonVisible', 'false');
+            // Add event listener for 'readyToClose' event
+            connectionJitsi.invoke("StopClassRoom", message, roomName, '@(Model.UserFriendlyName)');
+        }
+
+        console.log("SEND PERIODIC MESSAGE");
+        sendPeriodicMessage();
+
+        const domain = '@(Model.Url)';
+        const options = {
+            roomName: '@(Model.RoomName)',
+            height: 700,
+            parentNode: document.querySelector('#meet'),
+            lang: '@(Model.Language)',
+            userInfo: {
+                displayName: '@(Model.UserFriendlyName)'
+            },
+            configOverwrite: {
+                prejoinConfig: {
+                    enabled: false
+                },
+                disableDeepLinking: true,
+
+                // Prioritize audio quality
+                disableAudioLevels: true, // Disable audio levels to save bandwidth
+                enableNoAudioDetection: true, // Detect audio issues
+                enableNoisyMicDetection: true, // Improve audio clarity by detecting noisy mics
+
+                // Enable high-quality audio codecs
+                preferredCodec: 'G722', // Set a high-quality audio codec (can also use Opus)
+
+                // Enable simulcast for dynamic video quality adjustment
+                disableSimulcast: false,
+
+                // Set adaptive video resolution for medium and low bandwidth connections
+                videoQuality: {
+                    maxBitratesVideo: {
+                        low: 200000, // Low bitrate for poor connections
+                        standard: 500000, // Medium bitrate for average connections
+                        high: 1500000 // High bitrate for good connections
+                    }
+                },
+
+                // Limit the number of active video streams to reduce bandwidth consumption
+                channelLastN: 3, // Only show the last 3 active video participants
+
+                // Automatically adjust video quality based on network conditions
+                startBitrate: 800, // Initial bitrate to avoid bandwidth spikes
+                minHDHeight: 540, // Only switch to HD if height >= 540px
+
+                // Limit max resolution to balance between quality and bandwidth usage
+                resolution: 720, // Max resolution is 720p
+                constraints: {
+                    video: {
+                        height: {
+                            ideal: 720, // Target 720p
+                            max: 720, // Limit max resolution to 720p
+                            min: 180 // Allow fallback to 180p for poor connections
+                        },
+                        frameRate: {
+                            ideal: 30, // Target 30fps for smoother video
+                            max: 30, // Max 30fps
+                            min: 15 // Min 15fps to save bandwidth
+                        }
+                    }
+                },
+
+                // Mute video and audio for users by default to save bandwidth on join
+                startWithVideoMuted: false,
+                startWithAudioMuted: false,
+
+                // Advanced audio settings for better quality
+                audioQuality: {
+                    opusMaxAverageBitrate: 32000 // Ensure high-quality Opus audio codec
+                },
+
+                // Handle video suspensions for users with bad connections
+                disableSuspendVideo: false, // Suspend video for users who aren't watching
+            },
+            interfaceConfigOverwrite: {
+                SHOW_JITSI_WATERMARK: false,
+                SHOW_WATERMARK_FOR_GUESTS: false,
+                SHOW_BRAND_WATERMARK: false,
+                SHOW_POWERED_BY: false,
+                SHOW_DEEP_LINKING_IMAGE: false,
+                SHOW_PROMOTIONAL_CLOSE_PAGE: false,
+                DEFAULT_LOGO_URL: '', // or your custom logo URL
+                SHOW_CHROME_EXTENSION_BANNER: false,
+                TOOLBAR_BUTTONS: [
+                    'microphone', 'camera', 'closedcaptions', 'desktop', 'embedmeeting', 'fullscreen',
+                    'fodeviceselection', 'hangup', 'profile', 'chat', 'recording',
+                    'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
+                    'videoquality', 'filmstrip', 'invite', 'feedback', 'stats', 'shortcuts',
+                    'tileview', 'videobackgroundblur', 'download', 'help'
+                ],
+                // UI Customizations
+                HIDE_INVITE_MORE_HEADER: true,
+                TOOLBAR_ALWAYS_VISIBLE: true,
+                HIDE_KICK_BUTTON_FOR_GUESTS: true,
+                DISABLE_FOCUS_INDICATOR: true,
+                DISABLE_DOMINANT_SPEAKER_INDICATOR: true,
+                DISABLE_VIDEO_BACKGROUND: true // Disable video background for better performance
+            }
+        };
+        const api = new JitsiMeetExternalAPI(domain, options);
+
+        api.addListener('readyToClose', () => {
+            startConnectionJitsi().then(() => {
+                console.log('The video conference is about to be closed.');
+                this.stopMeeting();
+                window.location.href = localStorage.getItem("lastWindowUsed");
+            });
+            
+        });
+
+        window.addEventListener('beforeunload', function (event) {
+            startConnectionJitsi().then(() => {
+                this.stopMeeting();
+                sessionStorage.setItem('isPrivateButtonVisible', 'false');
+            });
+        });
+
+        window.addEventListener('unload', function (event) {
+            startConnectionJitsi().then(() => {
+                this.stopMeeting();
+                sessionStorage.setItem('isPrivateButtonVisible', 'false');
+            });
+        });
+    </script>
+}

@@ -1,0 +1,460 @@
+﻿<!-- _Layout.cshtml -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>@ViewData["Title"]</title>
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />
+    <!--     Fonts and icons     -->
+    <link rel="icon" href="favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+    <!-- CSS Files -->
+    <link href="~/css/material-kit.css?v=2.2.0" rel="stylesheet" />
+    <!--  DataTables.net Css, full documentation here: https://datatables.net/  -->
+    <link href="~/css/datatable/jquery.dataTables.min.css" rel="stylesheet" />
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/site.css" />
+    <!-- Calendar -->
+    <link href='~/lib/calendar/main.css' rel='stylesheet' />
+    <!-- Syncfusion ASP.NET Core controls styles -->
+    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/22.2.5/fluent.css" />
+    <!-- Syncfusion ASP.NET Core controls scripts -->
+    <script src="https://cdn.syncfusion.com/ej2/22.2.5/dist/ej2.min.js"></script>
+    <!-- Jitsit scripts -->
+    <script src='https://meet.jit.si/external_api.js'></script>
+    <!-- SignalR scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.11/signalr.min.js"></script>
+</head>
+<style>
+    @@-webkit-keyframes blink {
+        0% {
+            opacity: 0;
+        }
+
+        50% {
+            opacity: .5;
+        }
+
+        100% {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes blink{
+        0%{opacity: 0;}
+        50%{opacity: .5;}
+        100%{opacity: 1;}
+    }
+
+    .cardBox {
+        max-width: 500px;
+        height: 150px;
+        background: #353535;
+        border-radius: 20px;
+        align-items: center;
+        justify-content: left;
+        backdrop-filter: blur(10px);
+        transition: 0.5s ease-in-out;
+        display:none;
+        justify-content: center;
+        align-items: center;
+        float:right;
+        position: fixed;
+        top: 10vh;
+        right: 0;
+        margin-right: 15px;
+        z-index: 10;
+    }
+
+    .callAvailable{
+        display: block;
+    }
+
+    .callUnAvailable{
+        display: none;
+    }
+
+        .cardBox:hover {
+            cursor: pointer;
+            transform: scale(1.05);
+        }
+
+    .imgCard {
+        width: 50px;
+        height: 50px;
+        margin-left: 10px;
+        border-radius: 10px;
+        background: linear-gradient(#d7cfcf, #9198e5);
+    }
+
+    .cardBox:hover > .imgCard {
+        transition: 0.5s ease-in-out;
+        background: linear-gradient(#9198e5, #712020);
+    }
+
+    #notifBox{
+        display : none;
+    }
+
+    .textBoxCard {
+        width: calc(100% - 90px);
+        margin-left: 10px;
+        color: white;
+        font-family: 'Poppins' sans-serif;
+        animation: blink 1.5s linear infinite;
+    }
+
+    .textContentCard {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .spanCard {
+        font-size: 10px;
+    }
+
+    .h1Card {
+        font-size: 25px;
+        font-weight: bold;
+    }
+
+    .pCard {
+        font-size: 22px;
+        font-weight: lighter;
+    }
+</style>
+
+<body>
+    <nav class="navbar navbar-white fixed-top navbar-expand-lg @(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Production" ? "bg-warning" : "")" color-on-scroll="100">
+        <div class="container">
+            <div class="navbar-translate">
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                    <div class="logo-big">
+                        <img src="~/img/logo_confluences.png" class="img-fluid">
+                    </div>
+                    <div class="logo-small">
+                        <img src="~/img/logo_confluences.png" class="img-fluid">
+                    </div>
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="navbar-toggler-icon"></span>
+                    <span class="navbar-toggler-icon"></span>
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ml-auto">
+                    @if (ViewData.ContainsKey("IsStudent"))
+                    {
+                        if ((bool)ViewData["IsStudent"] == false)
+                        {
+                            if (!User.Claims.Any(c => c.Value != "Teacher"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Home" asp-action="Index">Accueil</a>
+                                </li>
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (!User.Claims.Any(c => c.Value != "Teacher"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Home" asp-action="Index">Accueil</a>
+                            </li>
+                        }
+                    }
+                    @if (User.Claims.Any(c => c.Value == "Teacher"))
+                    {
+@*                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Appointments" asp-action="Index">Les rendez-vous</a>
+                        </li>*@
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="SchoolClassRooms" asp-action="Index">Les classes</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="AspNetUsers" asp-action="Index">Les utilisateurs-trices</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Ressource" asp-action="Homeworks">Ressources</a>
+                        </li>
+                    }
+                    @if (ViewData.ContainsKey("IsStudent"))
+                    {
+                        if ((bool)ViewData["IsStudent"] == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="StudentPage" asp-action="Index">Ma page</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="StudentPage" asp-action="PreviousLessons">Cours précédents</a>
+                            </li>
+@*                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="StudentPage" asp-action="MyAppointments">Mes rendez-vous</a>
+                            </li>*@
+                            @*<li class="nav-item">
+                    <a class="nav-link" asp-controller="StudentPage" asp-action="Index">Infos</a>
+                </li>*@
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="StudentPage" asp-action="Help">Aide</a>
+                            </li>
+                        }
+                    }
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Account" asp-action="Logout">Se déconnecter</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Account" asp-action="SignIn">Se connecter</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    @RenderBody()
+
+
+    <!-- Syncfusion ASP.NET Core Script Manager -->
+    <script>
+        
+        if (!window.location.href.includes("Jitsi")) {
+            localStorage.setItem('lastWindowUsed', window.location.href);
+        }
+
+        async function openSyncfusionImageEditor(elementId, url, apiUrl, id) {
+            //console.log(elementId);
+            //console.log(url);
+            //console.log(document.getElementById(elementId));
+            //console.log(ej.base);
+
+            var element = document.getElementById(elementId);
+            //console.log(element);
+
+            if (element) {
+                var imageEditorObj = ej.base.getComponent(element, 'image-editor');
+                if (imageEditorObj) {
+                    imageEditorObj.open(url);
+                } else {
+                    console.log("imageEditorObj not found");
+                }
+            } else {
+                console.log("element not found");
+            }
+        }
+
+        function saveSyncfusionImage(elementId, apiUrl, id) {
+            // Get imageEditorObj from syncfusion
+            var imageEditorObj = ej.base.getComponent(document.getElementById(elementId), 'image-editor');
+            // Get imageData to work with a canvas
+            var imageData = imageEditorObj.getImageData();
+
+            // Convert it to a canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = imageData.width;
+            canvas.height = imageData.height;
+            const context = canvas.getContext('2d');
+            context.putImageData(imageData, 0, 0);
+
+            // Create a FormData object to send the blob to the server
+            var formData = new FormData();
+
+            // Convert canvas content to a Blob and send it to api
+            canvas.toBlob((blob) => {
+                formData.append('file', blob, 'editedImage.jpg');
+                formData.append('id', id);
+                // Make an AJAX request to send the edited image to the server
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', apiUrl, true);
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === XMLHttpRequest.DONE) {
+                        if (xhr.status === 200) {
+                            // Image saved successfully on the server
+                            alert('Envoyé avec succès');
+                        } else {
+                            // Handle error
+                            alert('Erreur.');
+                        }
+                    }
+                };
+                xhr.send(formData);
+            });    
+        }
+    </script>
+    <ejs-scripts></ejs-scripts>
+
+
+    <!--   Core JS Files   -->
+    <script src="~/js/core/jquery.min.js" type="text/javascript"></script>
+    <script src="~/js/core/popper.min.js" type="text/javascript"></script>
+    <script src="~/js/core/bootstrap-material-design.min.js" type="text/javascript"></script>
+    <script src="~/js/plugins/moment-with-locales.min.js"></script>
+    <!--	Plugin for the Datepicker, full documentation here: https://github.com/Eonasdan/bootstrap-datetimepicker -->
+    <script src="~/js/plugins/bootstrap-datetimepicker.js" type="text/javascript"></script>
+    <!--  Plugin for the Sliders, full documentation here: http://refreshless.com/nouislider/ -->
+    <script src="~/js/plugins/nouislider.min.js" type="text/javascript"></script>
+    <!--  Google Maps Plugin  -->
+    @*<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=YOUR_KEY_HERE"></script>*@
+    <!--	Plugin for Tags, full documentation here: https://github.com/bootstrap-tagsinput/bootstrap-tagsinputs  -->
+    <script src="~/js/plugins/bootstrap-tagsinput.js"></script>
+    <!--	Plugin for Select, full documentation here: http://silviomoreto.github.io/bootstrap-select -->
+    <script src="~/js/plugins/bootstrap-selectpicker.js" type="text/javascript"></script>
+    <!--	Plugin for Fileupload, full documentation here: http://www.jasny.net/bootstrap/javascript/#fileinput -->
+    <script src="~/js/plugins/jasny-bootstrap.min.js" type="text/javascript"></script>
+    <!-- Place this tag in your head or just before your close body tag. -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!-- Control Center for Material Kit: parallax effects, scripts for the example pages etc -->
+    <script src="~/js/material-kit.js?v=2.2.0" type="text/javascript"></script>
+    <!--  DataTables.net Plugin, full documentation here: https://datatables.net/  -->
+    <script src="~/js/datatable/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" language="javascript" src="https://nightly.datatables.net/responsive/js/dataTables.responsive.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chathub")
+            .build();
+
+        const connectionJitsi = new signalR.HubConnectionBuilder()
+            .withUrl("/jitsihub")
+            .build();
+
+        const privateJitsi = new signalR.HubConnectionBuilder()
+            .withUrl("/jitsihub")
+            .build();
+
+        async function startConnection() {
+            try {
+                await connection.start();
+                console.log("Connected to SignalR CHAT hub");
+            } catch (err) {
+                console.error(err);
+
+            }
+        }
+
+        startConnection();
+
+        connection.on("ReceiveConnectedUsers", function (users) {
+            console.log("USERS");
+            console.log(users);
+            const iconToChange = document.getElementsByClassName("userconnected");
+            const callAvailable = document.getElementsByClassName("callButton");
+
+            for (let i = 0, len = iconToChange.length; i < len; i++) {
+                if (users.includes(iconToChange[i].getAttribute("data-userConnected").toUpperCase())) {
+                    iconToChange[i].classList.remove('text-secondary');
+                    iconToChange[i].classList.add('text-success');
+                } else {
+                    iconToChange[i].classList.remove('text-success');
+                    iconToChange[i].classList.add('text-secondary');
+                }
+            }
+
+            for (let i = 0, len = callAvailable.length; i < len; i++) {
+                console.log(callAvailable);
+                console.log("CALLL");
+                console.log(callAvailable[i].getAttribute("data-userconnected"));
+
+                if (users.includes(callAvailable[i].getAttribute("data-userConnected").toUpperCase())) {
+                    console.log('Call available in');
+                    callAvailable[i].classList.remove('callUnAvailable');
+                    callAvailable[i].classList.add('callAvailable');
+                }
+                else {
+                    console.log('Call available out');
+                    callAvailable[i].classList.remove('callAvailable');
+                    callAvailable[i].classList.add('callUnAvailable');
+                }
+            }
+        });
+
+        connection.on("UserConnected", function (user) {
+            console.log(`${user} connected.`);
+        });
+
+        connection.on("UserDisconnected", function (user) {
+            console.log(`${user} disconnected.`);
+        });
+
+        
+
+        async function startConnectionJitsi() {
+            try {
+                await connectionJitsi.start();
+                console.log("Connected to JITSI SIGNALR");
+            } catch(err){
+                console.error(err);
+            }
+        }
+
+        async function startConnectionPrivateJitsi() {
+            try {
+                await privateJitsi.start();
+                console.log("Connected to JITSI Private SIGNALR");
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function sendMessage() {
+            const messageInput = document.getElementById("messageInput");
+            const message = messageInput.value;
+            messageInput.value = "";
+            await connection.invoke("SendMessage", message);
+        }
+
+        function checkButtonStatus() {
+            timerInterval = setInterval(function () {
+                var isButtonVisible = sessionStorage.getItem('isButtonVisible');
+
+                console.log('Buttonvisible');
+                console.log(isButtonVisible);
+
+                if (isButtonVisible === 'true') {
+                    document.getElementById('notifBox').style.display = 'flex';
+                }
+                else {
+                    if (document.getElementById('notifBox') != null)
+                        document.getElementById('notifBox').style.display = 'none';
+                }
+            }, 3000); // 3000 milliseconds = 3 seconds
+        }
+
+        function checkPrivateButtonStatus() {
+            timerIntervalPrivate = setInterval(function () {
+                var isPrivateButtonVisible = sessionStorage.getItem('isPrivateButtonVisible');
+
+                console.log('PrivateButtonvisible');
+                console.log(isPrivateButtonVisible);
+
+                if (isPrivateButtonVisible === 'true') {
+                    document.getElementById('notifBoxPrivate').style.display = 'flex';
+                }
+                else {
+                    if (document.getElementById('notifBoxPrivate') != null)
+                        document.getElementById('notifBoxPrivate').style.display = 'none';
+                }
+            }, 3000); // 3000 milliseconds = 3 seconds
+        }
+
+        checkButtonStatus();
+
+        checkPrivateButtonStatus();
+        
+    </script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

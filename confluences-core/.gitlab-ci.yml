@@ -1,0 +1,67 @@
+image: mcr.microsoft.com/dotnet/sdk:3.1
+
+stages:
+  - build
+  - deploy
+
+sonarqube-check:
+  stage: build
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
+    GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  script: 
+      - "apt-get update"
+      - "apt-get install --yes openjdk-11-jre"
+      - "dotnet tool install --global dotnet-sonarscanner"
+      - "export PATH=\"$PATH:$HOME/.dotnet/tools\""
+      - "dotnet sonarscanner begin /k:\"a7470_confluences-core_AX4QN2KXsXsQsHShelSm\" /d:sonar.login=\"$SONAR_TOKEN\" /d:\"sonar.host.url=$SONAR_HOST_URL\" "
+      - "dotnet build"
+      - "dotnet sonarscanner end /d:sonar.login=\"$SONAR_TOKEN\""
+  allow_failure: true
+  when: manual
+  only:
+    - master # or the name of your main branch
+
+build:
+  stage: build
+  script:
+    - echo "Compile apps"
+    - "cd src/IdentityServerAspNetIdentity"
+    - "dotnet build"
+    - "cd ../Api"
+    - "dotnet build"
+    - "cd ../mvc"
+    - "dotnet build"
+  when: manual
+  artifacts:
+        paths:
+            - "src/IdentityServerAspNetIdentity/bin"
+            - "src/Api/bin"
+            - "src/mvc/bin"
+        expire_in: 1 week
+
+deploy:
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  stage: deploy
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -f $DOCKERFILEPATH -t registry.gitlab.com/a7470/confluences/confluences-core:$PROJECTNAME-$CI_COMMIT_TAG .
+    - docker push registry.gitlab.com/a7470/confluences/confluences-core:$PROJECTNAME-$CI_COMMIT_TAG
+  parallel:
+    matrix:
+      - DOCKERFILEPATH: src/Api/Dockerfile
+        PROJECTNAME: api
+      - DOCKERFILEPATH: src/IdentityServerAspNetIdentity/Dockerfile
+        PROJECTNAME: idp
+      - DOCKERFILEPATH: src/mvc/Dockerfile
+        PROJECTNAME: frontendplateformecollaborative
+  environment:
+    name: $PROJECTNAME-$CI_COMMIT_TAG
+  only:
+    - tags

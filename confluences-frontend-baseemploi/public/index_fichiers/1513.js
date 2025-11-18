@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[1513],{2902:function(n,i,o){"use strict";o.r(i),i.default="$ yarn add material-design-icons-iconfont -D\n// OR\n$ npm install material-design-icons-iconfont -D\n"}}]);

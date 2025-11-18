@@ -1,0 +1,91 @@
+﻿@model mvc.Models.AspNetUser
+
+<div class="cardBox" id="notifBoxPrivate" onclick="location.href='@Url.Action("Private", "Jitsi", new { roomName = Model.UserName, isPrivateRoom = false})'">
+    <div class="imgCard"></div>
+    <div class="textBoxCard">
+        <div class="textContentCard">
+            <p class="h1Card">Quelqu'un vous appelle</p>
+        </div>
+        <p class="pCard">
+            Cliquer pour rejoindre
+        </p>
+        <div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let audioContext;
+
+    function initializeAudioContext() {
+        // Create the AudioContext after a user gesture
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        playSong();
+    }
+
+    function playSong() {
+        const notes = [
+            { frequency: 261.63, duration: 0.5 },  // C4
+            { frequency: 293.66, duration: 0.5 },  // D4
+            { frequency: 329.63, duration: 0.5 },  // E4
+            { frequency: 349.23, duration: 0.5 },  // F4
+            { frequency: 392.00, duration: 0.5 },  // G4
+            { frequency: 440.00, duration: 0.5 },  // A4
+            { frequency: 493.88, duration: 0.5 },  // B4
+            { frequency: 523.25, duration: 1.0 }   // C5
+        ];
+
+        let currentTime = audioContext.currentTime;
+
+        notes.forEach(note => {
+            playTone(audioContext, note.frequency, note.duration, currentTime);
+            currentTime += note.duration;
+        });
+    }
+
+    function playTone(audioContext, frequency, duration, startTime) {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(1, audioContext.currentTime);
+
+        oscillator.start(startTime);
+        oscillator.stop(startTime + duration);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        startConnectionPrivateJitsi().then(() => {
+            privateJitsi.invoke("AddToGroup", "SchoolClassRoom_" + "@Model.UserName").catch(function (err) {
+                return console.error(err.toString());
+            });
+
+            privateJitsi.on("JitsiPrivateNotification", function (message) {
+                sessionStorage.setItem('isPrivateButtonVisible', 'true');
+                isButtonVisible = sessionStorage.getItem('isPrivateButtonVisible');
+
+                if (isButtonVisible === 'true') {
+                    document.getElementById('notifBoxPrivate').style.display = 'flex';
+                }
+                else {
+                    document.getElementById('notifBoxPrivate').style.display = 'none';
+                }
+
+            });
+
+            privateJitsi.on("StopPrivateClassRoom", function (message) {
+                sessionStorage.setItem('isPrivateButtonVisible', 'false');
+                document.getElementById('notifBoxPrivate').style.display = 'none';
+            });
+        });
+    });
+
+    
+</script>

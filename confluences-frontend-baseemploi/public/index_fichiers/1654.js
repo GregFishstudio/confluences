@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[1654],{3043:function(n,o,c){"use strict";c.r(o),o.default=".your-svg-icon\n  fill: currentColor\n"}}]);

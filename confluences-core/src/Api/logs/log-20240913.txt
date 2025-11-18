@@ -1,0 +1,568 @@
+2024-09-13 13:07:47.185 +00:00 [INF] Starting host...
+2024-09-13 13:07:47.285 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2024-09-13 13:08:25.799 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:25.805 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:08:26.029 +00:00 [WRN] 'AddEntityFramework*' was called on the service provider, but 'UseInternalServiceProvider' wasn't called in the DbContext options configuration. Consider removing the 'AddEntityFramework*' call, as in most cases it's not needed and may cause conflicts with other products and services registered in the same service provider.
+2024-09-13 13:08:31.006 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:31.007 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:08:31.427 +00:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2024-09-13 13:08:31.799 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 13:08:31.843 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 13:08:31.857 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 13:08:31.885 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 13:08:31.907 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 13:08:31.934 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 13:08:33.039 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:33.040 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:08:34.484 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:34.485 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:08:34.571 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 13:08:34.598 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 13:08:34.618 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 13:08:34.628 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 13:08:34.642 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 13:08:34.648 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 13:08:35.507 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:35.507 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:08:35.531 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:35.531 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:08:36.078 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:36.078 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:08:40.180 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:40.181 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:08:40.217 +00:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2024-09-13 13:08:41.704 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:41.704 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:08:41.778 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:41.779 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:08:42.053 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:42.053 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:08:42.065 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:42.067 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:08:42.530 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:42.530 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:08:42.970 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:42.970 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:08:42.984 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:42.985 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:08:43.590 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:43.591 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:08:43.661 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:43.662 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:08:43.706 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:43.707 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:08:43.774 +00:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2024-09-13 13:08:50.082 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:50.082 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:08:50.410 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:50.411 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:08:51.648 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:51.649 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:08:51.667 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:08:51.668 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:09:13.920 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:09:13.921 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:09:18.060 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:09:18.061 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:09:18.093 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:09:18.094 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:09:18.227 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:09:18.229 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:09:20.503 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:09:20.503 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:09:20.568 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:09:20.568 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:09:33.596 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:09:33.597 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:09:39.836 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:09:39.837 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:09:40.010 +00:00 [DBG] Successfully validated the token.
+2024-09-13 13:09:40.011 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 13:12:42.322 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 13:12:42.914 +00:00 [ERR] Connection id "0HN6JUKJ6A4U0", Request id "0HN6JUKJ6A4U0:00000003": An unhandled exception was thrown by the application.
+Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Ambiguous HTTP method for action - Api.Controllers.PdfViewerController.JsonConverterstring (Api). Actions require an explicit HttpMethod binding for Swagger/OpenAPI 3.0
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperations(IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePaths(IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwagger(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Datadog.Trace.ClrProfiler.AutoInstrumentation.AspNetCore.BlockingMiddleware.Invoke(HttpContext context) in /_/tracer/src/Datadog.Trace/ClrProfiler/AutoInstrumentation/AspNetCore/BlockingMiddleware.cs:line 115
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpProtocol.ProcessRequests[TContext](IHttpApplication`1 application)
+2024-09-13 14:50:34.945 +00:00 [INF] Starting host...
+2024-09-13 14:50:35.099 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2024-09-13 14:50:40.864 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:41.051 +00:00 [WRN] 'AddEntityFramework*' was called on the service provider, but 'UseInternalServiceProvider' wasn't called in the DbContext options configuration. Consider removing the 'AddEntityFramework*' call, as in most cases it's not needed and may cause conflicts with other products and services registered in the same service provider.
+2024-09-13 14:50:44.235 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:44.251 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:44.813 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:44.831 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:44.859 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:45.288 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:45.353 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:45.375 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:45.375 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:45.382 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:50.397 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:50.627 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:50.645 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:50.735 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:50.749 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:50.760 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:50.772 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:50.782 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:50.791 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:50.862 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:53.576 +00:00 [DBG] Successfully validated the token.
+2024-09-13 14:50:53.580 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 14:50:55.971 +00:00 [DBG] Successfully validated the token.
+2024-09-13 14:50:55.973 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 14:50:56.243 +00:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2024-09-13 14:50:56.474 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:56.510 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:56.523 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:56.533 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:56.542 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:56.555 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:58.078 +00:00 [DBG] Successfully validated the token.
+2024-09-13 14:50:58.078 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 14:50:59.079 +00:00 [DBG] Successfully validated the token.
+2024-09-13 14:50:59.081 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 14:50:59.228 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:59.261 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:59.276 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:59.284 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:59.295 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:50:59.306 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:51:07.722 +00:00 [DBG] Successfully validated the token.
+2024-09-13 14:51:07.723 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 14:51:07.802 +00:00 [DBG] Successfully validated the token.
+2024-09-13 14:51:07.803 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 14:51:08.427 +00:00 [DBG] Successfully validated the token.
+2024-09-13 14:51:08.427 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 14:51:08.472 +00:00 [DBG] Successfully validated the token.
+2024-09-13 14:51:08.473 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 14:51:11.873 +00:00 [DBG] Successfully validated the token.
+2024-09-13 14:51:11.874 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 14:51:12.178 +00:00 [DBG] Successfully validated the token.
+2024-09-13 14:51:12.178 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 14:51:12.251 +00:00 [DBG] Successfully validated the token.
+2024-09-13 14:51:12.252 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 14:51:12.342 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:51:12.361 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:51:12.377 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:51:12.387 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:51:12.397 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:51:12.449 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:51:22.458 +00:00 [DBG] Successfully validated the token.
+2024-09-13 14:51:22.458 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 14:51:22.505 +00:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2024-09-13 14:51:22.613 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:51:22.684 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:51:22.693 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:51:22.737 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:51:22.738 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:51:22.764 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:55:28.588 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:55:29.007 +00:00 [ERR] Connection id "0HN6K0DNRAVLC", Request id "0HN6K0DNRAVLC:00000003": An unhandled exception was thrown by the application.
+Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Ambiguous HTTP method for action - Api.Controllers.PdfViewerController.JsonConverterstring (Api). Actions require an explicit HttpMethod binding for Swagger/OpenAPI 3.0
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperations(IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePaths(IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwagger(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Datadog.Trace.ClrProfiler.AutoInstrumentation.AspNetCore.BlockingMiddleware.Invoke(HttpContext context) in /_/tracer/src/Datadog.Trace/ClrProfiler/AutoInstrumentation/AspNetCore/BlockingMiddleware.cs:line 115
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpProtocol.ProcessRequests[TContext](IHttpApplication`1 application)
+2024-09-13 14:59:44.206 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:59:44.377 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:59:44.397 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:59:45.480 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:59:45.488 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:59:45.530 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:59:45.575 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:59:45.626 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:59:45.673 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 14:59:45.744 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:00:01.105 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:00:01.105 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:00:01.304 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:00:01.765 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:00:01.881 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:00:02.211 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:00:02.254 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:00:02.264 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:00:07.953 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:00:07.960 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:00:08.071 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:00:08.071 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:00:08.168 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:00:08.241 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:00:08.634 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:00:08.665 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:01:34.352 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:01:34.353 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:02:02.795 +00:00 [INF] Starting host...
+2024-09-13 15:02:03.091 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2024-09-13 15:02:11.361 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:02:11.566 +00:00 [WRN] 'AddEntityFramework*' was called on the service provider, but 'UseInternalServiceProvider' wasn't called in the DbContext options configuration. Consider removing the 'AddEntityFramework*' call, as in most cases it's not needed and may cause conflicts with other products and services registered in the same service provider.
+2024-09-13 15:02:15.259 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:02:15.259 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:02:15.606 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:02:15.626 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:02:15.771 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:02:15.789 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:02:15.799 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:02:15.813 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:02:15.827 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:02:16.822 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:02:26.562 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:02:26.576 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:02:26.858 +00:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2024-09-13 15:02:55.654 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:02:56.729 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:02:57.251 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:02:57.297 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:02:57.314 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:02:57.339 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:02.627 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:02.854 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:03.057 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:03.195 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:03.217 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:03.233 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:03.253 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:03.272 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:03.292 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:03.499 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:04.847 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:03:04.849 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:03:06.344 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:03:06.345 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:03:06.499 +00:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2024-09-13 15:03:06.657 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:06.714 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:06.753 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:06.789 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:06.793 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:06.794 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:08.395 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:08.489 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:08.526 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:08.550 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:08.563 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:08.579 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:08.581 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:08.586 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:08.613 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:08.613 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:09.765 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:03:09.765 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:03:10.902 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:03:10.903 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:03:11.018 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:11.169 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:11.435 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:11.449 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:12.973 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:03:12.973 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:03:12.992 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:03:12.993 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:03:13.624 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:03:13.625 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:03:14.818 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:03:14.819 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:03:17.128 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:03:17.129 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:03:17.250 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:17.295 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:17.335 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:17.382 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:19.330 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:03:19.332 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:03:19.400 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:03:19.400 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:03:20.067 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:03:20.069 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:03:20.157 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:03:20.158 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:03:22.992 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:03:22.993 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:03:23.338 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:03:23.339 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:03:23.365 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:03:23.366 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:03:23.541 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:23.585 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:23.608 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:23.632 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:03:32.378 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:03:32.379 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:14.826 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:14.826 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:15.003 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:15.046 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:15.132 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:15.132 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:15.155 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:15.132 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:15.132 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:15.178 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:15.177 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:15.204 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:15.331 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:15.442 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:15.442 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:15.483 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:15.569 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:15.594 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:20.827 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:20.828 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:21.019 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:21.019 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:21.197 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:21.623 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:21.703 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:21.707 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:22.548 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:22.551 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:22.838 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:22.856 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:22.898 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:22.908 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:25.616 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:25.617 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:27.333 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:27.333 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:27.419 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:27.463 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:27.478 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:27.490 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:27.507 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:27.519 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:29.893 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:29.894 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:30.258 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:30.259 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:31.177 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:31.178 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:31.218 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:31.219 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:31.276 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:31.277 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:31.378 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:31.378 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:31.520 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:31.548 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:31.568 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:31.577 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:31.586 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:31.592 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:32.439 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:32.440 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:33.715 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:33.715 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:05:33.803 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:33.837 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:33.863 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:33.874 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:05:43.788 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:05:43.789 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:06:19.611 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:06:19.611 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:06:19.670 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:19.715 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:19.834 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:06:19.836 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:06:19.913 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:19.921 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:19.965 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:20.390 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:06:20.391 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:06:20.410 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:06:20.412 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:06:20.571 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:30.153 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:06:30.153 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:06:31.214 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:06:31.214 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:06:31.321 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:31.360 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:31.397 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:31.423 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:31.450 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:31.454 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:34.400 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:06:34.401 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:06:34.803 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:06:34.804 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:06:35.660 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:06:35.663 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:06:35.744 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:06:35.746 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:06:35.787 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:06:35.788 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:06:35.864 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:06:35.865 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:06:36.028 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:36.061 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:36.098 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:36.112 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:36.118 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:36.123 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:37.152 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:06:37.152 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:06:38.434 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:06:38.434 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:06:38.600 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:38.600 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:38.624 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:38.638 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:49.925 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:51.114 +00:00 [ERR] Connection id "0HN6K0K5IECA9", Request id "0HN6K0K5IECA9:00000003": An unhandled exception was thrown by the application.
+Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Ambiguous HTTP method for action - Api.Controllers.PdfViewerController.JsonConverterstring (Api). Actions require an explicit HttpMethod binding for Swagger/OpenAPI 3.0
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperations(IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePaths(IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwagger(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Datadog.Trace.ClrProfiler.AutoInstrumentation.AspNetCore.BlockingMiddleware.Invoke(HttpContext context) in /_/tracer/src/Datadog.Trace/ClrProfiler/AutoInstrumentation/AspNetCore/BlockingMiddleware.cs:line 115
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpProtocol.ProcessRequests[TContext](IHttpApplication`1 application)
+2024-09-13 15:06:51.687 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:06:51.688 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:06:51.857 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:51.857 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:52.170 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:52.195 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:06:52.249 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:07:01.440 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:07:01.441 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:07:05.584 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:07:05.604 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:07:05.770 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:07:05.782 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:07:05.818 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:07:14.730 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:07:14.731 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:14:30.273 +00:00 [INF] Starting host...
+2024-09-13 15:14:30.362 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2024-09-13 15:14:47.976 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:14:47.981 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:14:48.190 +00:00 [WRN] 'AddEntityFramework*' was called on the service provider, but 'UseInternalServiceProvider' wasn't called in the DbContext options configuration. Consider removing the 'AddEntityFramework*' call, as in most cases it's not needed and may cause conflicts with other products and services registered in the same service provider.
+2024-09-13 15:14:50.682 +00:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2024-09-13 15:14:51.484 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:14:51.484 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:14:52.206 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:14:52.268 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:14:57.685 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:14:57.922 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:14:57.948 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:14:58.333 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:14:58.338 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:14:58.401 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:14:58.428 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:14:58.543 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:14:58.543 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:14:58.549 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:14:58.557 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:15:24.351 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:15:24.352 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:15:24.410 +00:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2024-09-13 15:15:41.526 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:15:41.529 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:15:41.597 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:15:41.606 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:15:41.613 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:16:27.967 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:16:27.968 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:16:28.200 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:16:28.312 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:16:28.424 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:16:28.454 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:17:54.555 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:17:54.555 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:17:54.907 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:17:55.106 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:17:55.748 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:17:56.051 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:17:56.078 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:19:23.139 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:19:23.805 +00:00 [ERR] Connection id "0HN6K0R6STJM2", Request id "0HN6K0R6STJM2:00000003": An unhandled exception was thrown by the application.
+Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Ambiguous HTTP method for action - Api.Controllers.PdfViewerController.JsonConverterstring (Api). Actions require an explicit HttpMethod binding for Swagger/OpenAPI 3.0
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperations(IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePaths(IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwagger(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Datadog.Trace.ClrProfiler.AutoInstrumentation.AspNetCore.BlockingMiddleware.Invoke(HttpContext context) in /_/tracer/src/Datadog.Trace/ClrProfiler/AutoInstrumentation/AspNetCore/BlockingMiddleware.cs:line 115
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpProtocol.ProcessRequests[TContext](IHttpApplication`1 application)
+2024-09-13 15:22:38.098 +00:00 [INF] Starting host...
+2024-09-13 15:22:38.283 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2024-09-13 15:22:51.440 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:22:51.447 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:22:51.672 +00:00 [WRN] 'AddEntityFramework*' was called on the service provider, but 'UseInternalServiceProvider' wasn't called in the DbContext options configuration. Consider removing the 'AddEntityFramework*' call, as in most cases it's not needed and may cause conflicts with other products and services registered in the same service provider.
+2024-09-13 15:22:53.154 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:22:53.155 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:22:53.737 +00:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2024-09-13 15:22:54.374 +00:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2024-09-13 15:22:55.111 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:22:55.111 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:22:55.258 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:22:55.315 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:22:55.491 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:22:55.511 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:22:56.476 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:22:56.543 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:22:57.110 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:25:50.499 +00:00 [INF] Starting host...
+2024-09-13 15:25:50.596 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2024-09-13 15:25:53.833 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:25:53.839 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:25:54.025 +00:00 [WRN] 'AddEntityFramework*' was called on the service provider, but 'UseInternalServiceProvider' wasn't called in the DbContext options configuration. Consider removing the 'AddEntityFramework*' call, as in most cases it's not needed and may cause conflicts with other products and services registered in the same service provider.
+2024-09-13 15:25:55.728 +00:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2024-09-13 15:25:57.012 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:25:57.239 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:25:57.450 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:25:57.462 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:25:57.472 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:27:22.895 +00:00 [INF] Starting host...
+2024-09-13 15:27:23.296 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2024-09-13 15:27:56.790 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:27:56.797 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:27:57.019 +00:00 [WRN] 'AddEntityFramework*' was called on the service provider, but 'UseInternalServiceProvider' wasn't called in the DbContext options configuration. Consider removing the 'AddEntityFramework*' call, as in most cases it's not needed and may cause conflicts with other products and services registered in the same service provider.
+2024-09-13 15:27:59.010 +00:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2024-09-13 15:28:00.639 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:28:00.852 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:28:01.351 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:28:01.401 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:28:01.595 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:29:41.688 +00:00 [INF] Starting host...
+2024-09-13 15:29:42.120 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2024-09-13 15:29:53.610 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:29:54.027 +00:00 [WRN] 'AddEntityFramework*' was called on the service provider, but 'UseInternalServiceProvider' wasn't called in the DbContext options configuration. Consider removing the 'AddEntityFramework*' call, as in most cases it's not needed and may cause conflicts with other products and services registered in the same service provider.
+2024-09-13 15:29:57.362 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:29:57.391 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:29:57.944 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:29:57.952 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:29:57.975 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:29:58.351 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:29:58.353 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:29:58.682 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:29:58.751 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:29:58.928 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:30:04.321 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:30:04.329 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:30:04.601 +00:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2024-09-13 15:30:04.988 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:30:05.628 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:30:05.719 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:30:05.752 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:30:06.075 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:30:13.289 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:30:13.291 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:30:13.512 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:30:13.532 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:30:13.666 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:30:13.691 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:30:13.705 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:30:16.467 +00:00 [DBG] Successfully validated the token.
+2024-09-13 15:30:16.469 +00:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2024-09-13 15:30:16.600 +00:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2024-09-13 15:30:16.997 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:30:17.050 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:30:17.244 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-09-13 15:30:17.272 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.

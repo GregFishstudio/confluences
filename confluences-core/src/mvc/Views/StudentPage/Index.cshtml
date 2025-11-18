@@ -1,0 +1,485 @@
+﻿@model mvc.Models.AspNetUser
+@{
+    ViewData["Title"] = "Index";
+    int lastTypeH = 0;
+}
+
+@using Microsoft.AspNetCore.Authentication
+
+<style>
+
+    #visioButton {
+        display: none;
+    }
+
+</style>
+
+<partial name="_Notification.cshtml" />
+<partial name="_NotificationPrivate.cshtml" />
+<body data-parallax="true" class="bgImage">
+    <div class="container">
+        <div class="about-team team-1" style="padding-bottom: 0px !important">
+            <div class="row">
+                <div class="col-md-10 ml-auto mr-auto text-center d-flex">
+                    <div class="card m-0 mb-4 mt-3">
+                        <div class="card-body flex-fill p-0">
+                            <h3 class="title">Bienvenue @Model.Firstname</h3>
+                            <div class="clearfix"></div>
+                            <!-- end content-->
+                        </div>
+                        <!--  end card  -->
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+
+                @if (!Model.HasSeenHelpVideo)
+                {
+                    <div class="col-md-10 ml-auto mr-auto text-center d-flex">
+                        <div class="card m-0 mb-4">
+                            <div class="card-body flex-fill p-0">
+                                @*<h5>
+            @Model.SessionStudents.First().Session.DateStart.ToString("dd MMMM") -
+            @Model.SessionStudents.First().Session.DateEnd.ToString("dd MMMM yyyy")
+        </h5>*@
+                                <div class="embed-responsive embed-responsive-16by9">
+                                    <iframe class="embed-responsive-item" src="@Model.SessionStudents.First().Session.SchoolClassRoom.ExplanationVideoLink" allowfullscreen></iframe>
+                                </div>
+                                <br />
+                                @foreach (var schoolClassRoomExplanation in Model.SessionStudents.First().Session.SchoolClassRoom.SchoolClassRoomExplanations)
+                                {
+                                    <button class="btn btn-primary" value="@schoolClassRoomExplanation.AudioLink">@schoolClassRoomExplanation.LanguageName</button>
+                                }
+                                <br />
+                                <br />
+                                <a class="btn btn-primary" asp-controller="StudentPage" asp-action="IGetIt">J'ai compris</a>
+                                <br />
+                                <br />
+                            </div>
+                            <!-- end content-->
+                        </div>
+                        <!--  end card  -->
+                    </div>
+                    <div class="col-md-6 ml-auto mr-auto text-center d-flex">
+                        <div class="card m-0 mb-4">
+                            <div class="card-body flex-fill p-0">
+                                @if (Model.SessionStudents.First().Session.HomeworkV2s != null)
+                                {
+                                    <h3 class="title">Mon cours</h3>
+
+                                    @if (Model.SessionStudents.First().Session.HomeworkV2s.Where(h => h.HomeworkV2date.Date == DateTime.Now.Date || (h.HomeworkV2date.Date >= DateTime.Now.Date && h.IsFutur)).Count() > 0)
+                                    {
+                                        string color = "";
+                                        <div class="row m-0">
+                                            <table class="table borderless">
+                                                <tbody>
+                                                    @foreach (HomeworkV2s homework in Model.SessionStudents.First().Session.HomeworkV2s.Where(h => h.HomeworkV2date.Date == DateTime.Now.Date || (h.HomeworkV2date.Date >= DateTime.Now.Date && h.IsFutur)).OrderBy(h => h.HomeworkType.HomeworkOrder))
+                                                    {
+                                                        if (lastTypeH != homework.HomeworkTypeId)
+                                                        {
+                                                            if (color == "bg-grey")
+                                                            {
+                                                                color = "";
+                                                            }
+                                                            else
+                                                            {
+                                                                color = "bg-grey";
+                                                            }
+                                                            <tr class="@color">
+                                                                <td colspan="3">
+                                                                    <h3 class="card-title">@homework.HomeworkType.HomeworkTypeName</h3>
+                                                                </td>
+                                                            </tr>
+                                                            lastTypeH = homework.HomeworkTypeId;
+                                                        }
+                                                        <tr class="@color">
+                                                            <td>
+                                                                <a asp-controller="HomeworkV2s" asp-action="Details" asp-route-id="@homework.HomeworkV2id">
+
+                                                                    @if (homework.IsFutur && homework.HomeworkV2date.Date > DateTime.Now.Date)
+                                                                    {
+                                                                        <h3 class="card-link">
+                                                                            @homework.HomeworkV2name <br />pour le @homework.HomeworkV2date.ToString("dd MMMM")
+                                                                        </h3>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        @if (DateTime.Now.Hour >= 17)
+                                                                        {
+                                                                            <h3 class="card-title text-danger">Corrigé</h3>
+                                                                        }
+                                                                        <h3 class="card-link font-weight-bold">
+                                                                            @homework.HomeworkV2name
+                                                                        </h3>
+                                                                    }
+
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <h3 class="title">Pas de cours prévus pour le moment</h3>
+                                    }
+                                }
+
+                            </div>
+                            <!-- end content-->
+                        </div>
+                        <!--  end card  -->
+                    </div>
+                }
+                else
+                {
+                    <div class="col-md-10 ml-auto mr-auto text-center d-flex">
+                        <div class="card m-0 mb-4">
+                            <div class="card-body flex-fill p-0">
+                                @if (Model.SessionStudents.First().Session.Homework != null)
+                                {
+                                    <h3 class="title">Mon cours</h3>
+
+                                    @if (Model.SessionStudents.First().Session.HomeworkV2s.Where(h => h.HomeworkV2date.Date == DateTime.Now.Date || (h.HomeworkV2date.Date >= DateTime.Now.Date && h.IsFutur)).Count() > 0)
+                                    {
+                                        string color = "";
+                                        <div class="row m-0">
+                                            <table class="table borderless">
+                                                <tbody>
+                                                    @foreach (HomeworkV2s homework in Model.SessionStudents.First().Session.HomeworkV2s.Where(h => h.HomeworkV2date.Date == DateTime.Now.Date || (h.HomeworkV2date.Date >= DateTime.Now.Date && h.IsFutur)).OrderBy(h => h.HomeworkType.HomeworkOrder))
+                                                    {
+                                                        if (lastTypeH != homework.HomeworkTypeId)
+                                                        {
+                                                            if (color == "bg-grey")
+                                                            {
+                                                                color = "";
+                                                            }
+                                                            else
+                                                            {
+                                                                color = "bg-grey";
+                                                            }
+                                                            <tr class="@color">
+                                                                <td colspan="3">
+                                                                    <h3 class="card-title">@homework.HomeworkType.HomeworkTypeName</h3>
+                                                                </td>
+                                                            </tr>
+                                                            lastTypeH = homework.HomeworkTypeId;
+                                                        }
+                                                        <tr class="@color">
+                                                            <td>
+                                                                <a asp-controller="HomeworkV2s" asp-action="Details" asp-route-id="@homework.HomeworkV2id">
+                                                                    @if (homework.IsFutur && homework.HomeworkV2date.Date > DateTime.Now.Date)
+                                                                    {
+                                                                        <h3 class="card-link">
+                                                                            @homework.HomeworkV2name <br />pour le @homework.HomeworkV2date.ToString("dd MMMM")
+                                                                        </h3>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        @if (DateTime.Now.Hour >= 17)
+                                                                        {
+                                                                            <h3 class="card-title text-danger">Corrigé</h3>
+                                                                        }
+                                                                        <h3 class="card-link font-weight-bold">
+                                                                            @homework.HomeworkV2name
+                                                                        </h3>
+                                                                    }
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <h3 class="title">Pas de cours prévus pour le moment</h3>
+                                    }
+                                }
+
+                            </div>
+                            <!-- end content-->
+                        </div>
+                        <!--  end card  -->
+                    </div>
+                }
+            </div>
+            @if (Model.SessionStudents.First().Session.SessionTeachers != null)
+            {
+                @if (Model.SessionStudents.First().Session.SessionTeachers.Count() > 0)
+                {
+                    <div class="row">
+                        <div class="col-md-10 ml-auto mr-auto text-center">
+                            <div class="card m-0 mb-4">
+                                <div class="card-body p-0">
+                                    <h3 class="title">Mes formatrices et Mes formateurs </h3>
+                                    <div class="row">
+                                        @foreach (var sessionTeacher in Model.SessionStudents.First().Session.SessionTeachers.OrderBy(s => s.Order))
+                                        {
+                                            <div class="col-md-4 mx-auto text-center">
+                                                <div class="card card-profile card-plain m-0">
+                                                    <div class="card-avatar">
+                                                        <img class="img" src="@(ViewData["URLAPI"] + sessionTeacher.Teacher.PathImage)">
+                                                    </div>
+                                                    <h4 class="title mt-3 mb-0"><i data-userconnected="@sessionTeacher.Teacher.UserName" class="userconnected fa fa-circle text-secondary"></i> @sessionTeacher.Teacher.Firstname @sessionTeacher.Teacher.LastName</h4>
+                                                    <h5 class="card-title mt-0 mb-4">
+                                                        @sessionTeacher.Teacher.PhoneNumber
+                                                    </h5>
+                                                    <a data-userConnected="@sessionTeacher.Teacher.UserName" class="callButton callUnAvailable" href="@Url.Action("Private", "Jitsi", new { roomName = sessionTeacher.Teacher.UserName, isPrivateRoom = true})"><img style="margin: auto; width: 100px;" src="@(ViewData["URLMVC"] + "img/Conference.png")" /></a>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                <!-- end content-->
+                            </div>
+                            <!--  end card  -->
+                        </div>
+                    </div>
+                }
+            }
+            @if (Model.SessionStudents.First().Session.SessionStudents != null)
+            {
+                @if (Model.SessionStudents.First().Session.SessionStudents.Count() > 0)
+                {
+                    <div class="row">
+                        <div class="col-md-10 ml-auto mr-auto text-center">
+                            <div class="card m-0 mb-4">
+                                <div class="card-body p-0">
+                                    <h3 class="title">Ma classe</h3>
+                                    <div class="row">
+                                        @*<div class="col-lg-3 mx-auto text-center">
+                                                <div class="card card-profile card-plain">
+                                                    <div class="card-avatar">
+                                                        <a href="#pablo">
+                                                            @if (Model.PathImage == null || Model.PathImage == "")
+                                                            {
+                                                                <img class="img" src="~/img/avatar.jpg">
+                                                            }
+                                                            else
+                                                            {
+                                                                <img class="img" src="@(ViewData["URLAPI"] + Model.PathImage)">
+                                                            }
+                                                        </a>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <h4 class="card-title">@Model.Firstname @Model.LastName</h4>
+                                                    </div>
+                                                </div>
+                                            </div>*@
+                                        @foreach (var sessionStudents in Model.SessionStudents.First().Session.SessionStudents)
+                                        {
+                                            <div class="col-md-4 mx-auto text-center">
+                                                <div class="card card-profile card-plain m-0">
+                                                    <div class="card-avatar">
+                                                        @if (sessionStudents.Student.PathImage == null || sessionStudents.Student.PathImage == "")
+                                                        {
+                                                            <img class="img" src="~/img/avatar.jpg">
+                                                        }
+                                                        else
+                                                        {
+                                                            <img class="img" src="@(ViewData["URLAPI"] + sessionStudents.Student.PathImage)">
+                                                        }
+                                                    </div>
+                                                    <h4 class="title m-3"><i data-userconnected="@sessionStudents.Student.UserName" class="userconnected fa fa-circle text-secondary"></i> @sessionStudents.Student.Firstname @sessionStudents.Student.LastName</h4>
+                                                    <br />
+                                                    <a data-userConnected="@sessionStudents.Student.UserName" class="callButton callUnAvailable" href="@Url.Action("Private", "Jitsi", new { roomName = sessionStudents.Student.UserName, isPrivateRoom = true})"><img style="margin: auto; width: 100px;" src="@(ViewData["URLMVC"] + "img/Conference.png")" /></a>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                <!-- end content-->
+                            </div>
+                            <!--  end card  -->
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+        <partial name="../Chat/ChatStudent.cshtml" />
+</body>
+
+@section Scripts {
+    <script>
+        // Let's create a soundboard module ("sb")
+        var sb = {
+            song: null,
+            init: function () {
+                sb.song = new Audio();
+                sb.listeners();
+            },
+            listeners: function () {
+                $("button").click(sb.play);
+            },
+            play: function (e) {
+                sb.song.src = e.target.value;
+                sb.song.play();
+            }
+        };
+
+        $(document).ready(sb.init);
+
+        async function startConnectionJitsi() {
+            try {
+                await connectionJitsi.start();
+                console.log("Connected to SignalR hub");
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        let $messages = document.getElementsByClassName("messages-content"),
+            d, h, m,
+            i = 0;
+
+        function updateScrollbar() {
+            // Get the messages content element
+            var messagesContent = document.querySelector(".messages-content");
+
+            // Update the scrollbar
+            messagesContent.scrollTop = messagesContent.scrollHeight;
+        }
+
+        function setDate() {
+            d = new Date()
+            if (m != d.getMinutes()) {
+                m = d.getMinutes();
+                var timestampDiv = document.createElement("div");
+                timestampDiv.className = "timestamp";
+                var timestamp = d.getHours() + ':' + (m < 10 ? '0' : '') + m;
+                timestampDiv.textContent = timestamp;
+
+                // Find the last message element
+                var lastMessage = document.querySelector('.message:last-child');
+
+                // Append the timestamp div to the last message element
+                lastMessage.appendChild(timestampDiv);
+            }
+        }
+
+        connection.on("SendMessage", function (message) {
+            console.log('CHATMESSAGE' + message);
+
+            updateScrollbar();
+
+            if ($.trim(message) == '') {
+                return false;
+            }
+
+            // Create a new div element for the message
+            var newMessageDiv = document.createElement("div");
+            newMessageDiv.className = "message message-personal new";
+            newMessageDiv.textContent = message;
+            newMessageDiv.style.background = "linear-gradient(120deg, #0b0db7, #00c5fb)";
+
+            // Find the messages content container
+            var messagesContent = document.querySelector(".messages-content");
+
+            // Append the new message div to the messages content container
+            messagesContent.prepend(newMessageDiv);
+
+            setDate();
+            document.getElementById('messageInput').value = null;
+
+            /*setTimeout(function () {
+
+                var loadingMessage = document.querySelector('.message.loading');
+                if (loadingMessage) {
+                    loadingMessage.parentNode.removeChild(loadingMessage);
+                }
+
+                setDate();
+
+                updateScrollbar();
+
+                i++;
+            }, 1000 + (Math.random() * 20) * 100);*()*/
+        });
+
+        connection.on("SendStudentMessage", function (message) {
+            console.log('CHATMESSAGE' + message);
+
+            updateScrollbar();
+
+            if ($.trim(message) == '') {
+                return false;
+            }
+
+            if ($.trim(message).includes('@(ViewData["CurrentUserName"])')){
+                return false;
+            }
+
+            // Create a new div element for the message
+            var newMessageDiv = document.createElement("div");
+            newMessageDiv.className = "message message-personal new";
+            newMessageDiv.textContent = message;
+            newMessageDiv.style.background = "linear-gradient(120deg, #0b0db7, #00c5fb)";
+
+            // Find the messages content container
+            var messagesContent = document.querySelector(".messages-content");
+
+            // Append the new message div to the messages content container
+            messagesContent.prepend(newMessageDiv);
+
+            setDate();
+            document.getElementById('messageInput').value = null;
+
+            /*setTimeout(function () {
+
+                var loadingMessage = document.querySelector('.message.loading');
+                if (loadingMessage) {
+                    loadingMessage.parentNode.removeChild(loadingMessage);
+                }
+
+                setDate();
+
+                updateScrollbar();
+
+                i++;
+            }, 1000 + (Math.random() * 20) * 100);*()*/
+        });
+
+        
+
+        function insertMessage() {
+            msg = document.getElementById('messageInput').value;
+            var userName = '@(ViewData["CurrentUserName"])';
+            if ($.trim(msg) == '') {
+                return false;
+            }
+
+            // Create a new div element for the message
+            var newMessageDiv = document.createElement("div");
+            newMessageDiv.className = "message message-personal new";
+            newMessageDiv.textContent = msg;
+
+            // Find the messages content container
+            var messagesContent = document.querySelector(".messages-content");
+
+            // Append the new message div to the messages content container
+            messagesContent.prepend(newMessageDiv);
+
+            setDate();
+            document.getElementById('messageInput').value = null;
+
+            $.ajax({
+                type: "POST",
+                url: "/Chat/StudentSendMessageToClassRoom",
+                data: { message: msg, userName: userName },
+                success: function (data) {
+
+                    console.log("SUCCESS SEND MESSAGE");
+                },
+                error: function (xhr, status, error) {
+                    console.error(error);
+                }
+            })
+            updateScrollbar();
+        }
+        
+    </script>
+}

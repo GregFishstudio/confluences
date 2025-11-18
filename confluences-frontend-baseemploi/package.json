@@ -1,0 +1,44 @@
+{
+  "name": "confluences-gestion-stagiaire",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext .vue,.js,.ts --fix",
+    "build:wc": "vite build --config vite.config.webcomponent.js"
+  },
+  "dependencies": {
+    "@mdi/font": "^7.4.47",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "axios": "^0.19.2",
+    "core-js": "^3.6.5",
+    "js-cookie": "^2.2.1",
+    "moment": "^2.30.1",
+    "nprogress": "^0.2.0",
+    "oidc-client": "^1.10.1",
+    "oidc-client-ts": "^3.4.0",
+    "pinia": "^3.0.4",
+    "vite": "^7.2.2",
+    "vue": "^3.5.24",
+    "vue-cookies": "^1.7.3",
+    "vue-router": "^4.6.3",
+    "vuetify": "^3.10.9",
+    "vuex": "^4.0.2"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-router": "~4.4.0",
+    "@vue/cli-plugin-vuex": "~4.4.0",
+    "@vue/eslint-config-prettier": "^6.0.0",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^6.8.0",
+    "eslint-plugin-prettier": "^3.1.3",
+    "eslint-plugin-vue": "^9.33.0",
+    "prettier": "^1.19.1",
+    "sass": "^1.94.0",
+    "sass-loader": "^8.0.0",
+    "vue-cli-plugin-vuetify": "~2.0.7",
+    "vue-template-compiler": "^2.6.11"
+  }
+}

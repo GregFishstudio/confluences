@@ -1,0 +1,33 @@
+stages:
+  - build
+  - deploy
+
+build:
+  image: node:14.4.0-alpine
+  stage: build
+  script:
+    - npm install
+    - npm run buildStaging
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - dist
+
+deploy:
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  stage: deploy
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -f $DOCKERFILEPATH -t registry.gitlab.com/a7470/confluences/confluences-frontend-baseemploi:$PROJECTNAME-$CI_COMMIT_TAG .
+    - docker push registry.gitlab.com/a7470/confluences/confluences-frontend-baseemploi:$PROJECTNAME-$CI_COMMIT_TAG
+  parallel:
+    matrix:
+      - DOCKERFILEPATH: Dockerfile
+        PROJECTNAME: frontendbaseemploi
+  environment:
+    name: $PROJECTNAME-$CI_COMMIT_TAG
+  only:
+    - tags
+

@@ -1,0 +1,956 @@
+2024-09-13 13:07:46.343 +00:00 [INF] Starting host...
+2024-09-13 13:07:46.462 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2024-09-13 13:07:46.724 +00:00 [WRN] 'AddEntityFramework*' was called on the service provider, but 'UseInternalServiceProvider' wasn't called in the DbContext options configuration. Consider removing the 'AddEntityFramework*' call, as in most cases it's not needed and may cause conflicts with other products and services registered in the same service provider.
+2024-09-13 13:07:46.788 +00:00 [INF] Starting IdentityServer4 version 3.1.0.0
+2024-09-13 13:07:46.797 +00:00 [INF] You are using the in-memory version of the persisted grant store. This will store consent decisions, authorization codes, refresh and reference tokens in memory only. If you are using any of those features in production, you want to switch to a different store implementation.
+2024-09-13 13:07:46.807 +00:00 [INF] Using the default authentication scheme Identity.Application for IdentityServer
+2024-09-13 13:07:46.807 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for authentication
+2024-09-13 13:07:46.808 +00:00 [DBG] Using Identity.External as default ASP.NET Core scheme for sign-in
+2024-09-13 13:07:46.809 +00:00 [DBG] Using Identity.External as default ASP.NET Core scheme for sign-out
+2024-09-13 13:07:46.810 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for challenge
+2024-09-13 13:07:46.811 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for forbid
+2024-09-13 13:08:25.170 +00:00 [DBG] Login Url: /Account/Login
+2024-09-13 13:08:25.172 +00:00 [DBG] Login Return Url Parameter: ReturnUrl
+2024-09-13 13:08:25.173 +00:00 [DBG] Logout Url: /Account/Logout
+2024-09-13 13:08:25.173 +00:00 [DBG] ConsentUrl Url: /consent
+2024-09-13 13:08:25.173 +00:00 [DBG] Consent Return Url Parameter: returnUrl
+2024-09-13 13:08:25.174 +00:00 [DBG] Error Url: /home/error
+2024-09-13 13:08:25.174 +00:00 [DBG] Error Id Parameter: errorId
+2024-09-13 13:08:25.181 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 13:08:25.223 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 13:08:25.244 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 13:08:25.253 +00:00 [DBG] Request path /.well-known/openid-configuration matched to endpoint type Discovery
+2024-09-13 13:08:25.269 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryEndpoint
+2024-09-13 13:08:25.270 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryEndpoint for /.well-known/openid-configuration
+2024-09-13 13:08:25.273 +00:00 [DBG] Start discovery request
+2024-09-13 13:08:25.556 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 13:08:25.560 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 13:08:25.561 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 13:08:25.562 +00:00 [DBG] Request path /.well-known/openid-configuration/jwks matched to endpoint type Discovery
+2024-09-13 13:08:25.565 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryKeyEndpoint
+2024-09-13 13:08:25.587 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryKeyEndpoint for /.well-known/openid-configuration/jwks
+2024-09-13 13:08:25.625 +00:00 [DBG] Start key discovery request
+2024-09-13 14:50:34.038 +00:00 [INF] Starting host...
+2024-09-13 14:50:34.196 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2024-09-13 14:50:34.516 +00:00 [WRN] 'AddEntityFramework*' was called on the service provider, but 'UseInternalServiceProvider' wasn't called in the DbContext options configuration. Consider removing the 'AddEntityFramework*' call, as in most cases it's not needed and may cause conflicts with other products and services registered in the same service provider.
+2024-09-13 14:50:34.614 +00:00 [INF] Starting IdentityServer4 version 3.1.0.0
+2024-09-13 14:50:34.626 +00:00 [INF] You are using the in-memory version of the persisted grant store. This will store consent decisions, authorization codes, refresh and reference tokens in memory only. If you are using any of those features in production, you want to switch to a different store implementation.
+2024-09-13 14:50:34.639 +00:00 [INF] Using the default authentication scheme Identity.Application for IdentityServer
+2024-09-13 14:50:34.640 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for authentication
+2024-09-13 14:50:34.640 +00:00 [DBG] Using Identity.External as default ASP.NET Core scheme for sign-in
+2024-09-13 14:50:34.641 +00:00 [DBG] Using Identity.External as default ASP.NET Core scheme for sign-out
+2024-09-13 14:50:34.642 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for challenge
+2024-09-13 14:50:34.643 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for forbid
+2024-09-13 14:50:53.057 +00:00 [DBG] Login Url: /Account/Login
+2024-09-13 14:50:53.060 +00:00 [DBG] Login Return Url Parameter: ReturnUrl
+2024-09-13 14:50:53.060 +00:00 [DBG] Logout Url: /Account/Logout
+2024-09-13 14:50:53.061 +00:00 [DBG] ConsentUrl Url: /consent
+2024-09-13 14:50:53.061 +00:00 [DBG] Consent Return Url Parameter: returnUrl
+2024-09-13 14:50:53.062 +00:00 [DBG] Error Url: /home/error
+2024-09-13 14:50:53.063 +00:00 [DBG] Error Id Parameter: errorId
+2024-09-13 14:50:53.067 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:50:53.103 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:50:53.119 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:50:53.127 +00:00 [DBG] Request path /.well-known/openid-configuration matched to endpoint type Discovery
+2024-09-13 14:50:53.139 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryEndpoint
+2024-09-13 14:50:53.139 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryEndpoint for /.well-known/openid-configuration
+2024-09-13 14:50:53.143 +00:00 [DBG] Start discovery request
+2024-09-13 14:50:53.375 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:50:53.379 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:50:53.379 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:50:53.380 +00:00 [DBG] Request path /.well-known/openid-configuration/jwks matched to endpoint type Discovery
+2024-09-13 14:50:53.391 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryKeyEndpoint
+2024-09-13 14:50:53.395 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryKeyEndpoint for /.well-known/openid-configuration/jwks
+2024-09-13 14:50:53.405 +00:00 [DBG] Start key discovery request
+2024-09-13 14:51:16.613 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:16.614 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:16.615 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:16.615 +00:00 [DBG] Request path /.well-known/openid-configuration matched to endpoint type Discovery
+2024-09-13 14:51:16.618 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryEndpoint
+2024-09-13 14:51:16.619 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryEndpoint for /.well-known/openid-configuration
+2024-09-13 14:51:16.620 +00:00 [DBG] Start discovery request
+2024-09-13 14:51:16.653 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:16.654 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:16.654 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:16.655 +00:00 [DBG] Request path /.well-known/openid-configuration/jwks matched to endpoint type Discovery
+2024-09-13 14:51:16.656 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryKeyEndpoint
+2024-09-13 14:51:16.656 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryKeyEndpoint for /.well-known/openid-configuration/jwks
+2024-09-13 14:51:16.657 +00:00 [DBG] Start key discovery request
+2024-09-13 14:51:16.694 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:16.694 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:16.694 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:16.696 +00:00 [DBG] Request path /connect/authorize matched to endpoint type Authorize
+2024-09-13 14:51:16.704 +00:00 [DBG] Endpoint enabled: Authorize, successfully created handler: IdentityServer4.Endpoints.AuthorizeEndpoint
+2024-09-13 14:51:16.704 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.AuthorizeEndpoint for /connect/authorize
+2024-09-13 14:51:16.708 +00:00 [DBG] Start authorize request
+2024-09-13 14:51:16.725 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:16.733 +00:00 [DBG] No user present in authorize request
+2024-09-13 14:51:16.738 +00:00 [DBG] Start authorize request protocol validation
+2024-09-13 14:51:16.751 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 14:51:16.760 +00:00 [DBG] Checking for PKCE parameters
+2024-09-13 14:51:16.782 +00:00 [DBG] Calling into custom validator: IdentityServer4.Validation.DefaultCustomAuthorizeRequestValidator
+2024-09-13 14:51:16.791 +00:00 [DBG] ValidatedAuthorizeRequest
+{"ClientId":"mvc","ClientName":null,"RedirectUri":"http://host.docker.internal:5002/signin-oidc","AllowedRedirectUris":["http://host.docker.internal:5002/signin-oidc","http://host.docker.internal:5002/openid-callback"],"SubjectId":"anonymous","ResponseType":"code","ResponseMode":"form_post","GrantType":"authorization_code","RequestedScopes":"openid profile api1 roles offline_access","State":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw9Y8cFTEnExvGegOGWW_P3e9Vb2NwiLgqMsHPvt02swj7MZsKxIvaujvicf9Jh4vImU-biUuzPiEZFwwN1oabQpbfZOHr1Ifm7PuPque2zQInKwOzK6dRMZmzz3mi5jBnIqNP4_WPW5UvutQF96Vnr9o5uCZV2FP4ccF2Ijtgt_7DnvZH-Aeh_CvKc9qNLYXynaGEILqquYcQKitdeWLBGknjzhHwdgnHIhgMQHxsJUJIlQLoYBmcqKcrMXV6u4tRV9ZsuahTEuN85YKag5-hxK3H9uko_2y6AmSkH2dCVR7OmIRgakFjlKs78F8nwfPbfObk7k5eMktho_elFmhAELBbMUQsx9_dQvbl_cqP-5FLJDxbGSxAJ2dfkIb75z_b-aKSYg5MAHtAC4Bo9Gq-1Ke1SxyN9BqkOHekMVWW0zwA","UiLocales":null,"Nonce":"638618358766756743.OTYwOWJmM2QtMGIyOC00YzdhLTk0OWItOWQ3ZDBhYTk2N2JiN2MyZTNmNTAtNGMyOC00NjY3LTlmOWMtY2JjZGE5ODc0OTli","AuthenticationContextReferenceClasses":null,"DisplayMode":null,"PromptMode":null,"MaxAge":null,"LoginHint":null,"SessionId":"","Raw":{"client_id":"mvc","redirect_uri":"http://host.docker.internal:5002/signin-oidc","response_type":"code","scope":"openid profile api1 roles offline_access","code_challenge":"itTFkepg5ekG4Hl9tZVCAu1_lt40KaMUToKPDDJY5UU","code_challenge_method":"S256","response_mode":"form_post","nonce":"638618358766756743.OTYwOWJmM2QtMGIyOC00YzdhLTk0OWItOWQ3ZDBhYTk2N2JiN2MyZTNmNTAtNGMyOC00NjY3LTlmOWMtY2JjZGE5ODc0OTli","state":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw9Y8cFTEnExvGegOGWW_P3e9Vb2NwiLgqMsHPvt02swj7MZsKxIvaujvicf9Jh4vImU-biUuzPiEZFwwN1oabQpbfZOHr1Ifm7PuPque2zQInKwOzK6dRMZmzz3mi5jBnIqNP4_WPW5UvutQF96Vnr9o5uCZV2FP4ccF2Ijtgt_7DnvZH-Aeh_CvKc9qNLYXynaGEILqquYcQKitdeWLBGknjzhHwdgnHIhgMQHxsJUJIlQLoYBmcqKcrMXV6u4tRV9ZsuahTEuN85YKag5-hxK3H9uko_2y6AmSkH2dCVR7OmIRgakFjlKs78F8nwfPbfObk7k5eMktho_elFmhAELBbMUQsx9_dQvbl_cqP-5FLJDxbGSxAJ2dfkIb75z_b-aKSYg5MAHtAC4Bo9Gq-1Ke1SxyN9BqkOHekMVWW0zwA","x-client-SKU":"ID_NETSTANDARD2_0","x-client-ver":"5.5.0.0"},"$type":"AuthorizeRequestValidationLog"}
+2024-09-13 14:51:16.806 +00:00 [INF] Showing login: User is not authenticated
+2024-09-13 14:51:16.814 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:16.816 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:16.816 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:16.852 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:16.852 +00:00 [DBG] Start authorize request protocol validation
+2024-09-13 14:51:16.853 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 14:51:16.853 +00:00 [DBG] Checking for PKCE parameters
+2024-09-13 14:51:16.854 +00:00 [DBG] Calling into custom validator: IdentityServer4.Validation.DefaultCustomAuthorizeRequestValidator
+2024-09-13 14:51:16.857 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 14:51:17.026 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:17.081 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:17.081 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:17.107 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:17.153 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:17.299 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:17.385 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:17.385 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:17.445 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:17.445 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:17.445 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:17.446 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:17.447 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:17.485 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:17.494 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:17.495 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:17.496 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:17.506 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:17.611 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:19.354 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:19.364 +00:00 [DBG] CORS request made for path: /Account/Login from origin: null but was ignored because path was not for an allowed IdentityServer CORS endpoint
+2024-09-13 14:51:19.365 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:19.365 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:19.400 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:19.401 +00:00 [DBG] Start authorize request protocol validation
+2024-09-13 14:51:19.402 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 14:51:19.403 +00:00 [DBG] Checking for PKCE parameters
+2024-09-13 14:51:19.404 +00:00 [DBG] Calling into custom validator: IdentityServer4.Validation.DefaultCustomAuthorizeRequestValidator
+2024-09-13 14:51:21.457 +00:00 [DBG] Augmenting SignInContext
+2024-09-13 14:51:21.459 +00:00 [DBG] Adding idp claim with value: local
+2024-09-13 14:51:21.459 +00:00 [DBG] Adding auth_time claim with value: 1726239081
+2024-09-13 14:51:21.462 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:21.467 +00:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2024-09-13 14:51:21.485 +00:00 [INF] {"Username":"yiab","Provider":null,"ProviderUserId":null,"SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","DisplayName":"yiab","Endpoint":"UI","ClientId":"mvc","Category":"Authentication","Name":"User Login Success","EventType":"Success","Id":1000,"Message":null,"ActivityId":"0HN6K0DRJM8UP:00000006","TimeStamp":"2024-09-13T14:51:21.0000000Z","ProcessId":915,"LocalIpAddress":"::ffff:172.18.0.3:80","RemoteIpAddress":"::ffff:172.18.0.1","$type":"UserLoginSuccessEvent"}
+2024-09-13 14:51:21.488 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 14:51:21.527 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 14:51:21.561 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 14:51:21.561 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 14:51:21.562 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 14:51:21.562 +00:00 [DBG] Request path /connect/authorize/callback matched to endpoint type Authorize
+2024-09-13 14:51:21.563 +00:00 [DBG] Endpoint enabled: Authorize, successfully created handler: IdentityServer4.Endpoints.AuthorizeCallbackEndpoint
+2024-09-13 14:51:21.564 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.AuthorizeCallbackEndpoint for /connect/authorize/callback
+2024-09-13 14:51:21.570 +00:00 [DBG] Start authorize callback request
+2024-09-13 14:51:21.575 +00:00 [DBG] User in authorize request: 7e462136-2963-49df-9cfa-056c1499f819
+2024-09-13 14:51:21.576 +00:00 [DBG] Start authorize request protocol validation
+2024-09-13 14:51:21.576 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 14:51:21.576 +00:00 [DBG] Checking for PKCE parameters
+2024-09-13 14:51:21.577 +00:00 [DBG] Calling into custom validator: IdentityServer4.Validation.DefaultCustomAuthorizeRequestValidator
+2024-09-13 14:51:21.578 +00:00 [DBG] ValidatedAuthorizeRequest
+{"ClientId":"mvc","ClientName":null,"RedirectUri":"http://host.docker.internal:5002/signin-oidc","AllowedRedirectUris":["http://host.docker.internal:5002/signin-oidc","http://host.docker.internal:5002/openid-callback"],"SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","ResponseType":"code","ResponseMode":"form_post","GrantType":"authorization_code","RequestedScopes":"openid profile api1 roles offline_access","State":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw9Y8cFTEnExvGegOGWW_P3e9Vb2NwiLgqMsHPvt02swj7MZsKxIvaujvicf9Jh4vImU-biUuzPiEZFwwN1oabQpbfZOHr1Ifm7PuPque2zQInKwOzK6dRMZmzz3mi5jBnIqNP4_WPW5UvutQF96Vnr9o5uCZV2FP4ccF2Ijtgt_7DnvZH-Aeh_CvKc9qNLYXynaGEILqquYcQKitdeWLBGknjzhHwdgnHIhgMQHxsJUJIlQLoYBmcqKcrMXV6u4tRV9ZsuahTEuN85YKag5-hxK3H9uko_2y6AmSkH2dCVR7OmIRgakFjlKs78F8nwfPbfObk7k5eMktho_elFmhAELBbMUQsx9_dQvbl_cqP-5FLJDxbGSxAJ2dfkIb75z_b-aKSYg5MAHtAC4Bo9Gq-1Ke1SxyN9BqkOHekMVWW0zwA","UiLocales":null,"Nonce":"638618358766756743.OTYwOWJmM2QtMGIyOC00YzdhLTk0OWItOWQ3ZDBhYTk2N2JiN2MyZTNmNTAtNGMyOC00NjY3LTlmOWMtY2JjZGE5ODc0OTli","AuthenticationContextReferenceClasses":null,"DisplayMode":null,"PromptMode":null,"MaxAge":null,"LoginHint":null,"SessionId":"ABp0-LDrsohia_V3l6QilQ","Raw":{"client_id":"mvc","redirect_uri":"http://host.docker.internal:5002/signin-oidc","response_type":"code","scope":"openid profile api1 roles offline_access","code_challenge":"itTFkepg5ekG4Hl9tZVCAu1_lt40KaMUToKPDDJY5UU","code_challenge_method":"S256","response_mode":"form_post","nonce":"638618358766756743.OTYwOWJmM2QtMGIyOC00YzdhLTk0OWItOWQ3ZDBhYTk2N2JiN2MyZTNmNTAtNGMyOC00NjY3LTlmOWMtY2JjZGE5ODc0OTli","state":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw9Y8cFTEnExvGegOGWW_P3e9Vb2NwiLgqMsHPvt02swj7MZsKxIvaujvicf9Jh4vImU-biUuzPiEZFwwN1oabQpbfZOHr1Ifm7PuPque2zQInKwOzK6dRMZmzz3mi5jBnIqNP4_WPW5UvutQF96Vnr9o5uCZV2FP4ccF2Ijtgt_7DnvZH-Aeh_CvKc9qNLYXynaGEILqquYcQKitdeWLBGknjzhHwdgnHIhgMQHxsJUJIlQLoYBmcqKcrMXV6u4tRV9ZsuahTEuN85YKag5-hxK3H9uko_2y6AmSkH2dCVR7OmIRgakFjlKs78F8nwfPbfObk7k5eMktho_elFmhAELBbMUQsx9_dQvbl_cqP-5FLJDxbGSxAJ2dfkIb75z_b-aKSYg5MAHtAC4Bo9Gq-1Ke1SxyN9BqkOHekMVWW0zwA","x-client-SKU":"ID_NETSTANDARD2_0","x-client-ver":"5.5.0.0"},"$type":"AuthorizeRequestValidationLog"}
+2024-09-13 14:51:21.655 +00:00 [DBG] Client is configured to not require consent, no consent is required
+2024-09-13 14:51:21.662 +00:00 [DBG] Creating Authorization Code Flow response.
+2024-09-13 14:51:21.684 +00:00 [INF] {"ClientId":"mvc","ClientName":null,"RedirectUri":"http://host.docker.internal:5002/signin-oidc","Endpoint":"Authorize","SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","Scopes":"openid profile roles api1 offline_access","GrantType":"authorization_code","Tokens":[{"TokenType":"code","TokenValue":"****aePM","$type":"Token"}],"Category":"Token","Name":"Token Issued Success","EventType":"Success","Id":2000,"Message":null,"ActivityId":"0HN6K0DRJM8UP:00000008","TimeStamp":"2024-09-13T14:51:21.0000000Z","ProcessId":915,"LocalIpAddress":"::ffff:172.18.0.3:80","RemoteIpAddress":"::ffff:172.18.0.1","$type":"TokenIssuedSuccessEvent"}
+2024-09-13 14:51:21.686 +00:00 [DBG] Authorize endpoint response
+{"SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","ClientId":"mvc","RedirectUri":"http://host.docker.internal:5002/signin-oidc","State":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw9Y8cFTEnExvGegOGWW_P3e9Vb2NwiLgqMsHPvt02swj7MZsKxIvaujvicf9Jh4vImU-biUuzPiEZFwwN1oabQpbfZOHr1Ifm7PuPque2zQInKwOzK6dRMZmzz3mi5jBnIqNP4_WPW5UvutQF96Vnr9o5uCZV2FP4ccF2Ijtgt_7DnvZH-Aeh_CvKc9qNLYXynaGEILqquYcQKitdeWLBGknjzhHwdgnHIhgMQHxsJUJIlQLoYBmcqKcrMXV6u4tRV9ZsuahTEuN85YKag5-hxK3H9uko_2y6AmSkH2dCVR7OmIRgakFjlKs78F8nwfPbfObk7k5eMktho_elFmhAELBbMUQsx9_dQvbl_cqP-5FLJDxbGSxAJ2dfkIb75z_b-aKSYg5MAHtAC4Bo9Gq-1Ke1SxyN9BqkOHekMVWW0zwA","Scope":"openid profile roles api1 offline_access","Error":null,"ErrorDescription":null,"$type":"AuthorizeResponseLog"}
+2024-09-13 14:51:21.697 +00:00 [DBG] Augmenting SignInContext
+2024-09-13 14:51:21.698 +00:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2024-09-13 14:51:21.772 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:21.773 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:21.773 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:21.774 +00:00 [DBG] Request path /connect/token matched to endpoint type Token
+2024-09-13 14:51:21.777 +00:00 [DBG] Endpoint enabled: Token, successfully created handler: IdentityServer4.Endpoints.TokenEndpoint
+2024-09-13 14:51:21.777 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.TokenEndpoint for /connect/token
+2024-09-13 14:51:21.783 +00:00 [DBG] Start token request.
+2024-09-13 14:51:21.788 +00:00 [DBG] Start client validation
+2024-09-13 14:51:21.794 +00:00 [DBG] Start parsing Basic Authentication secret
+2024-09-13 14:51:21.797 +00:00 [DBG] Start parsing for secret in post body
+2024-09-13 14:51:21.798 +00:00 [DBG] Parser found secret: PostBodySecretParser
+2024-09-13 14:51:21.799 +00:00 [DBG] Secret id found: mvc
+2024-09-13 14:51:21.799 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 14:51:21.805 +00:00 [DBG] Secret validator success: HashedSharedSecretValidator
+2024-09-13 14:51:21.806 +00:00 [DBG] Client validation success
+2024-09-13 14:51:21.808 +00:00 [INF] {"ClientId":"mvc","AuthenticationMethod":"SharedSecret","Category":"Authentication","Name":"Client Authentication Success","EventType":"Success","Id":1010,"Message":null,"ActivityId":"0HN6K0DRJM8UL:00000004","TimeStamp":"2024-09-13T14:51:21.0000000Z","ProcessId":915,"LocalIpAddress":"::ffff:172.18.0.3:80","RemoteIpAddress":"::ffff:172.18.0.1","$type":"ClientAuthenticationSuccessEvent"}
+2024-09-13 14:51:21.813 +00:00 [DBG] Start token request validation
+2024-09-13 14:51:21.822 +00:00 [DBG] Start validation of authorization code token request
+2024-09-13 14:51:21.847 +00:00 [DBG] Client required a proof key for code exchange. Starting PKCE validation
+2024-09-13 14:51:21.863 +00:00 [DBG] Validation of authorization code token request success
+2024-09-13 14:51:21.868 +00:00 [INF] Token request validation success, {"ClientId":"mvc","ClientName":null,"GrantType":"authorization_code","Scopes":null,"AuthorizationCode":"16kjEh5tvqXPLm6BCIxI4novt_eDN9uWKg8FhqXaePM","RefreshToken":null,"UserName":null,"AuthenticationContextReferenceClasses":null,"Tenant":null,"IdP":null,"Raw":{"client_id":"mvc","client_secret":"***REDACTED***","code":"16kjEh5tvqXPLm6BCIxI4novt_eDN9uWKg8FhqXaePM","grant_type":"authorization_code","redirect_uri":"http://host.docker.internal:5002/signin-oidc","code_verifier":"6Z7voImJhZOXQmdoRp1RiLGeKGXScktjcjWEO1v5Lfk"},"$type":"TokenRequestValidationLog"}
+2024-09-13 14:51:21.879 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 14:51:21.887 +00:00 [DBG] Getting claims for access token for client: mvc
+2024-09-13 14:51:21.888 +00:00 [DBG] Getting claims for access token for subject: 7e462136-2963-49df-9cfa-056c1499f819
+2024-09-13 14:51:22.064 +00:00 [DBG] Creating refresh token
+2024-09-13 14:51:22.064 +00:00 [DBG] Setting a sliding lifetime: 86400
+2024-09-13 14:51:22.073 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 14:51:22.079 +00:00 [DBG] Getting claims for identity token for subject: 7e462136-2963-49df-9cfa-056c1499f819 and client: mvc
+2024-09-13 14:51:22.080 +00:00 [DBG] In addition to an id_token, an access_token was requested. No claims other than sub are included in the id_token. To obtain more user claims, either use the user info endpoint or set AlwaysIncludeUserClaimsInIdToken on the client configuration.
+2024-09-13 14:51:22.087 +00:00 [INF] {"ClientId":"mvc","ClientName":null,"RedirectUri":null,"Endpoint":"Token","SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","Scopes":"openid profile roles api1 offline_access","GrantType":"authorization_code","Tokens":[{"TokenType":"id_token","TokenValue":"****VIog","$type":"Token"},{"TokenType":"refresh_token","TokenValue":"****-lZk","$type":"Token"},{"TokenType":"access_token","TokenValue":"****ZNWA","$type":"Token"}],"Category":"Token","Name":"Token Issued Success","EventType":"Success","Id":2000,"Message":null,"ActivityId":"0HN6K0DRJM8UL:00000004","TimeStamp":"2024-09-13T14:51:22.0000000Z","ProcessId":915,"LocalIpAddress":"::ffff:172.18.0.3:80","RemoteIpAddress":"::ffff:172.18.0.1","$type":"TokenIssuedSuccessEvent"}
+2024-09-13 14:51:22.094 +00:00 [DBG] Token request success.
+2024-09-13 14:51:22.230 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:22.231 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:22.232 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:51:22.233 +00:00 [DBG] Request path /connect/userinfo matched to endpoint type Userinfo
+2024-09-13 14:51:22.234 +00:00 [DBG] Endpoint enabled: Userinfo, successfully created handler: IdentityServer4.Endpoints.UserInfoEndpoint
+2024-09-13 14:51:22.234 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.UserInfoEndpoint for /connect/userinfo
+2024-09-13 14:51:22.242 +00:00 [DBG] Start userinfo request
+2024-09-13 14:51:22.245 +00:00 [DBG] Bearer token found in header
+2024-09-13 14:51:22.332 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 14:51:22.337 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 14:51:22.348 +00:00 [DBG] Calling into custom token validator: IdentityServer4.Validation.DefaultCustomTokenValidator
+2024-09-13 14:51:22.351 +00:00 [DBG] Token validation success
+{"ClientId":null,"ClientName":null,"ValidateLifetime":true,"AccessTokenType":"Jwt","ExpectedScope":"openid","TokenHandle":null,"JwtId":null,"Claims":{"nbf":1726239081,"exp":1726325481,"iss":"http://host.docker.internal:5000","aud":"api1","client_id":"mvc","sub":"7e462136-2963-49df-9cfa-056c1499f819","auth_time":1726239081,"idp":"local","scope":["openid","profile","roles","api1","offline_access"],"amr":"pwd"},"$type":"TokenValidationLog"}
+2024-09-13 14:51:22.360 +00:00 [DBG] Creating userinfo response
+2024-09-13 14:51:22.364 +00:00 [DBG] Scopes in access token: openid profile roles api1 offline_access
+2024-09-13 14:51:22.368 +00:00 [DBG] Scopes in access token: openid profile roles api1 offline_access
+2024-09-13 14:51:22.371 +00:00 [DBG] Requested claim types: sub name family_name given_name middle_name nickname preferred_username profile picture website gender birthdate zoneinfo locale updated_at role
+2024-09-13 14:51:22.371 +00:00 [DBG] Scopes in access token: openid profile roles api1 offline_access
+2024-09-13 14:51:22.407 +00:00 [INF] Profile service returned the following claim types: sub given_name preferred_username name
+2024-09-13 14:51:22.408 +00:00 [DBG] End userinfo request
+2024-09-13 14:52:37.258 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 14:52:37.259 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 14:52:37.260 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 14:52:37.261 +00:00 [DBG] Request path /connect/endsession matched to endpoint type Endsession
+2024-09-13 14:52:37.263 +00:00 [DBG] Endpoint enabled: Endsession, successfully created handler: IdentityServer4.Endpoints.EndSessionEndpoint
+2024-09-13 14:52:37.263 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.EndSessionEndpoint for /connect/endsession
+2024-09-13 14:52:37.267 +00:00 [DBG] Processing signout request for 7e462136-2963-49df-9cfa-056c1499f819
+2024-09-13 14:52:37.273 +00:00 [DBG] Start end session request validation
+2024-09-13 14:52:37.278 +00:00 [DBG] Start identity token validation
+2024-09-13 14:52:37.280 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 14:52:37.280 +00:00 [DBG] Client found: mvc / null
+2024-09-13 14:52:37.314 +00:00 [DBG] Calling into custom token validator: IdentityServer4.Validation.DefaultCustomTokenValidator
+2024-09-13 14:52:37.339 +00:00 [DBG] Token validation success
+{"ClientId":"mvc","ClientName":null,"ValidateLifetime":false,"AccessTokenType":null,"ExpectedScope":null,"TokenHandle":null,"JwtId":null,"Claims":{"nbf":1726239082,"exp":1726325482,"iss":"http://host.docker.internal:5000","aud":"mvc","nonce":"638618358766756743.OTYwOWJmM2QtMGIyOC00YzdhLTk0OWItOWQ3ZDBhYTk2N2JiN2MyZTNmNTAtNGMyOC00NjY3LTlmOWMtY2JjZGE5ODc0OTli","iat":1726239082,"at_hash":"xZnu9PrbNU7HOiZuBzxxcA","s_hash":"8Twn3bKAkA8MaPDp64N_3g","sid":"ABp0-LDrsohia_V3l6QilQ","sub":"7e462136-2963-49df-9cfa-056c1499f819","auth_time":1726239081,"idp":"local","amr":"pwd"},"$type":"TokenValidationLog"}
+2024-09-13 14:52:37.343 +00:00 [INF] End session request validation success
+{"ClientId":"mvc","ClientName":null,"SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","PostLogOutUri":"http://host.docker.internal:5002/signout-callback-oidc","State":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw_uPp7IR18fNOi1jyu5IBmYvvfG9EcQWsYtOFVzXgTH8r3CH6eqaUlU0kxabKOr9EArEnL0tPIgVDboE3uWb_4gOCL83prlnI9MJOSX_thxx2AXJg9yMtWXKvvnefWPHqod42eQ-rt8Q_jHwkoYAXORX0cIIII-PUoHmYSxO30Dbw","Raw":{"post_logout_redirect_uri":"http://host.docker.internal:5002/signout-callback-oidc","id_token_hint":"***REDACTED***","state":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw_uPp7IR18fNOi1jyu5IBmYvvfG9EcQWsYtOFVzXgTH8r3CH6eqaUlU0kxabKOr9EArEnL0tPIgVDboE3uWb_4gOCL83prlnI9MJOSX_thxx2AXJg9yMtWXKvvnefWPHqod42eQ-rt8Q_jHwkoYAXORX0cIIII-PUoHmYSxO30Dbw","x-client-SKU":"ID_NETSTANDARD2_0","x-client-ver":"5.5.0.0"},"$type":"EndSessionRequestValidationLog"}
+2024-09-13 14:52:37.345 +00:00 [DBG] Success validating end session request from mvc
+2024-09-13 14:52:37.362 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 14:52:37.362 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 14:52:37.363 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 14:52:37.396 +00:00 [INF] AuthenticationScheme: Identity.Application signed out.
+2024-09-13 14:52:37.397 +00:00 [INF] AuthenticationScheme: Identity.External signed out.
+2024-09-13 14:52:37.398 +00:00 [INF] AuthenticationScheme: Identity.TwoFactorUserId signed out.
+2024-09-13 14:52:37.401 +00:00 [INF] {"SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","DisplayName":"yiab","Category":"Authentication","Name":"User Logout Success","EventType":"Success","Id":1002,"Message":null,"ActivityId":"0HN6K0DRJM8US:00000003","TimeStamp":"2024-09-13T14:52:37.0000000Z","ProcessId":915,"LocalIpAddress":"::ffff:172.18.0.3:80","RemoteIpAddress":"::ffff:172.18.0.1","$type":"UserLogoutSuccessEvent"}
+2024-09-13 14:52:37.457 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:37.507 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:37.511 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:37.511 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:37.513 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:37.535 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:37.535 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:37.535 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:37.536 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:37.538 +00:00 [DBG] Request path /connect/endsession/callback matched to endpoint type Endsession
+2024-09-13 14:52:37.570 +00:00 [DBG] Endpoint enabled: Endsession, successfully created handler: IdentityServer4.Endpoints.EndSessionCallbackEndpoint
+2024-09-13 14:52:37.613 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.EndSessionCallbackEndpoint for /connect/endsession/callback
+2024-09-13 14:52:37.622 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:37.666 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:37.669 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:37.681 +00:00 [DBG] Processing signout callback request
+2024-09-13 14:52:37.692 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:37.718 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:37.758 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:37.820 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:37.834 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 14:52:37.855 +00:00 [DBG] No client front-channel logout URLs
+2024-09-13 14:52:37.862 +00:00 [DBG] No client back-channel logout URLs
+2024-09-13 14:52:37.867 +00:00 [INF] Successful signout callback.
+2024-09-13 14:52:37.867 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:37.868 +00:00 [DBG] No client front-channel iframe urls
+2024-09-13 14:52:37.891 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:37.895 +00:00 [DBG] No client back-channel iframe urls
+2024-09-13 14:52:37.891 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:37.912 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:37.968 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:37.982 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:38.007 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:38.057 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:38.058 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:52:38.082 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:47.488 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:47.489 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:47.489 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:47.490 +00:00 [DBG] Request path /connect/authorize matched to endpoint type Authorize
+2024-09-13 14:59:47.493 +00:00 [DBG] Endpoint enabled: Authorize, successfully created handler: IdentityServer4.Endpoints.AuthorizeEndpoint
+2024-09-13 14:59:47.494 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.AuthorizeEndpoint for /connect/authorize
+2024-09-13 14:59:47.494 +00:00 [DBG] Start authorize request
+2024-09-13 14:59:47.497 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:47.499 +00:00 [DBG] No user present in authorize request
+2024-09-13 14:59:47.500 +00:00 [DBG] Start authorize request protocol validation
+2024-09-13 14:59:47.501 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 14:59:47.503 +00:00 [DBG] Checking for PKCE parameters
+2024-09-13 14:59:47.504 +00:00 [DBG] Calling into custom validator: IdentityServer4.Validation.DefaultCustomAuthorizeRequestValidator
+2024-09-13 14:59:47.505 +00:00 [DBG] ValidatedAuthorizeRequest
+{"ClientId":"mvc","ClientName":null,"RedirectUri":"http://host.docker.internal:5002/signin-oidc","AllowedRedirectUris":["http://host.docker.internal:5002/signin-oidc","http://host.docker.internal:5002/openid-callback"],"SubjectId":"anonymous","ResponseType":"code","ResponseMode":"form_post","GrantType":"authorization_code","RequestedScopes":"openid profile api1 roles offline_access","State":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw9UlQ5hPR4ZDu7KBMH-ZZLRFJYClHDEUZR3GYZxzChh6wkRl4UYQerCyb-_PpvMe5aLXi8dRVxDB8GLpdgl2BhWjH0RApayGv8nCw6_x0lyZX5TXIgD6xbBweKxowib_FroEdecOjxh2LQJ0CQJ_p9xky1b9XXExun9BGW9Kt7VSw6jJAvhElmacT0YJ6XDzC_o_207rLWLv2ngi0hzS6geekw6CooMknmhrRezR_z1bct4mcnTccl08fsxUwvJXpFPzagKYfo5jsvdZ_refhLwSJgltZ3ejxH-dStMHj0W3dE7eQK3FMXansWkbjuocmPfLhY89G3aPbwbo0Cud90l2xToLNpdD_zPaoked_3X09cK-8OI8lqt_LBTWBewWoTl854DOPngXtjlg82uvt6U9XpA3ucLcsfHAzyptB_nDg","UiLocales":null,"Nonce":"638618363873526969.YTJjMDNjMDQtNzYwMy00ODE4LWE4NzgtYjM2NjBiZDRmNDAyNWQ1OTdjMzItNWE1MS00ZDQ5LTk5MWYtMWNmYTZmMDc3NTk4","AuthenticationContextReferenceClasses":null,"DisplayMode":null,"PromptMode":null,"MaxAge":null,"LoginHint":null,"SessionId":"","Raw":{"client_id":"mvc","redirect_uri":"http://host.docker.internal:5002/signin-oidc","response_type":"code","scope":"openid profile api1 roles offline_access","code_challenge":"y9LD2q8WPk_R1GDig_1DT_TwrS6nfyDqXn_zXlKMWlM","code_challenge_method":"S256","response_mode":"form_post","nonce":"638618363873526969.YTJjMDNjMDQtNzYwMy00ODE4LWE4NzgtYjM2NjBiZDRmNDAyNWQ1OTdjMzItNWE1MS00ZDQ5LTk5MWYtMWNmYTZmMDc3NTk4","state":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw9UlQ5hPR4ZDu7KBMH-ZZLRFJYClHDEUZR3GYZxzChh6wkRl4UYQerCyb-_PpvMe5aLXi8dRVxDB8GLpdgl2BhWjH0RApayGv8nCw6_x0lyZX5TXIgD6xbBweKxowib_FroEdecOjxh2LQJ0CQJ_p9xky1b9XXExun9BGW9Kt7VSw6jJAvhElmacT0YJ6XDzC_o_207rLWLv2ngi0hzS6geekw6CooMknmhrRezR_z1bct4mcnTccl08fsxUwvJXpFPzagKYfo5jsvdZ_refhLwSJgltZ3ejxH-dStMHj0W3dE7eQK3FMXansWkbjuocmPfLhY89G3aPbwbo0Cud90l2xToLNpdD_zPaoked_3X09cK-8OI8lqt_LBTWBewWoTl854DOPngXtjlg82uvt6U9XpA3ucLcsfHAzyptB_nDg","x-client-SKU":"ID_NETSTANDARD2_0","x-client-ver":"5.5.0.0"},"$type":"AuthorizeRequestValidationLog"}
+2024-09-13 14:59:47.506 +00:00 [INF] Showing login: User is not authenticated
+2024-09-13 14:59:47.511 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:47.513 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:47.514 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:47.520 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:47.520 +00:00 [DBG] Start authorize request protocol validation
+2024-09-13 14:59:47.521 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 14:59:47.522 +00:00 [DBG] Checking for PKCE parameters
+2024-09-13 14:59:47.522 +00:00 [DBG] Calling into custom validator: IdentityServer4.Validation.DefaultCustomAuthorizeRequestValidator
+2024-09-13 14:59:47.523 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 14:59:47.577 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:47.689 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:47.757 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:47.778 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:47.802 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:47.803 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:47.807 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:47.943 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:47.946 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:47.974 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:48.003 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:48.003 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:48.010 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:48.023 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:48.028 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:48.038 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:48.093 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:48.101 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:48.134 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:48.234 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:48.264 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:48.264 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 14:59:48.272 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:00:00.123 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:00:00.128 +00:00 [DBG] CORS request made for path: /Account/Login from origin: null but was ignored because path was not for an allowed IdentityServer CORS endpoint
+2024-09-13 15:00:00.137 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:00:00.141 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:00:00.156 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:00:00.159 +00:00 [DBG] Start authorize request protocol validation
+2024-09-13 15:00:00.164 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:00:00.165 +00:00 [DBG] Checking for PKCE parameters
+2024-09-13 15:00:00.167 +00:00 [DBG] Calling into custom validator: IdentityServer4.Validation.DefaultCustomAuthorizeRequestValidator
+2024-09-13 15:00:00.405 +00:00 [DBG] Augmenting SignInContext
+2024-09-13 15:00:00.406 +00:00 [DBG] Adding idp claim with value: local
+2024-09-13 15:00:00.409 +00:00 [DBG] Adding auth_time claim with value: 1726239600
+2024-09-13 15:00:00.412 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:00:00.421 +00:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2024-09-13 15:00:00.443 +00:00 [INF] {"Username":"yiab","Provider":null,"ProviderUserId":null,"SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","DisplayName":"yiab","Endpoint":"UI","ClientId":"mvc","Category":"Authentication","Name":"User Login Success","EventType":"Success","Id":1000,"Message":null,"ActivityId":"0HN6K0DRJM8V8:00000002","TimeStamp":"2024-09-13T15:00:00.0000000Z","ProcessId":915,"LocalIpAddress":"::ffff:172.18.0.3:80","RemoteIpAddress":"::ffff:172.18.0.1","$type":"UserLoginSuccessEvent"}
+2024-09-13 15:00:00.444 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:00:00.484 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 15:00:00.543 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 15:00:00.544 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 15:00:00.545 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 15:00:00.546 +00:00 [DBG] Request path /connect/authorize/callback matched to endpoint type Authorize
+2024-09-13 15:00:00.548 +00:00 [DBG] Endpoint enabled: Authorize, successfully created handler: IdentityServer4.Endpoints.AuthorizeCallbackEndpoint
+2024-09-13 15:00:00.549 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.AuthorizeCallbackEndpoint for /connect/authorize/callback
+2024-09-13 15:00:00.550 +00:00 [DBG] Start authorize callback request
+2024-09-13 15:00:00.553 +00:00 [DBG] User in authorize request: 7e462136-2963-49df-9cfa-056c1499f819
+2024-09-13 15:00:00.554 +00:00 [DBG] Start authorize request protocol validation
+2024-09-13 15:00:00.556 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:00:00.556 +00:00 [DBG] Checking for PKCE parameters
+2024-09-13 15:00:00.558 +00:00 [DBG] Calling into custom validator: IdentityServer4.Validation.DefaultCustomAuthorizeRequestValidator
+2024-09-13 15:00:00.558 +00:00 [DBG] ValidatedAuthorizeRequest
+{"ClientId":"mvc","ClientName":null,"RedirectUri":"http://host.docker.internal:5002/signin-oidc","AllowedRedirectUris":["http://host.docker.internal:5002/signin-oidc","http://host.docker.internal:5002/openid-callback"],"SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","ResponseType":"code","ResponseMode":"form_post","GrantType":"authorization_code","RequestedScopes":"openid profile api1 roles offline_access","State":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw9UlQ5hPR4ZDu7KBMH-ZZLRFJYClHDEUZR3GYZxzChh6wkRl4UYQerCyb-_PpvMe5aLXi8dRVxDB8GLpdgl2BhWjH0RApayGv8nCw6_x0lyZX5TXIgD6xbBweKxowib_FroEdecOjxh2LQJ0CQJ_p9xky1b9XXExun9BGW9Kt7VSw6jJAvhElmacT0YJ6XDzC_o_207rLWLv2ngi0hzS6geekw6CooMknmhrRezR_z1bct4mcnTccl08fsxUwvJXpFPzagKYfo5jsvdZ_refhLwSJgltZ3ejxH-dStMHj0W3dE7eQK3FMXansWkbjuocmPfLhY89G3aPbwbo0Cud90l2xToLNpdD_zPaoked_3X09cK-8OI8lqt_LBTWBewWoTl854DOPngXtjlg82uvt6U9XpA3ucLcsfHAzyptB_nDg","UiLocales":null,"Nonce":"638618363873526969.YTJjMDNjMDQtNzYwMy00ODE4LWE4NzgtYjM2NjBiZDRmNDAyNWQ1OTdjMzItNWE1MS00ZDQ5LTk5MWYtMWNmYTZmMDc3NTk4","AuthenticationContextReferenceClasses":null,"DisplayMode":null,"PromptMode":null,"MaxAge":null,"LoginHint":null,"SessionId":"TXCF3YIrDEhixeQZVCVKuQ","Raw":{"client_id":"mvc","redirect_uri":"http://host.docker.internal:5002/signin-oidc","response_type":"code","scope":"openid profile api1 roles offline_access","code_challenge":"y9LD2q8WPk_R1GDig_1DT_TwrS6nfyDqXn_zXlKMWlM","code_challenge_method":"S256","response_mode":"form_post","nonce":"638618363873526969.YTJjMDNjMDQtNzYwMy00ODE4LWE4NzgtYjM2NjBiZDRmNDAyNWQ1OTdjMzItNWE1MS00ZDQ5LTk5MWYtMWNmYTZmMDc3NTk4","state":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw9UlQ5hPR4ZDu7KBMH-ZZLRFJYClHDEUZR3GYZxzChh6wkRl4UYQerCyb-_PpvMe5aLXi8dRVxDB8GLpdgl2BhWjH0RApayGv8nCw6_x0lyZX5TXIgD6xbBweKxowib_FroEdecOjxh2LQJ0CQJ_p9xky1b9XXExun9BGW9Kt7VSw6jJAvhElmacT0YJ6XDzC_o_207rLWLv2ngi0hzS6geekw6CooMknmhrRezR_z1bct4mcnTccl08fsxUwvJXpFPzagKYfo5jsvdZ_refhLwSJgltZ3ejxH-dStMHj0W3dE7eQK3FMXansWkbjuocmPfLhY89G3aPbwbo0Cud90l2xToLNpdD_zPaoked_3X09cK-8OI8lqt_LBTWBewWoTl854DOPngXtjlg82uvt6U9XpA3ucLcsfHAzyptB_nDg","x-client-SKU":"ID_NETSTANDARD2_0","x-client-ver":"5.5.0.0"},"$type":"AuthorizeRequestValidationLog"}
+2024-09-13 15:00:00.611 +00:00 [DBG] Client is configured to not require consent, no consent is required
+2024-09-13 15:00:00.654 +00:00 [DBG] Creating Authorization Code Flow response.
+2024-09-13 15:00:00.659 +00:00 [INF] {"ClientId":"mvc","ClientName":null,"RedirectUri":"http://host.docker.internal:5002/signin-oidc","Endpoint":"Authorize","SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","Scopes":"openid profile roles api1 offline_access","GrantType":"authorization_code","Tokens":[{"TokenType":"code","TokenValue":"****Aetw","$type":"Token"}],"Category":"Token","Name":"Token Issued Success","EventType":"Success","Id":2000,"Message":null,"ActivityId":"0HN6K0DRJM8V8:00000004","TimeStamp":"2024-09-13T15:00:00.0000000Z","ProcessId":915,"LocalIpAddress":"::ffff:172.18.0.3:80","RemoteIpAddress":"::ffff:172.18.0.1","$type":"TokenIssuedSuccessEvent"}
+2024-09-13 15:00:00.660 +00:00 [DBG] Authorize endpoint response
+{"SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","ClientId":"mvc","RedirectUri":"http://host.docker.internal:5002/signin-oidc","State":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw9UlQ5hPR4ZDu7KBMH-ZZLRFJYClHDEUZR3GYZxzChh6wkRl4UYQerCyb-_PpvMe5aLXi8dRVxDB8GLpdgl2BhWjH0RApayGv8nCw6_x0lyZX5TXIgD6xbBweKxowib_FroEdecOjxh2LQJ0CQJ_p9xky1b9XXExun9BGW9Kt7VSw6jJAvhElmacT0YJ6XDzC_o_207rLWLv2ngi0hzS6geekw6CooMknmhrRezR_z1bct4mcnTccl08fsxUwvJXpFPzagKYfo5jsvdZ_refhLwSJgltZ3ejxH-dStMHj0W3dE7eQK3FMXansWkbjuocmPfLhY89G3aPbwbo0Cud90l2xToLNpdD_zPaoked_3X09cK-8OI8lqt_LBTWBewWoTl854DOPngXtjlg82uvt6U9XpA3ucLcsfHAzyptB_nDg","Scope":"openid profile roles api1 offline_access","Error":null,"ErrorDescription":null,"$type":"AuthorizeResponseLog"}
+2024-09-13 15:00:00.661 +00:00 [DBG] Augmenting SignInContext
+2024-09-13 15:00:00.662 +00:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2024-09-13 15:00:00.764 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:00:00.765 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:00:00.766 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:00:00.767 +00:00 [DBG] Request path /connect/token matched to endpoint type Token
+2024-09-13 15:00:00.770 +00:00 [DBG] Endpoint enabled: Token, successfully created handler: IdentityServer4.Endpoints.TokenEndpoint
+2024-09-13 15:00:00.770 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.TokenEndpoint for /connect/token
+2024-09-13 15:00:00.771 +00:00 [DBG] Start token request.
+2024-09-13 15:00:00.772 +00:00 [DBG] Start client validation
+2024-09-13 15:00:00.773 +00:00 [DBG] Start parsing Basic Authentication secret
+2024-09-13 15:00:00.774 +00:00 [DBG] Start parsing for secret in post body
+2024-09-13 15:00:00.776 +00:00 [DBG] Parser found secret: PostBodySecretParser
+2024-09-13 15:00:00.776 +00:00 [DBG] Secret id found: mvc
+2024-09-13 15:00:00.777 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:00:00.779 +00:00 [DBG] Secret validator success: HashedSharedSecretValidator
+2024-09-13 15:00:00.779 +00:00 [DBG] Client validation success
+2024-09-13 15:00:00.780 +00:00 [INF] {"ClientId":"mvc","AuthenticationMethod":"SharedSecret","Category":"Authentication","Name":"Client Authentication Success","EventType":"Success","Id":1010,"Message":null,"ActivityId":"0HN6K0DRJM8V9:00000002","TimeStamp":"2024-09-13T15:00:00.0000000Z","ProcessId":915,"LocalIpAddress":"::ffff:172.18.0.3:80","RemoteIpAddress":"::ffff:172.18.0.1","$type":"ClientAuthenticationSuccessEvent"}
+2024-09-13 15:00:00.782 +00:00 [DBG] Start token request validation
+2024-09-13 15:00:00.783 +00:00 [DBG] Start validation of authorization code token request
+2024-09-13 15:00:00.786 +00:00 [DBG] Client required a proof key for code exchange. Starting PKCE validation
+2024-09-13 15:00:00.796 +00:00 [DBG] Validation of authorization code token request success
+2024-09-13 15:00:00.821 +00:00 [INF] Token request validation success, {"ClientId":"mvc","ClientName":null,"GrantType":"authorization_code","Scopes":null,"AuthorizationCode":"98zrkPIiUxCd_XMX_I0J3impZyIoETzNpBRp9gNAetw","RefreshToken":null,"UserName":null,"AuthenticationContextReferenceClasses":null,"Tenant":null,"IdP":null,"Raw":{"client_id":"mvc","client_secret":"***REDACTED***","code":"98zrkPIiUxCd_XMX_I0J3impZyIoETzNpBRp9gNAetw","grant_type":"authorization_code","redirect_uri":"http://host.docker.internal:5002/signin-oidc","code_verifier":"6GQhIJpOskdUn9kmlwmoiKB8Tqs3tQMnhLrmNPclMtI"},"$type":"TokenRequestValidationLog"}
+2024-09-13 15:00:00.823 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:00:00.823 +00:00 [DBG] Getting claims for access token for client: mvc
+2024-09-13 15:00:00.824 +00:00 [DBG] Getting claims for access token for subject: 7e462136-2963-49df-9cfa-056c1499f819
+2024-09-13 15:00:00.858 +00:00 [DBG] Creating refresh token
+2024-09-13 15:00:00.859 +00:00 [DBG] Setting a sliding lifetime: 86400
+2024-09-13 15:00:00.861 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:00:00.864 +00:00 [DBG] Getting claims for identity token for subject: 7e462136-2963-49df-9cfa-056c1499f819 and client: mvc
+2024-09-13 15:00:00.865 +00:00 [DBG] In addition to an id_token, an access_token was requested. No claims other than sub are included in the id_token. To obtain more user claims, either use the user info endpoint or set AlwaysIncludeUserClaimsInIdToken on the client configuration.
+2024-09-13 15:00:00.867 +00:00 [INF] {"ClientId":"mvc","ClientName":null,"RedirectUri":null,"Endpoint":"Token","SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","Scopes":"openid profile roles api1 offline_access","GrantType":"authorization_code","Tokens":[{"TokenType":"id_token","TokenValue":"****o4xA","$type":"Token"},{"TokenType":"refresh_token","TokenValue":"****hwH0","$type":"Token"},{"TokenType":"access_token","TokenValue":"****iooQ","$type":"Token"}],"Category":"Token","Name":"Token Issued Success","EventType":"Success","Id":2000,"Message":null,"ActivityId":"0HN6K0DRJM8V9:00000002","TimeStamp":"2024-09-13T15:00:00.0000000Z","ProcessId":915,"LocalIpAddress":"::ffff:172.18.0.3:80","RemoteIpAddress":"::ffff:172.18.0.1","$type":"TokenIssuedSuccessEvent"}
+2024-09-13 15:00:00.869 +00:00 [DBG] Token request success.
+2024-09-13 15:00:00.886 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:00:00.890 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:00:00.892 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:00:00.893 +00:00 [DBG] Request path /connect/userinfo matched to endpoint type Userinfo
+2024-09-13 15:00:00.895 +00:00 [DBG] Endpoint enabled: Userinfo, successfully created handler: IdentityServer4.Endpoints.UserInfoEndpoint
+2024-09-13 15:00:00.896 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.UserInfoEndpoint for /connect/userinfo
+2024-09-13 15:00:00.897 +00:00 [DBG] Start userinfo request
+2024-09-13 15:00:00.898 +00:00 [DBG] Bearer token found in header
+2024-09-13 15:00:00.901 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:00:00.902 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:00:00.937 +00:00 [DBG] Calling into custom token validator: IdentityServer4.Validation.DefaultCustomTokenValidator
+2024-09-13 15:00:00.981 +00:00 [DBG] Token validation success
+{"ClientId":null,"ClientName":null,"ValidateLifetime":true,"AccessTokenType":"Jwt","ExpectedScope":"openid","TokenHandle":null,"JwtId":null,"Claims":{"nbf":1726239600,"exp":1726326000,"iss":"http://host.docker.internal:5000","aud":"api1","client_id":"mvc","sub":"7e462136-2963-49df-9cfa-056c1499f819","auth_time":1726239600,"idp":"local","scope":["openid","profile","roles","api1","offline_access"],"amr":"pwd"},"$type":"TokenValidationLog"}
+2024-09-13 15:00:01.004 +00:00 [DBG] Creating userinfo response
+2024-09-13 15:00:01.005 +00:00 [DBG] Scopes in access token: openid profile roles api1 offline_access
+2024-09-13 15:00:01.007 +00:00 [DBG] Scopes in access token: openid profile roles api1 offline_access
+2024-09-13 15:00:01.009 +00:00 [DBG] Requested claim types: sub name family_name given_name middle_name nickname preferred_username profile picture website gender birthdate zoneinfo locale updated_at role
+2024-09-13 15:00:01.010 +00:00 [DBG] Scopes in access token: openid profile roles api1 offline_access
+2024-09-13 15:00:01.035 +00:00 [INF] Profile service returned the following claim types: sub given_name preferred_username name
+2024-09-13 15:00:01.036 +00:00 [DBG] End userinfo request
+2024-09-13 15:02:01.315 +00:00 [INF] Starting host...
+2024-09-13 15:02:01.642 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2024-09-13 15:02:02.175 +00:00 [WRN] 'AddEntityFramework*' was called on the service provider, but 'UseInternalServiceProvider' wasn't called in the DbContext options configuration. Consider removing the 'AddEntityFramework*' call, as in most cases it's not needed and may cause conflicts with other products and services registered in the same service provider.
+2024-09-13 15:02:02.303 +00:00 [INF] Starting IdentityServer4 version 3.1.0.0
+2024-09-13 15:02:02.313 +00:00 [INF] You are using the in-memory version of the persisted grant store. This will store consent decisions, authorization codes, refresh and reference tokens in memory only. If you are using any of those features in production, you want to switch to a different store implementation.
+2024-09-13 15:02:02.324 +00:00 [INF] Using the default authentication scheme Identity.Application for IdentityServer
+2024-09-13 15:02:02.324 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for authentication
+2024-09-13 15:02:02.325 +00:00 [DBG] Using Identity.External as default ASP.NET Core scheme for sign-in
+2024-09-13 15:02:02.326 +00:00 [DBG] Using Identity.External as default ASP.NET Core scheme for sign-out
+2024-09-13 15:02:02.327 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for challenge
+2024-09-13 15:02:02.328 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for forbid
+2024-09-13 15:02:25.791 +00:00 [DBG] Login Url: /Account/Login
+2024-09-13 15:02:25.794 +00:00 [DBG] Login Return Url Parameter: ReturnUrl
+2024-09-13 15:02:25.795 +00:00 [DBG] Logout Url: /Account/Logout
+2024-09-13 15:02:25.796 +00:00 [DBG] ConsentUrl Url: /consent
+2024-09-13 15:02:25.796 +00:00 [DBG] Consent Return Url Parameter: returnUrl
+2024-09-13 15:02:25.797 +00:00 [DBG] Error Url: /home/error
+2024-09-13 15:02:25.798 +00:00 [DBG] Error Id Parameter: errorId
+2024-09-13 15:02:25.807 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:02:25.857 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:02:25.885 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:02:25.891 +00:00 [DBG] Request path /.well-known/openid-configuration matched to endpoint type Discovery
+2024-09-13 15:02:25.909 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryEndpoint
+2024-09-13 15:02:25.910 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryEndpoint for /.well-known/openid-configuration
+2024-09-13 15:02:25.915 +00:00 [DBG] Start discovery request
+2024-09-13 15:02:26.260 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:02:26.263 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:02:26.264 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:02:26.268 +00:00 [DBG] Request path /.well-known/openid-configuration/jwks matched to endpoint type Discovery
+2024-09-13 15:02:26.273 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryKeyEndpoint
+2024-09-13 15:02:26.296 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryKeyEndpoint for /.well-known/openid-configuration/jwks
+2024-09-13 15:02:26.312 +00:00 [DBG] Start key discovery request
+2024-09-13 15:14:28.172 +00:00 [INF] Starting host...
+2024-09-13 15:14:28.310 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2024-09-13 15:14:28.665 +00:00 [WRN] 'AddEntityFramework*' was called on the service provider, but 'UseInternalServiceProvider' wasn't called in the DbContext options configuration. Consider removing the 'AddEntityFramework*' call, as in most cases it's not needed and may cause conflicts with other products and services registered in the same service provider.
+2024-09-13 15:14:28.826 +00:00 [INF] Starting IdentityServer4 version 3.1.0.0
+2024-09-13 15:14:28.840 +00:00 [INF] You are using the in-memory version of the persisted grant store. This will store consent decisions, authorization codes, refresh and reference tokens in memory only. If you are using any of those features in production, you want to switch to a different store implementation.
+2024-09-13 15:14:28.860 +00:00 [INF] Using the default authentication scheme Identity.Application for IdentityServer
+2024-09-13 15:14:28.862 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for authentication
+2024-09-13 15:14:28.864 +00:00 [DBG] Using Identity.External as default ASP.NET Core scheme for sign-in
+2024-09-13 15:14:28.866 +00:00 [DBG] Using Identity.External as default ASP.NET Core scheme for sign-out
+2024-09-13 15:14:28.869 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for challenge
+2024-09-13 15:14:28.871 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for forbid
+2024-09-13 15:14:47.472 +00:00 [DBG] Login Url: /Account/Login
+2024-09-13 15:14:47.474 +00:00 [DBG] Login Return Url Parameter: ReturnUrl
+2024-09-13 15:14:47.475 +00:00 [DBG] Logout Url: /Account/Logout
+2024-09-13 15:14:47.476 +00:00 [DBG] ConsentUrl Url: /consent
+2024-09-13 15:14:47.478 +00:00 [DBG] Consent Return Url Parameter: returnUrl
+2024-09-13 15:14:47.479 +00:00 [DBG] Error Url: /home/error
+2024-09-13 15:14:47.480 +00:00 [DBG] Error Id Parameter: errorId
+2024-09-13 15:14:47.487 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:14:47.515 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:14:47.532 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:14:47.538 +00:00 [DBG] Request path /.well-known/openid-configuration matched to endpoint type Discovery
+2024-09-13 15:14:47.551 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryEndpoint
+2024-09-13 15:14:47.551 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryEndpoint for /.well-known/openid-configuration
+2024-09-13 15:14:47.554 +00:00 [DBG] Start discovery request
+2024-09-13 15:14:47.787 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:14:47.790 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:14:47.792 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:14:47.817 +00:00 [DBG] Request path /.well-known/openid-configuration/jwks matched to endpoint type Discovery
+2024-09-13 15:14:47.819 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryKeyEndpoint
+2024-09-13 15:14:47.819 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryKeyEndpoint for /.well-known/openid-configuration/jwks
+2024-09-13 15:14:47.823 +00:00 [DBG] Start key discovery request
+2024-09-13 15:14:59.730 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:14:59.732 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:14:59.734 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:14:59.735 +00:00 [DBG] Request path /.well-known/openid-configuration matched to endpoint type Discovery
+2024-09-13 15:14:59.737 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryEndpoint
+2024-09-13 15:14:59.737 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryEndpoint for /.well-known/openid-configuration
+2024-09-13 15:14:59.738 +00:00 [DBG] Start discovery request
+2024-09-13 15:14:59.772 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:14:59.773 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:14:59.773 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:14:59.774 +00:00 [DBG] Request path /.well-known/openid-configuration/jwks matched to endpoint type Discovery
+2024-09-13 15:14:59.775 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryKeyEndpoint
+2024-09-13 15:14:59.775 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryKeyEndpoint for /.well-known/openid-configuration/jwks
+2024-09-13 15:14:59.776 +00:00 [DBG] Start key discovery request
+2024-09-13 15:14:59.812 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:14:59.814 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:14:59.816 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:14:59.816 +00:00 [DBG] Request path /connect/authorize matched to endpoint type Authorize
+2024-09-13 15:14:59.823 +00:00 [DBG] Endpoint enabled: Authorize, successfully created handler: IdentityServer4.Endpoints.AuthorizeEndpoint
+2024-09-13 15:14:59.824 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.AuthorizeEndpoint for /connect/authorize
+2024-09-13 15:14:59.827 +00:00 [DBG] Start authorize request
+2024-09-13 15:14:59.843 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:14:59.853 +00:00 [DBG] No user present in authorize request
+2024-09-13 15:14:59.857 +00:00 [DBG] Start authorize request protocol validation
+2024-09-13 15:14:59.869 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:14:59.879 +00:00 [DBG] Checking for PKCE parameters
+2024-09-13 15:14:59.901 +00:00 [DBG] Calling into custom validator: IdentityServer4.Validation.DefaultCustomAuthorizeRequestValidator
+2024-09-13 15:14:59.911 +00:00 [DBG] ValidatedAuthorizeRequest
+{"ClientId":"mvc","ClientName":null,"RedirectUri":"http://host.docker.internal:5002/signin-oidc","AllowedRedirectUris":["http://host.docker.internal:5002/signin-oidc","http://host.docker.internal:5002/openid-callback"],"SubjectId":"anonymous","ResponseType":"code","ResponseMode":"form_post","GrantType":"authorization_code","RequestedScopes":"openid profile api1 roles offline_access","State":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw8SvogSJ6lu0mdnqDrJBAi4mPRK_3TYj6AzSwrcv6ybh7wmJDBh09uY6miv7jod2li23LtHXBLCr7gYTYfSCsBdr6_KnZFq9Wnaoa4WrFbCAFq9Y4sW_gadloCnwW1OX-n4kAY8v7n8px61jMAm7bb7UaFt5x7skY2zf7ElWJEyXXRv2dXoL8od3Yco4B2MkCqmwX-wWmLPyvIbLzzjGAErBSD56PNSKGrX11N9f2Ssj1YpUzSyo1GGdnSioenJyzFdOM2yn75Y-7wB6AFPn9oJbUylUWvtg3ZXq8Ush2f0HbPKspYQLkvCpDBCirtWRWgAyrtqQ7zNfRiKxVCQBJeJJM6sB0Y75T1S3gOPgaN3EPNykfkSkqc3e1M8MtesseJRprwCJ8_119eeSZI8Io65QcC8ME6KyRBUSz4jFE-_mA","UiLocales":null,"Nonce":"638618372997928655.YTBhNzc5YjItZDg0MS00NTA3LTg4NTMtNDk1ZWI3NWQ4ODViYzU3NzBlNDEtNzJlNC00MmUwLWI3ZTMtNDc3N2JmMDBjYjEx","AuthenticationContextReferenceClasses":null,"DisplayMode":null,"PromptMode":null,"MaxAge":null,"LoginHint":null,"SessionId":"","Raw":{"client_id":"mvc","redirect_uri":"http://host.docker.internal:5002/signin-oidc","response_type":"code","scope":"openid profile api1 roles offline_access","code_challenge":"5mffgZVlyV3E-t_5c3ssWUq-Ncea9NxV4Y7lrkZZjAE","code_challenge_method":"S256","response_mode":"form_post","nonce":"638618372997928655.YTBhNzc5YjItZDg0MS00NTA3LTg4NTMtNDk1ZWI3NWQ4ODViYzU3NzBlNDEtNzJlNC00MmUwLWI3ZTMtNDc3N2JmMDBjYjEx","state":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw8SvogSJ6lu0mdnqDrJBAi4mPRK_3TYj6AzSwrcv6ybh7wmJDBh09uY6miv7jod2li23LtHXBLCr7gYTYfSCsBdr6_KnZFq9Wnaoa4WrFbCAFq9Y4sW_gadloCnwW1OX-n4kAY8v7n8px61jMAm7bb7UaFt5x7skY2zf7ElWJEyXXRv2dXoL8od3Yco4B2MkCqmwX-wWmLPyvIbLzzjGAErBSD56PNSKGrX11N9f2Ssj1YpUzSyo1GGdnSioenJyzFdOM2yn75Y-7wB6AFPn9oJbUylUWvtg3ZXq8Ush2f0HbPKspYQLkvCpDBCirtWRWgAyrtqQ7zNfRiKxVCQBJeJJM6sB0Y75T1S3gOPgaN3EPNykfkSkqc3e1M8MtesseJRprwCJ8_119eeSZI8Io65QcC8ME6KyRBUSz4jFE-_mA","x-client-SKU":"ID_NETSTANDARD2_0","x-client-ver":"5.5.0.0"},"$type":"AuthorizeRequestValidationLog"}
+2024-09-13 15:14:59.926 +00:00 [INF] Showing login: User is not authenticated
+2024-09-13 15:14:59.936 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:14:59.937 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:14:59.938 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:14:59.978 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:14:59.978 +00:00 [DBG] Start authorize request protocol validation
+2024-09-13 15:14:59.979 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:14:59.981 +00:00 [DBG] Checking for PKCE parameters
+2024-09-13 15:14:59.982 +00:00 [DBG] Calling into custom validator: IdentityServer4.Validation.DefaultCustomAuthorizeRequestValidator
+2024-09-13 15:14:59.985 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:15:00.195 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:00.223 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:00.224 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:00.269 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:00.278 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:00.300 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:00.331 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:00.349 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:00.357 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:00.360 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:00.395 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:00.461 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:00.473 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:00.474 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:00.498 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:00.502 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:00.508 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:00.551 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:00.630 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:03.341 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:03.353 +00:00 [DBG] CORS request made for path: /Account/Login from origin: null but was ignored because path was not for an allowed IdentityServer CORS endpoint
+2024-09-13 15:15:03.354 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:03.355 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:03.387 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:03.388 +00:00 [DBG] Start authorize request protocol validation
+2024-09-13 15:15:03.389 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:15:03.389 +00:00 [DBG] Checking for PKCE parameters
+2024-09-13 15:15:03.390 +00:00 [DBG] Calling into custom validator: IdentityServer4.Validation.DefaultCustomAuthorizeRequestValidator
+2024-09-13 15:15:05.360 +00:00 [WRN] Invalid password for user.
+2024-09-13 15:15:05.361 +00:00 [WRN] User failed to provide the correct password.
+2024-09-13 15:15:05.597 +00:00 [INF] {"Username":"Gs","Endpoint":"UI","ClientId":"mvc","Category":"Authentication","Name":"User Login Failure","EventType":"Failure","Id":1001,"Message":"invalid credentials","ActivityId":"0HN6K0R73BJVN:00000005","TimeStamp":"2024-09-13T15:15:05.0000000Z","ProcessId":1188,"LocalIpAddress":"::ffff:172.18.0.3:80","RemoteIpAddress":"::ffff:172.18.0.1","$type":"UserLoginFailureEvent"}
+2024-09-13 15:15:05.600 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:05.601 +00:00 [DBG] Start authorize request protocol validation
+2024-09-13 15:15:05.601 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:15:05.602 +00:00 [DBG] Checking for PKCE parameters
+2024-09-13 15:15:05.603 +00:00 [DBG] Calling into custom validator: IdentityServer4.Validation.DefaultCustomAuthorizeRequestValidator
+2024-09-13 15:15:05.605 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:15:10.374 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:10.375 +00:00 [DBG] CORS request made for path: /Account/Login from origin: null but was ignored because path was not for an allowed IdentityServer CORS endpoint
+2024-09-13 15:15:10.376 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:10.377 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:10.392 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:10.393 +00:00 [DBG] Start authorize request protocol validation
+2024-09-13 15:15:10.394 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:15:10.394 +00:00 [DBG] Checking for PKCE parameters
+2024-09-13 15:15:10.396 +00:00 [DBG] Calling into custom validator: IdentityServer4.Validation.DefaultCustomAuthorizeRequestValidator
+2024-09-13 15:15:10.599 +00:00 [DBG] Augmenting SignInContext
+2024-09-13 15:15:10.602 +00:00 [DBG] Adding idp claim with value: local
+2024-09-13 15:15:10.603 +00:00 [DBG] Adding auth_time claim with value: 1726240510
+2024-09-13 15:15:10.606 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:10.614 +00:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2024-09-13 15:15:10.621 +00:00 [INF] {"Username":"yiab","Provider":null,"ProviderUserId":null,"SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","DisplayName":"yiab","Endpoint":"UI","ClientId":"mvc","Category":"Authentication","Name":"User Login Success","EventType":"Success","Id":1000,"Message":null,"ActivityId":"0HN6K0R73BJVR:00000002","TimeStamp":"2024-09-13T15:15:10.0000000Z","ProcessId":1188,"LocalIpAddress":"::ffff:172.18.0.3:80","RemoteIpAddress":"::ffff:172.18.0.1","$type":"UserLoginSuccessEvent"}
+2024-09-13 15:15:10.622 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:15:10.650 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 15:15:10.673 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 15:15:10.674 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 15:15:10.674 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 15:15:10.675 +00:00 [DBG] Request path /connect/authorize/callback matched to endpoint type Authorize
+2024-09-13 15:15:10.676 +00:00 [DBG] Endpoint enabled: Authorize, successfully created handler: IdentityServer4.Endpoints.AuthorizeCallbackEndpoint
+2024-09-13 15:15:10.677 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.AuthorizeCallbackEndpoint for /connect/authorize/callback
+2024-09-13 15:15:10.682 +00:00 [DBG] Start authorize callback request
+2024-09-13 15:15:10.687 +00:00 [DBG] User in authorize request: 7e462136-2963-49df-9cfa-056c1499f819
+2024-09-13 15:15:10.688 +00:00 [DBG] Start authorize request protocol validation
+2024-09-13 15:15:10.689 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:15:10.689 +00:00 [DBG] Checking for PKCE parameters
+2024-09-13 15:15:10.690 +00:00 [DBG] Calling into custom validator: IdentityServer4.Validation.DefaultCustomAuthorizeRequestValidator
+2024-09-13 15:15:10.692 +00:00 [DBG] ValidatedAuthorizeRequest
+{"ClientId":"mvc","ClientName":null,"RedirectUri":"http://host.docker.internal:5002/signin-oidc","AllowedRedirectUris":["http://host.docker.internal:5002/signin-oidc","http://host.docker.internal:5002/openid-callback"],"SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","ResponseType":"code","ResponseMode":"form_post","GrantType":"authorization_code","RequestedScopes":"openid profile api1 roles offline_access","State":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw8SvogSJ6lu0mdnqDrJBAi4mPRK_3TYj6AzSwrcv6ybh7wmJDBh09uY6miv7jod2li23LtHXBLCr7gYTYfSCsBdr6_KnZFq9Wnaoa4WrFbCAFq9Y4sW_gadloCnwW1OX-n4kAY8v7n8px61jMAm7bb7UaFt5x7skY2zf7ElWJEyXXRv2dXoL8od3Yco4B2MkCqmwX-wWmLPyvIbLzzjGAErBSD56PNSKGrX11N9f2Ssj1YpUzSyo1GGdnSioenJyzFdOM2yn75Y-7wB6AFPn9oJbUylUWvtg3ZXq8Ush2f0HbPKspYQLkvCpDBCirtWRWgAyrtqQ7zNfRiKxVCQBJeJJM6sB0Y75T1S3gOPgaN3EPNykfkSkqc3e1M8MtesseJRprwCJ8_119eeSZI8Io65QcC8ME6KyRBUSz4jFE-_mA","UiLocales":null,"Nonce":"638618372997928655.YTBhNzc5YjItZDg0MS00NTA3LTg4NTMtNDk1ZWI3NWQ4ODViYzU3NzBlNDEtNzJlNC00MmUwLWI3ZTMtNDc3N2JmMDBjYjEx","AuthenticationContextReferenceClasses":null,"DisplayMode":null,"PromptMode":null,"MaxAge":null,"LoginHint":null,"SessionId":"IrGVyX41oH9tk6Tv2aYpWg","Raw":{"client_id":"mvc","redirect_uri":"http://host.docker.internal:5002/signin-oidc","response_type":"code","scope":"openid profile api1 roles offline_access","code_challenge":"5mffgZVlyV3E-t_5c3ssWUq-Ncea9NxV4Y7lrkZZjAE","code_challenge_method":"S256","response_mode":"form_post","nonce":"638618372997928655.YTBhNzc5YjItZDg0MS00NTA3LTg4NTMtNDk1ZWI3NWQ4ODViYzU3NzBlNDEtNzJlNC00MmUwLWI3ZTMtNDc3N2JmMDBjYjEx","state":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw8SvogSJ6lu0mdnqDrJBAi4mPRK_3TYj6AzSwrcv6ybh7wmJDBh09uY6miv7jod2li23LtHXBLCr7gYTYfSCsBdr6_KnZFq9Wnaoa4WrFbCAFq9Y4sW_gadloCnwW1OX-n4kAY8v7n8px61jMAm7bb7UaFt5x7skY2zf7ElWJEyXXRv2dXoL8od3Yco4B2MkCqmwX-wWmLPyvIbLzzjGAErBSD56PNSKGrX11N9f2Ssj1YpUzSyo1GGdnSioenJyzFdOM2yn75Y-7wB6AFPn9oJbUylUWvtg3ZXq8Ush2f0HbPKspYQLkvCpDBCirtWRWgAyrtqQ7zNfRiKxVCQBJeJJM6sB0Y75T1S3gOPgaN3EPNykfkSkqc3e1M8MtesseJRprwCJ8_119eeSZI8Io65QcC8ME6KyRBUSz4jFE-_mA","x-client-SKU":"ID_NETSTANDARD2_0","x-client-ver":"5.5.0.0"},"$type":"AuthorizeRequestValidationLog"}
+2024-09-13 15:15:10.726 +00:00 [DBG] Client is configured to not require consent, no consent is required
+2024-09-13 15:15:10.731 +00:00 [DBG] Creating Authorization Code Flow response.
+2024-09-13 15:15:10.753 +00:00 [INF] {"ClientId":"mvc","ClientName":null,"RedirectUri":"http://host.docker.internal:5002/signin-oidc","Endpoint":"Authorize","SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","Scopes":"openid profile roles api1 offline_access","GrantType":"authorization_code","Tokens":[{"TokenType":"code","TokenValue":"****QvZ8","$type":"Token"}],"Category":"Token","Name":"Token Issued Success","EventType":"Success","Id":2000,"Message":null,"ActivityId":"0HN6K0R73BJVR:00000004","TimeStamp":"2024-09-13T15:15:10.0000000Z","ProcessId":1188,"LocalIpAddress":"::ffff:172.18.0.3:80","RemoteIpAddress":"::ffff:172.18.0.1","$type":"TokenIssuedSuccessEvent"}
+2024-09-13 15:15:10.755 +00:00 [DBG] Authorize endpoint response
+{"SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","ClientId":"mvc","RedirectUri":"http://host.docker.internal:5002/signin-oidc","State":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw8SvogSJ6lu0mdnqDrJBAi4mPRK_3TYj6AzSwrcv6ybh7wmJDBh09uY6miv7jod2li23LtHXBLCr7gYTYfSCsBdr6_KnZFq9Wnaoa4WrFbCAFq9Y4sW_gadloCnwW1OX-n4kAY8v7n8px61jMAm7bb7UaFt5x7skY2zf7ElWJEyXXRv2dXoL8od3Yco4B2MkCqmwX-wWmLPyvIbLzzjGAErBSD56PNSKGrX11N9f2Ssj1YpUzSyo1GGdnSioenJyzFdOM2yn75Y-7wB6AFPn9oJbUylUWvtg3ZXq8Ush2f0HbPKspYQLkvCpDBCirtWRWgAyrtqQ7zNfRiKxVCQBJeJJM6sB0Y75T1S3gOPgaN3EPNykfkSkqc3e1M8MtesseJRprwCJ8_119eeSZI8Io65QcC8ME6KyRBUSz4jFE-_mA","Scope":"openid profile roles api1 offline_access","Error":null,"ErrorDescription":null,"$type":"AuthorizeResponseLog"}
+2024-09-13 15:15:10.767 +00:00 [DBG] Augmenting SignInContext
+2024-09-13 15:15:10.767 +00:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2024-09-13 15:15:10.860 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:10.861 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:10.862 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:10.864 +00:00 [DBG] Request path /connect/token matched to endpoint type Token
+2024-09-13 15:15:10.872 +00:00 [DBG] Endpoint enabled: Token, successfully created handler: IdentityServer4.Endpoints.TokenEndpoint
+2024-09-13 15:15:10.873 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.TokenEndpoint for /connect/token
+2024-09-13 15:15:10.881 +00:00 [DBG] Start token request.
+2024-09-13 15:15:10.889 +00:00 [DBG] Start client validation
+2024-09-13 15:15:10.897 +00:00 [DBG] Start parsing Basic Authentication secret
+2024-09-13 15:15:10.904 +00:00 [DBG] Start parsing for secret in post body
+2024-09-13 15:15:10.905 +00:00 [DBG] Parser found secret: PostBodySecretParser
+2024-09-13 15:15:10.906 +00:00 [DBG] Secret id found: mvc
+2024-09-13 15:15:10.906 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:15:10.915 +00:00 [DBG] Secret validator success: HashedSharedSecretValidator
+2024-09-13 15:15:10.916 +00:00 [DBG] Client validation success
+2024-09-13 15:15:10.917 +00:00 [INF] {"ClientId":"mvc","AuthenticationMethod":"SharedSecret","Category":"Authentication","Name":"Client Authentication Success","EventType":"Success","Id":1010,"Message":null,"ActivityId":"0HN6K0R73BJVK:00000004","TimeStamp":"2024-09-13T15:15:10.0000000Z","ProcessId":1188,"LocalIpAddress":"::ffff:172.18.0.3:80","RemoteIpAddress":"::ffff:172.18.0.1","$type":"ClientAuthenticationSuccessEvent"}
+2024-09-13 15:15:10.924 +00:00 [DBG] Start token request validation
+2024-09-13 15:15:10.934 +00:00 [DBG] Start validation of authorization code token request
+2024-09-13 15:15:10.961 +00:00 [DBG] Client required a proof key for code exchange. Starting PKCE validation
+2024-09-13 15:15:10.973 +00:00 [DBG] Validation of authorization code token request success
+2024-09-13 15:15:10.980 +00:00 [INF] Token request validation success, {"ClientId":"mvc","ClientName":null,"GrantType":"authorization_code","Scopes":null,"AuthorizationCode":"gHUhgXx4ZHaCC4NScUqFk4K_MjCY0Rl93du87WCQvZ8","RefreshToken":null,"UserName":null,"AuthenticationContextReferenceClasses":null,"Tenant":null,"IdP":null,"Raw":{"client_id":"mvc","client_secret":"***REDACTED***","code":"gHUhgXx4ZHaCC4NScUqFk4K_MjCY0Rl93du87WCQvZ8","grant_type":"authorization_code","redirect_uri":"http://host.docker.internal:5002/signin-oidc","code_verifier":"ydca6tvTVFldM_9CCVbhkFH1on7qscOI97ZwY_dXW9I"},"$type":"TokenRequestValidationLog"}
+2024-09-13 15:15:10.996 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:15:11.007 +00:00 [DBG] Getting claims for access token for client: mvc
+2024-09-13 15:15:11.009 +00:00 [DBG] Getting claims for access token for subject: 7e462136-2963-49df-9cfa-056c1499f819
+2024-09-13 15:15:11.213 +00:00 [DBG] Creating refresh token
+2024-09-13 15:15:11.213 +00:00 [DBG] Setting a sliding lifetime: 86400
+2024-09-13 15:15:11.227 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:15:11.235 +00:00 [DBG] Getting claims for identity token for subject: 7e462136-2963-49df-9cfa-056c1499f819 and client: mvc
+2024-09-13 15:15:11.235 +00:00 [DBG] In addition to an id_token, an access_token was requested. No claims other than sub are included in the id_token. To obtain more user claims, either use the user info endpoint or set AlwaysIncludeUserClaimsInIdToken on the client configuration.
+2024-09-13 15:15:11.239 +00:00 [INF] {"ClientId":"mvc","ClientName":null,"RedirectUri":null,"Endpoint":"Token","SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","Scopes":"openid profile roles api1 offline_access","GrantType":"authorization_code","Tokens":[{"TokenType":"id_token","TokenValue":"****oDhg","$type":"Token"},{"TokenType":"refresh_token","TokenValue":"****TSws","$type":"Token"},{"TokenType":"access_token","TokenValue":"****EzWQ","$type":"Token"}],"Category":"Token","Name":"Token Issued Success","EventType":"Success","Id":2000,"Message":null,"ActivityId":"0HN6K0R73BJVK:00000004","TimeStamp":"2024-09-13T15:15:11.0000000Z","ProcessId":1188,"LocalIpAddress":"::ffff:172.18.0.3:80","RemoteIpAddress":"::ffff:172.18.0.1","$type":"TokenIssuedSuccessEvent"}
+2024-09-13 15:15:11.241 +00:00 [DBG] Token request success.
+2024-09-13 15:15:11.360 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:11.362 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:11.363 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:15:11.364 +00:00 [DBG] Request path /connect/userinfo matched to endpoint type Userinfo
+2024-09-13 15:15:11.367 +00:00 [DBG] Endpoint enabled: Userinfo, successfully created handler: IdentityServer4.Endpoints.UserInfoEndpoint
+2024-09-13 15:15:11.367 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.UserInfoEndpoint for /connect/userinfo
+2024-09-13 15:15:11.372 +00:00 [DBG] Start userinfo request
+2024-09-13 15:15:11.376 +00:00 [DBG] Bearer token found in header
+2024-09-13 15:15:11.456 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:15:11.461 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:15:11.473 +00:00 [DBG] Calling into custom token validator: IdentityServer4.Validation.DefaultCustomTokenValidator
+2024-09-13 15:15:11.478 +00:00 [DBG] Token validation success
+{"ClientId":null,"ClientName":null,"ValidateLifetime":true,"AccessTokenType":"Jwt","ExpectedScope":"openid","TokenHandle":null,"JwtId":null,"Claims":{"nbf":1726240511,"exp":1726326911,"iss":"http://host.docker.internal:5000","aud":"api1","client_id":"mvc","sub":"7e462136-2963-49df-9cfa-056c1499f819","auth_time":1726240510,"idp":"local","scope":["openid","profile","roles","api1","offline_access"],"amr":"pwd"},"$type":"TokenValidationLog"}
+2024-09-13 15:15:11.488 +00:00 [DBG] Creating userinfo response
+2024-09-13 15:15:11.492 +00:00 [DBG] Scopes in access token: openid profile roles api1 offline_access
+2024-09-13 15:15:11.495 +00:00 [DBG] Scopes in access token: openid profile roles api1 offline_access
+2024-09-13 15:15:11.497 +00:00 [DBG] Requested claim types: sub name family_name given_name middle_name nickname preferred_username profile picture website gender birthdate zoneinfo locale updated_at role
+2024-09-13 15:15:11.498 +00:00 [DBG] Scopes in access token: openid profile roles api1 offline_access
+2024-09-13 15:15:11.515 +00:00 [INF] Profile service returned the following claim types: sub given_name preferred_username name
+2024-09-13 15:15:11.516 +00:00 [DBG] End userinfo request
+2024-09-13 15:22:37.139 +00:00 [INF] Starting host...
+2024-09-13 15:22:37.306 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2024-09-13 15:22:37.606 +00:00 [WRN] 'AddEntityFramework*' was called on the service provider, but 'UseInternalServiceProvider' wasn't called in the DbContext options configuration. Consider removing the 'AddEntityFramework*' call, as in most cases it's not needed and may cause conflicts with other products and services registered in the same service provider.
+2024-09-13 15:22:37.679 +00:00 [INF] Starting IdentityServer4 version 3.1.0.0
+2024-09-13 15:22:37.686 +00:00 [INF] You are using the in-memory version of the persisted grant store. This will store consent decisions, authorization codes, refresh and reference tokens in memory only. If you are using any of those features in production, you want to switch to a different store implementation.
+2024-09-13 15:22:37.697 +00:00 [INF] Using the default authentication scheme Identity.Application for IdentityServer
+2024-09-13 15:22:37.697 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for authentication
+2024-09-13 15:22:37.698 +00:00 [DBG] Using Identity.External as default ASP.NET Core scheme for sign-in
+2024-09-13 15:22:37.700 +00:00 [DBG] Using Identity.External as default ASP.NET Core scheme for sign-out
+2024-09-13 15:22:37.701 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for challenge
+2024-09-13 15:22:37.702 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for forbid
+2024-09-13 15:22:50.782 +00:00 [DBG] Login Url: /Account/Login
+2024-09-13 15:22:50.783 +00:00 [DBG] Login Return Url Parameter: ReturnUrl
+2024-09-13 15:22:50.784 +00:00 [DBG] Logout Url: /Account/Logout
+2024-09-13 15:22:50.784 +00:00 [DBG] ConsentUrl Url: /consent
+2024-09-13 15:22:50.784 +00:00 [DBG] Consent Return Url Parameter: returnUrl
+2024-09-13 15:22:50.785 +00:00 [DBG] Error Url: /home/error
+2024-09-13 15:22:50.785 +00:00 [DBG] Error Id Parameter: errorId
+2024-09-13 15:22:50.791 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:22:50.821 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:22:50.877 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:22:50.883 +00:00 [DBG] Request path /.well-known/openid-configuration matched to endpoint type Discovery
+2024-09-13 15:22:50.899 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryEndpoint
+2024-09-13 15:22:50.900 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryEndpoint for /.well-known/openid-configuration
+2024-09-13 15:22:50.905 +00:00 [DBG] Start discovery request
+2024-09-13 15:22:51.223 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:22:51.228 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:22:51.229 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:22:51.230 +00:00 [DBG] Request path /.well-known/openid-configuration/jwks matched to endpoint type Discovery
+2024-09-13 15:22:51.232 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryKeyEndpoint
+2024-09-13 15:22:51.236 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryKeyEndpoint for /.well-known/openid-configuration/jwks
+2024-09-13 15:22:51.242 +00:00 [DBG] Start key discovery request
+2024-09-13 15:25:49.530 +00:00 [INF] Starting host...
+2024-09-13 15:25:49.641 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2024-09-13 15:25:49.883 +00:00 [WRN] 'AddEntityFramework*' was called on the service provider, but 'UseInternalServiceProvider' wasn't called in the DbContext options configuration. Consider removing the 'AddEntityFramework*' call, as in most cases it's not needed and may cause conflicts with other products and services registered in the same service provider.
+2024-09-13 15:25:49.948 +00:00 [INF] Starting IdentityServer4 version 3.1.0.0
+2024-09-13 15:25:49.957 +00:00 [INF] You are using the in-memory version of the persisted grant store. This will store consent decisions, authorization codes, refresh and reference tokens in memory only. If you are using any of those features in production, you want to switch to a different store implementation.
+2024-09-13 15:25:49.965 +00:00 [INF] Using the default authentication scheme Identity.Application for IdentityServer
+2024-09-13 15:25:49.966 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for authentication
+2024-09-13 15:25:49.966 +00:00 [DBG] Using Identity.External as default ASP.NET Core scheme for sign-in
+2024-09-13 15:25:49.967 +00:00 [DBG] Using Identity.External as default ASP.NET Core scheme for sign-out
+2024-09-13 15:25:49.968 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for challenge
+2024-09-13 15:25:49.968 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for forbid
+2024-09-13 15:25:53.268 +00:00 [DBG] Login Url: /Account/Login
+2024-09-13 15:25:53.270 +00:00 [DBG] Login Return Url Parameter: ReturnUrl
+2024-09-13 15:25:53.270 +00:00 [DBG] Logout Url: /Account/Logout
+2024-09-13 15:25:53.270 +00:00 [DBG] ConsentUrl Url: /consent
+2024-09-13 15:25:53.271 +00:00 [DBG] Consent Return Url Parameter: returnUrl
+2024-09-13 15:25:53.272 +00:00 [DBG] Error Url: /home/error
+2024-09-13 15:25:53.273 +00:00 [DBG] Error Id Parameter: errorId
+2024-09-13 15:25:53.279 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:25:53.309 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:25:53.329 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:25:53.337 +00:00 [DBG] Request path /.well-known/openid-configuration matched to endpoint type Discovery
+2024-09-13 15:25:53.351 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryEndpoint
+2024-09-13 15:25:53.352 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryEndpoint for /.well-known/openid-configuration
+2024-09-13 15:25:53.355 +00:00 [DBG] Start discovery request
+2024-09-13 15:25:53.620 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:25:53.622 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:25:53.623 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:25:53.645 +00:00 [DBG] Request path /.well-known/openid-configuration/jwks matched to endpoint type Discovery
+2024-09-13 15:25:53.650 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryKeyEndpoint
+2024-09-13 15:25:53.653 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryKeyEndpoint for /.well-known/openid-configuration/jwks
+2024-09-13 15:25:53.663 +00:00 [DBG] Start key discovery request
+2024-09-13 15:27:18.363 +00:00 [INF] Starting host...
+2024-09-13 15:27:18.790 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2024-09-13 15:27:19.321 +00:00 [WRN] 'AddEntityFramework*' was called on the service provider, but 'UseInternalServiceProvider' wasn't called in the DbContext options configuration. Consider removing the 'AddEntityFramework*' call, as in most cases it's not needed and may cause conflicts with other products and services registered in the same service provider.
+2024-09-13 15:27:19.566 +00:00 [INF] Starting IdentityServer4 version 3.1.0.0
+2024-09-13 15:27:19.591 +00:00 [INF] You are using the in-memory version of the persisted grant store. This will store consent decisions, authorization codes, refresh and reference tokens in memory only. If you are using any of those features in production, you want to switch to a different store implementation.
+2024-09-13 15:27:19.618 +00:00 [INF] Using the default authentication scheme Identity.Application for IdentityServer
+2024-09-13 15:27:19.621 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for authentication
+2024-09-13 15:27:19.626 +00:00 [DBG] Using Identity.External as default ASP.NET Core scheme for sign-in
+2024-09-13 15:27:19.629 +00:00 [DBG] Using Identity.External as default ASP.NET Core scheme for sign-out
+2024-09-13 15:27:19.630 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for challenge
+2024-09-13 15:27:19.632 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for forbid
+2024-09-13 15:27:56.264 +00:00 [DBG] Login Url: /Account/Login
+2024-09-13 15:27:56.266 +00:00 [DBG] Login Return Url Parameter: ReturnUrl
+2024-09-13 15:27:56.267 +00:00 [DBG] Logout Url: /Account/Logout
+2024-09-13 15:27:56.267 +00:00 [DBG] ConsentUrl Url: /consent
+2024-09-13 15:27:56.267 +00:00 [DBG] Consent Return Url Parameter: returnUrl
+2024-09-13 15:27:56.268 +00:00 [DBG] Error Url: /home/error
+2024-09-13 15:27:56.270 +00:00 [DBG] Error Id Parameter: errorId
+2024-09-13 15:27:56.277 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:27:56.304 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:27:56.315 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:27:56.321 +00:00 [DBG] Request path /.well-known/openid-configuration matched to endpoint type Discovery
+2024-09-13 15:27:56.334 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryEndpoint
+2024-09-13 15:27:56.334 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryEndpoint for /.well-known/openid-configuration
+2024-09-13 15:27:56.337 +00:00 [DBG] Start discovery request
+2024-09-13 15:27:56.575 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:27:56.578 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:27:56.579 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:27:56.605 +00:00 [DBG] Request path /.well-known/openid-configuration/jwks matched to endpoint type Discovery
+2024-09-13 15:27:56.611 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryKeyEndpoint
+2024-09-13 15:27:56.614 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryKeyEndpoint for /.well-known/openid-configuration/jwks
+2024-09-13 15:27:56.623 +00:00 [DBG] Start key discovery request
+2024-09-13 15:29:39.538 +00:00 [INF] Starting host...
+2024-09-13 15:29:39.754 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2024-09-13 15:29:40.559 +00:00 [WRN] 'AddEntityFramework*' was called on the service provider, but 'UseInternalServiceProvider' wasn't called in the DbContext options configuration. Consider removing the 'AddEntityFramework*' call, as in most cases it's not needed and may cause conflicts with other products and services registered in the same service provider.
+2024-09-13 15:29:40.718 +00:00 [INF] Starting IdentityServer4 version 3.1.0.0
+2024-09-13 15:29:40.737 +00:00 [INF] You are using the in-memory version of the persisted grant store. This will store consent decisions, authorization codes, refresh and reference tokens in memory only. If you are using any of those features in production, you want to switch to a different store implementation.
+2024-09-13 15:29:40.754 +00:00 [INF] Using the default authentication scheme Identity.Application for IdentityServer
+2024-09-13 15:29:40.755 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for authentication
+2024-09-13 15:29:40.756 +00:00 [DBG] Using Identity.External as default ASP.NET Core scheme for sign-in
+2024-09-13 15:29:40.757 +00:00 [DBG] Using Identity.External as default ASP.NET Core scheme for sign-out
+2024-09-13 15:29:40.760 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for challenge
+2024-09-13 15:29:40.762 +00:00 [DBG] Using Identity.Application as default ASP.NET Core scheme for forbid
+2024-09-13 15:29:43.597 +00:00 [DBG] Login Url: /Account/Login
+2024-09-13 15:29:43.602 +00:00 [DBG] Login Return Url Parameter: ReturnUrl
+2024-09-13 15:29:43.606 +00:00 [DBG] Logout Url: /Account/Logout
+2024-09-13 15:29:43.609 +00:00 [DBG] ConsentUrl Url: /consent
+2024-09-13 15:29:43.613 +00:00 [DBG] Consent Return Url Parameter: returnUrl
+2024-09-13 15:29:43.613 +00:00 [DBG] Error Url: /home/error
+2024-09-13 15:29:43.615 +00:00 [DBG] Error Id Parameter: errorId
+2024-09-13 15:29:43.631 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:43.709 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:43.748 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:43.759 +00:00 [DBG] Request path /.well-known/openid-configuration matched to endpoint type Discovery
+2024-09-13 15:29:43.781 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryEndpoint
+2024-09-13 15:29:43.782 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryEndpoint for /.well-known/openid-configuration
+2024-09-13 15:29:43.787 +00:00 [DBG] Start discovery request
+2024-09-13 15:29:44.300 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:44.305 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:44.307 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:44.308 +00:00 [DBG] Request path /.well-known/openid-configuration/jwks matched to endpoint type Discovery
+2024-09-13 15:29:44.311 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryKeyEndpoint
+2024-09-13 15:29:44.339 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryKeyEndpoint for /.well-known/openid-configuration/jwks
+2024-09-13 15:29:44.381 +00:00 [DBG] Start key discovery request
+2024-09-13 15:29:44.520 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 15:29:44.522 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 15:29:44.524 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 15:29:44.526 +00:00 [DBG] Request path /connect/endsession matched to endpoint type Endsession
+2024-09-13 15:29:44.532 +00:00 [DBG] Endpoint enabled: Endsession, successfully created handler: IdentityServer4.Endpoints.EndSessionEndpoint
+2024-09-13 15:29:44.534 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.EndSessionEndpoint for /connect/endsession
+2024-09-13 15:29:44.603 +00:00 [DBG] Processing signout request for 7e462136-2963-49df-9cfa-056c1499f819
+2024-09-13 15:29:44.613 +00:00 [DBG] Start end session request validation
+2024-09-13 15:29:44.622 +00:00 [DBG] Start identity token validation
+2024-09-13 15:29:44.956 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:29:44.957 +00:00 [DBG] Client found: mvc / null
+2024-09-13 15:29:49.877 +00:00 [DBG] Calling into custom token validator: IdentityServer4.Validation.DefaultCustomTokenValidator
+2024-09-13 15:29:49.898 +00:00 [DBG] Token validation success
+{"ClientId":"mvc","ClientName":null,"ValidateLifetime":false,"AccessTokenType":null,"ExpectedScope":null,"TokenHandle":null,"JwtId":null,"Claims":{"nbf":1726240511,"exp":1726326911,"iss":"http://host.docker.internal:5000","aud":"mvc","nonce":"638618372997928655.YTBhNzc5YjItZDg0MS00NTA3LTg4NTMtNDk1ZWI3NWQ4ODViYzU3NzBlNDEtNzJlNC00MmUwLWI3ZTMtNDc3N2JmMDBjYjEx","iat":1726240511,"at_hash":"AXF9DAg8XiRvyOlSSQECeg","s_hash":"Nj_SfTGobTaXssa-P2QFqA","sid":"IrGVyX41oH9tk6Tv2aYpWg","sub":"7e462136-2963-49df-9cfa-056c1499f819","auth_time":1726240510,"idp":"local","amr":"pwd"},"$type":"TokenValidationLog"}
+2024-09-13 15:29:49.926 +00:00 [INF] End session request validation success
+{"ClientId":"mvc","ClientName":null,"SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","PostLogOutUri":"http://host.docker.internal:5002/signout-callback-oidc","State":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw9aY75z9Hz4hrKnezvvs3V89q9jZ0CpzzN_2_Ddr1tPaEZpTgJ-rNgieAmeI8fYlPZdQO88LA2aJhF1Q7R-dVdZVrzsufLNJ-6i6zH_neTSY6Y90aiA4FRfx8Qy_ovL8FKCI-hBDqk5QhF3vF8dMmh1BQSPCxndAiDylOGVGQ6BUg","Raw":{"post_logout_redirect_uri":"http://host.docker.internal:5002/signout-callback-oidc","id_token_hint":"***REDACTED***","state":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw9aY75z9Hz4hrKnezvvs3V89q9jZ0CpzzN_2_Ddr1tPaEZpTgJ-rNgieAmeI8fYlPZdQO88LA2aJhF1Q7R-dVdZVrzsufLNJ-6i6zH_neTSY6Y90aiA4FRfx8Qy_ovL8FKCI-hBDqk5QhF3vF8dMmh1BQSPCxndAiDylOGVGQ6BUg","x-client-SKU":"ID_NETSTANDARD2_0","x-client-ver":"5.5.0.0"},"$type":"EndSessionRequestValidationLog"}
+2024-09-13 15:29:49.929 +00:00 [DBG] Success validating end session request from mvc
+2024-09-13 15:29:49.969 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 15:29:49.972 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 15:29:49.972 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 15:29:50.105 +00:00 [INF] AuthenticationScheme: Identity.Application signed out.
+2024-09-13 15:29:50.107 +00:00 [INF] AuthenticationScheme: Identity.External signed out.
+2024-09-13 15:29:50.108 +00:00 [INF] AuthenticationScheme: Identity.TwoFactorUserId signed out.
+2024-09-13 15:29:50.125 +00:00 [INF] {"SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","DisplayName":"yiab","Category":"Authentication","Name":"User Logout Success","EventType":"Success","Id":1002,"Message":null,"ActivityId":"0HN6K13I4MDUP:00000003","TimeStamp":"2024-09-13T15:29:50.0000000Z","ProcessId":1584,"LocalIpAddress":"::ffff:172.18.0.3:80","RemoteIpAddress":"::ffff:172.18.0.1","$type":"UserLogoutSuccessEvent"}
+2024-09-13 15:29:50.350 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.367 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.367 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.369 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.372 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.374 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.599 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.599 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.599 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.600 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.601 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.603 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.607 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.609 +00:00 [DBG] Request path /connect/endsession/callback matched to endpoint type Endsession
+2024-09-13 15:29:50.621 +00:00 [DBG] Endpoint enabled: Endsession, successfully created handler: IdentityServer4.Endpoints.EndSessionCallbackEndpoint
+2024-09-13 15:29:50.624 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.EndSessionCallbackEndpoint for /connect/endsession/callback
+2024-09-13 15:29:50.641 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.646 +00:00 [DBG] Processing signout callback request
+2024-09-13 15:29:50.648 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.681 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.681 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.716 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:29:50.724 +00:00 [DBG] No client front-channel logout URLs
+2024-09-13 15:29:50.726 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.726 +00:00 [DBG] No client back-channel logout URLs
+2024-09-13 15:29:50.729 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.729 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.731 +00:00 [INF] Successful signout callback.
+2024-09-13 15:29:50.737 +00:00 [DBG] No client front-channel iframe urls
+2024-09-13 15:29:50.740 +00:00 [DBG] No client back-channel iframe urls
+2024-09-13 15:29:50.747 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.771 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.903 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.936 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.946 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:50.998 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:59.881 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:59.882 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:59.882 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:59.884 +00:00 [DBG] Request path /connect/authorize matched to endpoint type Authorize
+2024-09-13 15:29:59.888 +00:00 [DBG] Endpoint enabled: Authorize, successfully created handler: IdentityServer4.Endpoints.AuthorizeEndpoint
+2024-09-13 15:29:59.889 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.AuthorizeEndpoint for /connect/authorize
+2024-09-13 15:29:59.895 +00:00 [DBG] Start authorize request
+2024-09-13 15:29:59.896 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:29:59.904 +00:00 [DBG] No user present in authorize request
+2024-09-13 15:29:59.910 +00:00 [DBG] Start authorize request protocol validation
+2024-09-13 15:29:59.917 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:29:59.935 +00:00 [DBG] Checking for PKCE parameters
+2024-09-13 15:29:59.979 +00:00 [DBG] Calling into custom validator: IdentityServer4.Validation.DefaultCustomAuthorizeRequestValidator
+2024-09-13 15:29:59.986 +00:00 [DBG] ValidatedAuthorizeRequest
+{"ClientId":"mvc","ClientName":null,"RedirectUri":"http://host.docker.internal:5002/signin-oidc","AllowedRedirectUris":["http://host.docker.internal:5002/signin-oidc","http://host.docker.internal:5002/openid-callback"],"SubjectId":"anonymous","ResponseType":"code","ResponseMode":"form_post","GrantType":"authorization_code","RequestedScopes":"openid profile api1 roles offline_access","State":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw83ohS8xpp6qz0rRU2Nrv4TBCLpjgWuSRJXDZO7gMxF_AcFrYMevfsnRzOWqbKJPGU5ANNdMq658xLlz3aeEWaKZdGyiXhHNfpviMLIYS4KH0WQFoN14r4tTdHGx-zeLoegcdMTErkFnd0_ZdVnV4UcwbedfeCtzyoMfhsw7ymN6Oz8BWGbV1ZctY-mwkCdniT2TlYsTJ_gzaDCNxxIv2zfTzriboqqcP1eIl6hYK_e8QBAAdsBYFnyh9uNxXHhu_cuMgjbt0-wGGDwQ1GGUW_MNor_ReqmKskslmck91T_pTmibuITjpVHYvQ0OIgzXtwVZGOihAKDzUryUVvgIpPuMILtqvlbvybEVNcKwLXSsXTOCo0ay2zYu3XI9o4JaAdclF9vdOt1033MxR_7cqmfmnFFYlqhKdnzmq0Cg17IAQ","UiLocales":null,"Nonce":"638618381998571179.M2IzYzkxOWMtMzg2NC00ODhkLWE2MmMtYWFiMWFmZDdhZDg1YTlmYTkzYjEtN2FmYy00NWIxLWE5MDAtNzczYTNmOTU5ZDg3","AuthenticationContextReferenceClasses":null,"DisplayMode":null,"PromptMode":null,"MaxAge":null,"LoginHint":null,"SessionId":"","Raw":{"client_id":"mvc","redirect_uri":"http://host.docker.internal:5002/signin-oidc","response_type":"code","scope":"openid profile api1 roles offline_access","code_challenge":"Wj2glwix5WC_PSTzm6qBdWm_a4nAIDK5DiRkj6T0tGc","code_challenge_method":"S256","response_mode":"form_post","nonce":"638618381998571179.M2IzYzkxOWMtMzg2NC00ODhkLWE2MmMtYWFiMWFmZDdhZDg1YTlmYTkzYjEtN2FmYy00NWIxLWE5MDAtNzczYTNmOTU5ZDg3","state":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw83ohS8xpp6qz0rRU2Nrv4TBCLpjgWuSRJXDZO7gMxF_AcFrYMevfsnRzOWqbKJPGU5ANNdMq658xLlz3aeEWaKZdGyiXhHNfpviMLIYS4KH0WQFoN14r4tTdHGx-zeLoegcdMTErkFnd0_ZdVnV4UcwbedfeCtzyoMfhsw7ymN6Oz8BWGbV1ZctY-mwkCdniT2TlYsTJ_gzaDCNxxIv2zfTzriboqqcP1eIl6hYK_e8QBAAdsBYFnyh9uNxXHhu_cuMgjbt0-wGGDwQ1GGUW_MNor_ReqmKskslmck91T_pTmibuITjpVHYvQ0OIgzXtwVZGOihAKDzUryUVvgIpPuMILtqvlbvybEVNcKwLXSsXTOCo0ay2zYu3XI9o4JaAdclF9vdOt1033MxR_7cqmfmnFFYlqhKdnzmq0Cg17IAQ","x-client-SKU":"ID_NETSTANDARD2_0","x-client-ver":"5.5.0.0"},"$type":"AuthorizeRequestValidationLog"}
+2024-09-13 15:30:00.004 +00:00 [INF] Showing login: User is not authenticated
+2024-09-13 15:30:00.023 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:00.027 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:00.028 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:00.070 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:00.073 +00:00 [DBG] Start authorize request protocol validation
+2024-09-13 15:30:00.077 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:30:00.080 +00:00 [DBG] Checking for PKCE parameters
+2024-09-13 15:30:00.087 +00:00 [DBG] Calling into custom validator: IdentityServer4.Validation.DefaultCustomAuthorizeRequestValidator
+2024-09-13 15:30:00.091 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:30:00.567 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:00.582 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:00.585 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:02.143 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:02.154 +00:00 [DBG] CORS request made for path: /Account/Login from origin: null but was ignored because path was not for an allowed IdentityServer CORS endpoint
+2024-09-13 15:30:02.155 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:02.157 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:02.232 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:02.232 +00:00 [DBG] Start authorize request protocol validation
+2024-09-13 15:30:02.234 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:30:02.235 +00:00 [DBG] Checking for PKCE parameters
+2024-09-13 15:30:02.238 +00:00 [DBG] Calling into custom validator: IdentityServer4.Validation.DefaultCustomAuthorizeRequestValidator
+2024-09-13 15:30:02.689 +00:00 [DBG] Augmenting SignInContext
+2024-09-13 15:30:02.695 +00:00 [DBG] Adding idp claim with value: local
+2024-09-13 15:30:02.696 +00:00 [DBG] Adding auth_time claim with value: 1726241402
+2024-09-13 15:30:02.700 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:02.708 +00:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2024-09-13 15:30:02.725 +00:00 [INF] {"Username":"yiab","Provider":null,"ProviderUserId":null,"SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","DisplayName":"yiab","Endpoint":"UI","ClientId":"mvc","Category":"Authentication","Name":"User Login Success","EventType":"Success","Id":1000,"Message":null,"ActivityId":"0HN6K13I4MDUV:00000005","TimeStamp":"2024-09-13T15:30:02.0000000Z","ProcessId":1584,"LocalIpAddress":"::ffff:172.18.0.3:80","RemoteIpAddress":"::ffff:172.18.0.1","$type":"UserLoginSuccessEvent"}
+2024-09-13 15:30:02.727 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:30:02.776 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 15:30:02.840 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 15:30:02.841 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 15:30:02.842 +00:00 [DBG] AuthenticationScheme: Identity.Application was successfully authenticated.
+2024-09-13 15:30:02.842 +00:00 [DBG] Request path /connect/authorize/callback matched to endpoint type Authorize
+2024-09-13 15:30:02.844 +00:00 [DBG] Endpoint enabled: Authorize, successfully created handler: IdentityServer4.Endpoints.AuthorizeCallbackEndpoint
+2024-09-13 15:30:02.844 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.AuthorizeCallbackEndpoint for /connect/authorize/callback
+2024-09-13 15:30:02.852 +00:00 [DBG] Start authorize callback request
+2024-09-13 15:30:02.858 +00:00 [DBG] User in authorize request: 7e462136-2963-49df-9cfa-056c1499f819
+2024-09-13 15:30:02.860 +00:00 [DBG] Start authorize request protocol validation
+2024-09-13 15:30:02.864 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:30:02.865 +00:00 [DBG] Checking for PKCE parameters
+2024-09-13 15:30:02.867 +00:00 [DBG] Calling into custom validator: IdentityServer4.Validation.DefaultCustomAuthorizeRequestValidator
+2024-09-13 15:30:02.870 +00:00 [DBG] ValidatedAuthorizeRequest
+{"ClientId":"mvc","ClientName":null,"RedirectUri":"http://host.docker.internal:5002/signin-oidc","AllowedRedirectUris":["http://host.docker.internal:5002/signin-oidc","http://host.docker.internal:5002/openid-callback"],"SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","ResponseType":"code","ResponseMode":"form_post","GrantType":"authorization_code","RequestedScopes":"openid profile api1 roles offline_access","State":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw83ohS8xpp6qz0rRU2Nrv4TBCLpjgWuSRJXDZO7gMxF_AcFrYMevfsnRzOWqbKJPGU5ANNdMq658xLlz3aeEWaKZdGyiXhHNfpviMLIYS4KH0WQFoN14r4tTdHGx-zeLoegcdMTErkFnd0_ZdVnV4UcwbedfeCtzyoMfhsw7ymN6Oz8BWGbV1ZctY-mwkCdniT2TlYsTJ_gzaDCNxxIv2zfTzriboqqcP1eIl6hYK_e8QBAAdsBYFnyh9uNxXHhu_cuMgjbt0-wGGDwQ1GGUW_MNor_ReqmKskslmck91T_pTmibuITjpVHYvQ0OIgzXtwVZGOihAKDzUryUVvgIpPuMILtqvlbvybEVNcKwLXSsXTOCo0ay2zYu3XI9o4JaAdclF9vdOt1033MxR_7cqmfmnFFYlqhKdnzmq0Cg17IAQ","UiLocales":null,"Nonce":"638618381998571179.M2IzYzkxOWMtMzg2NC00ODhkLWE2MmMtYWFiMWFmZDdhZDg1YTlmYTkzYjEtN2FmYy00NWIxLWE5MDAtNzczYTNmOTU5ZDg3","AuthenticationContextReferenceClasses":null,"DisplayMode":null,"PromptMode":null,"MaxAge":null,"LoginHint":null,"SessionId":"V9CZu2_Kj2ltFWLKtD24hQ","Raw":{"client_id":"mvc","redirect_uri":"http://host.docker.internal:5002/signin-oidc","response_type":"code","scope":"openid profile api1 roles offline_access","code_challenge":"Wj2glwix5WC_PSTzm6qBdWm_a4nAIDK5DiRkj6T0tGc","code_challenge_method":"S256","response_mode":"form_post","nonce":"638618381998571179.M2IzYzkxOWMtMzg2NC00ODhkLWE2MmMtYWFiMWFmZDdhZDg1YTlmYTkzYjEtN2FmYy00NWIxLWE5MDAtNzczYTNmOTU5ZDg3","state":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw83ohS8xpp6qz0rRU2Nrv4TBCLpjgWuSRJXDZO7gMxF_AcFrYMevfsnRzOWqbKJPGU5ANNdMq658xLlz3aeEWaKZdGyiXhHNfpviMLIYS4KH0WQFoN14r4tTdHGx-zeLoegcdMTErkFnd0_ZdVnV4UcwbedfeCtzyoMfhsw7ymN6Oz8BWGbV1ZctY-mwkCdniT2TlYsTJ_gzaDCNxxIv2zfTzriboqqcP1eIl6hYK_e8QBAAdsBYFnyh9uNxXHhu_cuMgjbt0-wGGDwQ1GGUW_MNor_ReqmKskslmck91T_pTmibuITjpVHYvQ0OIgzXtwVZGOihAKDzUryUVvgIpPuMILtqvlbvybEVNcKwLXSsXTOCo0ay2zYu3XI9o4JaAdclF9vdOt1033MxR_7cqmfmnFFYlqhKdnzmq0Cg17IAQ","x-client-SKU":"ID_NETSTANDARD2_0","x-client-ver":"5.5.0.0"},"$type":"AuthorizeRequestValidationLog"}
+2024-09-13 15:30:02.916 +00:00 [DBG] Client is configured to not require consent, no consent is required
+2024-09-13 15:30:02.924 +00:00 [DBG] Creating Authorization Code Flow response.
+2024-09-13 15:30:02.958 +00:00 [INF] {"ClientId":"mvc","ClientName":null,"RedirectUri":"http://host.docker.internal:5002/signin-oidc","Endpoint":"Authorize","SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","Scopes":"openid profile roles api1 offline_access","GrantType":"authorization_code","Tokens":[{"TokenType":"code","TokenValue":"****dWJ0","$type":"Token"}],"Category":"Token","Name":"Token Issued Success","EventType":"Success","Id":2000,"Message":null,"ActivityId":"0HN6K13I4MDUV:00000007","TimeStamp":"2024-09-13T15:30:02.0000000Z","ProcessId":1584,"LocalIpAddress":"::ffff:172.18.0.3:80","RemoteIpAddress":"::ffff:172.18.0.1","$type":"TokenIssuedSuccessEvent"}
+2024-09-13 15:30:02.960 +00:00 [DBG] Authorize endpoint response
+{"SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","ClientId":"mvc","RedirectUri":"http://host.docker.internal:5002/signin-oidc","State":"CfDJ8AOaHCfm3B9Mkfpdblm4Yw83ohS8xpp6qz0rRU2Nrv4TBCLpjgWuSRJXDZO7gMxF_AcFrYMevfsnRzOWqbKJPGU5ANNdMq658xLlz3aeEWaKZdGyiXhHNfpviMLIYS4KH0WQFoN14r4tTdHGx-zeLoegcdMTErkFnd0_ZdVnV4UcwbedfeCtzyoMfhsw7ymN6Oz8BWGbV1ZctY-mwkCdniT2TlYsTJ_gzaDCNxxIv2zfTzriboqqcP1eIl6hYK_e8QBAAdsBYFnyh9uNxXHhu_cuMgjbt0-wGGDwQ1GGUW_MNor_ReqmKskslmck91T_pTmibuITjpVHYvQ0OIgzXtwVZGOihAKDzUryUVvgIpPuMILtqvlbvybEVNcKwLXSsXTOCo0ay2zYu3XI9o4JaAdclF9vdOt1033MxR_7cqmfmnFFYlqhKdnzmq0Cg17IAQ","Scope":"openid profile roles api1 offline_access","Error":null,"ErrorDescription":null,"$type":"AuthorizeResponseLog"}
+2024-09-13 15:30:02.976 +00:00 [DBG] Augmenting SignInContext
+2024-09-13 15:30:02.977 +00:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2024-09-13 15:30:03.137 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:03.138 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:03.139 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:03.141 +00:00 [DBG] Request path /connect/token matched to endpoint type Token
+2024-09-13 15:30:03.146 +00:00 [DBG] Endpoint enabled: Token, successfully created handler: IdentityServer4.Endpoints.TokenEndpoint
+2024-09-13 15:30:03.147 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.TokenEndpoint for /connect/token
+2024-09-13 15:30:03.159 +00:00 [DBG] Start token request.
+2024-09-13 15:30:03.170 +00:00 [DBG] Start client validation
+2024-09-13 15:30:03.180 +00:00 [DBG] Start parsing Basic Authentication secret
+2024-09-13 15:30:03.187 +00:00 [DBG] Start parsing for secret in post body
+2024-09-13 15:30:03.188 +00:00 [DBG] Parser found secret: PostBodySecretParser
+2024-09-13 15:30:03.189 +00:00 [DBG] Secret id found: mvc
+2024-09-13 15:30:03.191 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:30:03.201 +00:00 [DBG] Secret validator success: HashedSharedSecretValidator
+2024-09-13 15:30:03.203 +00:00 [DBG] Client validation success
+2024-09-13 15:30:03.205 +00:00 [INF] {"ClientId":"mvc","AuthenticationMethod":"SharedSecret","Category":"Authentication","Name":"Client Authentication Success","EventType":"Success","Id":1010,"Message":null,"ActivityId":"0HN6K13I4MDUO:00000004","TimeStamp":"2024-09-13T15:30:03.0000000Z","ProcessId":1584,"LocalIpAddress":"::ffff:172.18.0.3:80","RemoteIpAddress":"::ffff:172.18.0.1","$type":"ClientAuthenticationSuccessEvent"}
+2024-09-13 15:30:03.211 +00:00 [DBG] Start token request validation
+2024-09-13 15:30:03.224 +00:00 [DBG] Start validation of authorization code token request
+2024-09-13 15:30:03.257 +00:00 [DBG] Client required a proof key for code exchange. Starting PKCE validation
+2024-09-13 15:30:03.293 +00:00 [DBG] Validation of authorization code token request success
+2024-09-13 15:30:03.301 +00:00 [INF] Token request validation success, {"ClientId":"mvc","ClientName":null,"GrantType":"authorization_code","Scopes":null,"AuthorizationCode":"RPdsCJc9Zm6Gdasee2GXO9cqGegeTbRJVKswPm7dWJ0","RefreshToken":null,"UserName":null,"AuthenticationContextReferenceClasses":null,"Tenant":null,"IdP":null,"Raw":{"client_id":"mvc","client_secret":"***REDACTED***","code":"RPdsCJc9Zm6Gdasee2GXO9cqGegeTbRJVKswPm7dWJ0","grant_type":"authorization_code","redirect_uri":"http://host.docker.internal:5002/signin-oidc","code_verifier":"F55dES33KQc1PMJG4y4qNwfM4_mnwMFl9OLTP5GIWQc"},"$type":"TokenRequestValidationLog"}
+2024-09-13 15:30:03.318 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:30:03.330 +00:00 [DBG] Getting claims for access token for client: mvc
+2024-09-13 15:30:03.331 +00:00 [DBG] Getting claims for access token for subject: 7e462136-2963-49df-9cfa-056c1499f819
+2024-09-13 15:30:03.426 +00:00 [DBG] Creating refresh token
+2024-09-13 15:30:03.427 +00:00 [DBG] Setting a sliding lifetime: 86400
+2024-09-13 15:30:03.440 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:30:03.451 +00:00 [DBG] Getting claims for identity token for subject: 7e462136-2963-49df-9cfa-056c1499f819 and client: mvc
+2024-09-13 15:30:03.452 +00:00 [DBG] In addition to an id_token, an access_token was requested. No claims other than sub are included in the id_token. To obtain more user claims, either use the user info endpoint or set AlwaysIncludeUserClaimsInIdToken on the client configuration.
+2024-09-13 15:30:03.461 +00:00 [INF] {"ClientId":"mvc","ClientName":null,"RedirectUri":null,"Endpoint":"Token","SubjectId":"7e462136-2963-49df-9cfa-056c1499f819","Scopes":"openid profile roles api1 offline_access","GrantType":"authorization_code","Tokens":[{"TokenType":"id_token","TokenValue":"****ctXQ","$type":"Token"},{"TokenType":"refresh_token","TokenValue":"****Lo4c","$type":"Token"},{"TokenType":"access_token","TokenValue":"****Ngxg","$type":"Token"}],"Category":"Token","Name":"Token Issued Success","EventType":"Success","Id":2000,"Message":null,"ActivityId":"0HN6K13I4MDUO:00000004","TimeStamp":"2024-09-13T15:30:03.0000000Z","ProcessId":1584,"LocalIpAddress":"::ffff:172.18.0.3:80","RemoteIpAddress":"::ffff:172.18.0.1","$type":"TokenIssuedSuccessEvent"}
+2024-09-13 15:30:03.462 +00:00 [DBG] Token request success.
+2024-09-13 15:30:03.664 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:03.665 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:03.665 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:03.667 +00:00 [DBG] Request path /connect/userinfo matched to endpoint type Userinfo
+2024-09-13 15:30:03.670 +00:00 [DBG] Endpoint enabled: Userinfo, successfully created handler: IdentityServer4.Endpoints.UserInfoEndpoint
+2024-09-13 15:30:03.671 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.UserInfoEndpoint for /connect/userinfo
+2024-09-13 15:30:03.678 +00:00 [DBG] Start userinfo request
+2024-09-13 15:30:03.683 +00:00 [DBG] Bearer token found in header
+2024-09-13 15:30:03.698 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:30:03.699 +00:00 [DBG] client configuration validation for client mvc succeeded.
+2024-09-13 15:30:03.714 +00:00 [DBG] Calling into custom token validator: IdentityServer4.Validation.DefaultCustomTokenValidator
+2024-09-13 15:30:03.718 +00:00 [DBG] Token validation success
+{"ClientId":null,"ClientName":null,"ValidateLifetime":true,"AccessTokenType":"Jwt","ExpectedScope":"openid","TokenHandle":null,"JwtId":null,"Claims":{"nbf":1726241403,"exp":1726327803,"iss":"http://host.docker.internal:5000","aud":"api1","client_id":"mvc","sub":"7e462136-2963-49df-9cfa-056c1499f819","auth_time":1726241402,"idp":"local","scope":["openid","profile","roles","api1","offline_access"],"amr":"pwd"},"$type":"TokenValidationLog"}
+2024-09-13 15:30:03.726 +00:00 [DBG] Creating userinfo response
+2024-09-13 15:30:03.731 +00:00 [DBG] Scopes in access token: openid profile roles api1 offline_access
+2024-09-13 15:30:03.734 +00:00 [DBG] Scopes in access token: openid profile roles api1 offline_access
+2024-09-13 15:30:03.737 +00:00 [DBG] Requested claim types: sub name family_name given_name middle_name nickname preferred_username profile picture website gender birthdate zoneinfo locale updated_at role
+2024-09-13 15:30:03.738 +00:00 [DBG] Scopes in access token: openid profile roles api1 offline_access
+2024-09-13 15:30:03.755 +00:00 [INF] Profile service returned the following claim types: sub given_name preferred_username name
+2024-09-13 15:30:03.756 +00:00 [DBG] End userinfo request
+2024-09-13 15:30:03.894 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:03.895 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:03.895 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:03.897 +00:00 [DBG] Request path /.well-known/openid-configuration matched to endpoint type Discovery
+2024-09-13 15:30:03.898 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryEndpoint
+2024-09-13 15:30:03.898 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryEndpoint for /.well-known/openid-configuration
+2024-09-13 15:30:03.899 +00:00 [DBG] Start discovery request
+2024-09-13 15:30:04.118 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:04.120 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:04.123 +00:00 [DBG] AuthenticationScheme: Identity.Application was not authenticated.
+2024-09-13 15:30:04.124 +00:00 [DBG] Request path /.well-known/openid-configuration/jwks matched to endpoint type Discovery
+2024-09-13 15:30:04.125 +00:00 [DBG] Endpoint enabled: Discovery, successfully created handler: IdentityServer4.Endpoints.DiscoveryKeyEndpoint
+2024-09-13 15:30:04.126 +00:00 [INF] Invoking IdentityServer endpoint: IdentityServer4.Endpoints.DiscoveryKeyEndpoint for /.well-known/openid-configuration/jwks
+2024-09-13 15:30:04.127 +00:00 [DBG] Start key discovery request

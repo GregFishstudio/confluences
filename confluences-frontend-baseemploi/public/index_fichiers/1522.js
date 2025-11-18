@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[1522],{2911:function(n,t,s){"use strict";s.r(t),t.default="$ yarn add @nuxtjs/vuetify -D\n# OR\n$ npm install @nuxtjs/vuetify -D\n"}}]);

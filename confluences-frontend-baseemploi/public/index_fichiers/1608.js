@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[1608],{2997:function(n,t,e){"use strict";e.r(t),t.default="// src/plugins/vuetify.js\n\nimport Vue from 'vue'\nimport Vuetify from 'vuetify'\nimport 'vuetify/dist/vuetify.min.css'\n\nVue.use(Vuetify)\n\nconst opts = {}\n\nexport default new Vuetify(opts)\n"}}]);

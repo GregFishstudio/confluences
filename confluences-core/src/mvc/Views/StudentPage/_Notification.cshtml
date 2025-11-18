@@ -1,0 +1,89 @@
+﻿@model mvc.Models.AspNetUser
+
+@using Newtonsoft.Json
+
+<!-- Container for dynamic notifications -->
+<div id="notifContainer"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Serialize the model data to JSON
+        var sessionStudents = @Html.Raw(JsonConvert.SerializeObject(Model.SessionStudents));
+        var classroomIds = sessionStudents.map(function (student) {
+            return student.Session.SchoolClassRoom.SchoolClassRoomId; // Directly use the classroom ID
+        });
+        var uniqueClassroomIds = [...new Set(classroomIds)]; // Ensure unique IDs
+
+        // Create a notification box for each unique classroom
+        var notifContainer = document.getElementById('notifContainer');
+        uniqueClassroomIds.forEach(function (classroomId) {
+            var notifBox = document.createElement('div');
+            notifBox.className = 'cardBox';
+            notifBox.id = 'notifBox_' + classroomId;
+            notifBox.onclick = function () {
+                var url = '@Url.Action("Index", "Jitsi", new { roomName = "__ROOM_ID__", isPrivateRoom = false })';
+                url = url.replace('__ROOM_ID__', classroomId); // Replace the placeholder with the actual classroomId
+                location.href = url;
+            };
+
+            notifBox.innerHTML = `
+                    <div class="imgCard"></div>
+                    <div class="textBoxCard">
+                        <div class="textContentCard">
+                            <p class="h1Card">COURS DE FRANCAIS</p>
+                        </div>
+                        <p class="pCard">
+                            Cliquer pour rejoindre
+                        </p>
+                    </div>
+                `;
+
+            notifContainer.appendChild(notifBox);
+        });
+
+        // Initialize Jitsi connection
+        startConnectionJitsi().then(function () {
+            // Check connection state before subscribing
+            if (connectionJitsi.state === 'Connected') {
+                // Subscribe to all groups
+                uniqueClassroomIds.forEach(function (groupId) {
+                    connectionJitsi.invoke("AddToGroup", "SchoolClassRoom_" + groupId)
+                        .catch(function (err) {
+                            console.error('Error adding to group ' + groupId + ': ', err.toString());
+                        });
+                });
+
+                // Handle Jitsi notifications
+                connectionJitsi.on("JitsiNotification", function (message) {
+                    sessionStorage.setItem('isButtonVisible', 'true');
+                    updateNotificationVisibility();
+                });
+
+                // Handle stop class room event
+                connectionJitsi.on("StopClassRoom", function (message) {
+                    sessionStorage.setItem('isButtonVisible', 'false');
+                    updateNotificationVisibility();
+                });
+            } else {
+                console.error("Connection is not established. Cannot send data.");
+            }
+
+            // Initial visibility setup
+            updateNotificationVisibility();
+        }).catch(function (err) {
+            console.error("Error initializing connection: ", err.toString());
+        });
+
+        // Function to update notification visibility
+        function updateNotificationVisibility() {
+            var isButtonVisible = sessionStorage.getItem('isButtonVisible');
+            var notifBoxes = document.querySelectorAll('[id^="notifBox_"]');
+
+            notifBoxes.forEach(function (box) {
+                if (box) {
+                    box.style.display = isButtonVisible === 'true' ? 'flex' : 'none';
+                }
+            });
+        }
+    });
+</script>

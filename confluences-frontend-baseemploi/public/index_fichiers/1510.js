@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[1510],{2899:function(n,o,a){"use strict";a.r(o),o.default="$ yarn add font-awesome@4.7.0 -D\n// OR\n$ npm install font-awesome@4.7.0 -D\n"}}]);

@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[1614],{3003:function(n,t,e){"use strict";e.r(t),t.default="// src/main.js\n\nimport Vue from 'vue'\nimport vuetify from '@/plugins/vuetify' // path to vuetify export\n\nnew Vue({\n  vuetify,\n}).$mount('#app')\n"}}]);

@@ -1,0 +1,18 @@
+2024-03-08 13:24:45.618 +00:00 [INF] Starting host...
+2024-03-08 13:24:45.675 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2024-03-08 13:24:45.706 +00:00 [WRN] No XML encryptor configured. Key {acb1a3c1-24d6-481c-ae8d-13b6ac14bad6} may be persisted to storage in unencrypted form.
+2024-03-08 13:24:49.956 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-03-08 13:24:49.975 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-03-08 13:24:50.084 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-03-08 13:24:50.084 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-03-08 13:24:50.084 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-03-08 13:24:50.217 +00:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2024-03-08 13:24:50.308 +00:00 [ERR] Connection id "0HN1VECGQ0N5S", Request id "0HN1VECGQ0N5S:00000004": An unhandled exception was thrown by the application.
+Swashbuckle.AspNetCore.SwaggerGen.SwaggerGeneratorException: Ambiguous HTTP method for action - Api.Controllers.PdfViewerController.JsonConverterstring (Api). Actions require an explicit HttpMethod binding for Swagger/OpenAPI 3.0
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GenerateOperations(IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GeneratePaths(IEnumerable`1 apiDescriptions, SchemaRepository schemaRepository)
+   at Swashbuckle.AspNetCore.SwaggerGen.SwaggerGenerator.GetSwagger(String documentName, String host, String basePath)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpProtocol.ProcessRequests[TContext](IHttpApplication`1 application)
+2024-03-08 13:25:44.489 +00:00 [INF] Starting host...
+2024-03-08 13:25:44.566 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.

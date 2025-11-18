@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[1504],{2893:function(e,n,p){"use strict";p.r(n),n.default="$ vue create my-app\n// navigate to new project directory\n$ cd my-app\n"}}]);

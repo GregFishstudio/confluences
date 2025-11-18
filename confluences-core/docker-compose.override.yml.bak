@@ -1,0 +1,76 @@
+version: '3.4'
+
+services:
+  dd-agent:
+    image: gcr.io/datadoghq/agent:7
+    container_name: dd-agent
+    environment:
+      - DD_API_KEY=967e450ddfb5ba9d0f76ab347ef7c973
+      - DD_SITE=datadoghq.eu
+      - DD_APM_ENABLED=true
+      - DD_APM_NON_LOCAL_TRAFFIC=true
+      - DD_APM_RECEIVER_SOCKET=/var/run/datadog/apm.socket
+      - DD_DOGSTATSD_SOCKET=/var/run/datadog/dsd.socket
+      - DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true
+    volumes:
+      - /var/run/datadog:/var/run/datadog
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    ports:
+      - "8125:8125"
+      - "8126:8126" # Expose port 8126 from the container to the host
+    restart: unless-stopped
+  api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres; Database=Confluences; Username=postgres; Password=Pass@word
+      - CORECLR_ENABLE_PROFILING=1
+      - CORECLR_PROFILER={846F5F1C-F9AE-4B07-969E-05C26BC060D8}
+      - CORECLR_PROFILER_PATH=/app/bin/Debug/net6.0/datadog/linux-x64/Datadog.Trace.ClrProfiler.Native.so
+      - DD_PROFILING_ENABLED=1
+      - DD_SERVICE=confluence-api
+      - DD_ENV=development
+      - DD_AGENT_HOST=host.docker.internal
+      - DD_TRACE_AGENT_PORT=8126 
+      - DD_TRACE_AGENT_URLDD_TRACE_AGENT_URL
+      - DD_PROFILING_ENABLED=true 
+      - DD_VERSION=1.2.3
+      - DD_RUNTIME_METRICS_ENABLED=true
+      - DD_PROFILING_ALLOCATION_ENABLED=true
+      - DD_PROFILING_HEAP_ENABLED=true
+      - DD_DOTNET_TRACER_HOME=/app/bin/Debug/net6.0/datadog
+      - LD_PRELOAD=/app/bin/Debug/net6.0/datadog/linux-x64/Datadog.Linux.ApiWrapper.x64.so
+    ports:
+      - "5001:80"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+    depends_on:
+      - dd-agent
+  mvc:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5002:80"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+  idp:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres; Database=Confluences; Username=postgres; Password=Pass@word
+    ports:
+      - "5000:80"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+  postgres:
+    environment:
+      - POSTGRES_PASSWORD=Pass@word
+    ports:
+      - "5434:5432"
+    volumes:
+      - auxitech-postgresdata:/var/lib/postgresql/data
+
+volumes:
+  auxitech-postgresdata:
+    external: false
