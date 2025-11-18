@@ -1,52 +1,72 @@
-<!-- 
-  -- Projet: Gestion des stagiaires
-  -- Auteur : Tim Allemann
-  -- Date : 16.09.2020
-  -- Description : Composant permettant d'afficher des notifications à l'utilisateur
-  -- Fichier : NotificationBar.vue
-  -->
+<!--  
+  Projet: Gestion des stagiaires
+  Migration Vue 3 + Vuetify 3
+  Composant : NotificationBar.vue
+-->
 
 <template>
-  <div class="notification-bar" :class="notificationTypeClass">
-    <v-alert v-bind="{ type: notification.type }">
-      {{ notification.message }}
-    </v-alert>
-  </div>
+  <v-slide-y-transition>
+    <div class="notification-bar">
+      <v-alert
+        :color="notificationColor"
+        variant="tonal"
+        rounded="lg"
+        class="pa-3"
+      >
+        {{ notification.message }}
+      </v-alert>
+    </div>
+  </v-slide-y-transition>
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapActions } from "vuex";
 
 export default {
   props: {
     notification: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
+
   data() {
     return {
-      timeout: null
-    }
+      timeout: null,
+    };
   },
-  // Supprime le composant après x secondes
+
   mounted() {
-    this.timeout = setTimeout(() => this.remove(this.notification), 2000)
+    this.timeout = setTimeout(() => {
+      this.remove(this.notification);
+    }, 2500);
   },
-  beforeDestroy() {
-    clearTimeout(this.timeout)
+
+  beforeUnmount() {
+    clearTimeout(this.timeout);
   },
+
   computed: {
-    notificationTypeClass() {
-      return `-text-${this.notification.type}`
-    }
+    // Convertit "success", "error", "warning", "info" → vraies couleurs Vuetify 3
+    notificationColor() {
+      const colors = {
+        success: "success",
+        error: "error",
+        warning: "warning",
+        info: "info",
+      };
+      return colors[this.notification.type] || "primary";
+    },
   },
-  methods: mapActions('notification', ['remove'])
-}
+
+  methods: {
+    ...mapActions("notification", ["remove"]),
+  },
+};
 </script>
 
 <style scoped>
 .notification-bar {
-  margin: 1em 0 1em;
+  margin: 12px 0;
 }
 </style>

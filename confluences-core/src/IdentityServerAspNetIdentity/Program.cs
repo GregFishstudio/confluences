@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -8,8 +9,8 @@ using System;
 using System.Threading.Tasks;
 using Confluences.Domain.Entities;
 using Confluences.Persistence;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace IdentityServerAspNetIdentity
 {
@@ -30,98 +31,18 @@ namespace IdentityServerAspNetIdentity
 
             try
             {
-                Log.Information("🚀 Starting Confluences IdentityServer...");
-
+                Log.Information("🚀 Starting IdentityServer...");
                 var host = CreateHostBuilder(args).Build();
 
-                using (var scope = host.Services.CreateScope())
-                {
-                    var services = scope.ServiceProvider;
-
-                    try
-                    {
-                        var context = services.GetRequiredService<ConfluencesDbContext>();
-                        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-                        var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
-
-                        // ✅ Ensure database exists
-                        context.Database.EnsureCreated();
-
-                        // 👇 Create default Gender if missing
-                        var gender = await context.Genders.FirstOrDefaultAsync();
-                        if (gender == null)
-                        {
-                            gender = new Gender { GenderName = "Unknown" };
-                            context.Genders.Add(gender);
-                            await context.SaveChangesAsync();
-                            Log.Information("🧩 Default gender 'Unknown' created.");
-                        }
-
-                        // 👇 Create the single "Teacher" role
-                        const string teacherRole = "Teacher";
-                        if (!await roleManager.RoleExistsAsync(teacherRole))
-                        {
-                            var role = new ApplicationRole
-                            {
-                                Id = Guid.NewGuid().ToString(),
-                                Name = teacherRole,
-                                NormalizedName = teacherRole.ToUpperInvariant()
-                            };
-                            var roleResult = await roleManager.CreateAsync(role);
-                            if (roleResult.Succeeded)
-                                Log.Information("✅ Role created: Teacher");
-                            else
-                                Log.Warning("⚠️ Role creation failed: {0}", string.Join(", ", roleResult.Errors));
-                        }
-
-                        // 👇 Create default admin@confluences.ch account
-                        var adminEmail = "admin@confluences.ch";
-                        var adminPassword = "Confluences2025!";
-
-                        var adminUser = await userManager.FindByEmailAsync(adminEmail);
-                        if (adminUser == null)
-                        {
-                            adminUser = new ApplicationUser
-                            {
-                                Id = Guid.NewGuid().ToString(),
-                                UserName = adminEmail,
-                                Email = adminEmail,
-                                EmailConfirmed = true,
-                                Firstname = "Admin",
-                                LastName = "Confluences",
-                                GenderId = gender.GenderId, // ✅ correspond à ta clé short
-                                HasSeenHelpVideo = false,
-                                WantsMoreHomeworks = false,
-                            };
-
-                            var createResult = await userManager.CreateAsync(adminUser, adminPassword);
-                            if (createResult.Succeeded)
-                                Log.Information($"👤 User created: {adminEmail}");
-                            else
-                                Log.Warning($"⚠️ User creation failed: {string.Join(", ", createResult.Errors)}");
-                        }
-
-                        // 👇 Add the Teacher role to the admin
-                        if (!await userManager.IsInRoleAsync(adminUser, teacherRole))
-                        {
-                            await userManager.AddToRoleAsync(adminUser, teacherRole);
-                            Log.Information($"✅ Role {teacherRole} assigned to {adminEmail}");
-                        }
-
-                        Log.Information("🎉 Initialization complete!");
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex, "💥 Error initializing roles or default user");
-                    }
-                }
+                // 🔥 Run seeding logic before running
+                await SeedAsync(host);
 
                 await host.RunAsync();
                 return 0;
             }
             catch (Exception ex)
             {
-                Log.Fatal(ex, "💀 Host terminated unexpectedly");
+                Log.Fatal(ex, "💥 Host terminated unexpectedly");
                 return 1;
             }
             finally
@@ -137,5 +58,90 @@ namespace IdentityServerAspNetIdentity
                     webBuilder.UseStartup<Startup>();
                     webBuilder.UseSerilog();
                 });
+
+        /// <summary>
+        /// 🔥 Seed database roles + admin user
+        /// </summary>
+        private static async Task SeedAsync(IHost host)
+        {
+            using var scope = host.Services.CreateScope();
+            var services = scope.ServiceProvider;
+
+            try
+            {
+                var context = services.GetRequiredService<ConfluencesDbContext>();
+                var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+                var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
+
+                // Ensure DB exists
+                await context.Database.EnsureCreatedAsync();
+
+                // 1️⃣ Ensure Gender "Unknown"
+                var gender = await context.Genders.FirstOrDefaultAsync();
+                if (gender == null)
+                {
+                    gender = new Gender { GenderName = "Unknown" };
+                    context.Genders.Add(gender);
+                    await context.SaveChangesAsync();
+
+                    Log.Information("🧩 Added default Gender 'Unknown'");
+                }
+
+                // 2️⃣ Ensure Teacher role exists
+                const string teacherRole = "Teacher";
+                if (!await roleManager.RoleExistsAsync(teacherRole))
+                {
+                    await roleManager.CreateAsync(new ApplicationRole
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Name = teacherRole,
+                        NormalizedName = teacherRole.ToUpperInvariant()
+                    });
+
+                    Log.Information("👔 Role created: Teacher");
+                }
+
+                // 3️⃣ Ensure admin user exists
+                string adminEmail = "admin@confluences.ch";
+
+                // 🔥 Password loaded from environment (safe)
+                string adminPassword =
+                    Environment.GetEnvironmentVariable("ADMIN_PASSWORD")
+                    ?? "Confluences2025!"; // fallback for dev
+
+                var admin = await userManager.FindByEmailAsync(adminEmail);
+                if (admin == null)
+                {
+                    admin = new ApplicationUser
+                    {
+                        UserName = adminEmail,
+                        Email = adminEmail,
+                        EmailConfirmed = true,
+                        Firstname = "Admin",
+                        LastName = "Confluences",
+                        GenderId = gender.GenderId
+                    };
+
+                    var createResult = await userManager.CreateAsync(admin, adminPassword);
+                    if (createResult.Succeeded)
+                        Log.Information("👤 Admin user created");
+                    else
+                        Log.Warning("⚠️ Failed to create admin: {0}", string.Join(", ", createResult.Errors));
+                }
+
+                // 4️⃣ Ensure admin has the teacher role
+                if (!await userManager.IsInRoleAsync(admin, teacherRole))
+                {
+                    await userManager.AddToRoleAsync(admin, teacherRole);
+                    Log.Information("🔗 Assigned role Teacher to admin");
+                }
+
+                Log.Information("🎉 Database seeding complete!");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "💥 Error during seeding");
+            }
+        }
     }
 }

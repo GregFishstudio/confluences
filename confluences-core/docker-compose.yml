@@ -1,77 +1,21 @@
+version: '3.4'
+
 services:
-  postgres:
-    image: postgres:16
-    container_name: confluences-postgres
-    restart: unless-stopped
-    ports:
-      - "5434:5432"
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: Confluences
-    volumes:
-      - confluences-postgres-data:/var/lib/postgresql/data
-
-  idp:
-    build:
-      context: .
-      dockerfile: src/IdentityServerAspNetIdentity/Dockerfile
-    container_name: confluences-idp
-    restart: unless-stopped
-    depends_on:
-      - postgres
-    ports:
-      - "5000:80"
-    environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Server=postgres;Port=5432;Database=Confluences;User Id=postgres;Password=password;"
-      URLClientMVC: "http://localhost:5002"
-      # Si ton front Vue tourne sur 8080 :
-      URLClientVue: "http://localhost:8080"
-    # Healthcheck (optionnel mais pratique)
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:80/.well-known/openid-configuration || exit 1"]
-      interval: 20s
-      timeout: 5s
-      retries: 5
-
   api:
+    image: ${DOCKER_REGISTRY-}api
     build:
       context: .
       dockerfile: src/Api/Dockerfile
-    container_name: confluences-api
-    restart: unless-stopped
-    depends_on:
-      - postgres
-      - idp
-    ports:
-      - "5001:80"
-    environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Server=postgres;Port=5432;Database=Confluences;User Id=postgres;Password=password;"
-      IdentityServer__Authority: "http://host.docker.internal:5000"
-      IdentityServer__RequireHttpsMetadata: "false"
-      IdentityServer__Audience: "confluences_api"
-      URLIdentityServer4: "http://host.docker.internal:5000"
-
   mvc:
+    image: ${DOCKER_REGISTRY-}mvc
     build:
       context: .
       dockerfile: src/mvc/Dockerfile
-    container_name: confluences-mvc
-    restart: unless-stopped
-    depends_on:
-      - api
-      - idp
-    ports:
-      - "5002:80"
-    environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: "Server=postgres;Port=5432;Database=Confluences;User Id=postgres;Password=password;"
-      IdentityServer__Authority: "http://idp"
-      IdentityServer__RequireHttpsMetadata: "false"
-    volumes:
-      - ./keys:/keys
-
-volumes:
-  confluences-postgres-data:
+  idp:
+    image: ${DOCKER_REGISTRY-}idp
+    build:
+      context: .
+      dockerfile: src/IdentityServerAspNetIdentity/Dockerfile
+  postgres:
+    image: postgres
+    container_name: Postgres

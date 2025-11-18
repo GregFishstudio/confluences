@@ -1,0 +1,135 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background: #f5f6fa;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+/* --- SIDEBAR --- */
+.sidebar {
+    width: 240px;
+    background: #1a1d21;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    color: white;
+    padding-top: 20px;
+    transition: transform 0.3s;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    padding: 0 20px 20px;
+}
+
+.sidebar-logo {
+    width: 36px;
+    margin-right: 10px;
+}
+
+.sidebar-title {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-section {
+    padding: 10px 20px;
+    font-size: 11px;
+    text-transform: uppercase;
+    opacity: .6;
+}
+
+.sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #d7d7d7;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.sidebar-menu li a:hover {
+    background: #2a2f35;
+    color: white;
+}
+
+.sidebar-menu li a span.material-icons {
+    margin-right: 12px;
+    font-size: 22px;
+}
+
+/* MOBILE */
+@media(max-width: 992px) {
+    .sidebar {
+        transform: translateX(-250px);
+    }
+    .sidebar.sidebar-open {
+        transform: translateX(0);
+    }
+}
+
+/* --- TOPBAR --- */
+.topbar {
+    height: 60px;
+    background: white;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    width: auto;
+    
+}
+
+.menu-toggle {
+    background: transparent;
+    border: none;
+    font-size: 26px;
+    cursor: pointer;
+}
+
+.topbar-title {
+    font-size: 18px;
+    font-weight: 500;
+    margin-left: 20px;
+}
+
+.topbar-user {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    color: #333;
+}
+
+.topbar-user span.material-icons {
+    margin-right: 5px;
+}
+
+/* MOBILE */
+@media(max-width: 992px) {
+    .topbar {
+        margin-left: 0;
+    }
+}
+
+/* --- PAGE CONTENT --- */
+.page-container {
+    margin-left: 240px;
+}
+
+@media(max-width: 992px) {
+    .page-container {
+        margin-left: 0;
+    }
+}
+
+.content {
+    padding: 30px;
+}

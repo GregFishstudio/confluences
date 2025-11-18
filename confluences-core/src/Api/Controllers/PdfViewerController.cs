@@ -115,9 +115,8 @@ namespace Api.Controllers
             return Content(JsonConvert.SerializeObject(jsonResult));
         }
 
-        [NonAction]
+        [HttpPost("json-convert")]
         public Dictionary<string, string> JsonConverterstring(jsonObjects results)
-
         {
             Dictionary<string, object> resultObjects = new Dictionary<string, object>();
             resultObjects = results.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public)

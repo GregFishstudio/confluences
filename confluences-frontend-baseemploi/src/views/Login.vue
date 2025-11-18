@@ -168,7 +168,7 @@ const error = ref('')
 // 🔧 Configuration OIDC CENTRALISÉE et COHÉRENTE
 const getOidcConfig = () => {
   const authority = import.meta.env.VITE_AUTHORITY_URL || 'http://localhost:5000'
-  const clientId = import.meta.env.VITE_CLIENT_ID || 'confluences-web'
+  const clientId = import.meta.env.VITE_CLIENT_ID || 'gestion-stagiaire'
   
   return {
     authority,
@@ -238,7 +238,7 @@ async function handleLogin() {
         grant_type: 'password',
         username: username.value,
         password: password.value,
-        client_id: 'confluences-web',
+        client_id: 'gestion-stagiaire',
         scope: 'openid profile api1 roles offline_access'
       })
     })

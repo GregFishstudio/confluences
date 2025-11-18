@@ -7,4 +7,3 @@ namespace Confluences.Domain.Entities
         public virtual ApplicationUser? User { get; set; }
     }
 }
- 

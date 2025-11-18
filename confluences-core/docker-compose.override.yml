@@ -1,0 +1,106 @@
+version: '3.8'
+
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=Pass@word
+      - POSTGRES_DB=Confluences
+    ports:
+      - "5434:5432"
+    volumes:
+      - auxitech-postgresdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+
+    # dd-agent:
+  #   image: gcr.io/datadoghq/agent:7
+  #   container_name: dd-agent
+  #   restart: unless-stopped
+  #   environment:
+  #     - DD_API_KEY=967e450ddfb5ba9d0f76ab347ef7c973
+  #     - DD_SITE=datadoghq.eu
+  #     - DD_APM_ENABLED=true
+  #     - DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true
+  #     - DD_APM_NON_LOCAL_TRAFFIC=true
+  #   ports:
+  #     - "8125:8125"
+  #     - "8126:8126"
+  #   volumes:
+  #     - /var/run/datadog:/var/run/datadog
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - /proc/:/host/proc/:ro
+  #     - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+  #     - /var/lib/docker/containers:/var/lib/docker/containers:ro
+
+
+
+  idp:
+    build:
+      context: .
+      dockerfile: src/IdentityServerAspNetIdentity/Dockerfile
+    container_name: idp
+    restart: on-failure
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ADMIN_PASSWORD=Confluences2025!
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=Confluences;Username=postgres;Password=Pass@word
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "5000:80"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+
+
+  api:
+    build:
+      context: .
+      dockerfile: src/Api/Dockerfile
+    container_name: api
+    restart: on-failure
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=Confluences;Username=postgres;Password=Pass@word
+    depends_on:
+      postgres:
+        condition: service_healthy
+      idp:
+        condition: service_started
+    ports:
+      - "5001:80"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+
+
+  mvc:
+    build:
+      context: .
+      dockerfile: src/mvc/Dockerfile
+    container_name: mvc
+    restart: on-failure
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      api:
+        condition: service_started
+      idp:
+        condition: service_started
+    ports:
+      - "5002:80"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+
+
+volumes:
+  auxitech-postgresdata:
+    driver: local

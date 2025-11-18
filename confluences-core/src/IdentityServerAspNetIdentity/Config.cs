@@ -1,17 +1,20 @@
-﻿using IdentityModel;
+﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
+
+
+using IdentityModel;
 using IdentityServer4;
 using IdentityServer4.Models;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
+using static IdentityServer4.IdentityServerConstants;
 
 namespace IdentityServerAspNetIdentity
 {
     public static class Config
     {
-        private static IConfiguration Configuration => Startup.Configuration;
 
-        // 1️⃣ Identity Resources
-        public static IEnumerable<IdentityResource> IdentityResources =>
+        public static IEnumerable<IdentityResource> Ids =>
             new IdentityResource[]
             {
                 new IdentityResources.OpenId(),
@@ -19,74 +22,41 @@ namespace IdentityServerAspNetIdentity
                 new IdentityResource
                 {
                     Name = "roles",
-                    DisplayName = "User roles",
+                    DisplayName = "Roles",
                     UserClaims = { JwtClaimTypes.Role }
                 }
             };
 
-        // 2️⃣ API Resources
-        public static IEnumerable<ApiResource> ApiResources =>
+
+        public static IEnumerable<ApiResource> Apis =>
             new ApiResource[]
             {
-                new ApiResource("api1", "Confluences API")
-                {
-                    Scopes = { "api1" },
-                    UserClaims = { JwtClaimTypes.Role }
-                }
+                //new ApiResource("api1", "My API #1"),
+                new ApiResource("api1", "My API #1", new [] { JwtClaimTypes.Role }),
             };
 
-        // 3️⃣ API Scopes
-        public static IEnumerable<ApiScope> ApiScopes =>
-            new ApiScope[]
-            {
-                new ApiScope("api1", "Confluences API"),
-            };
 
-        // 4️⃣ Clients
         public static IEnumerable<Client> Clients =>
             new Client[]
             {
-                // --- A) Client WebComponent pour login (Resource Owner Password)
+                 // interactive ASP.NET Core MVC client
                 new Client
                 {
-                    ClientId = "vue",
-                    ClientName = "Confluences Login WebComponent",
-
-                    AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
-                    RequireClientSecret = true,
+                    ClientId = "mvc",
                     ClientSecrets = { new Secret("secret".Sha256()) },
 
-                    AllowedScopes =
-                    {
-                        IdentityServerConstants.StandardScopes.OpenId,
-                        IdentityServerConstants.StandardScopes.Profile,
-                        "api1",
-                        "roles",
-                        IdentityServerConstants.StandardScopes.OfflineAccess
-                    },
+                    AllowedGrantTypes = GrantTypes.Code,
+                    RequireConsent = false,
+                    RequirePkce = true,
 
-                    AllowedCorsOrigins =
-                    {
-                        Configuration["URLClientMVC"].TrimEnd('/'),
-                        Configuration["URLVueJsGestionStagiaire"].TrimEnd('/')
-                    },
+                    // where to redirect to after login
+                    RedirectUris = { Startup.Configuration["URLClientMVC"] + "signin-oidc", 
+                                     Startup.Configuration["URLClientMVC"] + "openid-callback" },
 
-                    AllowOfflineAccess = true,
-                    AccessTokenLifetime = 3600,
-                    RefreshTokenUsage = TokenUsage.ReUse
-                },
+                    // where to redirect to after logout
+                    PostLogoutRedirectUris = { Startup.Configuration["URLClientMVC"] + "signout-callback-oidc" },
 
-
-                // --- B) Client SPA Vue.js (Resource Owner Password)
-                new Client
-                {
-                    ClientId = "confluences-web",
-                    ClientName = "Confluences Front (Vue.js)",
-
-                    AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
-                    RequireClientSecret = false,
-
-                    AllowedScopes =
+                    AllowedScopes = new List<string>
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
@@ -94,49 +64,52 @@ namespace IdentityServerAspNetIdentity
                         "roles"
                     },
 
-                    AllowedCorsOrigins =
-                    {
-                        Configuration["URLVueJsGestionStagiaire"].TrimEnd('/')
-                    },
+                    AllowOfflineAccess = true,
+                    AccessTokenLifetime = 86400, // 1 hour = 3600 seconds
+                    IdentityTokenLifetime = 86400,
+                    SlidingRefreshTokenLifetime = 86400,
+                    RefreshTokenUsage = TokenUsage.OneTimeOnly,
+                    RefreshTokenExpiration = TokenExpiration.Sliding,
+                    UpdateAccessTokenClaimsOnRefresh = true,
+                },
+                // JavaScript Client
+                new Client
+                {
+                    ClientId = "gestion-stagiaire",
+                    ClientName = "Gestion des stagiaires",
+
+                    AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
+                    RequireClientSecret = false,
+                    AllowAccessTokensViaBrowser = true,
 
                     AllowOfflineAccess = true,
-                    AccessTokenLifetime = 3600
-                },
+                    AccessTokenLifetime = 900, // 1 hour = 3600 seconds
+                    IdentityTokenLifetime = 900,
+                    SlidingRefreshTokenLifetime = 900,
+                    RefreshTokenUsage = TokenUsage.OneTimeOnly,
+                    RefreshTokenExpiration = TokenExpiration.Sliding,
+                    UpdateAccessTokenClaimsOnRefresh = true,
+                    RequireConsent = false,
+
+                    RedirectUris = {
+                        Startup.Configuration["URLVueJsGestionStagiaire"] + "callback",
+                        Startup.Configuration["URLVueJsGestionStagiaire"] + "static/silent-renew.html"
+                    },
+
+                    PostLogoutRedirectUris = { Startup.Configuration["URLVueJsGestionStagiaire"].Remove(Startup.Configuration["URLVueJsGestionStagiaire"].Length - 1) },
+
+                    AllowedCorsOrigins =     { Startup.Configuration["URLVueJsGestionStagiaire"].Remove(Startup.Configuration["URLVueJsGestionStagiaire"].Length - 1) },
 
 
-                // --- C) Client MVC (OIDC + PKCE)
-                new Client
-{
-    ClientId = "mvc",
-    ClientName = "Confluences MVC",
+                    AllowedScopes = new List<string>
+                    {
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        "api1",
+                        "roles"
+                    },
+                }
 
-    AllowedGrantTypes = GrantTypes.Code,
-    RequirePkce = true,
-    RequireClientSecret = false,
-
-    RedirectUris =
-    {
-        $"{Configuration["URLClientMVC"].TrimEnd('/')}/signin-oidc"
-    },
-
-    PostLogoutRedirectUris =
-    {
-        $"{Configuration["URLClientMVC"].TrimEnd('/')}/signout-callback-oidc"
-    },
-
-    FrontChannelLogoutUri =
-        $"{Configuration["URLClientMVC"].TrimEnd('/')}/signout-oidc",
-
-    AllowedScopes =
-    {
-        IdentityServerConstants.StandardScopes.OpenId,
-        IdentityServerConstants.StandardScopes.Profile,
-        "api1",
-        "roles"
-    },
-
-    AllowOfflineAccess = true
-}
 
             };
     }

@@ -6,6 +6,11 @@ namespace Confluences.Domain.Entities
 {
     public class ApplicationUser : IdentityUser<string>
     {
+        public ApplicationUser()
+    {
+        Id = Guid.NewGuid().ToString();
+    }
+
         [Required]
         public string Firstname { get; set; } = string.Empty;
         [Required]

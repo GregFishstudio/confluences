@@ -88,6 +88,26 @@
           </span>
         </template>
 
+        <template v-slot:item.documents="{ item }">
+  <v-btn
+    small
+    color="blue"
+    @click.stop="downloadAttestation(item.stageId)"
+  >
+    Attestation
+  </v-btn>
+
+  <v-btn
+    small
+    color="green"
+    class="ml-2"
+    @click.stop="downloadBilan(item.stageId)"
+  >
+    Bilan
+  </v-btn>
+</template>
+
+
         <template v-slot:no-data>
             <div class="pa-4 text-center">
                 <v-icon large color="grey lighten-1" class="mb-2">mdi-alert-circle-outline</v-icon>
@@ -110,90 +130,124 @@ import moment from 'moment'
 
 // Fonctions de chargement des données (inchangées)
 function getStages(routeTo, next) {
-  store.dispatch('stage/fetchStages', {}).then(() => {
-    next()
-  })
+  store.dispatch('stage/fetchStages', {}).then(() => {
+    next()
+  })
 }
 
+async function downloadAttestation(id) {
+  const res = await fetch(`/api/documents/attestation/${id}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`
+    }
+  });
+
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `attestation-${id}.pdf`;
+  link.click();
+}
+
+async function downloadBilan(id) {
+  const now = new Date().toISOString();
+  
+  const res = await fetch(`/api/documents/bilan/${id}?date=${now}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`
+    }
+  });
+
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `bilan-${id}.pdf`;
+  link.click();
+}
+
+
 function getStagesWithFilter(routeTo, next, filter) {
-  store.dispatch('stage/saveFilterStage', filter).then(() => {
-    next()
-  })
+  store.dispatch('stage/saveFilterStage', filter).then(() => {
+    next()
+  })
 }
 
 function loadData(routeTo, routeFrom, next) {
   const filter = store.state.stage.filter;
-  if (
-    filter.nom != null ||
-    filter.typeMetierId != null ||
-    filter.entrepriseId != null ||
-    filter.stagiaireId != null ||
-    filter.dateDebut != null ||
-    filter.dateFin != null ||
-    filter.typeStageId != null ||
-    filter.typeAnnonceId != null ||
-    filter.typeIntershipActivityId != null
-  ) {
-    getStagesWithFilter(routeTo, next, filter)
-  } else {
-    getStages(routeTo, next)
-  }
+  if (
+    filter.nom != null ||
+    filter.typeMetierId != null ||
+    filter.entrepriseId != null ||
+    filter.stagiaireId != null ||
+    filter.dateDebut != null ||
+    filter.dateFin != null ||
+    filter.typeStageId != null ||
+    filter.typeAnnonceId != null ||
+    filter.typeIntershipActivityId != null
+  ) {
+    getStagesWithFilter(routeTo, next, filter)
+  } else {
+    getStages(routeTo, next)
+  }
 }
 
 export default {
-  components: {
-    CreateStage,
-    FilterStage
-  },
+  components: {
+    CreateStage,
+    FilterStage
+  },
 
-  data: () => ({
-    options: {},
-    search: '',
-    headers: [
-      {
-        text: 'Activité', // Renommé 'Nom' en 'Activité' pour plus de clarté
-        value: 'typeIntershipActivity.nom',
+  data: () => ({
+    options: {},
+    search: '',
+    headers: [
+      {
+        text: 'Activité', // Renommé 'Nom' en 'Activité' pour plus de clarté
+        value: 'typeIntershipActivity.nom',
         class: 'font-weight-bold'
-      },
-      { text: 'Métier', value: 'typeMetier.libelle' },
-      { text: 'Entreprise', value: 'entreprise.nom' },
-      {
-        text: 'Stagiaire',
-        value: 'stagiaire.firstname' // La valeur affichée est construite dans le slot
-      },
-      { text: 'Année', value: 'year' },
-      { text: 'Début', value: 'debut' },
-      { text: 'Fin', value: 'fin' },
-      { text: 'Session', value: 'session.description' },
-      { text: 'Type Stage', value: 'typeStage.nom' }, // Renommé 'Type' en 'Type Stage'
-      { text: 'Annonce', value: 'typeAnnonce.libelle' }
-    ],
-    stages: []
-  }),
+      },
+      { text: 'Métier', value: 'typeMetier.libelle' },
+      { text: 'Entreprise', value: 'entreprise.nom' },
+      {
+        text: 'Stagiaire',
+        value: 'stagiaire.firstname' // La valeur affichée est construite dans le slot
+      },
+      { text: 'Année', value: 'year' },
+      { text: 'Début', value: 'debut' },
+      { text: 'Fin', value: 'fin' },
+      { text: 'Session', value: 'session.description' },
+      { text: 'Type Stage', value: 'typeStage.nom' }, // Renommé 'Type' en 'Type Stage'
+      { text: 'Annonce', value: 'typeAnnonce.libelle' },
+      { text: 'Documents', value: 'documents', sortable: false }
+    ],
+    stages: []
+  }),
 
-  beforeRouteEnter(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteUpdate(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteLeave(routeTo, routeFrom, next) {
-    // Sauvegarde le numéro de page consulté du tableau stage avant de changer de page
-    store
-      .dispatch('settings/setCurrentPageStage', {
-        number: this.options.page
-      })
-      .then(() => {})
-    next()
-  },
+  beforeRouteEnter(routeTo, routeFrom, next) {
+    loadData(routeTo, routeFrom, next)
+  },
+  beforeRouteUpdate(routeTo, routeFrom, next) {
+    loadData(routeTo, routeFrom, next)
+  },
+  beforeRouteLeave(routeTo, routeFrom, next) {
+    // Sauvegarde le numéro de page consulté du tableau stage avant de changer de page
+    store
+      .dispatch('settings/setCurrentPageStage', {
+        number: this.options.page
+      })
+      .then(() => {})
+    next()
+  },
 
-  created() {
-    // Récupère la dernier numéro de page consulté
-    this.options.page = store.state.settings.currentPageStage
-  },
+  created() {
+    // Récupère la dernier numéro de page consulté
+    this.options.page = store.state.settings.currentPageStage
+  },
 
-  computed: {
-    ...mapState(['stage', 'settings']),
+  computed: {
+    ...mapState(['stage', 'settings']),
     // Propriété calculée pour vérifier si un filtre est actif
     isFilterActive() {
       const filter = this.stage.filter;
@@ -209,33 +263,35 @@ export default {
         filter.typeIntershipActivityId != null
       );
     }
-  },
+  },
 
-  methods: {
-    selectRow(event) {
-      this.$router.push({
-        name: 'Stage-Modifier',
-        params: { id: event.stageId }
-      })
-    },
-    updateNumberItems(event) {
-      store
-        .dispatch('settings/setItemsPerPage', {
-          number: event
-        })
-        .then(() => {})
-    },
-    updatePageSearch() {
-      this.options.page = 1
-    },
-    formatDate(value) {
-      let date = moment(value).format('YYYY-MM-DD')
-      if (date == 'Invalid date') {
-        date = null
-      }
-      return date
-    },
-    // Ajout de la méthode pour effacer le filtre
+  methods: {
+    selectRow(event) {
+      this.$router.push({
+        name: 'Stage-Modifier',
+        params: { id: event.stageId }
+      })
+    },
+    updateNumberItems(event) {
+      store
+        .dispatch('settings/setItemsPerPage', {
+          number: event
+        })
+        .then(() => {})
+    },
+    updatePageSearch() {
+      this.options.page = 1
+    },
+    formatDate(value) {
+      let date = moment(value).format('YYYY-MM-DD')
+      if (date == 'Invalid date') {
+        date = null
+      }
+      return date
+    },
+    downloadAttestation,
+  downloadBilan,
+    // Ajout de la méthode pour effacer le filtre
     clearFilter() {
       const emptyFilter = {
         nom: null,
@@ -253,7 +309,7 @@ export default {
         store.dispatch('stage/fetchStages', {})
       })
     }
-  }
+  }
 }
 </script>
 

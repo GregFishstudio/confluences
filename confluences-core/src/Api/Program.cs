@@ -7,6 +7,7 @@ using Serilog.Events;
 using Serilog.Sinks.SystemConsole.Themes;
 using Serilog;
 using System;
+using QuestPDF.Infrastructure;
 
 namespace Api
 {

@@ -5,7 +5,7 @@ export async function login(email, password) {
   return axios.post(
     'http://localhost:5000/connect/token',
     {
-      client_id: 'confluences-web',
+      client_id: 'gestion-stagiaire',
       grant_type: 'password',
       username: email,
       password: password

@@ -1,262 +1,250 @@
 <!-- 
-  -- Projet: Gestion des stagiaires
-  -- Auteur : Tim Allemann
-  -- Date : 16.09.2020
-  -- Description : Filtre du stage
-  -- Fichier : FilterStage.vue
-  -->
+  Projet: Gestion des stagiaires
+  Migration Vue 3 / Vuetify 3
+  Description : Filtre des stages
+  Fichier : FilterStage.vue
+-->
 
 <template>
-  <v-form ref="formFilterStage" v-model="validFilterStage" lazy-validation>
-    <v-dialog v-model="dialog" max-width="600px">
-      <template v-slot:activator="{ on, attrs }">
-        <v-btn v-bind="attrs" v-on="on" color="primary" dark class="mr-4 mb-4">
+  <!-- Boutons -->
+  <div class="mb-4 d-flex ga-3">
+    <v-btn color="primary" @click="dialog = true">Filtrer</v-btn>
+
+    <v-btn color="primary" @click="exportStages">Excel</v-btn>
+
+    <v-btn color="primary" @click="deletefilterStage">Effacer le filtre</v-btn>
+  </div>
+
+  <!-- Dialog principal -->
+  <v-dialog v-model="dialog" max-width="650px" persistent>
+    <v-card rounded="lg">
+      <v-card-title class="text-h6 font-weight-bold">
+        Filtrer les stages
+      </v-card-title>
+
+      <v-divider />
+
+      <v-card-text>
+        <v-form ref="formFilterStage" v-model="validFilterStage">
+
+          <v-text-field
+            v-model="stage.filter.nom"
+            label="Nom"
+            :rules="nameRules"
+            clearable
+            density="comfortable"
+          />
+
+          <v-autocomplete
+            v-model="stage.filter.typeIntershipActivityId"
+            :items="typeIntershipActivity.typeIntershipActivities"
+            item-title="nom"
+            item-value="typeIntershipActivityId"
+            label="Type d'activité"
+            clearable
+            density="comfortable"
+          />
+
+          <v-autocomplete
+            v-model="stage.filter.typeMetierId"
+            :items="typeMetier.typeMetiers"
+            item-title="libelle"
+            item-value="typeMetierId"
+            label="Métier"
+            clearable
+            density="comfortable"
+          />
+
+          <v-autocomplete
+            v-model="stage.filter.entrepriseId"
+            :items="entreprise.entreprises"
+            item-title="nom"
+            item-value="entrepriseId"
+            label="Entreprise"
+            clearable
+            density="comfortable"
+          />
+
+          <v-autocomplete
+            v-model="stage.filter.stagiaireId"
+            :items="user.users"
+            item-title="nom"
+            item-value="id"
+            label="Stagiaire"
+            clearable
+            density="comfortable"
+          />
+
+          <v-text-field
+            v-model="stage.filter.year"
+            label="Année"
+            type="number"
+            clearable
+            density="comfortable"
+          />
+
+          <!-- DATE DE DÉBUT -->
+          <v-menu v-model="menuDebut" :close-on-content-click="false">
+            <template #activator="{ props }">
+              <v-text-field
+                v-bind="props"
+                v-model="stage.filter.dateDebut"
+                label="Date de début"
+                readonly
+                clearable
+                density="comfortable"
+              />
+            </template>
+            <v-date-picker
+              v-model="stage.filter.dateDebut"
+              scrollable
+              @update:modelValue="menuDebut = false"
+            />
+          </v-menu>
+
+          <!-- DATE DE FIN -->
+          <v-menu v-model="menuFin" :close-on-content-click="false">
+            <template #activator="{ props }">
+              <v-text-field
+                v-bind="props"
+                v-model="stage.filter.dateFin"
+                label="Date de fin"
+                readonly
+                clearable
+                density="comfortable"
+              />
+            </template>
+            <v-date-picker
+              v-model="stage.filter.dateFin"
+              scrollable
+              @update:modelValue="menuFin = false"
+            />
+          </v-menu>
+
+          <v-autocomplete
+            v-model="stage.filter.typeStageId"
+            :items="typeStage.typeStages"
+            item-title="nom"
+            item-value="typeStageId"
+            label="Taux d'occupation"
+            clearable
+            density="comfortable"
+          />
+
+          <v-autocomplete
+            v-model="stage.filter.typeAnnonceId"
+            :items="typeAnnonce.typeAnnonces"
+            item-title="libelle"
+            item-value="typeAnnonceId"
+            label="Type d'annonce"
+            clearable
+            density="comfortable"
+          />
+
+          <v-autocomplete
+            v-model="stage.filter.sessionId"
+            :items="session.sessions"
+            item-title="description"
+            item-value="sessionId"
+            label="Session"
+            clearable
+            density="comfortable"
+          />
+
+        </v-form>
+      </v-card-text>
+
+      <v-divider />
+
+      <v-card-actions class="py-3 px-4">
+        <v-spacer />
+
+        <v-btn variant="text" @click="dialog = false">
+          Fermer
+        </v-btn>
+
+        <v-btn color="primary" @click="filterStage">
           Filtrer
         </v-btn>
-        <v-btn color="primary" class="mr-4 mb-4" dark @click="exportStages()"
-          >Excel</v-btn
-        >
-        <v-btn
-          color="primary"
-          dark
-          @click="deletefilterStage()"
-          class="mr-4 mb-4"
-        >
-          Effacer le filtre
-        </v-btn>
-      </template>
-      <v-card>
-        <v-card-title>
-          <span class="headline">Filtrer les stages</span>
-        </v-card-title>
-        <v-card-text>
-          <h3 class="mb-3">
-            Tous les filtres sont optionnels :
-          </h3>
-          <v-card class="mx-auto" tile>
-            <v-row>
-              <v-col class="mx-4">
-                <v-autocomplete
-                  v-model="stage.filter.typeIntershipActivityId"
-                  :items="typeIntershipActivity.typeIntershipActivities"
-                  item-value="typeIntershipActivityId"
-                  item-text="nom"
-                  label="Type d'activité"
-                  clearable
-                ></v-autocomplete>
-                <v-text-field
-                  v-model="stage.filter.nom"
-                  :counter="50"
-                  :rules="nameRules"
-                  label="Nom"
-                ></v-text-field>
-                <v-autocomplete
-                  v-model="stage.filter.typeMetierId"
-                  :items="typeMetier.typeMetiers"
-                  item-value="typeMetierId"
-                  item-text="libelle"
-                  label="Métier"
-                  clearable
-                ></v-autocomplete>
-                <v-autocomplete
-                  v-model="stage.filter.entrepriseId"
-                  :items="entreprise.entreprises"
-                  item-value="entrepriseId"
-                  item-text="nom"
-                  label="Entreprise"
-                  clearable
-                ></v-autocomplete>
-                <v-autocomplete
-                  v-model="stage.filter.stagiaireId"
-                  :items="user.users"
-                  item-value="id"
-                  item-text="nom"
-                  label="Stagiaire"
-                  clearable
-                ></v-autocomplete>
-                <v-text-field
-                  v-model="stage.filter.year"
-                  label="Année"
-                  type="number"
-                  clearable
-                ></v-text-field>
-                <v-menu
-                  ref="menuDebut"
-                  v-model="menuDebut"
-                  :close-on-content-click="true"
-                  :return-value.sync="date"
-                  transition="scale-transition"
-                  offset-y
-                  min-width="290px"
-                >
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-text-field
-                      v-model="stage.filter.dateDebut"
-                      label="Date de début"
-                      readonly
-                      v-bind="attrs"
-                      v-on="on"
-                      clearable
-                    ></v-text-field>
-                  </template>
-                  <v-date-picker
-                    v-model="stage.filter.dateDebut"
-                    no-title
-                    scrollable
-                  >
-                  </v-date-picker>
-                </v-menu>
-                <v-menu
-                  ref="menuFin"
-                  v-model="menuFin"
-                  :close-on-content-click="true"
-                  :return-value.sync="date"
-                  transition="scale-transition"
-                  offset-y
-                  min-width="290px"
-                >
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-text-field
-                      v-model="stage.filter.dateFin"
-                      label="Date de fin"
-                      readonly
-                      v-bind="attrs"
-                      v-on="on"
-                      clearable
-                    ></v-text-field>
-                  </template>
-                  <v-date-picker
-                    v-model="stage.filter.dateFin"
-                    no-title
-                    scrollable
-                  >
-                  </v-date-picker>
-                </v-menu>
-                <v-autocomplete
-                  v-model="stage.filter.typeStageId"
-                  :items="typeStage.typeStages"
-                  item-value="typeStageId"
-                  item-text="nom"
-                  label="Taux d'occupation"
-                  clearable
-                ></v-autocomplete>
-                <v-autocomplete
-                  v-model="stage.filter.typeAnnonceId"
-                  :items="typeAnnonce.typeAnnonces"
-                  item-value="typeAnnonceId"
-                  item-text="libelle"
-                  label="Type d'annonce"
-                  clearable
-                ></v-autocomplete>
-                <v-autocomplete
-                  v-model="stage.filter.sessionId"
-                  :items="session.sessions"
-                  item-value="sessionId"
-                  item-text="description"
-                  label="Session"
-                  clearable
-                ></v-autocomplete>
-              </v-col>
-            </v-row>
-          </v-card>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="dialog = false">
-            Fermer
-          </v-btn>
-          <v-btn color="blue darken-1" text @click="filterStage()">
-            Filtrer
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-form>
+      </v-card-actions>
+
+    </v-card>
+  </v-dialog>
 </template>
 
-<script>
-import store from '@/store/index.js'
-import { mapState } from 'vuex'
+<script setup>
+import { ref } from 'vue'
+import store from '@/store'
+import { mapState, useStore } from 'vuex'
 import NProgress from 'nprogress'
 
-export default {
-  data: () => ({
-    date: null,
-    menuDebut: false,
-    menuFin: false,
-    validFilterStage: true,
-    dialog: false,
-    nameRules: [
-      v => !v || v.length <= 50 || 'Le champ doit être moins que 50 caractères'
-    ]
-  }),
+const dialog = ref(false)
+const menuDebut = ref(false)
+const menuFin = ref(false)
+const validFilterStage = ref(true)
 
-  // Pas besoin de charger les données, se fait déjà le composant CreateStage.vue
-  beforeCreate() {},
+const nameRules = [
+  v => !v || v.length <= 50 || 'Maximum 50 caractères'
+]
 
-  computed: {
-    ...mapState([
-      'stage',
-      'user',
-      'typeMetier',
-      'entreprise',
-      'typeStage',
-      'typeAnnonce',
-      'typeIntershipActivity',
-      'session'
-    ])
-  },
+/* ACCÈS AUX STATES */
+const storeInstance = useStore()
+const stage = storeInstance.state.stage
+const user = storeInstance.state.user
+const typeMetier = storeInstance.state.typeMetier
+const entreprise = storeInstance.state.entreprise
+const typeStage = storeInstance.state.typeStage
+const typeAnnonce = storeInstance.state.typeAnnonce
+const typeIntershipActivity = storeInstance.state.typeIntershipActivity
+const session = storeInstance.state.session
 
-  methods: {
-    // Sauvegarde et filtre les stages
-    filterStage() {
-      if (this.$refs.formFilterStage.validate()) {
-        NProgress.start()
-        store
-          .dispatch('stage/saveFilterStage', this.stage.filter)
-          .then(() => {})
-          .catch(() => {})
-        this.dialog = false
+const formFilterStage = ref(null)
+
+/* FILTRER */
+function filterStage() {
+  formFilterStage.value.validate().then(({ valid }) => {
+    if (!valid) return
+
+    NProgress.start()
+    store
+      .dispatch('stage/saveFilterStage', stage.filter)
+      .finally(() => {
+        dialog.value = false
         NProgress.done()
-      }
-    },
-    // Efface le filtre
-    deletefilterStage() {
-      NProgress.start()
-      store
-        .dispatch('stage/deleteFilterStage')
-        .then(() => {})
-        .catch(() => {})
-      store
-        .dispatch('stage/fetchStages', true)
-        .then(() => {})
-        .catch(() => {})
-      this.dialog = false
-      NProgress.done()
-    },
-    exportStages() {
-      NProgress.start()
-      store
-        .dispatch('stage/fetchStagesExport', this.stage.filter)
-        .then(response => {
-          console.log(response)
-          var fileURL = window.URL.createObjectURL(new Blob([response.data]))
-          var fileLink = document.createElement('a')
+      })
+  })
+}
 
-          fileLink.href = fileURL
-          var todayDate = new Date().toISOString().slice(0, 10)
-          fileLink.setAttribute(
-            'download',
-            todayDate + '_experiences_prof.xlsx'
-          )
-          document.body.appendChild(fileLink)
+/* RESET */
+function deletefilterStage() {
+  NProgress.start()
 
-          fileLink.click()
-          NProgress.done()
-        })
-        .catch(() => {})
-      NProgress.done()
-    }
-  }
+  store.dispatch('stage/deleteFilterStage')
+  store.dispatch('stage/fetchStages', true)
+
+  dialog.value = false
+  NProgress.done()
+}
+
+/* EXPORT EXCEL */
+function exportStages() {
+  NProgress.start()
+
+  store
+    .dispatch('stage/fetchStagesExport', stage.filter)
+    .then(response => {
+      const fileURL = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      const today = new Date().toISOString().slice(0, 10)
+
+      link.href = fileURL
+      link.setAttribute('download', `${today}_experiences_prof.xlsx`)
+      document.body.appendChild(link)
+      link.click()
+    })
+    .finally(() => NProgress.done())
 }
 </script>
+
+<style scoped>
+</style>

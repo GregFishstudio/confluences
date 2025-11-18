@@ -32,7 +32,7 @@ const error = ref(null)
 // 🔧 MÊME configuration que Login.vue
 const getOidcConfig = () => {
   const authority = import.meta.env.VITE_AUTHORITY_URL || 'http://localhost:5000'
-  const clientId = import.meta.env.VITE_CLIENT_ID || 'confluences-web'
+  const clientId = import.meta.env.VITE_CLIENT_ID || 'gestion-stagiaire'
   
   return {
     authority,

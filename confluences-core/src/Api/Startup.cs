@@ -27,45 +27,35 @@ namespace Api
             Configuration = configuration;
         }
 
+        // This method gets called by the runtime. Use this method to add services to the container.
+        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
             SyncfusionLicenseProvider.RegisterLicense(Configuration["SyncfusionKey"]);
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-            // ✅ CORS bien défini
             services.AddCors(options =>
-{
-    options.AddPolicy("default", policy =>
-    {
-        policy
-            .WithOrigins(
-                "http://localhost:8080",             // Front local (vite dev)
-                "https://localhost:8080",            // Si ton vite tourne en https
-                "http://host.docker.internal:8080",  // Front vu depuis Docker
-                "https://host.docker.internal:8080", // Variante https
-                "http://localhost:5002",             // MVC local
-                "https://localhost:5002"             // MVC via https
-            )
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials()
-            .WithExposedHeaders("Content-Disposition");
-    });
-});
+            {
+                // this defines a CORS policy called "default"
+                options.AddPolicy("default", policy =>
+                {
+                    policy.WithOrigins(Configuration["URLVueJsGestionStagiaire"], Configuration["URLMVC"])
+                    .WithExposedHeaders("Content-Disposition")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
 
 
-            // ✅ JSON
             services.AddControllers().AddNewtonsoftJson(options =>
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
             );
-
-            // ✅ Form upload 1 GB
             services.Configure<FormOptions>(options =>
             {
+                // Set the limit to 1 GB
                 options.MultipartBodyLengthLimit = 1073741824; // 1 GB
             });
 
-            // ✅ Swagger
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo
@@ -81,58 +71,62 @@ namespace Api
                 });
             });
 
-            // ✅ JWT config
             services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options =>
                 {
                     options.Authority = Configuration["URLIdentityServer4"];
+
                     options.RequireHttpsMetadata = false;
+
                     options.Audience = "api1";
                 });
+            //services.AddDbContext<ConfluencesDbContext>(options =>
+            //    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            // ✅ PostgreSQL
             services.AddEntityFrameworkNpgsql().AddDbContext<ConfluencesDbContext>(
-                opt => opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"))
-            );
+                opt => opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
-            // ✅ Claims
             services.AddSingleton<Microsoft.AspNetCore.Authentication.IClaimsTransformation, KarekeClaimsTransformer>();
 
-            // ✅ Roles
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("Teacher", policy => policy.RequireClaim(ClaimTypes.Role, "Teacher"));
                 options.AddPolicy("Student", policy => policy.RequireClaim(ClaimTypes.Role, "Student"));
+                //options.AddPolicy("Teacher", policy => {
+                //    policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
+                //    policy.RequireClaim("role", "Teacher");
+                //});
+
             });
 
             services.AddAutoMapper(typeof(Startup));
         }
 
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+           // QuestPDF.Settings.License = LicenseType.Community;
+
             if (env.IsDevelopment() || Configuration["UseDeveloperExceptionPage"] == "true")
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
 
-            // ⚠️ L'ordre ici est CRUCIAL
-
-            app.UseRouting();
-
-            // ✅ CORS doit être entre UseRouting et UseAuthentication
             app.UseCors("default");
 
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            var forwardedHeaderOptions = new ForwardedHeadersOptions
+            var fordwardedHeaderOptions = new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             };
-            forwardedHeaderOptions.KnownNetworks.Clear();
-            forwardedHeaderOptions.KnownProxies.Clear();
-            app.UseForwardedHeaders(forwardedHeaderOptions);
+            fordwardedHeaderOptions.KnownNetworks.Clear();
+            fordwardedHeaderOptions.KnownProxies.Clear();
+            app.UseForwardedHeaders(fordwardedHeaderOptions);
+
+            app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseStaticFiles();
 

@@ -32,73 +32,62 @@ namespace IdentityServerAspNetIdentity
         {
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-            // --- CORS pour ton front Vue.js ---
             services.AddCors(options =>
             {
+                // this defines a CORS policy called "default"
                 options.AddPolicy("default", policy =>
                 {
-                    policy.WithOrigins(
-                        Configuration["URLVueJsGestionStagiaire"].TrimEnd('/')
-                    )
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();
+                    policy.WithOrigins(Configuration["URLVueJsGestionStagiaire"].Remove(Configuration["URLVueJsGestionStagiaire"].Length - 1))
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
                 });
             });
 
             services.AddControllersWithViews();
-services.AddRazorPages();
 
-            // --- Database ---
+            //services.AddDbContext<ConfluencesDbContext>(options =>
+            //    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            var test = Configuration.GetConnectionString("DefaultConnection");
             services.AddEntityFrameworkNpgsql().AddDbContext<ConfluencesDbContext>(
-                opt => opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"))
-            );
+                opt => opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
 
-            // --- Identity ---
+
+
             services.AddIdentity<ApplicationUser, ApplicationRole>()
                 .AddEntityFrameworkStores<ConfluencesDbContext>()
                 .AddDefaultTokenProviders()
+                // pour les roles
                 .AddClaimsPrincipalFactory<ClaimsFactory>();
 
-            // --- IdentityServer ---
-           var builder = services.AddIdentityServer(options =>
-{
-    options.IssuerUri = "http://localhost:5000";
 
-    options.UserInteraction = new IdentityServer4.Configuration.UserInteractionOptions
-    {
-       LoginUrl = "/Identity/Account/Login",
-        LogoutUrl = "/Identity/Account/Logout",
-        ErrorUrl = "/Identity/Account/AccessDenied",
-        LoginReturnUrlParameter = "returnUrl"
-    };
+            var builder = services.AddIdentityServer(options =>
+                {
+                    //options.PublicOrigin = Configuration["URLIdentityServer4"];
+                    options.Events.RaiseErrorEvents = true;
+                    options.Events.RaiseInformationEvents = true;
+                    options.Events.RaiseFailureEvents = true;
+                    options.Events.RaiseSuccessEvents = true;
+                 })
+                .AddInMemoryIdentityResources(Config.Ids)
+                .AddInMemoryApiResources(Config.Apis)
+                .AddInMemoryClients(Config.Clients)
+                .AddAspNetIdentity<ApplicationUser>();
 
-    options.Events.RaiseErrorEvents = true;
-    options.Events.RaiseInformationEvents = true;
-    options.Events.RaiseFailureEvents = true;
-    options.Events.RaiseSuccessEvents = true;
-})
-.AddInMemoryIdentityResources(Config.IdentityResources)
-.AddInMemoryApiResources(Config.ApiResources)
-.AddInMemoryApiScopes(Config.ApiScopes)
-.AddInMemoryClients(Config.Clients)
-.AddAspNetIdentity<ApplicationUser>();
-
-builder.AddDeveloperSigningCredential();
-
+            builder.AddDeveloperSigningCredential();
 
             services.ConfigureNonBreakingSameSiteCookies();
+
+
         }
 
         public void Configure(IApplicationBuilder app, ConfluencesDbContext dataContext)
         {
-            // --- Cookie Policy ---
-            app.UseCookiePolicy(new CookiePolicyOptions
-            {
-                MinimumSameSitePolicy = SameSiteMode.Lax
-            });
+            // Add this before any other middleware that might write cookies
+            app.UseCookiePolicy(new CookiePolicyOptions { MinimumSameSitePolicy = SameSiteMode.Lax });
 
+            // This will write cookies, so make sure it's after the cookie policy
             app.UseAuthentication();
+
             app.UseCors("default");
 
             if (Environment.IsDevelopment() || Configuration["UseDeveloperExceptionPage"] == "true")
@@ -107,26 +96,23 @@ builder.AddDeveloperSigningCredential();
             }
 
             app.UseStaticFiles();
+
             app.UseRouting();
 
-            // --- Important pour Docker / reverse proxy ---
-            var forwardedHeaderOptions = new ForwardedHeadersOptions
+            var fordwardedHeaderOptions = new ForwardedHeadersOptions
             {
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             };
-            forwardedHeaderOptions.KnownNetworks.Clear();
-            forwardedHeaderOptions.KnownProxies.Clear();
-            app.UseForwardedHeaders(forwardedHeaderOptions);
+            fordwardedHeaderOptions.KnownNetworks.Clear();
+            fordwardedHeaderOptions.KnownProxies.Clear();
+            app.UseForwardedHeaders(fordwardedHeaderOptions);
 
-            // --- IdentityServer ---
             app.UseIdentityServer();
 
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapDefaultControllerRoute();
-                    endpoints.MapRazorPages();
-
             });
         }
     }

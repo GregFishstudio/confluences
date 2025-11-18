@@ -1,114 +1,123 @@
 <!-- 
-  -- Projet: Gestion des stagiaires
-  -- Auteur : Tim Allemann
-  -- Date : 17.09.2022
-  -- Description : Formulaire d'ajout d'un métier (anciens noms) au filtre
-  -- Fichier : FilterEntrepriseAddMetierOldNames.vue
-  -->
+  Projet: Gestion des stagiaires
+  Auteur : Tim Allemann
+  Migration Vue 3 / Vuetify 3
+  Description : Ajout d’un métier via ses anciens noms (oldNames)
+  Fichier : FilterEntrepriseAddMetierOldNames.vue
+-->
 
 <template>
-  <v-row justify="end">
-    <v-form ref="formCreateMetier" v-model="validCreateMetier" lazy-validation>
-      <v-dialog v-model="dialog" max-width="600px">
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn
-            color="success"
-            dark
-            v-bind="attrs"
-            v-on="on"
-            outlined
-            fab
-            x-small
-            class="mx-3"
-          >
-            <v-icon>
-              mdi-plus
-            </v-icon>
-          </v-btn>
-        </template>
-        <v-card>
-          <v-card-title>
-            <span class="headline">Ajouter un métier (Nom commun)</span>
-          </v-card-title>
-          <v-card-text>
-            <v-autocomplete
-              v-model="metier.typeMetierId"
-              :items="
-                typeMetier.typeMetiers.filter(
-                  item => item.oldNames != null && item.oldNames != ''
-                )
-              "
-              item-value="typeMetierId"
-              item-text="oldNames"
-              :rules="[v => !!v || 'Obligatoire']"
-              label="Type de métier"
-              required
-            ></v-autocomplete>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="blue darken-1" text @click="dialog = false">
-              Fermer
-            </v-btn>
-            <v-btn color="blue darken-1" text @click="submit()"
-              >Sauvegarder
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </v-form>
-  </v-row>
+  <!-- Bouton d’activation -->
+  <v-btn
+    icon
+    variant="outlined"
+    size="small"
+    class="ml-2"
+    color="success"
+    @click="dialog = true"
+  >
+    <v-icon>mdi-plus</v-icon>
+  </v-btn>
+
+  <!-- Dialog -->
+  <v-dialog v-model="dialog" max-width="450px" persistent>
+    <v-card rounded="lg">
+      <v-card-title class="d-flex align-center">
+        <v-icon class="mr-2">mdi-tag-plus</v-icon>
+        <span class="text-h6 font-weight-bold">Ajouter un métier (Nom commun)</span>
+      </v-card-title>
+
+      <v-divider />
+
+      <v-card-text class="pt-4">
+        <v-form ref="formCreateMetier" v-model="validCreateMetier">
+          <v-autocomplete
+            v-model="metier.typeMetierId"
+            :items="metiersOldNames"
+            item-title="oldNames"
+            item-value="typeMetierId"
+            :rules="[v => !!v || 'Obligatoire']"
+            label="Nom commun / Ancien nom"
+            clearable
+            density="comfortable"
+          />
+        </v-form>
+      </v-card-text>
+
+      <v-divider />
+
+      <v-card-actions class="py-3 px-4">
+        <v-spacer />
+
+        <v-btn variant="text" color="grey" @click="dialog = false">
+          Fermer
+        </v-btn>
+
+        <v-btn color="primary" @click="submit">
+          Sauvegarder
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
-<script>
+<script setup>
+import { ref, computed, onBeforeMount } from 'vue'
 import store from '@/store/index.js'
-import { mapState } from 'vuex'
 import NProgress from 'nprogress'
 
-function getTypeMetiers() {
-  store.dispatch('typeMetier/fetchTypeMetiers', {}).then(() => {})
-}
+const dialog = ref(false)
+const validCreateMetier = ref(true)
 
-export default {
-  data: () => ({
-    validCreateMetier: true,
-    dialog: false,
-    metier: {
-      typeMetierId: 0,
-      libelle: '',
-      oldNames: ''
-    }
-  }),
+const metier = ref({
+  typeMetierId: null,
+  libelle: '',
+  oldNames: ''
+})
 
-  // Chargement les métiers avant la création du composant
-  beforeCreate(routeTo, routeFrom, next) {
-    getTypeMetiers(routeTo, next)
-  },
+const typeMetier = computed(() => store.state.typeMetier)
+const entreprise = computed(() => store.state.entreprise)
 
-  computed: {
-    ...mapState(['entreprise', 'typeMetier'])
-  },
+onBeforeMount(() => {
+  store.dispatch('typeMetier/fetchTypeMetiers')
+})
 
-  methods: {
-    // Ajoute le métier au filtre
-    submit() {
-      if (this.$refs.formCreateMetier.validate()) {
-        this.metier.libelle = this.typeMetier.typeMetiers.find(
-          t => t.typeMetierId == this.metier.typeMetierId
-        ).libelle
-        this.metier.oldNames = this.typeMetier.typeMetiers.find(
-          t => t.typeMetierId == this.metier.typeMetierId
-        ).oldNames
+/* Liste filtrée : uniquement les métiers ayant oldNames */
+const metiersOldNames = computed(() =>
+  typeMetier.value.typeMetiers.filter(
+    m => m.oldNames && m.oldNames.trim() !== ''
+  )
+)
 
-        NProgress.start()
-        store
-          .dispatch('entreprise/addFilterEntrepriseMetier', this.metier)
-          .then(() => {})
-          .catch(() => {})
-        this.dialog = false
+const formCreateMetier = ref(null)
+
+function submit() {
+  const form = formCreateMetier.value
+  if (!form) return
+
+  form.validate().then(({ valid }) => {
+    if (!valid) return
+
+    const selected = typeMetier.value.typeMetiers.find(
+      t => t.typeMetierId === metier.value.typeMetierId
+    )
+
+    if (!selected) return
+
+    metier.value.libelle = selected.libelle
+    metier.value.oldNames = selected.oldNames
+
+    NProgress.start()
+
+    store
+      .dispatch('entreprise/addFilterEntrepriseMetier', metier.value)
+      .catch(() => {})
+      .finally(() => {
+        dialog.value = false
         NProgress.done()
-      }
-    }
-  }
+      })
+  })
 }
 </script>
+
+<style scoped></style>

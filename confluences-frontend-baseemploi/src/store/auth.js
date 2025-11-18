@@ -24,7 +24,7 @@ export const useAuthStore = defineStore('auth', {
         const response = await axios.post(
           'http://localhost:5000/connect/token',
           {
-            client_id: 'confluences-web',
+            client_id: 'gestion-stagiaire',
             grant_type: 'password',
             username: email,
             password: password
