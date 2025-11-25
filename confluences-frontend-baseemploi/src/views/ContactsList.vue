@@ -98,105 +98,69 @@
   </v-container>
 </template>
 
-<script>
-import store from '@/store/index.js'
-import { mapState } from 'vuex'
-import CreateContactFromList from '@/components/CreateContactFromList.vue'
+<script setup>
+import { ref, computed, onBeforeMount } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter, onBeforeRouteLeave } from 'vue-router';
+import CreateContactFromList from '@/components/CreateContactFromList.vue';
 
-// Fonctions de chargement des données (inchangées)
-function getContacts(routeTo, next) {
-  store.dispatch('contact/fetchContacts', true).then(() => {
-    next()
-  })
-}
+const store = useStore();
+const router = useRouter();
 
-function loadData(routeTo, routeFrom, next) {
-  getContacts(routeTo, next)
-}
+// --- État Réactif ---
+const search = ref('');
+const options = ref({}); 
 
-export default {
-  components: {
-    CreateContactFromList
-  },
+// --- Computed Properties ---
+const contact = computed(() => store.state.contact);
+const settings = computed(() => store.state.settings);
 
-  data: () => ({
-    options: {},
-    search: '',
-    headers: [
-      {
-        text: 'Entreprise',
-        value: 'entreprise.nom'
-      },
-      {
-        text: 'Nom',
-        value: 'nom',
-        class: 'font-weight-bold'
-      },
-      {
-        text: 'Prénom', // Correction de la typo 'Prenom'
-        value: 'prenom',
-        class: 'font-weight-bold'
-      },
-      {
-        text: 'Fonction',
-        value: 'fonction'
-      },
-      {
-        text: 'Email',
-        value: 'email'
-      },
-      {
-        text: 'Téléphone fixe',
-        value: 'telFix'
-      },
-      { text: 'Natel', value: 'natel' }
-    ],
-    contacts: []
-  }),
+// --- Données Statiques ---
+const headers = [
+    { text: 'Entreprise', value: 'entreprise.nom' },
+    { text: 'Nom', value: 'nom', class: 'font-weight-bold' },
+    { text: 'Prénom', value: 'prenom', class: 'font-weight-bold' },
+    { text: 'Fonction', value: 'fonction' },
+    { text: 'Email', value: 'email' },
+    { text: 'Téléphone fixe', value: 'telFix' },
+    { text: 'Natel', value: 'natel' }
+];
 
-  // Hooks de navigation (inchangés)
-  beforeRouteEnter(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteUpdate(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteLeave(routeTo, routeFrom, next) {
-    store
-      .dispatch('settings/setCurrentPageContact', {
-        number: this.options.page
-      })
-      .then(() => {})
-    next()
-  },
+// --- Hooks ---
 
-  created() {
-    this.options.page = store.state.settings.currentPageContact
-  },
+// FIX: Charger les données au montage pour résoudre le problème de rechargement après l'édition
+onBeforeMount(() => {
+    store.dispatch('contact/fetchContacts', true);
+});
 
-  computed: {
-    ...mapState(['contact', 'settings'])
-  },
+// Hook de navigation de sortie (sauvegarde la page actuelle)
+onBeforeRouteLeave((routeTo, routeFrom, next) => {
+    store.dispatch('settings/setCurrentPageContact', { number: options.value.page });
+    next();
+});
 
-  methods: {
-    selectRow(event) {
-      this.$router.push({
-        name: 'Contact-Modifier',
-        params: { id: event.contactId }
-      })
-    },
-    updateNumberItems(event) {
-      store
-        .dispatch('settings/setItemsPerPage', {
-          number: event
-        })
-        .then(() => {})
-    },
-    updatePageSearch() {
-      this.options.page = 1
-    }
-  }
-}
+// Initialisation (simule le 'created')
+options.value.page = store.state.settings.currentPageContact;
+
+// --- Méthodes ---
+const selectRow = (event, row) => {
+    const item = row ? row.item : event;
+    const id = item.contactId || item.ContactId;
+
+    if (id) {
+        router.push({ name: 'Contact-Modifier', params: { id: id } });
+    } else {
+        console.error("Erreur: ID de contact manquant lors de la sélection.");
+    }
+};
+
+const updateNumberItems = (event) => {
+    store.dispatch('settings/setItemsPerPage', { number: event });
+};
+
+const updatePageSearch = () => {
+    options.value.page = 1;
+};
 </script>
 
 <style scoped>

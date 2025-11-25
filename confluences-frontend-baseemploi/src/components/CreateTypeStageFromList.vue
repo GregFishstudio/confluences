@@ -1,13 +1,11 @@
 <template>
   <v-row class="d-flex justify-end">
     <v-dialog v-model="dialog" max-width="520px" persistent>
-      <!-- Bouton d'ouverture -->
-      <template v-slot:activator="{ on, attrs }">
+      <template #activator="{ props }">
         <v-btn
           color="primary"
           rounded
-          v-bind="attrs"
-          v-on="on"
+          v-bind="props"
           class="elevation-2"
         >
           <v-icon left>mdi-plus</v-icon>
@@ -15,9 +13,7 @@
         </v-btn>
       </template>
 
-      <!-- Contenu de la popup -->
       <v-card rounded="lg" class="pa-2">
-        <!-- Header moderne -->
         <v-card-title class="d-flex align-center py-4">
           <v-icon color="primary" class="mr-2">mdi-briefcase-clock-outline</v-icon>
           <span class="text-h6 font-weight-bold">
@@ -27,7 +23,6 @@
 
         <v-divider></v-divider>
 
-        <!-- Formulaire -->
         <v-card-text class="pt-6">
           <v-form ref="formCreateTypeStage" v-model="validCreateTypeStage" lazy-validation>
             <v-text-field
@@ -44,7 +39,6 @@
           </v-form>
         </v-card-text>
 
-        <!-- Boutons -->
         <v-divider></v-divider>
         <v-card-actions class="d-flex justify-end">
           <v-btn text color="grey darken-1" @click="dialog = false">
@@ -61,49 +55,61 @@
   </v-row>
 </template>
 
-<script>
-import store from '@/store/index.js'
-import NProgress from 'nprogress'
+<script setup>
+import { ref } from 'vue';
+import { useStore } from 'vuex';
+import NProgress from 'nprogress';
 
-export default {
-  data: () => ({
-    validCreateTypeStage: true,
-    dialog: false,
-    typeStage: {
-      typeStageId: 0,
-      code: null,
-      libelle: null,
-      nom: null
-    },
-    libelleRules: [
-      v => !!v || 'Le champ est obligatoire',
-      v => !v || v.length <= 50 || 'Le nom doit contenir moins de 50 caractères'
-    ]
-  }),
+const store = useStore();
 
-  methods: {
-    submit() {
-      if (this.$refs.formCreateTypeStage.validate()) {
-        NProgress.start()
+// --- État Réactif (data() migré vers ref) ---
+const dialog = ref(false);
+const validCreateTypeStage = ref(true);
+const formCreateTypeStage = ref(null); // Référence au V-Form
 
-        store
-          .dispatch('typeStage/createTypeStage', this.typeStage)
-          .then(() => {
-            this.$refs.formCreateTypeStage.reset()
-            this.dialog = false
-          })
-          .catch(() => {})
+const typeStage = ref({
+  typeStageId: 0,
+  code: null,
+  libelle: null,
+  nom: null
+});
 
-        NProgress.done()
-      }
-    }
+const libelleRules = [
+  v => !!v || 'Le champ est obligatoire',
+  v => !v || v.length <= 50 || 'Le nom doit contenir moins de 50 caractères'
+];
+
+// --- Méthode de soumission (migrée vers la Composition API) ---
+const submit = async () => {
+  // Valider le formulaire via la référence ref
+  const { valid: formValid } = await formCreateTypeStage.value.validate();
+
+  if (formValid) {
+    NProgress.start();
+
+    store
+      .dispatch('typeStage/createTypeStage', typeStage.value)
+      .then(() => {
+        // Succès : Réinitialiser le formulaire et fermer la modale
+        if (formCreateTypeStage.value) {
+            formCreateTypeStage.value.reset();
+        }
+        dialog.value = false;
+      })
+      .catch((error) => {
+        console.error("Erreur lors de la création du type de stage:", error);
+      })
+      .finally(() => {
+        NProgress.done();
+      });
   }
-}
+};
 </script>
 
 <style scoped>
 /* Style léger du hover bouton */
 .v-btn {
+  /* CORRIGÉ: Le côlon (:) est maintenant présent après 'transition' */
   transition: 0.2s ease-in-out;
 }
 .v-btn:hover {

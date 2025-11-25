@@ -1,11 +1,3 @@
-<!-- 
-  -- Projet: Gestion des stagiaires
-  -- Auteur : Tim Allemann
-  -- Date : 16.09.2020
-  -- Description : Formulaire de modification d'une offre
-  -- Fichier : typeJobSearchAssistanceEdit.vue
-  -->
-
 <template>
   <v-container>
     <v-row>
@@ -13,99 +5,112 @@
         <h1>Type ARE</h1>
       </v-col>
     </v-row>
-    <v-row>
-      <v-col cols="12">
+    
+    <v-card class="pa-4 elevation-2">
+      <v-card-text>
         <v-form
           ref="formCreatetypeJobSearchAssistance"
           v-model="validCreatetypeJobSearchAssistance"
           lazy-validation
         >
           <v-text-field
-            v-model="typeJobSearchAssistance.description"
+            v-model="typeJobSearchAssistanceRef.description"
             :rules="descriptionRules"
             label="Description"
+            outlined
+            dense
+            required
           ></v-text-field>
         </v-form>
-      </v-col>
-    </v-row>
+      </v-card-text>
+    </v-card>
 
-    <div class="action-container">
-      <v-row>
-        <v-col>
-          <div class="text-center">
-            <v-btn
-              class="ma-2"
-              tile
-              color="success"
-              dark
-              min-width="150"
-              @click="submit()"
-            >
-              Sauvegarder
-            </v-btn>
-            <DeleteTypeJobSearchAssistance
-              :typeJobSearchAssistance="this.typeJobSearchAssistance"
-            />
-            <v-btn
-              class="ma-2"
-              tile
-              color="primary"
-              dark
-              min-width="150"
-              @click="$router.go(-1)"
-            >
-              Annuler
-            </v-btn>
-          </div>
+    <div class="action-container action-bar-fixed">
+      <v-row class="fill-height ma-0">
+        <v-col class="d-flex justify-end align-center py-2">
+          <v-btn
+            class="ma-2"
+            color="success"
+            min-width="150"
+            @click="submit"
+          >
+            Sauvegarder
+          </v-btn>
+          <DeleteTypeJobSearchAssistance
+            :typeJobSearchAssistance="typeJobSearchAssistanceRef"
+            class="ma-2"
+          />
+          <v-btn
+            class="ma-2"
+            color="primary"
+            min-width="150"
+            @click="router.go(-1)"
+          >
+            Annuler
+          </v-btn>
         </v-col>
       </v-row>
     </div>
   </v-container>
 </template>
 
-<script>
-import store from '@/store/index.js'
-import NProgress from 'nprogress'
-import DeleteTypeJobSearchAssistance from '@/components/DeleteTypeJobSearchAssistance.vue'
+<script setup>
+import { ref } from 'vue';
+import { useStore } from 'vuex';
+import { useRoute, useRouter } from 'vue-router';
+import NProgress from 'nprogress';
+import DeleteTypeJobSearchAssistance from '@/components/DeleteTypeJobSearchAssistance.vue';
 
-export default {
-  props: {
-    typeJobSearchAssistance: {
-      type: Object,
-      required: true
-    }
-  },
+const store = useStore();
+const route = useRoute();
+const router = useRouter();
 
-  components: {
-    DeleteTypeJobSearchAssistance
-  },
+// Utilise la prop passée par le router guard
+const typeJobSearchAssistanceRef = ref(route.params.typeJobSearchAssistance || {});
 
-  data: () => ({
-    validCreatetypeJobSearchAssistance: true,
-    dialog: false,
-    descriptionRules: [v => !!v || 'Le champ est obligatoire']
-  }),
+// --- État Réactif ---
+const validCreatetypeJobSearchAssistance = ref(true);
+const formCreatetypeJobSearchAssistance = ref(null);
+const dialog = ref(false); // Ajouté pour la cohérence même s'il n'est pas utilisé dans le template
 
-  methods: {
-    // Si le formulaire est valide, sauvegarde de l'offre
-    submit() {
-      if (this.$refs.formCreatetypeJobSearchAssistance.validate()) {
-        NProgress.start()
-        store
-          .dispatch(
-            'typeJobSearchAssistance/editTypeJobSearchAssistance',
-            this.typeJobSearchAssistance
-          )
-          .then(() => {
-            this.$router.push({
-              name: 'TypeJobSearchAssistances'
-            })
-          })
-          .catch(() => {})
-        this.dialog = false
-        NProgress.done()
-      }
-    }
+// --- Règles de Validation ---
+const descriptionRules = [v => !!v || 'Le champ est obligatoire'];
+
+// --- Méthode de soumission ---
+const submit = async () => {
+  const { valid: formValid } = await formCreatetypeJobSearchAssistance.value.validate();
+
+  if (formValid) {
+    NProgress.start();
+    store
+      .dispatch('typeJobSearchAssistance/editTypeJobSearchAssistance', typeJobSearchAssistanceRef.value)
+      .then(() => {
+        router.push({ name: 'TypeJobSearchAssistances' });
+      })
+      .catch((error) => {
+          console.error("Erreur de sauvegarde du type ARE:", error);
+      })
+      .finally(() => {
+          dialog.value = false;
+          NProgress.done();
+      });
   }
-}
+};
 </script>
+
+<style scoped>
+.action-bar-fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 64px;
+  background: white;
+  border-top: 1px solid #e0e0e0;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+  z-index: 1000;
+}
+.v-container {
+    padding-bottom: 80px;
+}
+</style>

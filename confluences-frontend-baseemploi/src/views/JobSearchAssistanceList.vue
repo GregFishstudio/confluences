@@ -70,13 +70,12 @@
         <template v-slot:item.keyWords="{ item }">
           <div class="d-flex flex-wrap" style="max-width: 250px;">
             <v-chip
-              v-for="(word, index) in item.keyWords.split(',').map(s => s.trim())"
+              v-for="(word, index) in item.keyWords.split(',').map(s => s.trim()).filter(s => s.length > 0)"
               :key="index"
               x-small
               class="ma-05"
               color="blue-grey lighten-5"
               text-color="blue-grey darken-2"
-              v-show="word.length > 0"
             >
               {{ word }}
             </v-chip>
@@ -96,121 +95,76 @@
   </v-container>
 </template>
 
-<script>
-import store from '@/store/index.js'
-import { mapState } from 'vuex'
-import CreateJobSearchAssistanceFromList from '@/components/CreateJobSearchAssistanceFromList.vue'
-import moment from 'moment'
+<script setup>
+import { ref, computed, onBeforeMount } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter, onBeforeRouteLeave } from 'vue-router';
+import CreateJobSearchAssistanceFromList from '@/components/CreateJobSearchAssistanceFromList.vue';
+import moment from 'moment';
 
-// Fonctions de chargement des données (inchangées)
-function getJobSearchAssistance(routeTo, next) {
-  store
-    .dispatch('jobSearchAssistance/fetchJobSearchAssistances', true)
-    .then(() => {
-      next()
-    })
-}
+const store = useStore();
+const router = useRouter();
 
-function loadData(routeTo, routeFrom, next) {
-  getJobSearchAssistance(routeTo, next)
-}
+// --- État Réactif ---
+const search = ref('');
+const options = ref({}); 
 
-export default {
-  components: {
-    CreateJobSearchAssistanceFromList
-  },
+// --- Computed Properties ---
+const jobSearchAssistance = computed(() => store.state.jobSearchAssistance);
+const settings = computed(() => store.state.settings);
 
-  data: () => ({
-    options: {},
-    search: '',
-    headers: [
-      {
-        text: 'Adresse',
-        value: 'address'
-      },
-      {
-        text: 'Ville',
-        value: 'town'
-      },
-      {
-        text: 'Code postal',
-        value: 'zipCode'
-      },
-      {
-        text: 'Occurrence',
-        value: 'typeJobSearchAssistanceOccurrence.description'
-      },
-      {
-        text: 'Date',
-        value: 'date'
-      },
-      {
-        text: 'Description',
-        value: 'description'
-      },
-      {
-        text: 'Site internet',
-        value: 'website'
-      },
-      {
-        text: 'Mots clés',
-        value: 'keyWords'
-      },
-      {
-        text: 'Type',
-        value: 'typeJobSearchAssistance.description',
-        class: 'font-weight-bold'
-      }
-    ],
-    jobSearchAssistances: []
-  }),
+// --- Données Statiques ---
+const headers = [
+    { text: 'Adresse', value: 'address' },
+    { text: 'Ville', value: 'town' },
+    { text: 'Code postal', value: 'zipCode' },
+    { text: 'Occurrence', value: 'typeJobSearchAssistanceOccurrence.description' },
+    { text: 'Date', value: 'date' },
+    { text: 'Description', value: 'description' },
+    { text: 'Site internet', value: 'website' },
+    { text: 'Mots clés', value: 'keyWords' },
+    { text: 'Type', value: 'typeJobSearchAssistance.description', class: 'font-weight-bold' }
+];
 
-  // Hooks de navigation (inchangés)
-  beforeRouteEnter(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteUpdate(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteLeave(routeTo, routeFrom, next) {
-    store
-      .dispatch('settings/setCurrentPageJobSearchAssistance', {
-        number: this.options.page
-      })
-      .then(() => {})
-    next()
-  },
+// --- Hooks ---
 
-  created() {
-    this.options.page = store.state.settings.currentPageJobSearchAssistance
-  },
+// FIX: Charger les données au montage pour résoudre le problème de rechargement
+onBeforeMount(() => {
+    store.dispatch('jobSearchAssistance/fetchJobSearchAssistances', true);
+});
 
-  computed: {
-    ...mapState(['jobSearchAssistance', 'settings'])
-  },
+// Hook de navigation de sortie (sauvegarde la page actuelle)
+onBeforeRouteLeave((routeTo, routeFrom, next) => {
+    store.dispatch('settings/setCurrentPageJobSearchAssistance', { number: options.value.page });
+    next();
+});
 
-  methods: {
-    selectRow(event) {
-      this.$router.push({
-        name: 'JobSearchAssistance-Modifier',
-        params: { id: event.jobSearchAssistanceId }
-      })
-    },
-    updateNumberItems(event) {
-      store
-        .dispatch('settings/setItemsPerPage', {
-          number: event
-        })
-        .then(() => {})
-    },
-    updatePageSearch() {
-      this.options.page = 1
-    },
-    formatDate: function(date) {
-      return moment(date, 'YYYY-MM-DD').format('YYYY-MM-DD')
-    }
-  }
-}
+// Initialisation (simule le 'created')
+options.value.page = store.state.settings.currentPageJobSearchAssistance;
+
+// --- Méthodes ---
+const selectRow = (event, row) => {
+    const item = row ? row.item : event;
+    const id = item.jobSearchAssistanceId || item.JobSearchAssistanceId;
+
+    if (id) {
+        router.push({ name: 'JobSearchAssistance-Modifier', params: { id: id } });
+    } else {
+        console.error("Erreur: ID ARE manquant lors de la sélection.");
+    }
+};
+
+const updateNumberItems = (event) => {
+    store.dispatch('settings/setItemsPerPage', { number: event });
+};
+
+const updatePageSearch = () => {
+    options.value.page = 1;
+};
+
+const formatDate = (date) => {
+    return moment(date, 'YYYY-MM-DD').format('YYYY-MM-DD');
+};
 </script>
 
 <style scoped>

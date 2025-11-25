@@ -3,18 +3,18 @@ using Api.Utility;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Security.Claims;
-using System;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Syncfusion.Licensing;
 using Microsoft.AspNetCore.Http.Features;
+using Syncfusion.Licensing;
+using System;
+using System.Security.Claims;
+using QuestPDF.Infrastructure;
 
 namespace Api
 {
@@ -27,101 +27,113 @@ namespace Api
             Configuration = configuration;
         }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
             SyncfusionLicenseProvider.RegisterLicense(Configuration["SyncfusionKey"]);
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
+            //
+            // 🔥 CORS UNIQUE — autorisation du front Vue + MVC
+            //
             services.AddCors(options =>
-            {
-                // this defines a CORS policy called "default"
-                options.AddPolicy("default", policy =>
-                {
-                    policy.WithOrigins(Configuration["URLVueJsGestionStagiaire"], Configuration["URLMVC"])
-                    .WithExposedHeaders("Content-Disposition")
-                        .AllowAnyHeader()
-                        .AllowAnyMethod();
-                });
-            });
-
+{
+    options.AddPolicy("Frontend", builder =>
+    {
+        builder
+            .WithOrigins(
+                "http://localhost:8080",
+                "http://localhost:5002",
+                "http://localhost"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials()
+            .WithExposedHeaders("Content-Disposition"); // 🔥 OBLIGATOIRE POUR PDF
+    });
+});
 
             services.AddControllers().AddNewtonsoftJson(options =>
-                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-            );
-            services.Configure<FormOptions>(options =>
             {
-                // Set the limit to 1 GB
-                options.MultipartBodyLengthLimit = 1073741824; // 1 GB
+                options.SerializerSettings.ReferenceLoopHandling =
+                    Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             });
 
+            services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = 1073741824; // 1GB
+            });
+
+            //
+            // Swagger
+            //
             services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",
                     Title = "Confluences API",
-                    Description = "Api for the baseemploi and plateforme collaborative",
-                    Contact = new OpenApiContact
-                    {
-                        Name = "Tim Allemann",
-                        Url = new Uri("https://auxitech.ch/contact/")
-                    }
+                    Description = "API Confluences (Base Emploi + Plateforme)",
                 });
             });
 
+            //
+            // Auth JWT / IdentityServer4
+            //
             services.AddAuthentication("Bearer")
                 .AddJwtBearer("Bearer", options =>
                 {
                     options.Authority = Configuration["URLIdentityServer4"];
-
                     options.RequireHttpsMetadata = false;
-
                     options.Audience = "api1";
                 });
-            //services.AddDbContext<ConfluencesDbContext>(options =>
-            //    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddEntityFrameworkNpgsql().AddDbContext<ConfluencesDbContext>(
-                opt => opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
+            //
+            // EF Core Postgres
+            //
+            services.AddEntityFrameworkNpgsql().AddDbContext<ConfluencesDbContext>(opt =>
+                opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"))
+            );
 
-            services.AddSingleton<Microsoft.AspNetCore.Authentication.IClaimsTransformation, KarekeClaimsTransformer>();
+            services.AddSingleton<
+                Microsoft.AspNetCore.Authentication.IClaimsTransformation,
+                KarekeClaimsTransformer>();
 
+            //
+            // Authorization
+            //
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("Teacher", policy => policy.RequireClaim(ClaimTypes.Role, "Teacher"));
-                options.AddPolicy("Student", policy => policy.RequireClaim(ClaimTypes.Role, "Student"));
-                //options.AddPolicy("Teacher", policy => {
-                //    policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
-                //    policy.RequireClaim("role", "Teacher");
-                //});
-
+                options.AddPolicy("Teacher", p => p.RequireClaim(ClaimTypes.Role, "Teacher"));
+                options.AddPolicy("Student", p => p.RequireClaim(ClaimTypes.Role, "Student"));
             });
 
             services.AddAutoMapper(typeof(Startup));
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-           // QuestPDF.Settings.License = LicenseType.Community;
+            QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
-            if (env.IsDevelopment() || Configuration["UseDeveloperExceptionPage"] == "true")
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
 
-            app.UseCors("default");
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
-            var fordwardedHeaderOptions = new ForwardedHeadersOptions
+            //
+            // 🔥 CORS DOIT être ici avant UseRouting
+            //
+            //app.UseCors("AllowAllFrontend");
+            app.UseCors("Frontend");
+
+            //
+            // Reverse proxy / docker / nginx
+            //
+            var forwardOptions = new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             };
-            fordwardedHeaderOptions.KnownNetworks.Clear();
-            fordwardedHeaderOptions.KnownProxies.Clear();
-            app.UseForwardedHeaders(fordwardedHeaderOptions);
+            forwardOptions.KnownNetworks.Clear();
+            forwardOptions.KnownProxies.Clear();
+            app.UseForwardedHeaders(forwardOptions);
 
             app.UseRouting();
 
@@ -133,12 +145,6 @@ namespace Api
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-            });
-
-            app.UseSwaggerUI(options =>
-            {
-                options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
-                options.RoutePrefix = string.Empty;
             });
         }
     }

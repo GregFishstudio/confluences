@@ -1,408 +1,360 @@
-<!-- 
-  -- Projet: Gestion des stagiaires
-  -- Auteur : Tim Allemann
-  -- Date : 16.09.2020
-  -- Description : Formulaire de modification d'une entreprise
-  -- Fichier : EntrepriseEdit.vue
-  -->
-
 <template>
-  <v-container>
+  <v-container fluid class="main-content">
     <v-row>
       <v-col>
         <h1>Entreprise</h1>
       </v-col>
     </v-row>
+    
     <v-form ref="formEntreprise" v-model="valid" lazy-validation>
       <v-row>
-        <v-col cols="12" md="3">
-          <v-row>
-            <v-col>
-              <v-autocomplete
-                v-model="entreprise.typeEntrepriseId"
-                :items="typeEntreprise.typeEntreprises"
-                item-value="typeEntrepriseId"
-                item-text="nom"
-                label="Catégorie"
-                clearable
-              ></v-autocomplete>
-            </v-col>
-          </v-row>
+        <v-col cols="12" md="5">
+          <v-card class="pa-4 mb-4 elevation-2">
+            <v-card-title class="text-subtitle-1 font-weight-bold">Informations Générales</v-card-title>
+            <v-card-text>
+              <v-text-field
+                v-model="entrepriseRef.nom"
+                :counter="50"
+                :rules="nameRules"
+                label="Nom"
+                required
+                outlined
+                dense
+              ></v-text-field>
+              <v-text-field
+                v-model="entrepriseRef.email"
+                :counter="50"
+                :rules="emailRules"
+                label="Email"
+                outlined
+                dense
+              ></v-text-field>
+              
+              <v-text-field
+                v-model="entrepriseRef.adr1"
+                :counter="50"
+                :rules="adressRules"
+                label="Adresse"
+                outlined
+                dense
+              ></v-text-field>
+              <v-text-field
+                v-model="entrepriseRef.adr2"
+                :counter="50"
+                :rules="adressRules"
+                label="Complément d'adresse"
+                outlined
+                dense
+              ></v-text-field>
+              
+              <v-row>
+                <v-col cols="12" sm="6" class="py-0">
+                  <v-text-field
+                    v-model="entrepriseRef.codePostal"
+                    :counter="4"
+                    :rules="[codePostalRules]"
+                    label="Code postal"
+                    outlined
+                    dense
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" class="py-0">
+                  <v-text-field
+                    v-model="entrepriseRef.ville"
+                    :counter="50"
+                    :rules="nameRules"
+                    label="Ville"
+                    required
+                    outlined
+                    dense
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+
+              <v-row>
+                <v-col cols="12" sm="6" class="py-0">
+                  <v-text-field
+                    v-model="entrepriseRef.telFix"
+                    :counter="13"
+                    :rules="phonesRules"
+                    label="Téléphone fixe"
+                    outlined
+                    dense
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" class="py-0">
+                  <v-text-field
+                    v-model="entrepriseRef.telNatel"
+                    :counter="13"
+                    :rules="phonesRules"
+                    label="Natel"
+                    outlined
+                    dense
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-card>
         </v-col>
-        <v-col cols="12" md="9">
-          <v-row>
-            <v-col cols="12" md="3">
-              <v-menu
-                ref="menuContact"
-                v-model="menuContact"
-                :close-on-content-click="true"
-                :return-value.sync="date"
-                transition="scale-transition"
-                offset-y
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    v-model="entreprise.dateDernierContact"
-                    label="Date du dernier contact"
-                    readonly
-                    v-bind="attrs"
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-date-picker
-                  v-model="entreprise.dateDernierContact"
-                  no-title
-                  scrollable
-                >
-                </v-date-picker>
-              </v-menu>
-              <v-menu
-                ref="menuContactRecall"
-                v-model="menuContactRecall"
-                :close-on-content-click="true"
-                :return-value.sync="date"
-                transition="scale-transition"
-                offset-y
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    v-model="entreprise.dateLastRecall"
-                    label="Date de rappel"
-                    readonly
-                    v-bind="attrs"
-                    v-on="on"
+
+        <v-col cols="12" md="7">
+          <v-card class="pa-4 mb-4 elevation-2">
+            <v-card-title class="text-subtitle-1 font-weight-bold">Relations & Suivi</v-card-title>
+            <v-card-text>
+              <v-row>
+                <v-col cols="12" sm="4" class="py-0">
+                  <v-autocomplete
+                    v-model="entrepriseRef.typeEntrepriseId"
+                    :items="typeEntreprise.typeEntreprises"
+                    item-value="typeEntrepriseId"
+                    item-text="nom"
+                    label="Catégorie"
                     clearable
-                  ></v-text-field>
-                </template>
-                <v-date-picker
-                  v-model="entreprise.dateLastRecall"
-                  no-title
-                  scrollable
-                >
-                </v-date-picker>
-              </v-menu>
-            </v-col>
-            <v-col cols="12" md="3">
-              <v-autocomplete
-                v-model="entreprise.formateurIdDernierContact"
-                :items="user.users"
-                item-value="id"
-                item-text="nom"
-                label="Par"
-                clearable
-              ></v-autocomplete>
-            </v-col>
-            <v-col cols="12" md="3">
-              <v-autocomplete
-                v-model="entreprise.stagiaireIdDernierContact"
-                :items="user.users"
-                item-value="id"
-                item-text="nom"
-                label="Pour"
-                clearable
-              ></v-autocomplete>
-            </v-col>
-            <v-col cols="12" md="3">
-              <v-autocomplete
-                v-model="entreprise.typeMoyenId"
-                :items="typeMoyen.typeMoyens"
-                item-value="typeMoyenId"
-                item-text="libelle"
-                label="Moyen de communication"
-                clearable
-              ></v-autocomplete>
-            </v-col>
-          </v-row>
+                    outlined
+                    dense
+                  ></v-autocomplete>
+                </v-col>
+                <v-col cols="12" sm="4" class="py-0">
+                  <v-menu
+                    v-model="menuCreation"
+                    :close-on-content-click="false"
+                    transition="scale-transition"
+                    offset-y
+                    min-width="auto"
+                  >
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-text-field
+                        v-model="entrepriseRef.dateCreation"
+                        label="Chez Confluences depuis"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                        outlined
+                        dense
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker v-model="entrepriseRef.dateCreation" @input="menuCreation = false" no-title scrollable></v-date-picker>
+                  </v-menu>
+                </v-col>
+                <v-col cols="12" sm="4" class="py-0">
+                  <v-autocomplete
+                    v-model="entrepriseRef.typeMoyenId"
+                    :items="typeMoyen.typeMoyens"
+                    item-value="typeMoyenId"
+                    item-text="libelle"
+                    label="Moyen de communication"
+                    clearable
+                    outlined
+                    dense
+                  ></v-autocomplete>
+                </v-col>
+              </v-row>
+
+              <EntrepriseLastContactList :entreprise="entrepriseRef" class="mt-4" />
+              
+            </v-card-text>
+          </v-card>
+          
+          <v-card class="pa-4 elevation-2">
+            <v-card-title class="text-subtitle-1 font-weight-bold">Remarques</v-card-title>
+            <v-card-text>
+              <v-textarea
+                v-model="entrepriseRef.remarque"
+                outlined
+                label="Notes internes"
+                counter
+                maxlength="10000"
+                auto-grow
+                dense
+              ></v-textarea>
+            </v-card-text>
+          </v-card>
+
         </v-col>
       </v-row>
+      
       <v-row>
         <v-col cols="12" md="4">
-          <v-text-field
-            v-model="entreprise.nom"
-            :counter="50"
-            :rules="nameRules"
-            label="Nom"
-            required
-          ></v-text-field>
-          <v-text-field
-            v-model="entreprise.adr1"
-            :counter="50"
-            :rules="adressRules"
-            label="Adresse"
-          ></v-text-field>
-          <v-text-field
-            v-model="entreprise.adr2"
-            :counter="50"
-            :rules="adressRules"
-            label="Complément d'adresse"
-          ></v-text-field>
-          <v-text-field
-            v-model="entreprise.ville"
-            :counter="50"
-            :rules="nameRules"
-            label="Ville"
-            required
-          ></v-text-field>
-          <v-row>
-            <v-col cols="12" md="6">
-              <v-text-field
-                v-model="entreprise.codePostal"
-                :counter="4"
-                :rules="[codePostalRules]"
-                label="Code postal"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="6">
-              <v-menu
-                ref="menuCreation"
-                v-model="menuCreation"
-                :close-on-content-click="true"
-                :return-value.sync="date"
-                transition="scale-transition"
-                offset-y
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    v-model="entreprise.dateCreation"
-                    label="Chez Confluences depuis"
-                    readonly
-                    v-bind="attrs"
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-date-picker
-                  v-model="entreprise.dateCreation"
-                  no-title
-                  scrollable
-                >
-                </v-date-picker>
-              </v-menu>
-            </v-col>
-          </v-row>
-          <v-text-field
-            v-model="entreprise.email"
-            :counter="50"
-            :rules="emailRules"
-            label="Email"
-          ></v-text-field>
-          <v-row>
-            <v-col cols="12" md="6">
-              <v-text-field
-                v-model="entreprise.telFix"
-                :counter="13"
-                :rules="phonesRules"
-                label="Téléphone fixe"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="6">
-              <v-text-field
-                v-model="entreprise.telNatel"
-                :counter="13"
-                :rules="phonesRules"
-                label="Natel"
-              ></v-text-field>
-            </v-col>
-          </v-row>
+          <EntrepriseDomaineList :entreprise="entrepriseRef" />
         </v-col>
-        <v-col cols="12" md="8">
-          <EntrepriseDomaineList :entreprise="entreprise" />
-          <v-row>
-            <v-col cols="12" md="6">
-              <EntrepriseMetierList :entreprise="entreprise" />
-            </v-col>
-            <v-col cols="12" md="6">
-              <EntrepriseOffreList :entreprise="entreprise" />
-            </v-col>
-          </v-row>
+        <v-col cols="12" md="4">
+          <EntrepriseMetierList :entreprise="entrepriseRef" />
+        </v-col>
+        <v-col cols="12" md="4">
+          <EntrepriseOffreList :entreprise="entrepriseRef" />
         </v-col>
       </v-row>
-      <v-row>
-        <v-col>
-          <v-textarea
-            v-model="entreprise.remarque"
-            outlined
-            label="Remarques"
-            counter
-            maxlength="10000"
-            auto-grow
-          ></v-textarea>
+
+      <v-row class="mb-16">
+        <v-col cols="12" md="6">
+          <v-card class="elevation-2">
+            <v-card-title class="text-subtitle-1 font-weight-bold">Contacts Associés</v-card-title>
+            <EntrepriseContactList :entreprise="entrepriseRef" />
+          </v-card>
         </v-col>
-      </v-row>
-      <v-row style="margin-bottom:100px">
-        <v-col cols="12" md="12">
-          <EntrepriseContactList :entreprise="entreprise" />
-        </v-col>
-        <v-col cols="12" md="12">
-          <v-card class="mx-auto px-0" outlined>
+        <v-col cols="12" md="6">
+          <v-card class="elevation-2">
+            <v-card-title class="text-subtitle-1 font-weight-bold">Stages Précédents</v-card-title>
             <v-list>
-              <v-subheader>Stages</v-subheader>
-              <EntrepriseStageList :entreprise="entreprise" />
+              <EntrepriseStageList :entreprise="entrepriseRef" />
             </v-list>
           </v-card>
         </v-col>
-        <v-col cols="12" md="12">
-          <EntrepriseLastContactList :entreprise="entreprise" />
-        </v-col>
       </v-row>
-      <div class="action-container">
-        <v-row>
-          <v-col>
-            <div class="text-center">
-              <v-btn
-                class="ma-2"
-                tile
-                color="success"
-                dark
-                min-width="150"
-                @click="submit()"
-              >
-                Sauvegarder
-              </v-btn>
-              <DeleteEntreprise :entreprise="this.entreprise" />
-              <v-btn
-                class="ma-2"
-                tile
-                color="primary"
-                dark
-                min-width="150"
-                @click="$router.go(-1)"
-              >
-                Annuler
-              </v-btn>
-            </div>
-          </v-col>
-        </v-row>
-      </div>
     </v-form>
   </v-container>
+  
+  <div class="action-container action-bar-fixed">
+    <v-row class="fill-height ma-0">
+      <v-col class="d-flex justify-end align-center py-2">
+        <v-btn
+          class="ma-2"
+          color="success"
+          min-width="120"
+          @click="submit"
+        >
+          Sauvegarder
+        </v-btn>
+        <DeleteEntreprise :entreprise="entrepriseRef" class="ma-2" />
+        <v-btn
+          class="ma-2"
+          color="primary"
+          min-width="120"
+          @click="$router.go(-1)"
+        >
+          Annuler
+        </v-btn>
+      </v-col>
+    </v-row>
+  </div>
 </template>
 
-<script>
-import store from '@/store/index.js'
-import { mapState } from 'vuex'
-import NProgress from 'nprogress'
-import EntrepriseOffreList from '@/components/EntrepriseOffreList.vue'
-import EntrepriseDomaineList from '@/components/EntrepriseDomaineList.vue'
-import EntrepriseMetierList from '@/components/EntrepriseMetierList.vue'
-import EntrepriseStageList from '@/components/EntrepriseStageList.vue'
-import EntrepriseContactList from '@/components/EntrepriseContactList.vue'
-import EntrepriseLastContactList from '@/components/EntrepriseLastContactList.vue'
-import DeleteEntreprise from '@/components/DeleteEntreprise.vue'
-import moment from 'moment'
+<script setup>
+import { ref, computed, onBeforeMount } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
+import NProgress from 'nprogress';
+// Assurez-vous que tous ces chemins de composants sont corrects
+import EntrepriseOffreList from '@/components/EntrepriseOffreList.vue'; 
+import EntrepriseDomaineList from '@/components/EntrepriseDomaineList.vue';
+import EntrepriseMetierList from '@/components/EntrepriseMetierList.vue';
+import EntrepriseStageList from '@/components/EntrepriseStageList.vue';
+import EntrepriseContactList from '@/components/EntrepriseContactList.vue';
+import EntrepriseLastContactList from '@/components/EntrepriseLastContactList.vue';
+import DeleteEntreprise from '@/components/DeleteEntreprise.vue';
+import moment from 'moment';
 
-function getTypeEntreprises() {
-  store.dispatch('typeEntreprise/fetchTypeEntreprises', {}).then(() => {})
-}
+const route = useRoute();
+const router = useRouter();
+const store = useStore();
 
-function getTypeDomaines() {
-  store.dispatch('typeDomaine/fetchTypeDomaines', {}).then(() => {})
-}
+// --- État Réactif ---
+const entrepriseRef = ref(route.params.entreprise || {}); 
+const date = ref(null);
+const menuContact = ref(false);
+const menuCreation = ref(false);
+const menuContactRecall = ref(false);
+const valid = ref(true);
+const formEntreprise = ref(null);
 
-function getTypeMoyens() {
-  store.dispatch('typeMoyen/fetchTypeMoyens', {}).then(() => {})
-}
+// --- Computed Properties ---
+const state = store.state;
+const typeEntreprise = computed(() => state.typeEntreprise);
+const typeDomaine = computed(() => state.typeDomaine);
+const typeMoyen = computed(() => state.typeMoyen);
+const user = computed(() => state.user);
 
-function getUsers() {
-  store.dispatch('user/fetchUsers', {}).then(() => {})
-}
+// --- Fonctions de chargement ---
+const loadInitialData = () => {
+    store.dispatch('typeEntreprise/fetchTypeEntreprises', {});
+    store.dispatch('typeDomaine/fetchTypeDomaines', {});
+    store.dispatch('typeMoyen/fetchTypeMoyens', {});
+    store.dispatch('user/fetchUsers', {});
+};
 
-export default {
-  props: {
-    entreprise: {
-      type: Object,
-      required: true
+// --- Formatage ---
+const formatDate = (date) => {
+    let dateFormat = moment(date, 'YYYY-MM-DD').format('YYYY-MM-DD');
+    if (dateFormat === 'Invalid date') {
+        return null;
+    } else {
+        return dateFormat;
     }
-  },
+};
 
-  components: {
-    EntrepriseOffreList,
-    EntrepriseMetierList,
-    EntrepriseDomaineList,
-    EntrepriseStageList,
-    EntrepriseContactList,
-    EntrepriseLastContactList,
-    DeleteEntreprise
-  },
+// --- Hooks d'exécution ---
+onBeforeMount(loadInitialData);
 
-  data: () => ({
-    date: null,
-    menuContact: false,
-    menuCreation: false,
-    menuContactRecall: false,
-    valid: true,
-    nameRules: [
-      v => !!v || 'Le nom est obligatoire',
-      v => (v && v.length <= 50) || 'Le nom doit être moins que 50 caractères'
-    ],
-    adressRules: [
-      v => !v || v.length <= 50 || 'Le champ doit être moins que 50 caractères'
-    ],
-    emailRules: [
-      v => !v || /.+@.+\..+/.test(v) || "L'email doit être valide",
-      v => !v || v.length <= 50 || 'Le champ doit être moins que 50 caractères'
-    ],
-    codePostalRules: v => {
-      if (v >= 0 && v <= 9999) return true
-      return 'En Suisse, 4 chiffres'
-    },
-    phonesRules: [
-      v => !v || v.length <= 13 || 'Le champ doit être moins que 13 caractères'
-    ],
-    requiredRule: [v => !!v || 'Obligatoire'],
-    select: null
-  }),
+// Initialisation des dates
+entrepriseRef.value.dateDernierContact = formatDate(entrepriseRef.value.dateDernierContact);
+entrepriseRef.value.dateCreation = formatDate(entrepriseRef.value.dateCreation);
+entrepriseRef.value.dateLastRecall = formatDate(entrepriseRef.value.dateLastRecall);
 
-  // Charger les différents possibilités de choix avant la création du composant
-  beforeCreate(routeTo, routeFrom, next) {
-    getTypeEntreprises(routeTo, next)
-    getTypeDomaines(routeTo, next)
-    getTypeMoyens(routeTo, next)
-    getUsers(routeTo, next)
-  },
 
-  created() {
-    // Formattage des dates afin qu'elles s'affichent correctement
-    this.entreprise.dateDernierContact = this.formatDate(
-      this.entreprise.dateDernierContact
-    )
-    this.entreprise.dateCreation = this.formatDate(this.entreprise.dateCreation)
-    this.entreprise.dateLastRecall = this.formatDate(
-      this.entreprise.dateLastRecall
-    )
-    this.entreprise.dateLastRecall = this.formatDate(
-      this.entreprise.dateLastRecall
-    )
-  },
+// --- Règles de Validation ---
+const nameRules = [
+    v => !!v || 'Le nom est obligatoire',
+    v => (v && v.length <= 50) || 'Le nom doit être moins que 50 caractères'
+];
+const adressRules = [
+    v => !v || v.length <= 50 || 'Le champ doit être moins que 50 caractères'
+];
+const emailRules = [
+    v => !v || /.+@.+\..+/.test(v) || "L'email doit être valide",
+    v => !v || v.length <= 50 || 'Le champ doit être moins que 50 caractères'
+];
+const codePostalRules = v => {
+    if (v === null || v === undefined) return true;
+    if (v >= 0 && v <= 9999 && String(v).length === 4) return true;
+    return 'En Suisse, 4 chiffres';
+};
+const phonesRules = [
+    v => !v || v.length <= 13 || 'Le champ doit être moins que 13 caractères'
+];
 
-  computed: {
-    ...mapState(['typeEntreprise', 'typeDomaine', 'typeMoyen', 'user'])
-  },
 
-  methods: {
-    // Si le formulaire est valide, sauvegarde de l'entreprise
-    submit() {
-      if (this.$refs.formEntreprise.validate()) {
-        NProgress.start()
+// --- Méthode de soumission ---
+const submit = async () => {
+    const { valid: formValid } = await formEntreprise.value.validate();
+
+    if (formValid) {
+        NProgress.start();
         store
-          .dispatch('entreprise/editEntreprise', this.entreprise)
-          .then(() => {
-            this.$router.push({ name: 'Entreprises' })
-          })
-          .catch(() => {})
-        NProgress.done()
-      }
-    },
-    formatDate: function(date) {
-      let dateFormat = moment(date, 'YYYY-MM-DD').format('YYYY-MM-DD')
-      if (dateFormat == 'Invalid date') {
-        return null
-      } else {
-        return dateFormat
-      }
+            .dispatch('entreprise/editEntreprise', entrepriseRef.value)
+            .then(() => {
+                router.push({ name: 'Entreprises' });
+            })
+            .catch((error) => {
+                console.error("Erreur de sauvegarde de l'entreprise:", error);
+            })
+            .finally(() => {
+                NProgress.done();
+            });
     }
-  }
-}
+};
 </script>
+
+<style scoped>
+/* Conteneur principal pour éviter que la barre fixe cache le contenu */
+.main-content {
+    padding-bottom: 80px !important; /* Espace pour la barre d'action fixe */
+}
+
+/* Style de la Barre d'Actions Fixe */
+.action-bar-fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 64px; /* Hauteur définie */
+  background: white;
+  border-top: 1px solid #e0e0e0;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+  z-index: 1000;
+}
+
+/* Correction de l'alignement des menus dans les colonnes */
+.v-menu {
+    width: 100%;
+}
+</style>

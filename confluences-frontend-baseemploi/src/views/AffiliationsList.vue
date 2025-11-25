@@ -67,87 +67,64 @@
   </v-container>
 </template>
 
-<script>
-import store from '@/store/index.js'
-import { mapState } from 'vuex'
-import CreateAffiliationFromList from '@/components/CreateAffiliationFromList.vue'
+<script setup>
+import { ref, computed, onBeforeMount } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter, onBeforeRouteLeave } from 'vue-router';
+import CreateAffiliationFromList from '@/components/CreateAffiliationFromList.vue';
 
-function getTypeAffiliations(routeTo, next) {
-  store.dispatch('typeAffiliation/fetchTypeAffiliations', true).then(() => {
-    next()
-  })
-}
+const store = useStore();
+const router = useRouter();
 
-function loadData(routeTo, routeFrom, next) {
-  getTypeAffiliations(routeTo, next)
-}
+// --- État Réactif ---
+const search = ref('');
+const options = ref({}); 
 
-export default {
-  components: {
-    CreateAffiliationFromList
-  },
+// --- Computed Properties ---
+const typeAffiliation = computed(() => store.state.typeAffiliation);
+const settings = computed(() => store.state.settings);
 
-  data: () => ({
-    options: {},
-    search: '',
-    headers: [
-      {
-        text: 'Code',
-        value: 'code',
-        class: 'font-weight-bold'
-      },
-      {
-        text: 'Nom',
-        value: 'libelle',
-        class: 'font-weight-medium'
-      }
-    ],
-    typeAffiliations: []
-  }),
+// --- Données Statiques ---
+const headers = [
+    { text: 'Code', value: 'code', class: 'font-weight-bold' },
+    { text: 'Nom', value: 'libelle', class: 'font-weight-medium' }
+];
 
-  // Hooks de navigation (inchangés)
-  beforeRouteEnter(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteUpdate(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteLeave(routeTo, routeFrom, next) {
-    store
-      .dispatch('settings/setCurrentPageTypeAffiliation', {
-        number: this.options.page
-      })
-      .then(() => {})
-    next()
-  },
+// --- Hooks ---
 
-  created() {
-    this.options.page = store.state.settings.currentPageTypeAffiliation
-  },
+// FIX: Charger les données au montage pour résoudre le problème de rechargement après l'édition
+onBeforeMount(() => {
+    store.dispatch('typeAffiliation/fetchTypeAffiliations', true);
+});
 
-  computed: {
-    ...mapState(['typeAffiliation', 'settings'])
-  },
+// Hook de navigation de sortie (sauvegarde la page actuelle)
+onBeforeRouteLeave((routeTo, routeFrom, next) => {
+    store.dispatch('settings/setCurrentPageTypeAffiliation', { number: options.value.page });
+    next();
+});
 
-  methods: {
-    selectRow(event) {
-      this.$router.push({
-        name: 'TypeAffiliation-Modifier',
-        params: { id: event.typeAffiliationId }
-      })
-    },
-    updateNumberItems(event) {
-      store
-        .dispatch('settings/setItemsPerPage', {
-          number: event
-        })
-        .then(() => {})
-    },
-    updatePageSearch() {
-      this.options.page = 1
+// Initialisation (simule le 'created')
+options.value.page = store.state.settings.currentPageTypeAffiliation;
+
+// --- Méthodes ---
+const selectRow = (event, row) => {
+    const item = row ? row.item : event;
+    const id = item.typeAffiliationId || item.TypeAffiliationId;
+
+    if (id) {
+        router.push({ name: 'TypeAffiliation-Modifier', params: { id: id } });
+    } else {
+        console.error("Erreur: ID d'affiliation manquant lors de la sélection.");
     }
-  }
-}
+};
+
+const updateNumberItems = (event) => {
+    store.dispatch('settings/setItemsPerPage', { number: event });
+};
+
+const updatePageSearch = () => {
+    options.value.page = 1;
+};
 </script>
 
 <style scoped>

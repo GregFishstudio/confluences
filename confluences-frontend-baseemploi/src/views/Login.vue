@@ -271,9 +271,7 @@ async function handleLogin() {
   } catch (err) {
     console.error('❌ Erreur login:', err)
     error.value = 'Nom d’utilisateur ou mot de passe incorrect'
-  } finally {
-    loading.value = false
-  }
+  } 
 }
 
 

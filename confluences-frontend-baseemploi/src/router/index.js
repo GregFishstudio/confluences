@@ -40,14 +40,14 @@ import TypeJobSearchAssistanceOccurenceList from '../views/TypeJobSearchAssistan
 import TypeJobSearchAssistanceOccurenceEdit from '../views/TypeJobSearchAssistanceOccurenceEdit.vue'
 import TypeIntershipActivityList from '../views/TypeIntershipActivityList.vue'
 import TypeIntershipActivityEdit from '../views/TypeIntershipActivityEdit.vue'
+import AttendanceRegister from '../views/AttendanceRegister.vue';
 import Login from '../views/Login.vue'
 import Callback from '../views/Callback.vue'
 import NotFound from '../views/NotFound.vue'
 import Unauthorized from '../views/Unauthorized.vue'
 import Home from '../views/Home.vue'
 import NProgress from 'nprogress'
-import store from '../store' // Assurez-vous d'utiliser Vuex 4
-
+import store from '../store'
 // --- Définition des Routes ---
 
 const routes = [
@@ -64,6 +64,12 @@ const routes = [
     path: '/home',
     name: 'Home',
     component: Home,
+  },
+  {
+    path: '/attendance',
+    name: 'AttendanceRegister',
+    component: AttendanceRegister,
+    meta: { requiresAuth: true } 
   },
   // Entreprises
   { path: '/entreprises', name: 'Entreprises', component: EntreprisesList, meta: { requiresAuth: true } },

@@ -1,11 +1,3 @@
-<!-- 
-  -- Projet: Gestion des stagiaires
-  -- Auteur : Tim Allemann
-  -- Date : 16.09.2020
-  -- Description : Formulaire de modification d'un contact
-  -- Fichier : ContactEdit.vue
-  -->
-
 <template>
   <v-container>
     <v-row>
@@ -13,159 +5,180 @@
         <h1>Contact</h1>
       </v-col>
     </v-row>
-    <v-row>
-      <v-col cols="12">
+    
+    <v-card class="pa-4 elevation-2">
+      <v-card-text>
         <v-form
           ref="formCreateContact"
           v-model="validCreateContact"
           lazy-validation
         >
           <v-autocomplete
-            v-model="contact.entrepriseId"
+            v-model="contactRef.entrepriseId"
             :items="entreprise.entreprises"
             item-value="entrepriseId"
             item-text="nom"
             label="Entreprise"
+            outlined
+            dense
           ></v-autocomplete>
           <v-text-field
-            v-model="contact.prenom"
+            v-model="contactRef.prenom"
             :counter="50"
             label="Prénom"
             :rules="nameRules"
             required
+            outlined
+            dense
           ></v-text-field>
           <v-text-field
-            v-model="contact.nom"
+            v-model="contactRef.nom"
             :counter="50"
             :rules="nameRules"
             label="Nom"
             required
+            outlined
+            dense
           ></v-text-field>
           <v-text-field
-            v-model="contact.fonction"
+            v-model="contactRef.fonction"
             :counter="50"
             :rules="nameRules"
             label="Fonction"
             required
+            outlined
+            dense
           ></v-text-field>
           <v-text-field
-            v-model="contact.email"
+            v-model="contactRef.email"
             :counter="50"
             :rules="emailRules"
             label="Email"
+            outlined
+            dense
           ></v-text-field>
           <v-text-field
-            v-model="contact.telFix"
+            v-model="contactRef.telFix"
             :counter="13"
             :rules="phonesRules"
             label="Téléphone fixe"
+            outlined
+            dense
           ></v-text-field>
           <v-text-field
-            v-model="contact.natel"
+            v-model="contactRef.natel"
             :counter="13"
             :rules="phonesRules"
             label="Natel"
+            outlined
+            dense
           ></v-text-field>
         </v-form>
-      </v-col>
-    </v-row>
+      </v-card-text>
+    </v-card>
 
-    <div class="action-container">
-      <v-row>
-        <v-col>
-          <div class="text-center">
-            <v-btn
-              class="ma-2"
-              tile
-              color="success"
-              dark
-              min-width="150"
-              @click="submit()"
-            >
-              Sauvegarder
-            </v-btn>
-            <DeleteContact :contact="this.contact" />
-            <v-btn
-              class="ma-2"
-              tile
-              color="primary"
-              dark
-              min-width="150"
-              @click="$router.go(-1)"
-            >
-              Annuler
-            </v-btn>
-          </div>
+    <div class="action-container action-bar-fixed">
+      <v-row class="fill-height ma-0">
+        <v-col class="d-flex justify-end align-center py-2">
+          <v-btn
+            class="ma-2"
+            color="success"
+            min-width="150"
+            @click="submit"
+          >
+            Sauvegarder
+          </v-btn>
+          <DeleteContact :contact="contactRef" class="ma-2" />
+          <v-btn
+            class="ma-2"
+            color="primary"
+            min-width="150"
+            @click="router.go(-1)"
+          >
+            Annuler
+          </v-btn>
         </v-col>
       </v-row>
     </div>
   </v-container>
 </template>
 
-<script>
-import store from '@/store/index.js'
-import { mapState } from 'vuex'
-import NProgress from 'nprogress'
-import DeleteContact from '@/components/DeleteContact.vue'
+<script setup>
+import { ref, computed, onBeforeMount } from 'vue';
+import { useStore } from 'vuex';
+import { useRoute, useRouter } from 'vue-router';
+import NProgress from 'nprogress';
+import DeleteContact from '@/components/DeleteContact.vue';
 
-function getEntreprises() {
-  store.dispatch('entreprise/fetchEntreprises', {}).then(() => {})
-}
+const store = useStore();
+const route = useRoute();
+const router = useRouter();
 
-export default {
-  props: {
-    contact: {
-      type: Object,
-      required: true
-    }
-  },
+// Utilise la prop passée par le router guard
+const contactRef = ref(route.params.contact || {});
 
-  components: {
-    DeleteContact
-  },
+// --- État Réactif ---
+const validCreateContact = ref(true);
+const formCreateContact = ref(null);
 
-  data: () => ({
-    validCreateContact: true,
-    dialog: false,
-    nameRules: [
-      v => !v || v.length <= 50 || 'Le champ doit être moins que 50 caractères'
-    ],
-    emailRules: [
-      v => !v || /.+@.+\..+/.test(v) || "L'email doit être valide",
-      v => !v || v.length <= 50 || 'Le champ doit être moins que 50 caractères'
-    ],
-    phonesRules: [
-      v => !v || v.length <= 13 || 'Le champ doit être moins que 13 caractères'
-    ],
-    requiredRule: [v => !!v || 'Le champ est obligatoire']
-  }),
+// --- Computed Properties ---
+const entreprise = computed(() => store.state.entreprise);
 
-  beforeCreate(routeTo, routeFrom, next) {
-    // Charger les entreprises avant de créer le composant
-    getEntreprises(routeTo, next)
-  },
+// --- Fonctions de chargement ---
+const loadInitialData = () => {
+    store.dispatch('entreprise/fetchEntreprises', {});
+};
 
-  computed: {
-    ...mapState(['entreprise'])
-  },
+// --- Hooks ---
+onBeforeMount(loadInitialData);
 
-  methods: {
-    // Si le formulaire est valide, sauvegarde du contact
-    submit() {
-      if (this.$refs.formCreateContact.validate()) {
-        NProgress.start()
-        store
-          .dispatch('contact/editContact', this.contact)
-          .then(() => {
-            this.$router.push({
-              name: 'Contacts'
-            })
-          })
-          .catch(() => {})
-        this.dialog = false
-        NProgress.done()
-      }
-    }
+// --- Règles de Validation ---
+const nameRules = [
+  v => !!v || 'Le champ est obligatoire',
+  v => !v || v.length <= 50 || 'Le champ doit être moins que 50 caractères'
+];
+const emailRules = [
+  v => !v || /.+@.+\..+/.test(v) || "L'email doit être valide",
+  v => !v || v.length <= 50 || 'Le champ doit être moins que 50 caractères'
+];
+const phonesRules = [
+  v => !v || v.length <= 13 || 'Le champ doit être moins que 13 caractères'
+];
+
+// --- Méthode de soumission ---
+const submit = async () => {
+  const { valid: formValid } = await formCreateContact.value.validate();
+  
+  if (formValid) {
+    NProgress.start();
+    store
+      .dispatch('contact/editContact', contactRef.value)
+      .then(() => {
+        router.push({ name: 'Contacts' });
+      })
+      .catch((error) => {
+          console.error("Erreur de sauvegarde du contact:", error);
+      })
+      .finally(() => {
+          NProgress.done();
+      });
   }
-}
+};
 </script>
+
+<style scoped>
+.action-bar-fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 64px;
+  background: white;
+  border-top: 1px solid #e0e0e0;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+  z-index: 1000;
+}
+.v-container {
+    padding-bottom: 80px;
+}
+</style>

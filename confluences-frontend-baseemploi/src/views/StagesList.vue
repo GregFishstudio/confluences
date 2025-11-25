@@ -89,23 +89,15 @@
         </template>
 
         <template v-slot:item.documents="{ item }">
-  <v-btn
-    small
-    color="blue"
-    @click.stop="downloadAttestation(item.stageId)"
-  >
-    Attestation
-  </v-btn>
-
-  <v-btn
-    small
-    color="green"
-    class="ml-2"
-    @click.stop="downloadBilan(item.stageId)"
-  >
-    Bilan
-  </v-btn>
-</template>
+          <v-btn
+            small
+            color="green"
+            class="ml-2"
+            @click.stop="downloadBilan(item.stageId)"
+          >
+            Bilan
+          </v-btn>
+        </template>
 
 
         <template v-slot:no-data>
@@ -121,137 +113,44 @@
   </v-container>
 </template>
 
-<script>
-import store from '@/store/index.js'
-import { mapState } from 'vuex'
-import CreateStage from '@/components/CreateStage.vue'
-import FilterStage from '@/components/FilterStage.vue'
-import moment from 'moment'
+<script setup>
+import { ref, computed, onBeforeMount } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter, onBeforeRouteLeave } from 'vue-router';
+import CreateStage from '@/components/CreateStage.vue';
+import FilterStage from '@/components/FilterStage.vue';
+import moment from 'moment';
+import API_BASE from "@/services/api";
 
-// Fonctions de chargement des données (inchangées)
-function getStages(routeTo, next) {
-  store.dispatch('stage/fetchStages', {}).then(() => {
-    next()
-  })
-}
+const store = useStore();
+const router = useRouter();
 
-async function downloadAttestation(id) {
-  const res = await fetch(`/api/documents/attestation/${id}`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`
-    }
-  });
+// --- État Réactif ---
+const search = ref('');
+const options = ref({}); 
 
-  const blob = await res.blob();
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `attestation-${id}.pdf`;
-  link.click();
-}
+// --- Computed Properties ---
+const stage = computed(() => store.state.stage);
+const settings = computed(() => store.state.settings);
 
-async function downloadBilan(id) {
-  const now = new Date().toISOString();
-  
-  const res = await fetch(`/api/documents/bilan/${id}?date=${now}`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`
-    }
-  });
+// --- Données Statiques ---
+const headers = [
+    { text: 'Activité', value: 'typeIntershipActivity.nom', class: 'font-weight-bold' },
+    { text: 'Métier', value: 'typeMetier.libelle' },
+    { text: 'Entreprise', value: 'entreprise.nom' },
+    { text: 'Stagiaire', value: 'stagiaire.firstname' },
+    { text: 'Année', value: 'year' },
+    { text: 'Début', value: 'debut' },
+    { text: 'Fin', value: 'fin' },
+    { text: 'Session', value: 'session.description' },
+    { text: 'Type Stage', value: 'typeStage.nom' },
+    { text: 'Annonce', value: 'typeAnnonce.libelle' },
+    { text: 'Documents', value: 'documents', sortable: false }
+];
 
-  const blob = await res.blob();
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `bilan-${id}.pdf`;
-  link.click();
-}
-
-
-function getStagesWithFilter(routeTo, next, filter) {
-  store.dispatch('stage/saveFilterStage', filter).then(() => {
-    next()
-  })
-}
-
-function loadData(routeTo, routeFrom, next) {
-  const filter = store.state.stage.filter;
-  if (
-    filter.nom != null ||
-    filter.typeMetierId != null ||
-    filter.entrepriseId != null ||
-    filter.stagiaireId != null ||
-    filter.dateDebut != null ||
-    filter.dateFin != null ||
-    filter.typeStageId != null ||
-    filter.typeAnnonceId != null ||
-    filter.typeIntershipActivityId != null
-  ) {
-    getStagesWithFilter(routeTo, next, filter)
-  } else {
-    getStages(routeTo, next)
-  }
-}
-
-export default {
-  components: {
-    CreateStage,
-    FilterStage
-  },
-
-  data: () => ({
-    options: {},
-    search: '',
-    headers: [
-      {
-        text: 'Activité', // Renommé 'Nom' en 'Activité' pour plus de clarté
-        value: 'typeIntershipActivity.nom',
-        class: 'font-weight-bold'
-      },
-      { text: 'Métier', value: 'typeMetier.libelle' },
-      { text: 'Entreprise', value: 'entreprise.nom' },
-      {
-        text: 'Stagiaire',
-        value: 'stagiaire.firstname' // La valeur affichée est construite dans le slot
-      },
-      { text: 'Année', value: 'year' },
-      { text: 'Début', value: 'debut' },
-      { text: 'Fin', value: 'fin' },
-      { text: 'Session', value: 'session.description' },
-      { text: 'Type Stage', value: 'typeStage.nom' }, // Renommé 'Type' en 'Type Stage'
-      { text: 'Annonce', value: 'typeAnnonce.libelle' },
-      { text: 'Documents', value: 'documents', sortable: false }
-    ],
-    stages: []
-  }),
-
-  beforeRouteEnter(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteUpdate(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteLeave(routeTo, routeFrom, next) {
-    // Sauvegarde le numéro de page consulté du tableau stage avant de changer de page
-    store
-      .dispatch('settings/setCurrentPageStage', {
-        number: this.options.page
-      })
-      .then(() => {})
-    next()
-  },
-
-  created() {
-    // Récupère la dernier numéro de page consulté
-    this.options.page = store.state.settings.currentPageStage
-  },
-
-  computed: {
-    ...mapState(['stage', 'settings']),
-    // Propriété calculée pour vérifier si un filtre est actif
-    isFilterActive() {
-      const filter = this.stage.filter;
-      return (
+const isFilterActive = computed(() => {
+    const filter = store.state.stage.filter;
+    return (
         filter.nom != null ||
         filter.typeMetierId != null ||
         filter.entrepriseId != null ||
@@ -261,39 +160,75 @@ export default {
         filter.typeStageId != null ||
         filter.typeAnnonceId != null ||
         filter.typeIntershipActivityId != null
-      );
-    }
-  },
+    );
+});
 
-  methods: {
-    selectRow(event) {
-      this.$router.push({
-        name: 'Stage-Modifier',
-        params: { id: event.stageId }
-      })
-    },
-    updateNumberItems(event) {
-      store
-        .dispatch('settings/setItemsPerPage', {
-          number: event
-        })
-        .then(() => {})
-    },
-    updatePageSearch() {
-      this.options.page = 1
-    },
-    formatDate(value) {
-      let date = moment(value).format('YYYY-MM-DD')
-      if (date == 'Invalid date') {
-        date = null
-      }
-      return date
-    },
-    downloadAttestation,
-  downloadBilan,
-    // Ajout de la méthode pour effacer le filtre
-    clearFilter() {
-      const emptyFilter = {
+// --- Hooks ---
+
+// FIX: Charger les données au montage pour résoudre le problème de rechargement après l'édition
+onBeforeMount(() => {
+    store.dispatch('stage/fetchStages', {});
+});
+
+// Hook de navigation de sortie (sauvegarde la page actuelle)
+onBeforeRouteLeave((routeTo, routeFrom, next) => {
+    store.dispatch('settings/setCurrentPageStage', { number: options.value.page });
+    next();
+});
+
+// Initialisation (simule le 'created')
+options.value.page = store.state.settings.currentPageStage;
+
+// --- Méthodes ---
+const selectRow = (event, row) => {
+    const item = row ? row.item : event;
+    const id = item.stageId || item.StageId;
+
+    if (id) {
+        router.push({ name: 'Stage-Modifier', params: { id: id } });
+    } else {
+        console.error("Erreur: ID de stage manquant lors de la sélection.");
+    }
+};
+
+const updateNumberItems = (event) => {
+    store.dispatch('settings/setItemsPerPage', { number: event });
+};
+
+const updatePageSearch = () => {
+    options.value.page = 1;
+};
+
+const formatDate = (value) => {
+    let date = moment(value).format('YYYY-MM-DD');
+    return date === 'Invalid date' ? null : date;
+};
+
+const downloadBilan = async (id) => {
+    const now = new Date().toISOString();
+    const token = localStorage.getItem("token") || localStorage.getItem("access_token");
+
+    const res = await fetch(`${API_BASE}/documents/bilan/${id}?date=${now}`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `bilan-${id}.pdf`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+    } else {
+        console.error("Échec du téléchargement du bilan:", res.status);
+    }
+};
+
+const clearFilter = () => {
+    const emptyFilter = {
         nom: null,
         typeMetierId: null,
         entrepriseId: null,
@@ -303,14 +238,11 @@ export default {
         typeStageId: null,
         typeAnnonceId: null,
         typeIntershipActivityId: null
-      };
-      // Sauvegarde le filtre vide et recharge la liste
-      store.dispatch('stage/saveFilterStage', emptyFilter).then(() => {
+    };
+    store.dispatch('stage/saveFilterStage', emptyFilter).then(() => {
         store.dispatch('stage/fetchStages', {})
-      })
-    }
-  }
-}
+    });
+};
 </script>
 
 <style scoped>

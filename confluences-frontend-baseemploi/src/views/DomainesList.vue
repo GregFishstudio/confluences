@@ -51,7 +51,7 @@
         <template v-slot:item.oldNames="{ item }">
           <div class="d-flex flex-wrap" style="max-width: 300px;">
             <v-chip
-              v-for="(name, index) in item.oldNames"
+              v-for="(name, index) in item.oldNames.split(',').map(s => s.trim()).filter(s => s.length > 0)"
               :key="index"
               x-small
               class="ma-1"
@@ -76,87 +76,65 @@
   </v-container>
 </template>
 
-<script>
-import store from '@/store/index.js'
-import { mapState } from 'vuex'
-import CreateDomaineFromList from '@/components/CreateDomaineFromList.vue'
+<script setup>
+import { ref, computed, onBeforeMount } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter, onBeforeRouteLeave } from 'vue-router';
+import CreateDomaineFromList from '@/components/CreateDomaineFromList.vue';
 
-function getTypeDomaines(routeTo, next) {
-   store.dispatch('typeDomaine/fetchTypeDomaines', true).then(() => {
-      next()
-   })
-}
+const store = useStore();
+const router = useRouter();
 
-function loadData(routeTo, routeFrom, next) {
-   getTypeDomaines(routeTo, next)
-}
+// --- État Réactif ---
+const search = ref('');
+const options = ref({}); 
 
-export default {
-   components: {
-      CreateDomaineFromList
-   },
+// --- Computed Properties ---
+const typeDomaine = computed(() => store.state.typeDomaine);
+const settings = computed(() => store.state.settings);
 
-   data: () => ({
-      options: {},
-      search: '',
-      headers: [
-         {
-            text: 'Nom (Actuel)',
-            value: 'libelle',
-        class: 'font-weight-bold'
-         },
-         {
-            text: 'Autres noms (Historique)',
-            value: 'oldNames',
-        sortable: false
-         }
-      ],
-      typeDomaines: []
-   }),
+// --- Données Statiques ---
+const headers = [
+    { text: 'Nom (Actuel)', value: 'libelle', class: 'font-weight-bold' },
+    { text: 'Autres noms (Historique)', value: 'oldNames', sortable: false }
+];
 
-   // Hooks de navigation (inchangés)
-   beforeRouteEnter(routeTo, routeFrom, next) {
-      loadData(routeTo, routeFrom, next)
-   },
-   beforeRouteUpdate(routeTo, routeFrom, next) {
-      loadData(routeTo, routeFrom, next)
-   },
-   beforeRouteLeave(routeTo, routeFrom, next) {
-      store
-         .dispatch('settings/setCurrentPageTypeDomaine', {
-            number: this.options.page
-         })
-         .then(() => {})
-      next()
-   },
+// --- Hooks ---
 
-   created() {
-      this.options.page = store.state.settings.currentPageTypeDomaine
-   },
+// FIX: Charger les données au montage pour résoudre le problème de rechargement après l'édition
+onBeforeMount(() => {
+    store.dispatch('typeDomaine/fetchTypeDomaines', true);
+});
 
-   computed: {
-      ...mapState(['typeDomaine', 'settings'])
-   },
+// Hook de navigation de sortie (sauvegarde la page actuelle)
+onBeforeRouteLeave((routeTo, routeFrom, next) => {
+    store.dispatch('settings/setCurrentPageTypeDomaine', { number: options.value.page });
+    next();
+});
 
-   methods: {
-      selectRow(event) {
-         this.$router.push({
-            name: 'TypeDomaine-Modifier',
-            params: { id: event.typeDomaineId }
-         })
-      },
-      updateNumberItems(event) {
-         store
-            .dispatch('settings/setItemsPerPage', {
-               number: event
-            })
-            .then(() => {})
-      },
-      updatePageSearch() {
-         this.options.page = 1
-      }
-   }
-}
+// Initialisation (simule le 'created')
+options.value.page = store.state.settings.currentPageTypeDomaine;
+
+// --- Méthodes ---
+const selectRow = (event, row) => {
+    const item = row ? row.item : event; // Compatible V2/V3
+    const id = item.typeDomaineId || item.TypeDomaineId;
+
+    if (id) {
+        router.push({ name: 'TypeDomaine-Modifier', params: { id: id } });
+    } else {
+        console.error("Erreur: ID de domaine manquant lors de la sélection.");
+    }
+};
+
+const updateNumberItems = (event) => {
+    store.dispatch('settings/setItemsPerPage', { number: event });
+};
+
+const updatePageSearch = () => {
+    options.value.page = 1;
+};
+
 </script>
 
 <style scoped>

@@ -61,82 +61,64 @@
   </v-container>
 </template>
 
-<script>
-import store from '@/store/index.js'
-import { mapState } from 'vuex'
-import CreateTypeEntrepriseFromList from '@/components/CreateTypeEntrepriseFromList.vue'
+<script setup>
+import { ref, computed, onBeforeMount } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter, onBeforeRouteLeave } from 'vue-router';
+import CreateTypeEntrepriseFromList from '@/components/CreateTypeEntrepriseFromList.vue';
 
-function getTypeEntreprises(routeTo, next) {
-   store.dispatch('typeEntreprise/fetchTypeEntreprises', true).then(() => {
-      next()
-   })
-}
+const store = useStore();
+const router = useRouter();
 
-function loadData(routeTo, routeFrom, next) {
-   getTypeEntreprises(routeTo, next)
-}
+// --- État Réactif ---
+const search = ref('');
+const options = ref({}); 
 
-export default {
-   components: {
-      CreateTypeEntrepriseFromList
-   },
+// --- Computed Properties ---
+const typeEntreprise = computed(() => store.state.typeEntreprise);
+const settings = computed(() => store.state.settings);
 
-   data: () => ({
-      options: {},
-      search: '',
-      headers: [
-         {
-            text: 'Nom',
-            value: 'nom',
-        class: 'font-weight-bold'
-         }
-      ],
-      typeEntreprises: []
-   }),
+// --- Données Statiques ---
+const headers = [
+    { text: 'Nom', value: 'nom', class: 'font-weight-bold' }
+];
 
-   // Hooks de navigation (inchangés)
-   beforeRouteEnter(routeTo, routeFrom, next) {
-      loadData(routeTo, routeFrom, next)
-   },
-   beforeRouteUpdate(routeTo, routeFrom, next) {
-      loadData(routeTo, routeFrom, next)
-   },
-   beforeRouteLeave(routeTo, routeFrom, next) {
-      store
-         .dispatch('settings/setCurrentPageTypeEntreprise', {
-            number: this.options.page
-         })
-         .then(() => {})
-      next()
-   },
+// --- Hooks ---
 
-   created() {
-      this.options.page = store.state.settings.currentPageTypeEntreprise
-   },
+// FIX: Charger les données au montage pour résoudre le problème de rechargement
+onBeforeMount(() => {
+    store.dispatch('typeEntreprise/fetchTypeEntreprises', true);
+});
 
-   computed: {
-      ...mapState(['typeEntreprise', 'settings'])
-   },
+// Hook de navigation de sortie (sauvegarde la page actuelle)
+onBeforeRouteLeave((routeTo, routeFrom, next) => {
+    // Note: Le code de sauvegarde de la page doit être migré ici s'il est requis.
+    // Exemple: store.dispatch('settings/setCurrentPageTypeEntreprise', { number: options.value.page });
+    next();
+});
 
-   methods: {
-      selectRow(event) {
-         this.$router.push({
-            name: 'TypeEntreprise-Modifier',
-            params: { id: event.typeEntrepriseId }
-         })
-      },
-      updateNumberItems(event) {
-         store
-            .dispatch('settings/setItemsPerPage', {
-               number: event
-            })
-            .then(() => {})
-      },
-      updatePageSearch() {
-         this.options.page = 1
-      }
-   }
-}
+// Initialisation (simule le 'created')
+options.value.page = store.state.settings.currentPageTypeEntreprise;
+
+// --- Méthodes ---
+const selectRow = (event, row) => {
+    const item = row ? row.item : event;
+    const id = item.typeEntrepriseId || item.TypeEntrepriseId;
+
+    if (id) {
+        router.push({ name: 'TypeEntreprise-Modifier', params: { id: id } });
+    } else {
+        console.error("Erreur: ID de type d'entreprise manquant lors de la sélection.");
+    }
+};
+
+const updateNumberItems = (event) => {
+    store.dispatch('settings/setItemsPerPage', { number: event });
+};
+
+const updatePageSearch = () => {
+    options.value.page = 1;
+};
 </script>
 
 <style scoped>

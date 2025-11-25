@@ -1,11 +1,3 @@
-<!-- 
-  -- Projet: Gestion des stagiaires
-  -- Auteur : Tim Allemann
-  -- Date : 16.09.2020
-  -- Description : Formulaire de modification d'une affiliation
-  -- Fichier : AffiliationEdit.vue
-  -->
-
 <template>
   <v-container>
     <v-row>
@@ -13,111 +5,125 @@
         <h1>Affiliation</h1>
       </v-col>
     </v-row>
-    <v-row>
-      <v-col cols="12">
+    
+    <v-card class="pa-4 elevation-2">
+      <v-card-text>
         <v-form
           ref="formCreateTypeAffiliation"
           v-model="validCreateTypeAffiliation"
           lazy-validation
         >
           <v-text-field
-            v-model="typeAffiliation.code"
+            v-model="typeAffiliationRef.code"
             :counter="10"
             label="Code"
             :rules="codeRules"
             required
+            outlined
+            dense
           ></v-text-field>
           <v-text-field
-            v-model="typeAffiliation.libelle"
+            v-model="typeAffiliationRef.libelle"
             :counter="50"
             :rules="libelleRules"
             label="Nom"
             required
+            outlined
+            dense
           ></v-text-field>
         </v-form>
-      </v-col>
-    </v-row>
+      </v-card-text>
+    </v-card>
 
-    <div class="action-container">
-      <v-row>
-        <v-col>
-          <div class="text-center">
-            <v-btn
-              class="ma-2"
-              tile
-              color="success"
-              dark
-              min-width="150"
-              @click="submit()"
-            >
-              Sauvegarder
-            </v-btn>
-            <DeleteTypeAffiliation :typeAffiliation="this.typeAffiliation" />
-            <v-btn
-              class="ma-2"
-              tile
-              color="primary"
-              dark
-              min-width="150"
-              @click="$router.go(-1)"
-            >
-              Annuler
-            </v-btn>
-          </div>
+    <div class="action-container action-bar-fixed">
+      <v-row class="fill-height ma-0">
+        <v-col class="d-flex justify-end align-center py-2">
+          <v-btn
+            class="ma-2"
+            color="success"
+            min-width="150"
+            @click="submit"
+          >
+            Sauvegarder
+          </v-btn>
+          <DeleteTypeAffiliation :typeAffiliation="typeAffiliationRef" class="ma-2" />
+          <v-btn
+            class="ma-2"
+            color="primary"
+            min-width="150"
+            @click="router.go(-1)"
+          >
+            Annuler
+          </v-btn>
         </v-col>
       </v-row>
     </div>
   </v-container>
 </template>
 
-<script>
-import store from '@/store/index.js'
-import NProgress from 'nprogress'
-import DeleteTypeAffiliation from '@/components/DeleteTypeAffiliation.vue'
+<script setup>
+import { ref } from 'vue';
+import { useStore } from 'vuex';
+import { useRoute, useRouter } from 'vue-router';
+import NProgress from 'nprogress';
+import DeleteTypeAffiliation from '@/components/DeleteTypeAffiliation.vue';
 
-export default {
-  props: {
-    typeAffiliation: {
-      type: Object,
-      required: true
-    }
-  },
+const store = useStore();
+const route = useRoute();
+const router = useRouter();
 
-  components: {
-    DeleteTypeAffiliation
-  },
+// Utilise la prop passée par le router guard
+const typeAffiliationRef = ref(route.params.typeAffiliation || {});
 
-  data: () => ({
-    validCreateTypeAffiliation: true,
-    dialog: false,
-    codeRules: [
-      v => !!v || 'Le champ est obligatoire',
-      v => /(\b[A-Z0-9]{1,}\b)/.test(v) || 'En majuscule seulement',
-      v => (v && v.length <= 10) || 'Le nom doit être moins que 10 caractères'
-    ],
-    libelleRules: [
-      v => !!v || 'Le champ est obligatoire',
-      v => !v || v.length <= 50 || 'Le champ doit être moins que 50 caractères'
-    ]
-  }),
+// --- État Réactif ---
+const validCreateTypeAffiliation = ref(true);
+const formCreateTypeAffiliation = ref(null);
 
-  methods: {
-    // Si le formulaire est valide, sauvegarde de l'affiliation
-    submit() {
-      if (this.$refs.formCreateTypeAffiliation.validate()) {
-        NProgress.start()
-        store
-          .dispatch('typeAffiliation/editTypeAffiliation', this.typeAffiliation)
-          .then(() => {
-            this.$router.push({
-              name: 'Affiliations'
-            })
-          })
-          .catch(() => {})
-        this.dialog = false
-        NProgress.done()
-      }
-    }
+// --- Règles de Validation ---
+const codeRules = [
+  v => !!v || 'Le champ est obligatoire',
+  v => /(\b[A-Z0-9]{1,}\b)/.test(v) || 'En majuscule seulement',
+  v => (v && v.length <= 10) || 'Le nom doit être moins que 10 caractères'
+];
+const libelleRules = [
+  v => !!v || 'Le champ est obligatoire',
+  v => !v || v.length <= 50 || 'Le champ doit être moins que 50 caractères'
+];
+
+// --- Méthode de soumission ---
+const submit = async () => {
+  const { valid: formValid } = await formCreateTypeAffiliation.value.validate();
+  
+  if (formValid) {
+    NProgress.start();
+    store
+      .dispatch('typeAffiliation/editTypeAffiliation', typeAffiliationRef.value)
+      .then(() => {
+        router.push({ name: 'Affiliations' });
+      })
+      .catch((error) => {
+          console.error("Erreur de sauvegarde de l'affiliation:", error);
+      })
+      .finally(() => {
+          NProgress.done();
+      });
   }
-}
+};
 </script>
+
+<style scoped>
+.action-bar-fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 64px;
+  background: white;
+  border-top: 1px solid #e0e0e0;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+  z-index: 1000;
+}
+.v-container {
+    padding-bottom: 80px;
+}
+</style>

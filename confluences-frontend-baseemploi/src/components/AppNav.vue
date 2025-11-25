@@ -255,7 +255,8 @@ const internalLinks = [
     { label: 'Expériences professionnelles', routeName: 'Stages', icon: 'mdi-briefcase-outline', external: false },
     { label: 'Stages par stagiaire', routeName: 'Stagiaires', icon: 'mdi-account-hard-hat', external: false },
     { label: 'Contacts', routeName: 'Contacts', icon: 'mdi-card-account-mail', external: false },
-    { label: 'ARE', routeName: 'JobSearchAssistances', icon: 'mdi-account-cash', external: false }
+    { label: 'ARE', routeName: 'JobSearchAssistances', icon: 'mdi-account-cash', external: false },
+    { label: 'Registre de Présence', routeName: 'AttendanceRegister', icon: 'mdi-calendar-check', external: false },
 ]
 
 // Nouveau Lien de Navigation Externe

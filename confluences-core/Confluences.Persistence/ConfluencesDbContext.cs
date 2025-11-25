@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Confluences.Domain.Entities;
 using Confluences.Domain.Entities.Views;
+using System; // Ajouté pour utiliser DateTime
 
 namespace Confluences.Persistence
 {
@@ -58,6 +59,9 @@ namespace Confluences.Persistence
         public virtual DbSet<JobSearchAssistance> JobSearchAssistances => Set<JobSearchAssistance>();
         public virtual DbSet<LastContact> LastContacts => Set<LastContact>();
         public virtual DbSet<StageFile> StageFiles => Set<StageFile>();
+        
+        // NOUVEAU : DbSet pour les entrées de présence
+        public virtual DbSet<Presence> Presences { get; set; } // <--- AJOUTÉ
 
         // Views
         public virtual DbSet<Ressource> Ressources => Set<Ressource>();
@@ -74,6 +78,35 @@ namespace Confluences.Persistence
             // Customize the ASP.NET Identity model and override the defaults if needed.
             // For example, you can rename the ASP.NET Identity table names and more.
             // Add your customizations after calling base.OnModelCreating(builder);
+            
+            // --- Configuration de l'entité PRESENCE (AJOUTÉ) ---
+            builder.Entity<Presence>(entity =>
+            {
+                entity.ToTable("Presences"); // Nom de la table
+                entity.HasKey(p => p.Id);
+
+                // Clé étrangère vers ApplicationUser (Stagiaire)
+                entity.HasOne(p => p.Stagiaire)
+                      .WithMany() 
+                      .HasForeignKey(p => p.StagiaireId)
+                      .IsRequired();
+                
+                // Clé étrangère vers Stage (optionnel)
+                entity.HasOne(p => p.Stage)
+                      .WithMany() 
+                      .HasForeignKey(p => p.StageId)
+                      .IsRequired(false); 
+
+                // Index unique pour éviter qu'un stagiaire ait deux entrées pour le même jour
+                // Nous utilisons Date.Date pour s'assurer qu'on compare la partie jour de la DateTime
+                entity.HasIndex(p => new { p.StagiaireId, p.Date }).IsUnique();
+                
+                // Assurez-vous que le statut est bien stocké
+                entity.Property(p => p.Statut).HasMaxLength(2).IsRequired();
+            });
+            // ----------------------------------------------------
+
+
             builder.Entity<ApplicationUser>(b =>
             {
                 // Each User can have many UserClaims
@@ -131,6 +164,7 @@ namespace Confluences.Persistence
             builder.Entity<EntrepriseMetier>().HasKey(st => new { st.EntrepriseId, st.TypeMetierId });
             builder.Entity<EntrepriseOffre>().HasKey(st => new { st.EntrepriseId, st.TypeOffreId });
             builder.Entity<EntrepriseDomaine>().HasKey(st => new { st.EntrepriseId, st.TypeDomaineId });
+            
             builder.Entity<TypeMetier>(entity => {
                 entity.HasIndex(e => e.Libelle).IsUnique();
             });

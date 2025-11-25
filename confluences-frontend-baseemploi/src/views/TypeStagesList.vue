@@ -1,119 +1,119 @@
-<!-- 
-  -- Projet: Gestion des stagiaires
-  -- Auteur : Tim Allemann
-  -- Date : 16.09.2020
-  -- Description : Liste des types de stages
-  -- Fichier : TypeStagesList.vue
-  -->
-
 <template>
-  <v-container>
-    <v-row>
-      <v-col cols="12" md="4">
-        <CreateTypeStageFromList />
-      </v-col>
-      <v-col cols="12" md="4"> </v-col>
-      <v-col cols="12" md="4" class="pt-0">
-        <v-text-field
-          v-model="search"
-          append-icon="mdi-magnify"
-          label="Rechercher"
-          single-line
-          hide-details
-          @click="updatePageSearch"
-        ></v-text-field>
-      </v-col>
-    </v-row>
+  <v-container fluid>
+    <v-card class="mb-6 pa-4 elevation-3" rounded="lg">
+      <v-row align="center">
+        <v-col cols="12" sm="8" md="9">
+          <v-text-field
+            v-model="search"
+            append-icon="mdi-magnify"
+            label="Rechercher un taux d'occupation..."
+            placeholder="Nom..."
+            outlined
+            dense
+            clearable
+            hide-details
+            @focus="updatePageSearch"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="12" sm="4" md="3" class="d-flex justify-end">
+          <CreateTypeStageFromList />
+        </v-col>
+      </v-row>
+    </v-card>
+    
     <v-data-table
       :headers="headers"
-:items="Array.isArray(typeStage.typeStages) ? typeStage.typeStages : []"      :items-per-page="settings.itemsPerPage"
+      :items="Array.isArray(typeStage.typeStages) ? typeStage.typeStages : []"
+      :items-per-page="settings.itemsPerPage"
       :search="search"
       class="elevation-1"
       @click:row="selectRow"
       @update:items-per-page="updateNumberItems"
       :options.sync="options"
     >
+      <template v-slot:item.nom="{ item }">
+        <v-chip color="primary lighten-5" text-color="primary darken-3" class="font-weight-bold">
+          {{ item.nom }}
+        </v-chip>
+      </template>
+      
+      <template v-slot:no-data>
+        <div class="pa-4 text-center">
+            <v-icon large color="grey lighten-1" class="mb-2">mdi-alert-circle-outline</v-icon>
+            <p class="text-subtitle-1 grey--text">
+                Aucun taux d'occupation trouvé.
+            </p>
+        </div>
+      </template>
     </v-data-table>
   </v-container>
 </template>
 
-<script>
-import store from '@/store/index.js'
-import { mapState } from 'vuex'
-import CreateTypeStageFromList from '@/components/CreateTypeStageFromList.vue'
+<script setup>
+import { ref, computed, onBeforeMount } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter, onBeforeRouteLeave } from 'vue-router';
+import CreateTypeStageFromList from '@/components/CreateTypeStageFromList.vue';
 
-function getTypeStages(routeTo, next) {
-  store.dispatch('typeStage/fetchTypeStages', true).then(() => {
-    next()
-  })
-}
+const store = useStore();
+const router = useRouter();
 
-function loadData(routeTo, routeFrom, next) {
-  getTypeStages(routeTo, next)
-}
+// --- État Réactif ---
+const search = ref('');
+const options = ref({}); 
 
-export default {
-  components: {
-    CreateTypeStageFromList
-  },
+// --- Computed Properties ---
+const typeStage = computed(() => store.state.typeStage);
+const settings = computed(() => store.state.settings);
 
-  data: () => ({
-    options: {},
-    search: '',
-    headers: [
-      {
-        text: 'Nom',
-        value: 'nom'
-      }
-    ],
-    typeStages: []
-  }),
+// --- Données Statiques ---
+const headers = [
+    { text: 'Nom', value: 'nom', class: 'font-weight-bold' }
+];
 
-  beforeRouteEnter(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteUpdate(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteLeave(routeTo, routeFrom, next) {
-    // Sauvegarde le numéro de page consulté du tableau type de stage avant de changer de page
-    store
-      .dispatch('settings/setCurrentPageTypeStage', {
-        number: this.options.page
-      })
-      .then(() => {})
-    next()
-  },
+// --- Hooks ---
 
-  created() {
-    // Récupère la dernier numéro de page consulté
-    this.options.page = store.state.settings.currentPageTypeStage
-  },
+// FIX: Charger les données au montage pour résoudre le problème de rechargement
+onBeforeMount(() => {
+    store.dispatch('typeStage/fetchTypeStages', true);
+});
 
-  computed: {
-    ...mapState(['typeStage', 'settings'])
-  },
+// Hook de navigation de sortie (sauvegarde la page actuelle)
+onBeforeRouteLeave((routeTo, routeFrom, next) => {
+    store.dispatch('settings/setCurrentPageTypeStage', { number: options.value.page });
+    next();
+});
 
-  methods: {
-    // Lorsqu'une donnée est selectionnée dans le tableau, redirige vers le formulaire de modification
-    selectRow(event) {
-      this.$router.push({
-        name: 'TypeStage-Modifier',
-        params: { id: event.typeStageId }
-      })
-    },
-    // Met à jour le nombre d'élément à afficher dans un tableau
-    updateNumberItems(event) {
-      store
-        .dispatch('settings/setItemsPerPage', {
-          number: event
-        })
-        .then(() => {})
-    },
-    // Quand une recherche est effectuée, partir de la première page
-    updatePageSearch() {
-      this.options.page = 1
+// Initialisation (simule le 'created')
+options.value.page = store.state.settings.currentPageTypeStage;
+
+// --- Méthodes ---
+const selectRow = (event, row) => {
+    const item = row ? row.item : event;
+    const id = item.typeStageId || item.TypeStageId;
+
+    if (id) {
+        router.push({ name: 'TypeStage-Modifier', params: { id: id } });
+    } else {
+        console.error("Erreur: ID de type de stage manquant lors de la sélection.");
     }
-  }
-}
+};
+
+const updateNumberItems = (event) => {
+    store.dispatch('settings/setItemsPerPage', { number: event });
+};
+
+const updatePageSearch = () => {
+    options.value.page = 1;
+};
 </script>
+
+<style scoped>
+/* Ajout de styles pour améliorer l'UI du tableau */
+.v-data-table >>> tbody tr:hover {
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+  transition: all 0.2s ease-in-out;
+}
+</style>

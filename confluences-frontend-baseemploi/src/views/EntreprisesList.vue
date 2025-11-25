@@ -196,12 +196,34 @@ export default {
     }
   },
 
-  methods: {
-    selectRow(event) {
-      this.$router.push({
-        name: 'Entreprise-Modifier',
-        params: { id: event.entrepriseId }
-      })
+ methods: {
+    selectRow(event, row) {
+        let item;
+
+        // --- Fix 1: Handle Vuetify 3 / Modern structure (event, { item }) ---
+        if (row && row.item) {
+            item = row.item;
+        } 
+        // --- Fix 2: Handle Vuetify 2 structure (item only) ---
+        else if (event && event.nom) {
+            item = event;
+        } else {
+            console.error("ERROR: Row object structure unexpected.", event);
+            return;
+        }
+
+        // Find the ID, checking for casing differences (camelCase vs. PascalCase)
+        const id = item.entrepriseId || item.EntrepriseId; 
+        
+        if (!id) {
+            console.error("CRITICAL: Final ID not found in item.", item);
+            return;
+        }
+
+        this.$router.push({
+            name: 'Entreprise-Modifier',
+            params: { id: id }
+        });
     },
     updateNumberItems(event) {
       store

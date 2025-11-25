@@ -61,82 +61,63 @@
   </v-container>
 </template>
 
-<script>
-import store from '@/store/index.js'
-import { mapState } from 'vuex'
-import CreateOffreFromList from '@/components/CreateOffreFromList.vue'
+<script setup>
+import { ref, computed, onBeforeMount } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter, onBeforeRouteLeave } from 'vue-router';
+import CreateOffreFromList from '@/components/CreateOffreFromList.vue';
 
-function getTypeOffres(routeTo, next) {
-  store.dispatch('typeOffre/fetchTypeOffres', true).then(() => {
-    next()
-  })
-}
+const store = useStore();
+const router = useRouter();
 
-function loadData(routeTo, routeFrom, next) {
-  getTypeOffres(routeTo, next)
-}
+// --- État Réactif ---
+const search = ref('');
+const options = ref({}); 
 
-export default {
-  components: {
-    CreateOffreFromList
-  },
+// --- Computed Properties ---
+const typeOffre = computed(() => store.state.typeOffre);
+const settings = computed(() => store.state.settings);
 
-  data: () => ({
-    options: {},
-    search: '',
-    headers: [
-      {
-        text: 'Nom',
-        value: 'libelle',
-        class: 'font-weight-bold'
-      }
-    ],
-    typeOffres: []
-  }),
+// --- Données Statiques ---
+const headers = [
+    { text: 'Nom', value: 'libelle', class: 'font-weight-bold' }
+];
 
-  // Hooks de navigation (inchangés)
-  beforeRouteEnter(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteUpdate(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteLeave(routeTo, routeFrom, next) {
-    store
-      .dispatch('settings/setCurrentPageTypeOffre', {
-        number: this.options.page
-      })
-      .then(() => {})
-    next()
-  },
+// --- Hooks ---
 
-  created() {
-    this.options.page = store.state.settings.currentPageTypeOffre
-  },
+// FIX: Charger les données au montage pour résoudre le problème de rechargement
+onBeforeMount(() => {
+    store.dispatch('typeOffre/fetchTypeOffres', true);
+});
 
-  computed: {
-    ...mapState(['typeOffre', 'settings'])
-  },
+// Hook de navigation de sortie (sauvegarde la page actuelle)
+onBeforeRouteLeave((routeTo, routeFrom, next) => {
+    store.dispatch('settings/setCurrentPageTypeOffre', { number: options.value.page });
+    next();
+});
 
-  methods: {
-    selectRow(event) {
-      this.$router.push({
-        name: 'TypeOffre-Modifier',
-        params: { id: event.typeOffreId }
-      })
-    },
-    updateNumberItems(event) {
-      store
-        .dispatch('settings/setItemsPerPage', {
-          number: event
-        })
-        .then(() => {})
-    },
-    updatePageSearch() {
-      this.options.page = 1
+// Initialisation (simule le 'created')
+options.value.page = store.state.settings.currentPageTypeOffre;
+
+// --- Méthodes ---
+const selectRow = (event, row) => {
+    const item = row ? row.item : event;
+    const id = item.typeOffreId || item.TypeOffreId;
+
+    if (id) {
+        router.push({ name: 'TypeOffre-Modifier', params: { id: id } });
+    } else {
+        console.error("Erreur: ID de type d'offre manquant lors de la sélection.");
     }
-  }
-}
+};
+
+const updateNumberItems = (event) => {
+    store.dispatch('settings/setItemsPerPage', { number: event });
+};
+
+const updatePageSearch = () => {
+    options.value.page = 1;
+};
 </script>
 
 <style scoped>

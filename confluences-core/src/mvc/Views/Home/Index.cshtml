@@ -3,178 +3,444 @@
 }
 @model IEnumerable<mvc.Models.AspNetUser>
 
-<div class="page-header bgImageHome" data-parallax="true">
-    <div class="container">
+<div class="main-content">
+    <div class="container-fluid">
+        <!-- Header Hero Section -->
         <div class="row">
-            <div class="col-md-8 ml-auto mr-auto">
-                <div class="brand text-center">
-                    @*<h1>Travail à la maison</h1>*@
-                    @*<h3 class="title text-center">
-                            @ViewData["Title"]
-                        </h3>
-                        <br />*@
-                    <img class="img-fluid" src="~/img/logo_confluences.png" alt="Alternate Text" style="max-height:250px;" />
+            <div class="col-12">
+                <div class="hero-section text-center">
+                    <div class="hero-content">
+                        <img class="hero-logo" src="~/img/logo_confluences.png" alt="Logo Confluences" />
+                        <p class="hero-subtitle">Intégration par l'autonomisation</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<div class="main">
-    <div class="container">
-        <div class="about-team team-1" id="association">
-            <div class="row">
-                <div class="col-md-8 ml-auto mr-auto text-center">
-                    <h2 class="title mt-0">L'association</h2>
-                    <h4 class="description">
-                        L'association Confluences s'est donné pour but de contribuer à l'intégration des migrants
-                        par leur autonomisation.
-                    </h4>
-                    <h4 class="description">
-                        Pour atteindre son objectif, Confluences organise des cours de français, des formations
-                        et crée des projets d'insertion socio-professionnelle permettant de mettre en valeur les
-                        ressources des migrants.
-                    </h4>
-                    <h4 class="description">
-                        Confluences oeuvre donc à développer des réseaux de contacts dans la société d'accueil.
-                    </h4>
+        <!-- Mission Section -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="section-header">
+                    <h2>L'association Confluences</h2>
+                    <div class="header-divider"></div>
                 </div>
             </div>
-            <br /><br />
-            <div class="row">
-                @foreach (var teacher in Model.OrderBy(t => t.Firstname))
-                {
-                    <div class="col-md-4">
-                        <div class="card card-profile card-plain m-0">
-                            <div class="card-avatar">
-                                <a href="#pablo">
-                                    <img class="img" src="@(ViewData["URLAPI"] + teacher.PathImage)">
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="mission-card">
+                    <div class="card-icon">
+                        <i class="material-icons">groups</i>
+                    </div>
+                    <h4>Intégration des migrants</h4>
+                    <p>L'association Confluences s'est donné pour but de contribuer à l'intégration des migrants par leur autonomisation.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="mission-card">
+                    <div class="card-icon">
+                        <i class="material-icons">school</i>
+                    </div>
+                    <h4>Formations et cours</h4>
+                    <p>Pour atteindre son objectif, Confluences organise des cours de français, des formations et crée des projets d'insertion socio-professionnelle.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="mission-card">
+                    <div class="card-icon">
+                        <i class="material-icons">connect_without_contact</i>
+                    </div>
+                    <h4>Réseaux de contacts</h4>
+                    <p>Confluences oeuvre à développer des réseaux de contacts dans la société d'accueil pour mettre en valeur les ressources des migrants.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Section -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="section-header">
+                    <h2>Notre Équipe</h2>
+                    <p class="section-subtitle">Des professionnels engagés pour votre intégration</p>
+                    <div class="header-divider"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            @foreach (var teacher in Model.OrderBy(t => t.Firstname))
+            {
+                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                    <div class="team-member-card">
+                        <div class="member-photo">
+                            <img src="@(ViewData["URLAPI"] + teacher.PathImage)" alt="@teacher.Firstname @teacher.LastName" />
+                            <div class="member-overlay">
+                                <a href="tel:@teacher.PhoneNumber" class="btn btn-primary btn-sm">
+                                    <i class="material-icons">call</i>
                                 </a>
                             </div>
-                            <div class="card-body m-0">
-                                <h4 class="card-title">@teacher.Firstname @teacher.LastName</h4>
+                        </div>
+                        <div class="member-info">
+                            <h5 class="member-name">@teacher.Firstname @teacher.LastName</h5>
+                            <div class="member-role">
                                 @if (teacher.Firstname == "Jean-Marc")
                                 {
-                                    <h5 class="card-title text-muted">
-                                        Administration
-                                    </h5>
+                                    <span class='badge badge-admin'>Administration</span>
                                 }
                                 else if (teacher.Firstname == "Marie-Laure")
                                 {
-                                    <h5 class="card-title text-muted">
-                                        Stages et apprentissages
-                                    </h5>
+                                    <span class='badge badge-stage'>Stages et apprentissages</span>
                                 }
                                 else
                                 {
-                                    <h5 class="card-title text-muted">
-                                        Enseignement
-                                    </h5>
+                                    <span class='badge badge-teaching'>Enseignement</span>
                                 }
-                                <h5 class="card-title text-muted">
-                                    <a href="tel:@teacher.PhoneNumber" class="text-primary">
-                                        @teacher.PhoneNumber
-                                    </a>
-                                </h5>
                             </div>
-                        </div>
-                    </div>
-                }
-                @*<div class="col-md-3">
-                        <div class="card card-profile card-plain">
-                            <div class="card-avatar">
-                                <a href="#pablo">
-                                    <img class="img" src="~/img/equipe/jmh.jpg">
-                                </a>
-                            </div>
-                            <div class="card-body">
-                                <h4 class="card-title">Jean-Marc Henry</h4>
-                                <h6 class="category text-muted">Administration</h6>
-                            </div>
-                            <div class="card-footer justify-content-center">
-                                <a href="tel:+41796586934" class="btn btn-link btn-twitter">
-                                    079 658 69 34
+                            <div class="member-contact">
+                                <a href="tel:@teacher.PhoneNumber" class="contact-phone">
+                                    <i class="material-icons">phone_iphone</i>
+                                    @teacher.PhoneNumber
                                 </a>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="card card-profile card-plain">
-                            <div class="card-avatar">
-                                <a href="#pablo">
-                                    <img class="img" src="~/img/equipe/mrs.jpg">
-                                </a>
-                            </div>
-                            <div class="card-body">
-                                <h4 class="card-title">Marie-Laure Schick</h4>
-                                <h6 class="category text-muted">Stages et apprentissages</h6>
-                            </div>
-                            <div class="card-footer justify-content-center">
-                                <a href="tel:+41775200284" class="btn btn-link btn-twitter">
-                                    077 520 02 84
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card card-profile card-plain">
-                            <div class="card-avatar">
-                                <a href="#pablo">
-                                    <img class="img" src="~/img/equipe/gsi.jpg">
-                                </a>
-                            </div>
-                            <div class="card-body">
-                                <h4 class="card-title">Guillaumette Sauvé</h4>
-                                <h6 class="category text-muted">Enseignement</h6>
-                            </div>
-                            <div class="card-footer justify-content-center">
-                                <a href="tel:+41794544152" class="btn btn-link btn-twitter">
-                                    079 454 41 52
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card card-profile card-plain">
-                            <div class="card-avatar">
-                                <a href="#pablo">
-                                    <img class="img" src="~/img/equipe/cs.jpg">
-                                </a>
-                            </div>
-                            <div class="card-body">
-                                <h4 class="card-title">Caroline Sanmartin</h4>
-                                <h6 class="category text-muted">Enseignement</h6>
-                            </div>
-                            <div class="card-footer justify-content-center">
-                                <a href="tel:+41794544152" class="btn btn-link btn-twitter">
+                </div>
+            }
+        </div>
 
-                                </a>
+        <!-- Quick Stats -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="stats-section">
+                    <div class="row">
+                        <div class="col-md-3 col-6 text-center">
+                            <div class="stat-item">
+                                <div class="stat-number">50+</div>
+                                <div class="stat-label">Étudiants accompagnés</div>
                             </div>
                         </div>
-                    </div>*@
+                        <div class="col-md-3 col-6 text-center">
+                            <div class="stat-item">
+                                <div class="stat-number">15+</div>
+                                <div class="stat-label">Stages réalisés</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 text-center">
+                            <div class="stat-item">
+                                <div class="stat-number">4</div>
+                                <div class="stat-label">Enseignants dédiés</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 text-center">
+                            <div class="stat-item">
+                                <div class="stat-number">100%</div>
+                                <div class="stat-label">Engagement</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<footer class="footer">
-    <div class="container">
-        <nav class="float-left">
-            <ul>
-                <li>
-                    <a href="http://confluences.ch">
-                        Visitez le site principal
-                    </a>
-                </li>
-            </ul>
-        </nav>
-        <div class="copyright float-right">
-            &copy;
-            <script>
-                document.write(new Date().getFullYear())
-            </script>, made with <i class="material-icons">favorite</i> by
-            <a href="https://www.linkedin.com/in/tim-allemann-64491b1b2" target="_blank">Tim Allemann</a> for Confluences.
-        </div>
-    </div>
-</footer>
+<style>
+    /* Variables */
+    :root {
+        --primary: #1B3C70;
+        --accent: #00B4B0;
+        --success: #28a745;
+        --warning: #ffc107;
+        --danger: #dc3545;
+        --light: #f8f9fa;
+        --dark: #343a40;
+        --sidebar-width: 250px;
+    }
 
+    /* Main Content Area */
+    .main-content {
+      padding:0;
+        min-height: 100vh;
+    }
+
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        border-radius: 15px;
+        padding: 60px 20px;
+        margin-bottom: 30px;
+        color: white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .hero-logo {
+        max-height: 120px;
+        margin-bottom: 20px;
+        filter: brightness(0) invert(1);
+    }
+
+    .hero-title {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .hero-subtitle {
+        font-size: 1.5rem;
+        opacity: 0.9;
+        font-weight: 300;
+    }
+
+    /* Section Headers */
+    .section-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .section-header h2 {
+        color: var(--primary);
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .section-subtitle {
+        color: #6c757d;
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+    }
+
+    .header-divider {
+        width: 80px;
+        height: 4px;
+        background: var(--accent);
+        margin: 0 auto;
+        border-radius: 2px;
+    }
+
+    /* Mission Cards */
+    .mission-card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px 25px;
+        text-align: center;
+        height: 100%;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        border: 1px solid #e9ecef;
+    }
+
+    .mission-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+
+    .card-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        background: linear-gradient(135deg, var(--accent), var(--primary));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    .card-icon .material-icons {
+        font-size: 2.5rem;
+    }
+
+    .mission-card h4 {
+        color: var(--primary);
+        font-weight: 600;
+        margin-bottom: 15px;
+        font-size: 1.3rem;
+    }
+
+    .mission-card p {
+        color: #6c757d;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* Team Member Cards */
+    .team-member-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+    .team-member-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+
+    .member-photo {
+        position: relative;
+        height: 250px;
+        overflow: hidden;
+    }
+
+    .member-photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: all 0.3s ease;
+    }
+
+    .team-member-card:hover .member-photo img {
+        transform: scale(1.1);
+    }
+
+    .member-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(27, 60, 112, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .team-member-card:hover .member-overlay {
+        opacity: 1;
+    }
+
+    .member-info {
+        padding: 20px;
+        text-align: center;
+    }
+
+    .member-name {
+        color: var(--primary);
+        font-weight: 600;
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+    }
+
+    .member-role {
+        margin-bottom: 15px;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: white;
+    }
+
+    .badge-admin {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    .badge-stage {
+        background: linear-gradient(135deg, #f093fb, #f5576c);
+    }
+
+    .badge-teaching {
+        background: linear-gradient(135deg, #4facfe, #00f2fe);
+    }
+
+    .member-contact {
+        margin-top: 10px;
+    }
+
+    .contact-phone {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.3s ease;
+    }
+
+    .contact-phone:hover {
+        color: var(--accent);
+    }
+
+    .contact-phone .material-icons {
+        font-size: 1rem;
+        margin-right: 5px;
+    }
+
+    /* Stats Section */
+    .stats-section {
+        background: white;
+        border-radius: 15px;
+        padding: 40px 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+
+    .stat-item {
+        padding: 20px 10px;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 10px;
+    }
+
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .main-content {
+            margin-left: 0;
+            padding: 15px;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+        }
+
+        .mission-card, .team-member-card {
+            margin-bottom: 20px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+        }
+    }
+
+    /* Animation pour le contenu */
+    .main-content > .container-fluid > .row {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>

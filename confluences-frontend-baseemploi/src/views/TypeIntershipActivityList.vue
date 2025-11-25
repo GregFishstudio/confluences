@@ -61,86 +61,63 @@
   </v-container>
 </template>
 
-<script>
-import store from '@/store/index.js'
-import { mapState } from 'vuex'
-import CreateIntershipActivityFromList from '@/components/CreateIntershipActivityFromList.vue'
+<script setup>
+import { ref, computed, onBeforeMount } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter, onBeforeRouteLeave } from 'vue-router';
+import CreateIntershipActivityFromList from '@/components/CreateIntershipActivityFromList.vue';
 
-function getTypeIntershipActivities(routeTo, next) {
-  store
-    .dispatch('typeIntershipActivity/fetchTypeIntershipActivities', true)
-    .then(() => {
-      next()
-    })
-}
+const store = useStore();
+const router = useRouter();
 
-function loadData(routeTo, routeFrom, next) {
-  getTypeIntershipActivities(routeTo, next)
-}
+// --- État Réactif ---
+const search = ref('');
+const options = ref({}); 
 
-export default {
-  components: {
-    CreateIntershipActivityFromList
-  },
+// --- Computed Properties ---
+const typeIntershipActivity = computed(() => store.state.typeIntershipActivity);
+const settings = computed(() => store.state.settings);
 
-  data: () => ({
-    options: {},
-    search: '',
-    headers: [
-      {
-        text: 'Nom de l\'activité',
-        value: 'nom',
-        class: 'font-weight-bold'
-      }
-    ],
-    typeIntershipActivities: []
-  }),
+// --- Données Statiques ---
+const headers = [
+    { text: 'Nom de l\'activité', value: 'nom', class: 'font-weight-bold' }
+];
 
-  // Hooks de navigation (inchangés)
-  beforeRouteEnter(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteUpdate(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteLeave(routeTo, routeFrom, next) {
-    // Sauvegarde le numéro de page consulté du tableau type d'activité avant de changer de page
-    store
-      .dispatch('settings/setCurrentPageTypeIntershipActivity', {
-        number: this.options.page
-      })
-      .then(() => {})
-    next()
-  },
+// --- Hooks ---
 
-  created() {
-    // Récupère la dernier numéro de page consulté
-    this.options.page = store.state.settings.currentPageTypeIntershipActivity
-  },
+// FIX: Charger les données au montage pour résoudre le problème de rechargement
+onBeforeMount(() => {
+    store.dispatch('typeIntershipActivity/fetchTypeIntershipActivities', true);
+});
 
-  computed: {
-    ...mapState(['typeIntershipActivity', 'settings'])
-  },
+// Hook de navigation de sortie (sauvegarde la page actuelle)
+onBeforeRouteLeave((routeTo, routeFrom, next) => {
+    store.dispatch('settings/setCurrentPageTypeIntershipActivity', { number: options.value.page });
+    next();
+});
 
-  methods: {
-    selectRow(event) {
-      this.$router.push({
-        name: 'TypeIntershipActivity-Modifier',
-        params: { id: event.typeIntershipActivityId }
-      })
-    },
-    updateNumberItems(event) {
-      store
-        .dispatch('settings/setItemsPerPage', {
-          number: event
-        })
-        .then(() => {})
-    },
-    updatePageSearch() {
-      this.options.page = 1
+// Initialisation (simule le 'created')
+options.value.page = store.state.settings.currentPageTypeIntershipActivity;
+
+// --- Méthodes ---
+const selectRow = (event, row) => {
+    const item = row ? row.item : event;
+    const id = item.typeIntershipActivityId || item.TypeIntershipActivityId;
+
+    if (id) {
+        router.push({ name: 'TypeIntershipActivity-Modifier', params: { id: id } });
+    } else {
+        console.error("Erreur: ID d'activité manquant lors de la sélection.");
     }
-  }
-}
+};
+
+const updateNumberItems = (event) => {
+    store.dispatch('settings/setItemsPerPage', { number: event });
+};
+
+const updatePageSearch = () => {
+    options.value.page = 1;
+};
 </script>
 
 <style scoped>

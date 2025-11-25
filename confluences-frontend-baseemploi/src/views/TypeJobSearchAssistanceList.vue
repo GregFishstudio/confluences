@@ -61,85 +61,65 @@
   </v-container>
 </template>
 
-<script>
-import store from '@/store/index.js'
-import { mapState } from 'vuex'
-import CreateTypeJobSearchAssistanceFromList from '@/components/CreateTypeJobSearchAssistanceFromList.vue'
+<script setup>
+import { ref, computed, onBeforeMount } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter, onBeforeRouteLeave } from 'vue-router';
+import CreateTypeJobSearchAssistanceFromList from '@/components/CreateTypeJobSearchAssistanceFromList.vue';
 
-function getTypeJobSearchAssistances(routeTo, next) {
-  store
-    .dispatch('typeJobSearchAssistance/fetchTypeJobSearchAssistances', true)
-    .then(() => {
-      next()
-    })
-}
+const store = useStore();
+const router = useRouter();
 
-function loadData(routeTo, routeFrom, next) {
-  getTypeJobSearchAssistances(routeTo, next)
-}
+// --- État Réactif ---
+const search = ref('');
+const options = ref({}); 
 
-export default {
-  components: {
-    CreateTypeJobSearchAssistanceFromList
-  },
+// --- Computed Properties ---
+const typeJobSearchAssistance = computed(() => store.state.typeJobSearchAssistance);
+const settings = computed(() => store.state.settings);
 
-  data: () => ({
-    options: {},
-    search: '',
-    headers: [
-      {
-        text: 'Description',
-        value: 'description',
-        class: 'font-weight-bold'
-      }
-    ]
-  }),
+// --- Données Statiques ---
+const headers = [
+    { text: 'Description', value: 'description', class: 'font-weight-bold' }
+];
 
-  // Hooks de navigation (inchangés)
-  beforeRouteEnter(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteUpdate(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteLeave(routeTo, routeFrom, next) {
-    // Le code de sauvegarde de la page est maintenu commenté.
-    /*store
-      .dispatch('settings/setCurrentPageTypeJobSearchAssistance', {
-        number: this.options.page
-      })
-      .then(() => {})*/
-    next()
-  },
+// --- Hooks ---
 
-  created() {
-    // Récupère la dernière page (ou 1 par défaut)
-    this.options.page = 1
-  },
+// FIX: Charger les données au montage pour résoudre le problème de rechargement
+onBeforeMount(() => {
+    store.dispatch('typeJobSearchAssistance/fetchTypeJobSearchAssistances', true);
+});
 
-  computed: {
-    ...mapState(['typeJobSearchAssistance', 'settings'])
-  },
+// Hook de navigation de sortie
+onBeforeRouteLeave((routeTo, routeFrom, next) => {
+    // Note: Le code de sauvegarde de la page est souvent déplacé ici
+    // store.dispatch('settings/setCurrentPageTypeJobSearchAssistance', { number: options.value.page });
+    next();
+});
 
-  methods: {
-    selectRow(event) {
-      this.$router.push({
-        name: 'TypeJobSearchAssistance-Modifier',
-        params: { id: event.typeJobSearchAssistanceId }
-      })
-    },
-    updateNumberItems(event) {
-      store
-        .dispatch('settings/setItemsPerPage', {
-          number: event
-        })
-        .then(() => {})
-    },
-    updatePageSearch() {
-      this.options.page = 1
+// Initialisation (simule le 'created')
+// Initialisation simple car la clé de paramètre de page n'est pas claire dans les fichiers précédents
+options.value.page = 1;
+
+// --- Méthodes ---
+const selectRow = (event, row) => {
+    const item = row ? row.item : event;
+    const id = item.typeJobSearchAssistanceId || item.TypeJobSearchAssistanceId;
+
+    if (id) {
+        router.push({ name: 'TypeJobSearchAssistance-Modifier', params: { id: id } });
+    } else {
+        console.error("Erreur: ID de type ARE manquant lors de la sélection.");
     }
-  }
-}
+};
+
+const updateNumberItems = (event) => {
+    store.dispatch('settings/setItemsPerPage', { number: event });
+};
+
+const updatePageSearch = () => {
+    options.value.page = 1;
+};
 </script>
 
 <style scoped>

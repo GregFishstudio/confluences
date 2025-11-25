@@ -1,16 +1,8 @@
-<!-- 
-  -- Projet: Gestion des stagiaires
-  -- Auteur : Tim Allemann
-  -- Date : 16.09.2020
-  -- Description : Page servant à signaler à l'utilisateur qu'il n'a pas les droits d'accès
-  -- Fichier : Unauthorized.vue
-  -->
-
 <template>
   <v-container>
     <v-row class="mt-5">
       <v-col class="text-center" cols="12" tag="h1">
-        <h2>Stop</h2>
+        <h2>❌ Stop</h2>
         <h3>
           Vous n'avez pas les droits nécessaires afin d'accéder à cette
           ressource
@@ -20,3 +12,7 @@
     </v-row>
   </v-container>
 </template>
+
+<script setup>
+// Pas de logique à migrer, le composant utilise seulement le template.
+</script>

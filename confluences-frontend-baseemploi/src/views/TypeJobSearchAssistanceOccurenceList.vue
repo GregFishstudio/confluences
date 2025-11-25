@@ -61,90 +61,63 @@
   </v-container>
 </template>
 
-<script>
-import store from '@/store/index.js'
-import { mapState } from 'vuex'
-import CreateTypeJobSearchAssistanceOccurenceFromList from '@/components/CreateTypeJobSearchAssistanceOccurenceFromList.vue'
+<script setup>
+import { ref, computed, onBeforeMount } from 'vue';
+import { useStore } from 'vuex';
+import { useRouter, onBeforeRouteLeave } from 'vue-router';
+import CreateTypeJobSearchAssistanceOccurenceFromList from '@/components/CreateTypeJobSearchAssistanceOccurenceFromList.vue';
 
-function getTypeJobSearchAssistances(routeTo, next) {
-  store
-    .dispatch(
-      'typeJobSearchAssistanceOccurrence/fetchtypeSearchAssistanceOccurrences',
-      true
-    )
-    .then(() => {
-      next()
-    })
-}
+const store = useStore();
+const router = useRouter();
 
-function loadData(routeTo, routeFrom, next) {
-  getTypeJobSearchAssistances(routeTo, next)
-}
+// --- État Réactif ---
+const search = ref('');
+const options = ref({}); 
 
-export default {
-  components: {
-    CreateTypeJobSearchAssistanceOccurenceFromList
-  },
+// --- Computed Properties ---
+const typeJobSearchAssistanceOccurrence = computed(() => store.state.typeJobSearchAssistanceOccurrence);
+const settings = computed(() => store.state.settings);
 
-  data: () => ({
-    options: {},
-    search: '',
-    headers: [
-      {
-        text: 'Description de l\'occurrence',
-        value: 'description',
-        class: 'font-weight-bold'
-      }
-    ]
-  }),
+// --- Données Statiques ---
+const headers = [
+    { text: 'Description de l\'occurrence', value: 'description', class: 'font-weight-bold' }
+];
 
-  // Hooks de navigation (inchangés)
-  beforeRouteEnter(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteUpdate(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteLeave(routeTo, routeFrom, next) {
-    // Le code de sauvegarde de la page était commenté, je le laisse commenté.
-    /*store
-      .dispatch('settings/setCurrentPageTypeJobSearchAssistance', {
-        number: this.options.page
-      })
-      .then(() => {})*/
-    next()
-  },
+// --- Hooks ---
 
-  created() {
-    // Récupère la dernière page (ou 1 si non définie)
-    // Je suppose que vous utilisez 'currentPageTypeJobSearchAssistanceOccurrence' ou le par défaut à 1
-    // J'initialise à 1 comme dans votre `created()` d'origine.
-    this.options.page = 1 
-  },
+// FIX: Charger les données au montage pour résoudre le problème de rechargement
+onBeforeMount(() => {
+    store.dispatch('typeJobSearchAssistanceOccurrence/fetchtypeSearchAssistanceOccurrences', true);
+});
 
-  computed: {
-    ...mapState(['typeJobSearchAssistanceOccurrence', 'settings'])
-  },
+// Hook de navigation de sortie
+onBeforeRouteLeave((routeTo, routeFrom, next) => {
+    // Note: La sauvegarde de la page était commentée
+    next();
+});
 
-  methods: {
-    selectRow(event) {
-      this.$router.push({
-        name: 'TypeJobSearchAssistanceOccurrence-Modifier',
-        params: { id: event.typeJobSearchAssistanceOccurrenceId }
-      })
-    },
-    updateNumberItems(event) {
-      store
-        .dispatch('settings/setItemsPerPage', {
-          number: event
-        })
-        .then(() => {})
-    },
-    updatePageSearch() {
-      this.options.page = 1
+// Initialisation (simule le 'created')
+options.value.page = 1;
+
+// --- Méthodes ---
+const selectRow = (event, row) => {
+    const item = row ? row.item : event;
+    const id = item.typeJobSearchAssistanceOccurrenceId || item.TypeJobSearchAssistanceOccurrenceId;
+
+    if (id) {
+        router.push({ name: 'TypeJobSearchAssistanceOccurrence-Modifier', params: { id: id } });
+    } else {
+        console.error("Erreur: ID d'occurrence ARE manquant lors de la sélection.");
     }
-  }
-}
+};
+
+const updateNumberItems = (event) => {
+    store.dispatch('settings/setItemsPerPage', { number: event });
+};
+
+const updatePageSearch = () => {
+    options.value.page = 1;
+};
 </script>
 
 <style scoped>
