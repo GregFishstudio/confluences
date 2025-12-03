@@ -59,10 +59,8 @@ namespace Confluences.Persistence
         public virtual DbSet<JobSearchAssistance> JobSearchAssistances => Set<JobSearchAssistance>();
         public virtual DbSet<LastContact> LastContacts => Set<LastContact>();
         public virtual DbSet<StageFile> StageFiles => Set<StageFile>();
-        
-        // NOUVEAU : DbSet pour les entrées de présence
-        public virtual DbSet<Presence> Presences { get; set; } // <--- AJOUTÉ
-
+        public virtual DbSet<Presence> Presences { get; set; }
+        public virtual DbSet<SessionReport> SessionReports { get; set; }
         // Views
         public virtual DbSet<Ressource> Ressources => Set<Ressource>();
 

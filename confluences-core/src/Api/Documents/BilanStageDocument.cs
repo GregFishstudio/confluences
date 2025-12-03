@@ -25,7 +25,7 @@ namespace Api.Documents
         // Typographie harmonisée
         private readonly TextStyle _titleStyle = TextStyle.Default
             .FontFamily("Arial")
-            .FontSize(32)
+            .FontSize(24)
             .Bold()
             .FontColor(PrimaryColor);
 
@@ -124,10 +124,10 @@ namespace Api.Documents
                 // --- 1. Titre ---
                 col.Item().AlignCenter().Text("BILAN DE STAGE")
                     .Style(_titleStyle)
-                    .LetterSpacing(0.8f);
+                    .LetterSpacing(0.4f);
 
                 // Ligne de séparation courte et accentuée
-                col.Item().Width(80).AlignCenter().PaddingTop(6)
+                col.Item().Width(60).AlignCenter().PaddingTop(6)
                     .LineHorizontal(2)
                     .LineColor(AccentColor);
                 

@@ -1,9 +1,9 @@
-// File: Api/Models/Dto/Attendance/AttendanceEntryDto.cs
+// File: Confluences.Domain/Dto/Attendance/AttendanceEntryDto.cs
 
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Api.Models.Dto.Attendance
+namespace Confluences.Domain.Dto
 {
     public class AttendanceEntryDto
     {

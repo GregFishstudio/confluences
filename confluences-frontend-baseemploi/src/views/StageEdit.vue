@@ -8,7 +8,6 @@
 
     <v-form ref="formStage" v-model="valid" lazy-validation>
       
-      <!-- Bloc 1 : Activité et Métadonnées -->
       <v-card class="pa-4 mb-4 elevation-2 rounded-lg">
         <v-card-title class="text-subtitle-1 font-weight-bold">Détails du Stage</v-card-title>
         <v-card-text>
@@ -16,7 +15,7 @@
             <v-col cols="12" md="4">
               <v-autocomplete
                 v-model="localStage.typeIntershipActivityId"
-                :items="typeIntershipActivity.value?.typeIntershipActivities || []"
+                :items="typeIntershipActivitiesList"
                 item-title="nom"
                 item-value="typeIntershipActivityId"
                 label="Type d'activité"
@@ -42,7 +41,7 @@
             <v-col cols="12" md="4">
               <v-autocomplete
                 v-model="localStage.typeStageId"
-                :items="typeStage.value?.typeStages || []"
+                :items="typeStagesList"
                 item-title="nom"
                 item-value="typeStageId"
                 label="Taux d'occupation"
@@ -56,7 +55,7 @@
             <v-col cols="12" md="6">
               <v-autocomplete
                 v-model="localStage.createurId"
-                :items="user.value?.users || []"
+                :items="usersList"
                 item-title="nom"
                 item-value="id"
                 label="Créateur-trice"
@@ -70,7 +69,7 @@
             <v-col cols="12" md="6">
               <v-autocomplete
                 v-model="localStage.typeAnnonceId"
-                :items="typeAnnonce.value?.typeAnnonces || []"
+                :items="typeAnnoncesList"
                 item-title="libelle"
                 item-value="typeAnnonceId"
                 label="Stage à annoncer (Optionnel)"
@@ -84,7 +83,6 @@
         </v-card-text>
       </v-card>
 
-      <!-- Bloc 2 : Personnes et Entreprise -->
       <v-card class="pa-4 mb-4 elevation-2 rounded-lg">
         <v-card-title class="text-subtitle-1 font-weight-bold">Rôles et Organisation</v-card-title>
         <v-card-text>
@@ -92,7 +90,7 @@
             <v-col cols="12" md="4">
               <v-autocomplete
                 v-model="localStage.typeMetierId"
-                :items="typeMetier.value?.typeMetiers || []"
+                :items="typeMetiersList"
                 item-title="libelle"
                 item-value="typeMetierId"
                 label="Métier"
@@ -106,7 +104,7 @@
             <v-col cols="12" md="4">
               <v-autocomplete
                 v-model="localStage.entrepriseId"
-                :items="entreprise.value?.entreprises || []"
+                :items="entreprisesList"
                 item-title="nom"
                 item-value="entrepriseId"
                 label="Entreprise (Optionnel)"
@@ -120,7 +118,7 @@
             <v-col cols="12" md="4">
               <v-autocomplete
                 v-model="localStage.stagiaireId"
-                :items="user.value?.users || []"
+                :items="usersList"
                 item-title="nom"
                 item-value="id"
                 label="Stagiaire"
@@ -134,7 +132,6 @@
         </v-card-text>
       </v-card>
       
-      <!-- Bloc 3 : Dates, Horaires et Avantages -->
       <v-card class="pa-4 mb-4 elevation-2 rounded-lg">
         <v-card-title class="text-subtitle-1 font-weight-bold">Période et Conditions</v-card-title>
         <v-card-text>
@@ -187,7 +184,7 @@
               
               <v-autocomplete
                 v-model="localStage.sessionId"
-                :items="session.value?.sessions || []"
+                :items="sessionsList"
                 item-title="description"
                 item-value="sessionId"
                 label="Session (Optionnel)"
@@ -266,7 +263,6 @@
         </v-card-text>
       </v-card>
 
-      <!-- Bloc 4 : Textes et Bilans -->
       <v-card class="pa-4 mb-4 elevation-2 rounded-lg">
         <v-card-title class="text-subtitle-1 font-weight-bold">Notes et Suivi</v-card-title>
         <v-card-text>
@@ -312,19 +308,16 @@
         </v-card-text>
       </v-card>
 
-      <!-- Bloc 5 : Fichiers -->
       <v-row class="mb-10">
         <v-col>
           <StageFileList :stage="localStage" />
         </v-col>
       </v-row>
 
-      <!-- Barre d'Actions FIXE -->
       <div class="action-container action-bar-fixed">
         <v-row class="fill-height ma-0">
           <v-col class="d-flex justify-end align-center py-2">
             
-            <!-- Bouton Générer Bilan -->
             <v-btn
               class="ma-2"
               color="secondary"
@@ -387,7 +380,6 @@ const props = defineProps({
 })
 
 /* Local State (COPIE LOCALE POUR ÉDITION) */
-// Initialisé vide, sera rempli par le watcher
 const localStage = ref({});
 
 /* Form State */
@@ -413,17 +405,17 @@ const horaireSamediRules = [
 
 const requiredRule = [v => !!v || 'Obligatoire']
 
-/* Store state */
-const entreprise = computed(() => store.state.entreprise)
-const typeStage = computed(() => store.state.typeStage)
-const typeAnnonce = computed(() => store.state.typeAnnonce)
-const typeMetier = computed(() => store.state.typeMetier)
-const typeIntershipActivity = computed(() => store.state.typeIntershipActivity)
-const user = computed(() => store.state.user)
-const session = computed(() => store.state.session)
+// 🚀 Correction Majeure ici : Accès direct et sécurisé (?. pour éviter les crashs)
+// Ces variables ne nécessitent PAS .value dans le template
+const entreprisesList = computed(() => store.state.entreprise?.entreprises || [])
+const typeStagesList = computed(() => store.state.typeStage?.typeStages || [])
+const typeAnnoncesList = computed(() => store.state.typeAnnonce?.typeAnnonces || [])
+const typeMetiersList = computed(() => store.state.typeMetier?.typeMetiers || [])
+const typeIntershipActivitiesList = computed(() => store.state.typeIntershipActivity?.typeIntershipActivities || [])
+const usersList = computed(() => store.state.user?.users || [])
+const sessionsList = computed(() => store.state.session?.sessions || [])
 
 /* Watcher pour copier les props vers le state local */
-// C'est crucial : quand les données arrivent du store, on met à jour la copie locale
 watch(() => props.stage, (newVal) => {
   if (newVal) {
     // Copie superficielle (spread operator)
@@ -437,12 +429,13 @@ watch(() => props.stage, (newVal) => {
 
 /* Data Loading */
 onBeforeMount(() => {
+  // Assurez-vous que l'appel d'action correspond au nom du module
   store.dispatch('entreprise/fetchEntreprises')
   store.dispatch('typeStage/fetchTypeStages')
   store.dispatch('typeAnnonce/fetchTypeAnnonces')
   store.dispatch('typeMetier/fetchTypeMetiers')
   store.dispatch('typeIntershipActivity/fetchTypeIntershipActivities')
-  store.dispatch('user/fetchUsers')
+  store.dispatch('user/fetchUsers') // L'action doit être dans le module 'user'
   store.dispatch('session/fetchSessions')
 })
 
@@ -460,7 +453,7 @@ const downloadBilan = async (id) => {
     const now = new Date().toISOString();
     const token = localStorage.getItem("token") || localStorage.getItem("access_token");
 
-    const res = await fetch(`${API_BASE}/documents/bilan/${id}?date=${now}`, {
+    const res = await fetch(`${API_BASE}/api/documents/bilan/${id}?date=${now}`, {
         headers: {
             Authorization: `Bearer ${token}`
         }
@@ -514,6 +507,7 @@ async function submit() {
   padding: 0 40px;
 }
 
+/* Fix pour les ombres des champs, si nécessaire */
 .v-text-field :deep(.v-field__overlay),
 .v-autocomplete :deep(.v-field__overlay),
 .v-textarea :deep(.v-field__overlay) {

@@ -12,9 +12,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Http.Features;
 using Syncfusion.Licensing;
-using System;
 using System.Security.Claims;
 using QuestPDF.Infrastructure;
+using Microsoft.AspNetCore.Identity;
+using Confluences.Domain.Entities;
 
 namespace Api
 {
@@ -29,104 +30,131 @@ namespace Api
 
         public void ConfigureServices(IServiceCollection services)
         {
+            // -----------------------------
+            // Licences & context
+            // -----------------------------
             SyncfusionLicenseProvider.RegisterLicense(Configuration["SyncfusionKey"]);
-            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+            System.AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true); // Fix EF Core + Postgres
 
-            //
-            // 🔥 CORS UNIQUE — autorisation du front Vue + MVC
-            //
+            // -----------------------------
+            // CORS
+            // -----------------------------
             services.AddCors(options =>
-{
-    options.AddPolicy("Frontend", builder =>
-    {
-        builder
-            .WithOrigins(
-                "http://localhost:8080",
-                "http://localhost:5002",
-                "http://localhost"
-            )
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials()
-            .WithExposedHeaders("Content-Disposition"); // 🔥 OBLIGATOIRE POUR PDF
-    });
-});
-
-            services.AddControllers().AddNewtonsoftJson(options =>
             {
-                options.SerializerSettings.ReferenceLoopHandling =
-                    Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                options.AddPolicy("Frontend", builder =>
+                {
+                    builder
+                        .WithOrigins(
+                            "http://localhost:8080",
+                            "http://localhost:5002",
+                            "http://localhost"
+                        )
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials()
+                        .WithExposedHeaders("Content-Disposition");
+                });
             });
 
-            services.Configure<FormOptions>(options =>
+            // -----------------------------
+            // Controllers + JSON
+            // -----------------------------
+            services.AddControllers().AddNewtonsoftJson(opt =>
             {
-                options.MultipartBodyLengthLimit = 1073741824; // 1GB
+                opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             });
 
-            //
+            services.Configure<FormOptions>(opt =>
+            {
+                opt.MultipartBodyLengthLimit = 1073741824; // 1 GB
+            });
+
+            // -----------------------------
             // Swagger
-            //
-            services.AddSwaggerGen(options =>
+            // -----------------------------
+            services.AddSwaggerGen(opt =>
             {
-                options.SwaggerDoc("v1", new OpenApiInfo
+                opt.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",
                     Title = "Confluences API",
-                    Description = "API Confluences (Base Emploi + Plateforme)",
+                    Description = "API Confluences (Base Emploi + Plateforme)"
                 });
             });
 
-            //
-            // Auth JWT / IdentityServer4
-            //
-            services.AddAuthentication("Bearer")
-                .AddJwtBearer("Bearer", options =>
-                {
-                    options.Authority = Configuration["URLIdentityServer4"];
-                    options.RequireHttpsMetadata = false;
-                    options.Audience = "api1";
-                });
-
-            //
-            // EF Core Postgres
-            //
-            services.AddEntityFrameworkNpgsql().AddDbContext<ConfluencesDbContext>(opt =>
-                opt.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"))
-            );
-
-            services.AddSingleton<
-                Microsoft.AspNetCore.Authentication.IClaimsTransformation,
-                KarekeClaimsTransformer>();
-
-            //
-            // Authorization
-            //
-            services.AddAuthorization(options =>
+            // -----------------------------
+            // Authentication JWT (IdentityServer4)
+            // -----------------------------
+            services.AddAuthentication(options =>
             {
-                options.AddPolicy("Teacher", p => p.RequireClaim(ClaimTypes.Role, "Teacher"));
-                options.AddPolicy("Student", p => p.RequireClaim(ClaimTypes.Role, "Student"));
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.Authority = Configuration["URLIdentityServer4"];
+                options.RequireHttpsMetadata = false;
+                options.Audience = "api1";
             });
 
+            // -----------------------------
+            // EF Core Postgres
+            // -----------------------------
+            services.AddDbContext<ConfluencesDbContext>(options =>
+    options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"),
+        b => b.MigrationsAssembly("Confluences.Persistence")));
+
+
+            // -----------------------------
+            // Identity (API-friendly)
+            // -----------------------------
+            services.AddIdentityCore<ApplicationUser>(opt => { })
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<ConfluencesDbContext>()
+                .AddDefaultTokenProviders();
+
+            // Claims transformation
+            services.AddSingleton<Microsoft.AspNetCore.Authentication.IClaimsTransformation, KarekeClaimsTransformer>();
+
+            // -----------------------------
+            // Authorization
+            // -----------------------------
+            services.AddAuthorization(opt =>
+            {
+                opt.AddPolicy("Teacher", p => p.RequireClaim(ClaimTypes.Role, "Teacher"));
+                opt.AddPolicy("Student", p => p.RequireClaim(ClaimTypes.Role, "Student"));
+            });
+
+            // -----------------------------
+            // AutoMapper
+            // -----------------------------
             services.AddAutoMapper(typeof(Startup));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            // -----------------------------
+            // PDF License (QuestPDF)
+            // -----------------------------
             QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
 
             app.UseSwagger();
             app.UseSwaggerUI();
 
-            //
-            // 🔥 CORS DOIT être ici avant UseRouting
-            //
-            //app.UseCors("AllowAllFrontend");
+            // -----------------------------
+            // CORS must be before routing
+            // -----------------------------
             app.UseCors("Frontend");
 
-            //
-            // Reverse proxy / docker / nginx
-            //
+            // -----------------------------
+            // Reverse proxy / Docker
+            // -----------------------------
             var forwardOptions = new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto

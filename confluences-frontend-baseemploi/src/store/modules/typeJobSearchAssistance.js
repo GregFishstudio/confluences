@@ -38,19 +38,25 @@ export const mutations = {
 
 export const actions = {
   // Récupère les typeSearchAssistances et notifie l'utilisateur en cas de succès ou erreur
-  fetchTypeJobSearchAssistances({ commit, dispatch }) {
-    return TypeJobSearchAssistanceService.getTypeJobSearchAssistances()
-      .then(response => {
-        commit('SET_TYPESEARCHASSISTANCES', response.data)
-      })
-      .catch(error => {
-        const notification = {
-          type: 'error',
-          message: 'Problème au chargement des type ARE : ' + error.message
-        }
-        dispatch('notification/add', notification, { root: true })
-      })
-  },
+  // ✨ Recommended Improvement
+fetchTypeJobSearchAssistances({ commit, dispatch }) {
+  return TypeJobSearchAssistanceService.getTypeJobSearchAssistances()
+    .then(response => {
+      // 1. Success: Commit the fetched data
+      commit('SET_TYPESEARCHASSISTANCES', response.data)
+    })
+    .catch(error => {
+      // 2. Error: Commit an empty array to stabilize the state
+      commit('SET_TYPESEARCHASSISTANCES', []) // <-- CRUCIAL FIX
+      
+      const notification = {
+        type: 'error',
+        message: 'Problème au chargement des type ARE : ' + error.message
+      }
+      dispatch('notification/add', notification, { root: true })
+      // Optionally, you could use `throw error` here if components calling this action need to catch the error.
+    })
+},
   // Récupère un typeSearchAssistance spécifique et notifie l'utilisateur en cas de succès ou erreur
   fetchTypeJobSearchAssistance({ commit, dispatch }, id) {
     return TypeJobSearchAssistanceService.getTypeJobSearchAssistance(id)

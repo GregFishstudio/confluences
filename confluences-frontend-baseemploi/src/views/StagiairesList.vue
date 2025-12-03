@@ -192,7 +192,7 @@ export default {
     async fetchStagiaireStages(stagiaireId) {
       const token = localStorage.getItem("access_token")
       // Utilisation du endpoint corrigé dans la session précédente: api/stages/ByStagiaire/{stagiaireId}
-      const url = `http://localhost:5001/api/stages/ByStagiaire/${stagiaireId}` 
+      const url = `${API_BASE}/api/stages/ByStagiaire/${stagiaireId}` 
 
       try {
         const res = await fetch(url, {
@@ -259,7 +259,7 @@ export default {
       const token = localStorage.getItem("access_token")
 
       // Utilisation du endpoint AttestationTrimestre dans le DocumentsController
-      const url = `http://localhost:5001/api/documents/attestation-trimestre/${stagiaireId}?year=${year}&trimestre=${trimestre}`
+      const url = `${API_BASE}/api/documents/attestation-trimestre/${stagiaireId}?year=${year}&trimestre=${trimestre}`
 
       const res = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` }

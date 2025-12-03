@@ -208,7 +208,7 @@ const downloadBilan = async (id) => {
     const now = new Date().toISOString();
     const token = localStorage.getItem("token") || localStorage.getItem("access_token");
 
-    const res = await fetch(`${API_BASE}/documents/bilan/${id}?date=${now}`, {
+    const res = await fetch(`${API_BASE}/api/documents/bilan/${id}?date=${now}`, {
         headers: {
             Authorization: `Bearer ${token}`
         }

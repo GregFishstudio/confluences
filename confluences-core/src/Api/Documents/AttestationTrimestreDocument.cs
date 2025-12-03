@@ -119,10 +119,10 @@ namespace Api.Documents
                         .FontSize(24)
                         .Bold()
                         .FontColor(PrimaryColor)
-                        .LetterSpacing(0.8f);
+                        .LetterSpacing(0.4f);
 
                     // Ligne de séparation accentée
-                    titleCol.Item().PaddingTop(6).Width(80).AlignCenter()
+                    titleCol.Item().PaddingTop(6).Width(60).AlignCenter()
                         .LineHorizontal(2)
                         .LineColor(AccentColor);
 

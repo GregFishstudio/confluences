@@ -41,6 +41,7 @@ import TypeJobSearchAssistanceOccurenceEdit from '../views/TypeJobSearchAssistan
 import TypeIntershipActivityList from '../views/TypeIntershipActivityList.vue'
 import TypeIntershipActivityEdit from '../views/TypeIntershipActivityEdit.vue'
 import AttendanceRegister from '../views/AttendanceRegister.vue';
+import StagiairesFollowUp from '../views/FollowUpPage.vue';
 import Login from '../views/Login.vue'
 import Callback from '../views/Callback.vue'
 import NotFound from '../views/NotFound.vue'
@@ -70,6 +71,12 @@ const routes = [
     name: 'AttendanceRegister',
     component: AttendanceRegister,
     meta: { requiresAuth: true } 
+  },
+
+    {
+    path: '/stagiaires/follow-up',
+    name: 'StagiairesFollowUp', 
+    component: StagiairesFollowUp,
   },
   // Entreprises
   { path: '/entreprises', name: 'Entreprises', component: EntreprisesList, meta: { requiresAuth: true } },

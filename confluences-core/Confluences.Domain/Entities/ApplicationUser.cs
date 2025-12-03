@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+
 namespace Confluences.Domain.Entities
 {
     public class ApplicationUser : IdentityUser<string>

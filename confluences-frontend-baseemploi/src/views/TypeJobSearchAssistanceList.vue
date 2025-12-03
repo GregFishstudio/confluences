@@ -43,10 +43,10 @@
         </template>
         
         <template v-slot:item.description="{ item }">
-          <v-chip color="secondary lighten-5" text-color="secondary darken-4" class="font-weight-medium">
-            {{ item.description }}
-          </v-chip>
-        </template>
+  <v-chip color="secondary lighten-5" text-color="secondary darken-4" class="font-weight-medium">
+    {{ item ? item.description : '' }}
+  </v-chip>
+</template>
 
         <template v-slot:no-data>
             <div class="pa-4 text-center">
@@ -102,14 +102,25 @@ onBeforeRouteLeave((routeTo, routeFrom, next) => {
 options.value.page = 1;
 
 // --- Méthodes ---
+// JobSearchAssistanceList.vue (in <script setup>)
+
 const selectRow = (event, row) => {
+    // Determine the item object safely
     const item = row ? row.item : event;
+
+    // ✨ CRUCIAL FIX: Check if 'item' is valid before accessing properties
+    if (!item) {
+        console.warn("Tentative de sélection d'une ligne avec un item null/undefined. Ignoré.");
+        return; // Exit the function safely
+    }
+
+    // Now it is safe to access item properties
     const id = item.typeJobSearchAssistanceId || item.TypeJobSearchAssistanceId;
 
     if (id) {
         router.push({ name: 'TypeJobSearchAssistance-Modifier', params: { id: id } });
     } else {
-        console.error("Erreur: ID de type ARE manquant lors de la sélection.");
+        console.error("Erreur: ID de type ARE manquant lors de la sélection.", item);
     }
 };
 
