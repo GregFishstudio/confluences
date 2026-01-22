@@ -137,27 +137,36 @@
                   </div>
                 </td>
 
-                <td 
+               <td 
     class="rate-col sticky-col sticky-rate-session" 
-    :class="calculateQuarterlyRate(stagiaire).hasData ? getRateClass(calculateQuarterlyRate(stagiaire).rate) : 'grey--text text--darken-1'"
+    :class="calculateRates(stagiaire).hasData ? getRateClass(calculateRates(stagiaire).globalRate) : 'grey--text text--darken-1'"
 >
     <div class="font-weight-bold">
-        {{ calculateQuarterlyRate(stagiaire).rate.toFixed(1) }}%
+        {{ calculateRates(stagiaire).globalRate.toFixed(1) }}%
     </div>
     
-    <div v-if="calculateQuarterlyRate(stagiaire).totalAbsencePenalty > 0" class="text-caption error--text font-weight-bold" style="line-height: 1.2;">
-      <v-icon x-small color="red">mdi-clock-alert</v-icon> -{{ calculateQuarterlyRate(stagiaire).totalAbsencePenalty.toFixed(1) }} J
+    <v-progress-linear
+        :value="calculateRates(stagiaire).globalRate"
+        height="4"
+        rounded
+        :color="calculateRates(stagiaire).hasData ? (calculateRates(stagiaire).globalRate >= 80 ? 'success' : calculateRates(stagiaire).globalRate >= 50 ? 'warning' : 'error') : 'grey lighten-2'"
+        class="mt-1"
+    ></v-progress-linear>
+</td>
+
+<td 
+    class="rate-col" 
+    :class="calculateRates(stagiaire).hasData ? getRateClass(calculateRates(stagiaire).sessionRate) : 'grey--text'"
+>
+    <div class="font-weight-bold">
+        {{ calculateRates(stagiaire).sessionRate.toFixed(1) }}%
+    </div>
+
+    <div v-if="calculateRates(stagiaire).sessionPenalty > 0" class="text-caption error--text font-weight-bold" style="line-height: 1.2;">
+      <v-icon x-small color="red">mdi-clock-alert</v-icon> -{{ calculateRates(stagiaire).sessionPenalty.toFixed(1) }} J
     </div>
 </td>
                 
-                <td 
-                    class="rate-col" 
-                    :class="calculateVisiblePeriodRate(stagiaire).hasData ? getRateClass(calculateVisiblePeriodRate(stagiaire).rate) : 'grey--text'">
-                    <div class="font-weight-bold">
-                        {{ calculateVisiblePeriodRate(stagiaire).hasData ? calculateVisiblePeriodRate(stagiaire).rate.toFixed(1) + '%' : '-' }}
-                    </div>
-                </td>
-
                 <td
                   v-for="day in currentPeriodDays"
                   :key="day.fullDate"
@@ -667,81 +676,104 @@ async saveStartDate() {
             end: moment([year, startMonth + 2, 1]).endOf('month').toDate()
         };
     },
-    calculateVisiblePeriodRate(stagiaire) {
-        return this.calculateRateForPeriod(stagiaire, { start: this.currentPeriodStart, end: this.currentPeriodEnd });
-    },
+   
+    // DANS methods:
 
-    calculateQuarterlyRate(stagiaire) {
-        return this.calculateRateForPeriod(stagiaire, this.getQuarterDates(this.currentPeriodStart));
-    },
+calculateRates(stagiaire) {
+    // 1. Définir les bornes du TRIMESTRE (basé sur la date affichée)
+    // On se base sur l'ancre actuelle + 6 jours pour être sûr d'être dans le mois courant
+    const anchor = moment(this.currentPeriodStart).add(6, 'days');
+    const currentQuarterIndex = Math.floor((anchor.month() / 3)) + 1;
+    const startMonth = (currentQuarterIndex - 1) * 3;
+    const year = anchor.year();
+    
+    // Dates de début et fin du trimestre entier
+    const startOfQuarter = moment([year, startMonth, 1]).startOf('month');
+    const endOfQuarter = moment([year, startMonth + 2, 1]).endOf('month');
 
-    calculateRateForPeriod(stagiaire, dates) {
-      if (!dates.start || !dates.end) return { rate: 100, hasData: false, totalAbsencePenalty: 0 };
+    // 2. Définir les bornes Stagiaire
+    const participationStart = stagiaire.dateDebutParticipation 
+        ? moment(stagiaire.dateDebutParticipation).startOf('day')
+        : moment('2000-01-01'); // Par défaut dans le passé si vide
+    
+    // DATE CLÉ : On arrête le calcul "Session" à ce soir (comme dans l'autre composant)
+    const today = moment().endOf('day');
 
-      // Date de début du stagiaire (ou très loin dans le passé si non définie)
-      const participationStartDate = stagiaire.dateDebutParticipation 
-          ? moment(stagiaire.dateDebutParticipation).startOf('day')
-          : moment('2000-01-01');
+    let denomGlobal = 0; // Dénominateur Trimestre (ex: 60 jours)
+    let denomActive = 0; // Dénominateur Session (ex: 15 jours si on est le 15)
+    
+    let penaltyTotal = 0; // Total des pénalités
+    let penaltyActive = 0; // Pénalités sur la période active
+    
+    let hasExplicitBadData = false;
 
-      let totalTheorique = 0; 
-      let penalty = 0;
-      let hasExplicitBadData = false;
+    // 3. Boucle sur tout le trimestre
+    let curr = startOfQuarter.clone();
+    
+    while (curr.isSameOrBefore(endOfQuarter, 'day')) {
+        const dateStr = curr.format('YYYY-MM-DD'); 
+        const dateKey = curr.format('ddd MMM DD YYYY'); // Format clé API
+        const dayOfWeek = curr.isoWeekday();
+        const isWorking = dayOfWeek >= 1 && dayOfWeek <= 5;
+        
+        if (isWorking) {
+            const isFerie = this.joursFeries.includes(dateStr);
+            const isVac = this.periodesVacances.some(v => 
+                curr.isBetween(moment(v.start), moment(v.end), 'day', '[]')
+            );
 
-      let current = moment(dates.start);
-      const end = moment(dates.end);
+            if (!isFerie && !isVac) {
+                // --- Calcul GLOBAL (Projection Trimestre) ---
+                denomGlobal++;
+                
+                // Récupération pénalité
+                const status = stagiaire.presences?.[dateKey];
+                let currentPenalty = 0;
+                
+                if (status === 'a') {
+                    currentPenalty = 1;
+                    hasExplicitBadData = true;
+                } else if (status === 'r') {
+                    currentPenalty = 0.5;
+                    hasExplicitBadData = true;
+                }
+                
+                penaltyTotal += currentPenalty;
 
-      while (current.isSameOrBefore(end, 'day')) {
-          const dateStr = current.format('YYYY-MM-DD');
-          const dateKey = current.format('ddd MMM DD YYYY'); // Format clé API
-          const dayOfWeek = current.isoWeekday(); // 1=Lundi, 6=Samedi, 7=Dimanche
-          
-          // 1. Est-ce un jour ouvrable théorique ?
-          const isWorkingDay = dayOfWeek >= 1 && dayOfWeek <= 5;
-          
-          if (isWorkingDay) {
-              // 2. Est-ce un jour hors calcul (Férié / Vacances Globales) ?
-              const isFerie = this.joursFeries.includes(dateStr);
-              const isVacanceGlobale = this.periodesVacances.some(v => 
-                  current.isBetween(moment(v.start), moment(v.end), 'day', '[]')
-              );
+                // --- Calcul SESSION (Réalisé à date) ---
+                const isStarted = curr.isSameOrAfter(participationStart, 'day');
+                const isPastOrToday = curr.isSameOrBefore(today, 'day');
 
-              if (!isFerie && !isVacanceGlobale) {
-                  // 3. Le stagiaire est-il actif ce jour-là ?
-                  const isStarted = current.isSameOrAfter(participationStartDate, 'day');
-                  
-                  if (isStarted) {
-                      // C'est un jour comptabilisé
-                      totalTheorique++;
+                if (isStarted && isPastOrToday) {
+                    denomActive++;
+                    penaltyActive += currentPenalty;
+                }
+            }
+        }
+        curr.add(1, 'day');
+    }
+    
+    // 4. Calcul des Pourcentages
+    
+    // Taux Session (Active) : (Jours passés - Absences passées) / Jours passés
+    let rateActive = 100;
+    if (denomActive > 0) {
+        rateActive = ((denomActive - penaltyActive) / denomActive) * 100;
+    }
 
-                      // 4. Vérification des saisies (Pénalités)
-                      const s = stagiaire.presences?.[dateKey];
+    // Taux Global (Trimestre) : (Total Trimestre - Absences Totales) / Total Trimestre
+    let rateGlobal = 100;
+    if (denomGlobal > 0) {
+        rateGlobal = ((denomGlobal - penaltyTotal) / denomGlobal) * 100;
+    }
 
-                      if (s === 'a') {
-                          penalty += 1;
-                          hasExplicitBadData = true;
-                      } else if (s === 'r') {
-                          penalty += 0.5;
-                          hasExplicitBadData = true;
-                      }
-                      // Note : 'p' (présent), 'e' (excusé) ou vide = 0 pénalité (100% par défaut)
-                  }
-              }
-          }
-          current.add(1, 'day');
-      }
-
-      // Calcul final
-      if (totalTheorique === 0) return { rate: 100, hasData: false, totalAbsencePenalty: 0 };
-
-      const achieved = totalTheorique - penalty;
-      const rate = (achieved / totalTheorique) * 100;
-
-      return { 
-          rate: Math.max(0, rate), // Pas de taux négatif
-          hasData: hasExplicitBadData, // True seulement si pénalités trouvées
-          totalAbsencePenalty: penalty 
-      };
-    },
+    return { 
+        sessionRate: Math.max(0, rateActive), // Correspond à "Présence Session"
+        globalRate: Math.max(0, rateGlobal),  // Correspond à "Taux Global / Trimestre"
+        hasData: hasExplicitBadData, 
+        sessionPenalty: penaltyActive 
+    };
+},
 
     // --- AUTRES ---
     loadJoursFeriesFromStorage() {
