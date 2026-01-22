@@ -70,7 +70,7 @@
             </button>
           </div>
 
-          <!-- Options supplémentaires -->
+          <!-- Options supplémentaires
           <div class="form-options">
             <label class="remember-me">
               <input type="checkbox" v-model="rememberMe" />
@@ -78,7 +78,7 @@
               Se souvenir de moi
             </label>
             <a href="#" class="forgot-password">Mot de passe oublié ?</a>
-          </div>
+          </div> -->
 
           <!-- Bouton de connexion -->
           <button
@@ -137,9 +137,7 @@
       <div class="login-footer">
         <p>© 2025 Confluences. Tous droits réservés.</p>
         <div class="footer-links">
-          <a href="#">Confidentialité</a>
-          <a href="#">Conditions</a>
-          <a href="#">Support</a>
+          
         </div>
       </div>
     </div>

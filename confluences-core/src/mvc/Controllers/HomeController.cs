@@ -42,8 +42,13 @@ namespace mvc.Controllers
 
             // Préparation de l'appel à l'API
             HttpClient client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer");
+            var token = await HttpContext.GetTokenAsync("access_token");
 
+            if (!string.IsNullOrEmpty(token))
+            {
+                    client.DefaultRequestHeaders.Authorization =
+                         new AuthenticationHeaderValue("Bearer", token);
+            }
             // Récupération de la liste de teachers
             //string contentUsers = await client.GetStringAsync(_configuration["URLAPI"] + "api/Role/Teachers");
             //List<AspNetUser> users = JsonSerializer.Deserialize<List<AspNetUser>>(contentUsers);

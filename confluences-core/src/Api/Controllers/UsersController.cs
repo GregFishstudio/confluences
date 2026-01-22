@@ -36,13 +36,22 @@ namespace Api.Controllers
         public async Task<ActionResult<IEnumerable<UserInfo>>> GetUsers()
         {
             var aspnetusers = await _context.Users
-                            .AsNoTracking()
-                            .Include(a => a.SessionStudents)
-                                .ThenInclude(a => a.Session)
-                                    .ThenInclude(a => a.SchoolClassRoom)
-                            .OrderBy(a => a.Firstname)
-                            .Select(v => new UserInfo { Id = v.Id.ToString(), Nom = v.Firstname + " " + v.LastName })
-                            .ToListAsync();
+                                    .AsNoTracking()
+                                    .Include(a => a.SessionStudents)
+                                        .ThenInclude(a => a.Session)
+                                            .ThenInclude(a => a.SchoolClassRoom)
+                                    .OrderBy(a => a.Firstname)
+                                    .Select(v => new UserInfo 
+                                    { 
+                                        Id = v.Id.ToString(), 
+                                        Nom = v.Firstname + " " + v.LastName,
+                                        // Logique pour extraire le nom de la classe/session la plus récente (trié par DateStart)
+                                        Niveau = v.SessionStudents
+                                                    .OrderByDescending(ss => ss.Session.DateStart)
+                                                    .Select(ss => ss.Session.SchoolClassRoom.SchoolClassRoomName)
+                                                    .FirstOrDefault() ?? "N/A"
+                                    })
+                                    .ToListAsync();
 
 
             return aspnetusers;

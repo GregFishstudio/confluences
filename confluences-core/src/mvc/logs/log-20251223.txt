@@ -1,0 +1,188 @@
+2025-12-23 06:35:08.818 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:38:21.668 +00:00 [INF] Starting host...
+2025-12-23 06:38:21.717 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:38:22.680 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:38:44.432 +00:00 [INF] Starting host...
+2025-12-23 06:38:44.544 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:39:02.510 +00:00 [INF] Starting host...
+2025-12-23 06:39:02.558 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:39:04.315 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:39:31.520 +00:00 [INF] Starting host...
+2025-12-23 06:39:31.565 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:39:32.409 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:39:33.270 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:40:04.217 +00:00 [INF] Starting host...
+2025-12-23 06:40:04.265 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:40:05.362 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:40:28.067 +00:00 [INF] Starting host...
+2025-12-23 06:40:28.113 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:40:30.215 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:41:01.252 +00:00 [INF] Starting host...
+2025-12-23 06:41:01.298 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:41:24.506 +00:00 [INF] Starting host...
+2025-12-23 06:41:24.558 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:41:27.531 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:42:21.396 +00:00 [INF] Starting host...
+2025-12-23 06:42:21.448 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:42:23.545 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:43:48.877 +00:00 [INF] Starting host...
+2025-12-23 06:43:48.924 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:43:49.981 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:43:52.933 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:44:20.400 +00:00 [INF] Starting host...
+2025-12-23 06:44:20.450 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:44:20.867 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:45:54.282 +00:00 [INF] Starting host...
+2025-12-23 06:45:54.332 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:45:59.640 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:46:21.581 +00:00 [INF] Starting host...
+2025-12-23 06:46:21.629 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:46:41.846 +00:00 [INF] Starting host...
+2025-12-23 06:46:41.889 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:46:43.398 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:47:15.073 +00:00 [INF] Starting host...
+2025-12-23 06:47:15.175 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:47:26.401 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:47:57.887 +00:00 [INF] Starting host...
+2025-12-23 06:47:57.930 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:47:58.976 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:48:39.269 +00:00 [INF] Starting host...
+2025-12-23 06:48:39.322 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:48:40.598 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:48:41.791 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:49:27.533 +00:00 [INF] Starting host...
+2025-12-23 06:49:27.581 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:49:30.498 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:49:59.698 +00:00 [INF] Starting host...
+2025-12-23 06:49:59.760 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:50:00.275 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:50:01.445 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:50:29.483 +00:00 [INF] Starting host...
+2025-12-23 06:50:29.532 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:50:36.054 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:50:38.358 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:50:39.742 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:50:39.753 +00:00 [ERR] An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: Sequence contains no elements
+   at System.Linq.ThrowHelper.ThrowNoElementsException()
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source)
+   at mvc.Controllers.StudentPageController.IndexAsync() in /src/src/mvc/Controllers/StudentPageController.cs:line 28
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|6_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Localization.RequestLocalizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.Invoke(HttpContext context)
+2025-12-23 06:50:48.647 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:50:48.652 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:50:48.688 +00:00 [INF] AuthenticationScheme: Cookies signed out.
+2025-12-23 06:50:48.692 +00:00 [VRB] Entering Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectHandler's HandleSignOutAsync.
+2025-12-23 06:50:48.870 +00:00 [VRB] Using properties.RedirectUri for redirect post authentication: 'http://localhost:5002/'.
+2025-12-23 06:50:48.870 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:50:48.875 +00:00 [INF] AuthenticationScheme: oidc signed out.
+2025-12-23 06:50:59.156 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:51:01.249 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:51:01.253 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:51:01.264 +00:00 [ERR] An unhandled exception has occurred while executing the request.
+System.Net.Http.HttpRequestException: Response status code does not indicate success: 401 (Unauthorized).
+   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at System.Net.Http.HttpClient.GetStringAsyncCore(HttpRequestMessage request, CancellationToken cancellationToken)
+   at mvc.Controllers.StudentPageController.PreviousLessonsAsync() in /src/src/mvc/Controllers/StudentPageController.cs:line 156
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|6_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Localization.RequestLocalizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware.Invoke(HttpContext context)
+2025-12-23 06:51:04.423 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:51:04.424 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:51:04.435 +00:00 [INF] AuthenticationScheme: Cookies signed out.
+2025-12-23 06:51:04.436 +00:00 [VRB] Entering Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectHandler's HandleSignOutAsync.
+2025-12-23 06:51:04.436 +00:00 [VRB] Using properties.RedirectUri for redirect post authentication: 'http://localhost:5002/'.
+2025-12-23 06:51:04.436 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:51:04.437 +00:00 [INF] AuthenticationScheme: oidc signed out.
+2025-12-23 06:52:20.248 +00:00 [INF] Starting host...
+2025-12-23 06:52:20.293 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:52:21.221 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:52:24.981 +00:00 [DBG] AuthenticationScheme: Cookies was not authenticated.
+2025-12-23 06:52:24.990 +00:00 [VRB] Entering Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectHandler's HandleUnauthorizedAsync.
+2025-12-23 06:52:24.997 +00:00 [VRB] Using properties.RedirectUri for 'local redirect' post authentication: '/Account/SignIn'.
+2025-12-23 06:52:25.141 +00:00 [DBG] HandleChallenge with Location: http://host.docker.internal:5000/connect/authorize?client_id=mvc&redirect_uri=http%3A%2F%2Flocalhost%3A5002%2Fsignin-oidc&response_type=code&scope=openid%20profile%20api1%20roles%20offline_access&code_challenge=OpG4N0jtiCWJM6WiRif8tYA8UmwafIzM1DbAcT0TKks&code_challenge_method=S256&response_mode=form_post&nonce=639020695451336831.NWJkODFmYTctMzgzNi00YWQ5LTgyYzktNGZmMzdlZWJhODYyYTBjOGQxMWQtYTQ4OC00MGUwLWFkNDItOWNjYjg1ZGY5NjMy&state=CfDJ8C6EXQ-Tr0xJigzFPObEsg3-qxltOHhHIqTeIElPQGaLhgkigwVveEGui1t092ifCulRi4ShWJnxCR13wuNeVmQEeHxmry7IX85g7dsnmxRT8MRwXzRl41uf0dmNBqJF7ys3TfiBM6_FQH0b07gpDwsJTONzR2R__lrGBlgmC12QrxY1Y2BoCiODWmoiKdXMh5mdK52XEem-kTYI9GH1YFi1HBS3kexcuLAlGgsn8YPfmeilfFssy_hNRI4plV1K3dCkJuKZM2XtROMvHND0TeIJCuiqCUCxo1ulr4f1IdQJg0Cs6dJOoHBjyjnB14B8yzhrq4Z0rm3Ub_52EdANpB493rrjhq_4ZolroUJMtVMqB__8vw-wLuycmMlkKkGzPg&x-client-SKU=ID_NETSTANDARD2_0&x-client-ver=5.5.0.0; and Set-Cookie: .AspNetCore.OpenIdConnect.Nonce.CfDJ8C6EXQ-Tr0xJigzFPObEsg3h5utDszHVp4vWLyJbqjz23Xy1MWPZJqSL_Vz6prPxJ2YarB6aSA62cU7vLG_ceLsoVsx3BOfmv-vvDUEKbt6pxN4m_KHJV5M3D3q58kdDj5aiYTnmJz8bV0hZt3VpajKkb2q4bJwabBCk_kQFHU2M_aIO0-r4YZlfMi7XCksYmiTEJdxwzwqoZemsaqFuRcTJEV3hXm3LMrecbWiiAs54gFfdoo_LU88nSt6otxayvL06x5P6mCqPf2YuWJZhchU=N; expires=Tue, 23 Dec 2025 07:07:25 GMT; path=/signin-oidc; httponly,.AspNetCore.Correlation.dAsyAmB7Ah-5PrjqJxlUgl8RQX_HwGLuTUOCNdxAV7Q=N; expires=Tue, 23 Dec 2025 07:07:25 GMT; path=/signin-oidc; httponly.
+2025-12-23 06:52:25.142 +00:00 [INF] AuthenticationScheme: oidc was challenged.
+2025-12-23 06:52:27.708 +00:00 [VRB] Entering Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectHandler's HandleRemoteAuthenticateAsync.
+2025-12-23 06:52:27.715 +00:00 [VRB] MessageReceived: '?code=IXlLGKLmfOUw8AU69b73_jk_ao2obKUuBkWjr6gF76E&scope=openid%20profile%20roles%20api1%20offline_access&session_state=SIqkefJdOkSokWPa2LHnFBwHvU2FdKSRqnIj7tntPMM.oaEGCZTJzcxOJszFFbcEgA'.
+2025-12-23 06:52:27.718 +00:00 [DBG] Updating configuration
+2025-12-23 06:52:27.721 +00:00 [VRB] Authorization code received.
+2025-12-23 06:52:27.723 +00:00 [DBG] Redeeming code for tokens.
+2025-12-23 06:52:27.761 +00:00 [VRB] Token response received.
+2025-12-23 06:52:27.816 +00:00 [VRB] Retrieving claims from the user info endpoint.
+2025-12-23 06:52:27.831 +00:00 [VRB] User information received: System.Text.Json.JsonDocument
+2025-12-23 06:52:27.836 +00:00 [INF] AuthenticationScheme: Cookies signed in.
+2025-12-23 06:52:27.849 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:52:27.859 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:52:27.864 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:52:38.682 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:52:38.687 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:52:40.368 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:52:40.368 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:52:41.807 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:52:41.811 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:52:42.811 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:52:42.832 +00:00 [INF] About page 'Ressources' visited at 06:52:42
+2025-12-23 06:52:44.665 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:52:44.665 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:52:50.921 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:52:50.925 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:53:07.611 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:53:07.612 +00:00 [INF] About page 'Ressources' visited at 06:53:07
+2025-12-23 06:53:08.442 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:53:08.443 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:53:35.788 +00:00 [INF] Starting host...
+2025-12-23 06:53:35.850 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:53:37.597 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:53:37.612 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:54:23.661 +00:00 [INF] Starting host...
+2025-12-23 06:54:23.703 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:54:25.024 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:54:25.039 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:54:27.926 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:54:27.932 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:54:30.892 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:54:30.893 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:55:07.531 +00:00 [INF] Starting host...
+2025-12-23 06:55:07.579 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2025-12-23 06:57:20.853 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:57:20.878 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:57:23.219 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:57:23.248 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:57:28.191 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:57:37.110 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:57:37.117 +00:00 [INF] AuthenticationScheme: Cookies signed out.
+2025-12-23 06:57:37.124 +00:00 [VRB] Entering Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectHandler's HandleSignOutAsync.
+2025-12-23 06:57:37.204 +00:00 [VRB] Using properties.RedirectUri for redirect post authentication: 'http://localhost:5002/'.
+2025-12-23 06:57:37.205 +00:00 [DBG] AuthenticationScheme: Cookies was successfully authenticated.
+2025-12-23 06:57:37.211 +00:00 [INF] AuthenticationScheme: oidc signed out.

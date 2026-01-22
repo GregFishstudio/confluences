@@ -1,88 +1,162 @@
 ﻿@model mvc.Models.AspNetUser
-
 @using Newtonsoft.Json
 
-<!-- Container for dynamic notifications -->
+<style>
+    /* Conteneur pour empiler les notifications si plusieurs cours démarrent */
+    #notifContainer {
+        position: fixed;
+        top: 20px;
+        left: 20px; /* Aligné à gauche pour différencier des appels privés à droite */
+        z-index: 9998;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .cardBox-modern {
+        display: none; /* Masqué par défaut */
+        align-items: center;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 22px;
+        padding: 15px 20px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        animation: slideInLeft 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        max-width: 350px;
+    }
+
+    .cardBox-modern:hover {
+        transform: scale(1.03) translateY(-2px);
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 15px 45px rgba(0, 0, 0, 0.18);
+    }
+
+    @@keyframes slideInLeft {
+        from { transform: translateX(-120%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    .icon-live {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #1cc88a, #13855c);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.4rem;
+        margin-right: 15px;
+        position: relative;
+    }
+
+    /* Point rouge clignotant "LIVE" */
+    .live-dot {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        width: 12px;
+        height: 12px;
+        background: #e74a3b;
+        border-radius: 50%;
+        border: 2px solid white;
+        animation: blink 1s infinite;
+    }
+
+  @@keyframes blink {
+        0% { opacity: 1; } 
+        50% { opacity: 0.3; } 
+        100% { opacity: 1; }
+    }
+
+    .text-content-modern {
+        flex-grow: 1;
+    }
+
+    .title-modern {
+        margin: 0;
+        font-weight: 800;
+        font-size: 0.9rem;
+        color: #2e3d49;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .subtitle-modern {
+        margin: 0;
+        font-size: 0.8rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+</style>
+
 <div id="notifContainer"></div>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Serialize the model data to JSON
-        var sessionStudents = @Html.Raw(JsonConvert.SerializeObject(Model.SessionStudents));
-        var classroomIds = sessionStudents.map(function (student) {
-            return student.Session.SchoolClassRoom.SchoolClassRoomId; // Directly use the classroom ID
-        });
-        var uniqueClassroomIds = [...new Set(classroomIds)]; // Ensure unique IDs
+        // Sérialisation des données
+        const sessionStudents = @Html.Raw(JsonConvert.SerializeObject(Model.SessionStudents));
+        const classroomIds = sessionStudents.map(s => s.Session.SchoolClassRoom.SchoolClassRoomId);
+        const uniqueClassroomIds = [...new Set(classroomIds)];
 
-        // Create a notification box for each unique classroom
-        var notifContainer = document.getElementById('notifContainer');
+        const notifContainer = document.getElementById('notifContainer');
+        
+        // Création dynamique des box
         uniqueClassroomIds.forEach(function (classroomId) {
-            var notifBox = document.createElement('div');
-            notifBox.className = 'cardBox';
+            const notifBox = document.createElement('div');
+            notifBox.className = 'cardBox-modern';
             notifBox.id = 'notifBox_' + classroomId;
+            
             notifBox.onclick = function () {
-                var url = '@Url.Action("Index", "Jitsi", new { roomName = "__ROOM_ID__", isPrivateRoom = false })';
-                url = url.replace('__ROOM_ID__', classroomId); // Replace the placeholder with the actual classroomId
-                location.href = url;
+                let url = '@Url.Action("Index", "Jitsi", new { roomName = "__ROOM_ID__", isPrivateRoom = false })';
+                location.href = url.replace('__ROOM_ID__', classroomId);
             };
 
             notifBox.innerHTML = `
-                    <div class="imgCard"></div>
-                    <div class="textBoxCard">
-                        <div class="textContentCard">
-                            <p class="h1Card">COURS DE FRANCAIS</p>
-                        </div>
-                        <p class="pCard">
-                            Cliquer pour rejoindre
-                        </p>
-                    </div>
-                `;
+                <div class="icon-live">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <div class="live-dot"></div>
+                </div>
+                <div class="text-content-modern">
+                    <p class="title-modern">Cours en direct</p>
+                    <p class="subtitle-modern">Rejoindre la classe</p>
+                </div>
+            `;
 
             notifContainer.appendChild(notifBox);
         });
 
-        // Initialize Jitsi connection
+        // Connexion SignalR Jitsi
         startConnectionJitsi().then(function () {
-            // Check connection state before subscribing
             if (connectionJitsi.state === 'Connected') {
-                // Subscribe to all groups
-                uniqueClassroomIds.forEach(function (groupId) {
+                
+                uniqueClassroomIds.forEach(groupId => {
                     connectionJitsi.invoke("AddToGroup", "SchoolClassRoom_" + groupId)
-                        .catch(function (err) {
-                            console.error('Error adding to group ' + groupId + ': ', err.toString());
-                        });
+                        .catch(err => console.error('SignalR Group Error:', err));
                 });
 
-                // Handle Jitsi notifications
-                connectionJitsi.on("JitsiNotification", function (message) {
+                connectionJitsi.on("JitsiNotification", function () {
                     sessionStorage.setItem('isButtonVisible', 'true');
-                    updateNotificationVisibility();
+                    updateVisibility();
                 });
 
-                // Handle stop class room event
-                connectionJitsi.on("StopClassRoom", function (message) {
+                connectionJitsi.on("StopClassRoom", function () {
                     sessionStorage.setItem('isButtonVisible', 'false');
-                    updateNotificationVisibility();
+                    updateVisibility();
                 });
-            } else {
-                console.error("Connection is not established. Cannot send data.");
             }
 
-            // Initial visibility setup
-            updateNotificationVisibility();
-        }).catch(function (err) {
-            console.error("Error initializing connection: ", err.toString());
-        });
+            updateVisibility();
+        }).catch(err => console.error("Jitsi Connection Error:", err));
 
-        // Function to update notification visibility
-        function updateNotificationVisibility() {
-            var isButtonVisible = sessionStorage.getItem('isButtonVisible');
-            var notifBoxes = document.querySelectorAll('[id^="notifBox_"]');
-
-            notifBoxes.forEach(function (box) {
-                if (box) {
-                    box.style.display = isButtonVisible === 'true' ? 'flex' : 'none';
-                }
+        function updateVisibility() {
+            const isVisible = sessionStorage.getItem('isButtonVisible') === 'true';
+            document.querySelectorAll('[id^="notifBox_"]').forEach(box => {
+                box.style.display = isVisible ? 'flex' : 'none';
             });
         }
     });

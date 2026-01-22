@@ -22,6 +22,40 @@ namespace IdentityServerAspNetIdentity.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Confluences.Domain.Entities.AccompanyingPresence", b =>
+                {
+                    b.Property<int>("AccompanyingPresenceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("AccompanyingPresenceId"));
+
+                    b.Property<string>("ActivityName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<bool>("IsPresent")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("StagiaireId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("AccompanyingPresenceId");
+
+                    b.HasIndex("StagiaireId", "Date", "ActivityName")
+                        .IsUnique();
+
+                    b.ToTable("AccompanyingPresences");
+                });
+
             modelBuilder.Entity("Confluences.Domain.Entities.AnnouncePage", b =>
                 {
                     b.Property<int>("AnnouncePageId")
@@ -134,6 +168,9 @@ namespace IdentityServerAspNetIdentity.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("DateDebutParticipation")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -175,6 +212,9 @@ namespace IdentityServerAspNetIdentity.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<string>("OralLevel")
+                        .HasColumnType("text");
+
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text");
 
@@ -202,6 +242,9 @@ namespace IdentityServerAspNetIdentity.Migrations
 
                     b.Property<bool>("WantsMoreHomeworks")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("WrittenLevel")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -1026,11 +1069,17 @@ namespace IdentityServerAspNetIdentity.Migrations
 
             modelBuilder.Entity("Confluences.Domain.Entities.SessionReport", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("SessionReportId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SessionReportId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("DigitalSkillsText")
+                        .HasColumnType("text");
 
                     b.Property<string>("EvaluationText")
                         .IsRequired()
@@ -1043,13 +1092,25 @@ namespace IdentityServerAspNetIdentity.Migrations
                     b.Property<double>("GlobalRate")
                         .HasColumnType("double precision");
 
+                    b.Property<string>("HomeVisitsText")
+                        .HasColumnType("text");
+
+                    b.Property<string>("IndividualAccompanyingText")
+                        .HasColumnType("text");
+
                     b.Property<string>("Quarter")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SocialInsertionText")
                         .HasColumnType("text");
 
                     b.Property<string>("StagiaireId")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("WorkshopsJson")
                         .IsRequired()
@@ -1058,7 +1119,7 @@ namespace IdentityServerAspNetIdentity.Migrations
                     b.Property<int>("Year")
                         .HasColumnType("integer");
 
-                    b.HasKey("Id");
+                    b.HasKey("SessionReportId");
 
                     b.HasIndex("StagiaireId");
 
@@ -1227,6 +1288,37 @@ namespace IdentityServerAspNetIdentity.Migrations
                     b.HasIndex("StageId");
 
                     b.ToTable("StageFiles");
+                });
+
+            modelBuilder.Entity("Confluences.Domain.Entities.StagiaireNiveau", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Annee")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("OralLevel")
+                        .HasColumnType("text");
+
+                    b.Property<string>("StagiaireId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Trimestre")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("WrittenLevel")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StagiaireId");
+
+                    b.ToTable("StagiaireNiveaux");
                 });
 
             modelBuilder.Entity("Confluences.Domain.Entities.Theory", b =>
@@ -1526,6 +1618,17 @@ namespace IdentityServerAspNetIdentity.Migrations
                         .HasColumnType("text");
 
                     b.ToTable("ressources");
+                });
+
+            modelBuilder.Entity("Confluences.Domain.Entities.AccompanyingPresence", b =>
+                {
+                    b.HasOne("Confluences.Domain.Entities.ApplicationUser", "Stagiaire")
+                        .WithMany()
+                        .HasForeignKey("StagiaireId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Stagiaire");
                 });
 
             modelBuilder.Entity("Confluences.Domain.Entities.AnnouncePageLink", b =>
@@ -2051,6 +2154,17 @@ namespace IdentityServerAspNetIdentity.Migrations
                         .IsRequired();
 
                     b.Navigation("Stage");
+                });
+
+            modelBuilder.Entity("Confluences.Domain.Entities.StagiaireNiveau", b =>
+                {
+                    b.HasOne("Confluences.Domain.Entities.ApplicationUser", "Stagiaire")
+                        .WithMany()
+                        .HasForeignKey("StagiaireId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Stagiaire");
                 });
 
             modelBuilder.Entity("Confluences.Domain.Entities.Theory", b =>

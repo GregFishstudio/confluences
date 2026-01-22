@@ -1,103 +1,158 @@
 ﻿@model IEnumerable<mvc.Models.SchoolClassRoom>
 
 @{
-    ViewData["Title"] = "Les classes";
+    ViewData["Title"] = "Gestion des Classes";
 }
 
-<br />
-<br />
-<br />
-<br />
-<body data-parallax="true" class="bgImage">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header card-header-primary card-header-icon">
-                        <div class="card-icon">
-                            <h4 class="card-title">@ViewData["Title"]</h4>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div>
-                            <table class="table table-no-bordered table-hover" cellspacing="0" width="100%" style="width:100%">
-                                <tbody>
-                                    @foreach (var item in Model)
-                                    {
-                                    <tr>
-                                        <td>
-                                            <a class="btn btn-primary btn-block" asp-action="Details" asp-route-id="@item.SchoolClassRoomId" style="max-width:200px;">
-                                                <h5>
-                                                    @Html.DisplayFor(modelItem => item.SchoolClassRoomName)
-                                                </h5>
-                                            </a>
-                                        </td>
-                                        <td class="text-md-right">
-                                            <a asp-action="Edit" asp-route-id="@item.SchoolClassRoomId" style="font-size:1.0625rem">
-                                                Modifier
-                                            </a> |
-                                            <a class="text-danger blo" asp-action="Delete" asp-route-id="@item.SchoolClassRoomId" style="font-size:1.0625rem">
-                                                Supprimer
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="toolbar">
-                            <p>
-                                <a class="btn btn-success" asp-action="Create">Créer une nouvelle classe</a>
-                            </p>
-                        </div>
-                    </div>
-                    <!-- end content-->
-                </div>
-                <!--  end card  -->
+<style>
+     :root {
+        --bg-gradient: linear-gradient(135deg, #f0f4ff 0%, #f1fff5 50%, #ffffff 100%);
+        --primary-modern: #4e73df;
+        --border-soft: rgba(0, 0, 0, 0.05);
+        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    }
+
+    body, .bgImage {
+        background: var(--bg-gradient) !important;
+        background-attachment: fixed !important;
+        font-family: 'Inter', sans-serif;
+        color: #2e3d49;
+    }
+    
+    .admin-card {
+        background: #fff;
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: var(--card-shadow);
+        margin-top: 2rem;
+    }
+
+    .card-header-actions {
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #e3e6f0;
+    }
+
+    /* Style des badges pour les noms de classe */
+    .class-link-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.6rem 1.2rem;
+        background-color: rgba(78, 115, 223, 0.08);
+        color: var(--primary-color);
+        border-radius: 0.5rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: 0.2s;
+        border: 1px solid transparent;
+    }
+
+    .class-link-badge:hover {
+        background-color: var(--primary-color);
+        color: white !important;
+        transform: translateY(-1px);
+    }
+
+    /* Boutons d'actions compacts */
+    .action-group { display: flex; justify-content: flex-end; gap: 8px; }
+    
+    .btn-circle-action {
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #f8f9fc;
+        border: 1px solid #e3e6f0;
+        color: #858796;
+        transition: 0.2s;
+    }
+
+    .btn-circle-action:hover { background: #eaecf4; color: var(--primary-color); }
+    .btn-circle-action.delete:hover { background: #fff1f0; color: #e74a3b; border-color: #ffa39e; }
+</style>
+
+<div class="container-fluid px-4">
+    <div class="admin-card">
+        <div class="card-header-actions">
+            <div>
+                <h2 class="h3 font-weight-bold text-gray-800 mb-1">@ViewData["Title"]</h2>
+                <p class="text-muted small mb-0"><i class="fas fa-info-circle mr-1"></i> Cliquez sur une classe pour voir ses détails ou gérez les via les actions à droite.</p>
             </div>
-            <!-- end col-md-12 -->
+
+            <a class="btn btn-primary btn-icon-split shadow-sm" asp-action="Create">
+                <span class="icon text-white-50"><i class="fas fa-plus"></i></span>
+                <span class="text">Ajouter une classe</span>
+            </a>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table id="tableClasses" class="table table-hover mb-0" width="100%">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="py-3 px-4 border-0">Nom de la classe / Salle</th>
+                            <th class="py-3 px-4 border-0 text-right">Actions de gestion</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="align-middle px-4">
+                                    <a class="class-link-badge" asp-action="Details" asp-route-id="@item.SchoolClassRoomId">
+                                        <i class="fas fa-door-open mr-2"></i>
+                                        @Html.DisplayFor(modelItem => item.SchoolClassRoomName)
+                                    </a>
+                                </td>
+                                <td class="align-middle px-4">
+                                    <div class="action-group">
+                                        <a asp-action="Edit" asp-route-id="@item.SchoolClassRoomId" class="btn-circle-action" title="Modifier">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.SchoolClassRoomId" class="btn-circle-action delete" title="Supprimer">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</body>
-
-
+</div>
 
 @section Scripts {
-
     <script>
         $(document).ready(function () {
-            $('#datatables').DataTable({
-                "pagingType": "full_numbers",
-                "lengthMenu": [
-                    [10, 25, 50, -1],
-                    [10, 25, 50, "All"]
+            // Initialisation propre de DataTables avec l'ID spécifique
+            var table = $('#tableClasses').DataTable({
+                "pagingType": "simple_numbers",
+                "pageLength": 10,
+                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "Toutes"]],
+                "responsive": true,
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/French.json",
+                    "search": "", // Enlève le label "Rechercher"
+                    "searchPlaceholder": "Rechercher une classe..."
+                },
+                "columnDefs": [
+                    { "orderable": false, "targets": 1 } // Désactive le tri sur la colonne Actions
                 ],
-                responsive: true,
-                scrollCollapse: true,
-                language: {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/French.json"
-                }
+                // Structure du layout (DOM) pour un affichage propre
+                "dom": "<'row p-4'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                       "<'row'<'col-sm-12'tr>>" +
+                       "<'row p-4'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
             });
 
-            var table = $('#datatable').DataTable();
-
-            // Edit record
-            table.on('click', '.edit', function () {
-                $tr = $(this).closest('tr');
-                var data = table.row($tr).data();
-                alert('You press on Row: ' + data[0] + ' ' + data[1] + ' ' + data[2] + '\'s row.');
-            });
-
-            // Delete a record
-            table.on('click', '.remove', function (e) {
-                $tr = $(this).closest('tr');
-                table.row($tr).remove().draw();
-                e.preventDefault();
-            });
-
-            //Like record
-            table.on('click', '.like', function () {
-                alert('You clicked on Like button');
-            });
-        });</script>
+            // Amélioration du champ de recherche pour qu'il ressemble à un input Bootstrap
+            $('.dataTables_filter input').addClass('form-control shadow-sm');
+            $('.dataTables_length select').addClass('form-control form-control-sm');
+        });
+    </script>
 }

@@ -11,6 +11,7 @@ using Confluences.Domain.Entities;
 using Confluences.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using System.Linq;
 
 namespace IdentityServerAspNetIdentity
 {
@@ -135,6 +136,31 @@ namespace IdentityServerAspNetIdentity
                     await userManager.AddToRoleAsync(admin, teacherRole);
                     Log.Information("🔗 Assigned role Teacher to admin");
                 }
+
+// 5️⃣ Reset passwords for all Teacher users (hors admin)
+var teachers = await userManager.GetUsersInRoleAsync("Teacher");
+teachers = teachers.Where(u => u.UserName != "admin@confluences.ch").ToList();
+
+string teacherPassword = "Confluences2025!";
+
+foreach (var teacher in teachers)
+{
+    var token = await userManager.GeneratePasswordResetTokenAsync(teacher);
+    var resetResult = await userManager.ResetPasswordAsync(teacher, token, teacherPassword);
+
+    if (resetResult.Succeeded)
+    {
+        teacher.LockoutEnd = null; // débloquer l’utilisateur si verrouillé
+        await userManager.UpdateAsync(teacher);
+        Log.Information("✅ Password reset for {0}", teacher.UserName);
+    }
+    else
+    {
+        Log.Warning("⚠️ Failed to reset password for {0}: {1}",
+            teacher.UserName, string.Join(", ", resetResult.Errors.Select(e => e.Description)));
+    }
+}
+
 
                 Log.Information("🎉 Database seeding complete!");
             }

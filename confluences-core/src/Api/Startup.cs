@@ -1,20 +1,21 @@
 using Confluences.Persistence;
 using Api.Utility;
+using System;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Microsoft.AspNetCore.Http.Features;
+using QuestPDF.Infrastructure;
 using Syncfusion.Licensing;
 using System.Security.Claims;
-using QuestPDF.Infrastructure;
-using Microsoft.AspNetCore.Identity;
 using Confluences.Domain.Entities;
 
 namespace Api
@@ -30,15 +31,15 @@ namespace Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // -----------------------------
-            // Licences & context
-            // -----------------------------
+            // ----------------------------------------------------
+            // LICENCES & COMPAT
+            // ----------------------------------------------------
             SyncfusionLicenseProvider.RegisterLicense(Configuration["SyncfusionKey"]);
-            System.AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true); // Fix EF Core + Postgres
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-            // -----------------------------
+            // ----------------------------------------------------
             // CORS
-            // -----------------------------
+            // ----------------------------------------------------
             services.AddCors(options =>
             {
                 options.AddPolicy("Frontend", builder =>
@@ -47,7 +48,9 @@ namespace Api
                         .WithOrigins(
                             "http://localhost:8080",
                             "http://localhost:5002",
-                            "http://localhost"
+                            "http://localhost",
+                            "https://test-baseemploi.confluences.ch",
+                            "https://baseemploi.confluences.ch"
                         )
                         .AllowAnyHeader()
                         .AllowAnyMethod()
@@ -56,114 +59,156 @@ namespace Api
                 });
             });
 
-            // -----------------------------
-            // Controllers + JSON
-            // -----------------------------
-            services.AddControllers().AddNewtonsoftJson(opt =>
-            {
-                opt.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            });
+            // ----------------------------------------------------
+            // CONTROLLERS / JSON
+            // ----------------------------------------------------
+            services.AddControllers()
+                .AddNewtonsoftJson(opt =>
+                {
+                    opt.SerializerSettings.ReferenceLoopHandling =
+                        Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                });
 
             services.Configure<FormOptions>(opt =>
             {
-                opt.MultipartBodyLengthLimit = 1073741824; // 1 GB
+                opt.MultipartBodyLengthLimit = 1073741824; // 1GB
             });
 
-            // -----------------------------
-            // Swagger
-            // -----------------------------
+            // ----------------------------------------------------
+            // SWAGGER
+            // ----------------------------------------------------
             services.AddSwaggerGen(opt =>
             {
                 opt.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Version = "v1",
                     Title = "Confluences API",
+                    Version = "v1",
                     Description = "API Confluences (Base Emploi + Plateforme)"
+                });
+
+                opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+
+                opt.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
+                    }
                 });
             });
 
-            // -----------------------------
-            // Authentication JWT (IdentityServer4)
-            // -----------------------------
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
-            {
-                options.Authority = Configuration["URLIdentityServer4"];
-                options.RequireHttpsMetadata = false;
-                options.Audience = "api1";
-            });
+            // ----------------------------------------------------
+            // AUTHENTICATION JWT (IdentityServer4)
+            // ----------------------------------------------------
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.Authority = Configuration["URLIdentityServer4"];
+                    options.RequireHttpsMetadata = false;
+                    options.Audience = "api1";
 
-            // -----------------------------
-            // EF Core Postgres
-            // -----------------------------
+                    // 🔥 Empêche le JWT de casser les preflight OPTIONS
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnChallenge = context =>
+                        {
+                            context.HandleResponse();
+                            context.Response.StatusCode = 401;
+                            return System.Threading.Tasks.Task.CompletedTask;
+                        }
+                    };
+                });
+
+            // ----------------------------------------------------
+            // EF CORE POSTGRES
+            // ----------------------------------------------------
             services.AddDbContext<ConfluencesDbContext>(options =>
-    options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"),
-        b => b.MigrationsAssembly("Confluences.Persistence")));
+                options.UseNpgsql(
+                    Configuration.GetConnectionString("DefaultConnection"),
+                    b => b.MigrationsAssembly("Confluences.Persistence")
+                ));
 
-
-            // -----------------------------
-            // Identity (API-friendly)
-            // -----------------------------
-            services.AddIdentityCore<ApplicationUser>(opt => { })
+            // ----------------------------------------------------
+            // IDENTITY
+            // ----------------------------------------------------
+            services.AddIdentityCore<ApplicationUser>()
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ConfluencesDbContext>()
                 .AddDefaultTokenProviders();
 
-            // Claims transformation
-            services.AddSingleton<Microsoft.AspNetCore.Authentication.IClaimsTransformation, KarekeClaimsTransformer>();
+            services.AddSingleton<
+                Microsoft.AspNetCore.Authentication.IClaimsTransformation,
+                KarekeClaimsTransformer
+            >();
 
-            // -----------------------------
-            // Authorization
-            // -----------------------------
+            // ----------------------------------------------------
+            // AUTHORIZATION
+            // ----------------------------------------------------
             services.AddAuthorization(opt =>
             {
                 opt.AddPolicy("Teacher", p => p.RequireClaim(ClaimTypes.Role, "Teacher"));
                 opt.AddPolicy("Student", p => p.RequireClaim(ClaimTypes.Role, "Student"));
             });
 
-            // -----------------------------
-            // AutoMapper
-            // -----------------------------
+            // ----------------------------------------------------
+            // AUTOMAPPER
+            // ----------------------------------------------------
             services.AddAutoMapper(typeof(Startup));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            // -----------------------------
-            // PDF License (QuestPDF)
-            // -----------------------------
+            // ----------------------------------------------------
+            // REVERSE PROXY / HTTPS FIX
+            // ----------------------------------------------------
+            var forwardOptions = new ForwardedHeadersOptions
+            {
+                ForwardedHeaders =
+                    ForwardedHeaders.XForwardedFor |
+                    ForwardedHeaders.XForwardedProto
+            };
+            forwardOptions.KnownNetworks.Clear();
+            forwardOptions.KnownProxies.Clear();
+            app.UseForwardedHeaders(forwardOptions);
+
+            // ----------------------------------------------------
+            // PDF
+            // ----------------------------------------------------
             QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
 
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
+            // ----------------------------------------------------
+            // SWAGGER
+            // ----------------------------------------------------
             app.UseSwagger();
             app.UseSwaggerUI();
 
-            // -----------------------------
-            // CORS must be before routing
-            // -----------------------------
-            app.UseCors("Frontend");
-
-            // -----------------------------
-            // Reverse proxy / Docker
-            // -----------------------------
-            var forwardOptions = new ForwardedHeadersOptions
-            {
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-            };
-            forwardOptions.KnownNetworks.Clear();
-            forwardOptions.KnownProxies.Clear();
-            app.UseForwardedHeaders(forwardOptions);
-
+            // ----------------------------------------------------
+            // PIPELINE
+            // ----------------------------------------------------
             app.UseRouting();
+
+            // 🔥 CORS AVANT AUTH
+            app.UseCors("Frontend");
 
             app.UseAuthentication();
             app.UseAuthorization();
@@ -172,7 +217,9 @@ namespace Api
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints
+                    .MapControllers()
+                    .RequireCors("Frontend");
             });
         }
     }

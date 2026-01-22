@@ -1,41 +1,176 @@
 ﻿@model IEnumerable<mvc.Models.AnnouncePage>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Gestion des Annonces";
 }
 
-<h1>Index</h1>
+<style>
+    :root {
+        --bg-gradient: linear-gradient(135deg, #f0f4ff 0%, #f1fff5 50%, #ffffff 100%);
+        --primary-modern: #4e73df;
+        --border-soft: rgba(0, 0, 0, 0.06);
+        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    }
 
-<p>
-    <a class="btn btn-success" asp-action="Create">Créer une nouvelle annonce</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.AnnouncePageName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsActivated)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.AnnouncePageName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsActivated)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.AnnouncePageId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.AnnouncePageId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.AnnouncePageId">Delete</a>
-            </td>
-        </tr>
+    body, .bgImage {
+        background: var(--bg-gradient) !important;
+        background-attachment: fixed !important;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        color: #2e3d49;
+    }
+
+    /* Header Panel Glassmorphism */
+    .header-glass {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 20px;
+        padding: 1.5rem 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+    }
+
+    /* Table Container */
+    .admin-card {
+        background: #ffffff;
+        border-radius: 24px;
+        border: 1px solid var(--border-soft);
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+    }
+
+    .custom-table thead th {
+        background-color: #f8f9fc;
+        color: #858796;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        padding: 1.2rem 1.5rem;
+        border: none;
+    }
+
+    .custom-table tbody td {
+        padding: 1.2rem 1.5rem;
+        vertical-align: middle;
+        border-top: 1px solid #f1f3f9;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .status-active { background: #e6fffa; color: #088a6d; }
+    .status-inactive { background: #fff5f5; color: #c53030; }
+
+    /* Action Buttons */
+    .action-btn-group { display: flex; gap: 8px; justify-content: flex-end; }
+    
+    .btn-circle-sm {
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #f8f9fc;
+        border: 1px solid #eef0f7;
+        color: #4e73df;
+        transition: 0.2s;
+    }
+    .btn-circle-sm:hover { background: #4e73df; color: white; transform: translateY(-2px); }
+    .btn-circle-sm.delete:hover { background: #e74a3b; color: white; border-color: #e74a3b; }
+
+    .announce-name {
+        font-weight: 600;
+        color: #2e3d49;
+        font-size: 0.95rem;
+    }
+</style>
+
+<div class="container-fluid py-4 px-md-5">
+
+    <div class="header-glass d-flex flex-wrap justify-content-between align-items-center mt-3">
+        <div>
+            <h1 class="h3 font-weight-bold mb-1">📢 @ViewData["Title"]</h1>
+            <p class="text-muted small mb-0">Gérez les annonces diffusées sur la plateforme</p>
+        </div>
+        <a class="btn btn-primary rounded-pill px-4 shadow-sm" asp-action="Create">
+            <i class="fas fa-plus mr-2"></i> Nouvelle annonce
+        </a>
+    </div>
+
+    <div class="admin-card">
+        <div class="table-responsive">
+            <table id="announceTable" class="table custom-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Titre de l'annonce</th>
+                        <th>Statut</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model) {
+                        <tr>
+                            <td>
+                                <span class="announce-name">@Html.DisplayFor(modelItem => item.AnnouncePageName)</span>
+                            </td>
+                            <td>
+                                @if (item.IsActivated) {
+                                    <span class="status-badge status-active">
+                                        <i class="fas fa-check-circle"></i> Actif
+                                    </span>
+                                } else {
+                                    <span class="status-badge status-inactive">
+                                        <i class="fas fa-times-circle"></i> Inactif
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <div class="action-btn-group">
+                                    <a asp-action="Edit" asp-route-id="@item.AnnouncePageId" class="btn-circle-sm" title="Modifier">
+                                        <i class="fas fa-pen fa-sm"></i>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.AnnouncePageId" class="btn-circle-sm" title="Détails">
+                                        <i class="fas fa-eye fa-sm"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.AnnouncePageId" class="btn-circle-sm delete" title="Supprimer">
+                                        <i class="fas fa-trash fa-sm"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#announceTable').DataTable({
+                "pagingType": "simple_numbers",
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/French.json",
+                    "searchPlaceholder": "Rechercher une annonce..."
+                },
+                "columnDefs": [
+                    { "orderable": false, "targets": 2 }
+                ],
+                "dom": "<'row p-4'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                       "<'row'<'col-sm-12'tr>>" +
+                       "<'row p-4'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
+            });
+        });
+    </script>
 }
-    </tbody>
-</table>

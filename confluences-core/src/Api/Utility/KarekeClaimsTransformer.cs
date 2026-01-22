@@ -11,6 +11,8 @@ namespace Api.Utility
     public class KarekeClaimsTransformer : Microsoft.AspNetCore.Authentication.IClaimsTransformation
     {
 
+
+
         public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
         {
             if (principal.Identity.IsAuthenticated)

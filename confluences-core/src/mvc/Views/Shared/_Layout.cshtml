@@ -2,36 +2,158 @@
 <html lang="fr">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>@ViewData["Title"] - Confluences</title>
 
-    <!-- POLICES + ICONS -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-    <!-- BOOTSTRAP -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
 
-    <!-- TON CSS MODERNE -->
+    <style>
+        :root {
+            --sidebar-width: 260px;
+            --topbar-height: 70px;
+            --primary-color: #4e73df;
+            --bg-light: #f8f9fc;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light);
+            overflow-x: hidden;
+        }
+
+        
+        #sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            background: #1a1c23;
+            color: #fff;
+            transition: all 0.3s;
+            overflow-y: auto;
+        }
+
+        /* --- SIDEBAR HEADER --- */
+        .sidebar-header {
+            padding: 20px; /* Large espace vertical pour aérer le logo */
+            text-align: center;
+            background: rgba(0, 0, 0, 1);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            min-height:100px;
+            display: flex; /* Utilisation de flexbox pour centrer */
+            justify-content: left;
+            align-items: center;
+        }
+
+        .sidebar-logo { 
+               width: 260px;
+    height: auto;
+    transform: scale(4);
+    transform-origin: center;
+    margin-left:50px;
+        }
+
+        .sidebar-logo-bg {
+    width: 260px;
+    height: 80px;
+    background: url('/img/confluences_blanc.png') no-repeat center;
+    background-size: contain;
+}
+
+        /* Ajustement du menu pour qu'il ne colle pas au logo */
+        .sidebar-menu {
+            margin-top: 10px;
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar-menu li a {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .sidebar-menu li a:hover, .sidebar-menu li.active a {
+            color: #fff;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .sidebar-menu .material-icons { margin-right: 15px; font-size: 20px; }
+
+        .sidebar-section {
+            padding: 20px 20px 10px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.4);
+            font-weight: 700;
+        }
+
+        /* --- CONTENU --- */
+        .page-container {
+            margin-left: var(--sidebar-width); /* Sidebar visible sur PC */
+            min-height: 100vh;
+            transition: all 0.3s;
+        }
+
+        .topbar {
+            height: var(--topbar-height);
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        .menu-toggle {
+            display: none; /* Caché sur PC */
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .content {
+            padding: 25px;
+            width: 100%;
+        }
+
+        /* --- RESPONSIVE : MOBILE & TABLETTE --- */
+        @@media (max-width: 992px) {
+            #sidebar {
+                left: calc(-1 * var(--sidebar-width)); /* Caché par défaut sur mobile */
+            }
+            #sidebar.sidebar-open {
+                left: 0;
+            }
+            .page-container {
+                margin-left: 0; /* Prend tout l'écran sur mobile */
+            }
+            .menu-toggle {
+                display: block; /* Hamburger visible sur mobile */
+            }
+        }
+    </style>
+
     <link rel="stylesheet" href="~/css/app-modern.css" />
-
-    <!-- SYNCFUSION -->
     <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/22.2.5/fluent.css" />
-    <script src="https://cdn.syncfusion.com/ej2/22.2.5/dist/ej2.min.js"></script>
-
-    <!-- SIGNALR -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.11/signalr.min.js"></script>
-
-    <!-- JITSI -->
-    <script src='https://meet.jit.si/external_api.js'></script>
-
-    <!-- DATATABLES -->
     <link href="~/css/datatable/jquery.dataTables.min.css" rel="stylesheet" />
 </head>
 
-
-<body>
+<body class="bgImage">
 
 @{
     bool isTeacher = User.HasClaim("role", "Teacher");
@@ -39,132 +161,118 @@
     bool showAll = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Production";
 }
 
-<!-- SIDEBAR -->
-<div class="sidebar" id="sidebar">
+<nav id="sidebar">
     <div class="sidebar-header">
-        <img src="~/img/logo_confluences.png" class="sidebar-logo" />
+        <img src="~/img/confluences_blanc.png" class="sidebar-logo" alt="Logo" />
     </div>
 
     <ul class="sidebar-menu">
-
         <li>
             <a asp-controller="Home" asp-action="Index">
                 <span class="material-icons">home</span> <span>Accueil</span>
             </a>
         </li>
 
-        @if (showAll || isTeacher)
+        @if (isTeacher)
         {
             <li class="sidebar-section">Administration</li>
-            <li class="nav-item">
-                <a class="nav-link" asp-controller="Appointments" asp-action="Index">Les rendez-vous</a>
-            </li>
+            <li><a asp-controller="Appointments" asp-action="Index">
+                <span class="material-icons">event</span> <span>Rendez-vous</span>
+            </a></li>
             <li><a asp-controller="SchoolClassRooms" asp-action="Index">
                 <span class="material-icons">class</span> <span>Classes</span>
             </a></li>
-
             <li><a asp-controller="AspNetUsers" asp-action="Index">
                 <span class="material-icons">group</span> <span>Utilisateurs</span>
             </a></li>
-
             <li><a asp-controller="Ressource" asp-action="Homeworks">
                 <span class="material-icons">folder</span> <span>Ressources</span>
             </a></li>
         }
 
-        @if (isStudent)
+        @if (isStudent && !isTeacher)
         {
             <li class="sidebar-section">Espace élève</li>
-
             <li><a asp-controller="StudentPage" asp-action="Index">
                 <span class="material-icons">person</span> <span>Ma page</span>
             </a></li>
-
-            <li class="nav-item">
-                <a class="nav-link" asp-controller="StudentPage" asp-action="MyAppointments">Mes rendez-vous</a>
-            </li>
-
-            <li><a asp-controller="StudentPage" asp-action="PreviousLessons">
-                <span class="material-icons">history</span> <span>Leçons précédentes</span>
+            <li><a asp-controller="StudentPage" asp-action="MyAppointments">
+                <span class="material-icons">schedule</span> <span>Mes RDV</span>
             </a></li>
-
+            <li><a asp-controller="StudentPage" asp-action="PreviousLessons">
+                <span class="material-icons">history</span> <span>Leçons</span>
+            </a></li>
             <li><a asp-controller="StudentPage" asp-action="Help">
                 <span class="material-icons">help</span> <span>Aide</span>
             </a></li>
         }
 
-        <li class="sidebar-section"></li>
-
-        @if (User.Identity.IsAuthenticated)
-        {
-            <li><a asp-controller="Account" asp-action="Logout">
-                <span class="material-icons">logout</span> <span>Déconnexion</span>
-            </a></li>
-        }
-        else
-        {
-            <li><a asp-controller="Account" asp-action="SignIn">
-                <span class="material-icons">login</span> <span>Se connecter</span>
-            </a></li>
-        }
+        <li style="margin-top: 50px;">
+            @if (User.Identity.IsAuthenticated) {
+                <a asp-controller="Account" asp-action="Logout" class="text-danger">
+                    <span class="material-icons">logout</span> <span>Déconnexion</span>
+                </a>
+            } else {
+                <a asp-controller="Account" asp-action="SignIn">
+                    <span class="material-icons">login</span> <span>Se connecter</span>
+                </a>
+            }
+        </li>
     </ul>
-</div>
+</nav>
 
-
-<!-- PAGE -->
 <div class="page-container">
 
-    <!-- TOP BAR -->
-    <nav class="topbar">
+    <header class="topbar">
         <button class="menu-toggle" onclick="toggleSidebar()">
             <span class="material-icons">menu</span>
         </button>
 
-        <div class="topbar-title">@ViewData["Title"]</div>
+        <div class="topbar-title font-weight-bold text-dark">@ViewData["Title"]</div>
 
-        <div class="topbar-user">
+        <div class="topbar-user d-flex align-items-center">
             @if (User.Identity.IsAuthenticated)
             {
-                <span class="material-icons">account_circle</span>
-                <span>@User.Identity.Name</span>
+                <span class="text-muted small mr-2 d-none d-sm-inline">Connecté en tant que</span>
+                <span class="font-weight-bold mr-2">@User.Identity.Name</span>
+                <span class="material-icons text-primary">account_circle</span>
             }
         </div>
-    </nav>
+    </header>
 
-    <!-- CONTENT -->
     <main class="content">
-        @RenderBody()
+        <div class="container-fluid">
+            @RenderBody()
+        </div>
     </main>
 
 </div>
 
+<script src="~/js/core/jquery.min.js"></script>
+<script src="~/js/core/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdn.syncfusion.com/ej2/22.2.5/dist/ej2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.11/signalr.min.js"></script>
+<script src='https://meet.jit.si/external_api.js'></script>
+<script src="~/js/datatable/jquery.dataTables.min.js"></script>
+<script src="https://nightly.datatables.net/responsive/js/dataTables.responsive.min.js"></script>
 
-<!-- TOGGLE SIDEBAR -->
 <script>
     function toggleSidebar() {
         document.getElementById("sidebar").classList.toggle("sidebar-open");
     }
+
+    // Fermer la sidebar quand on clique ailleurs sur mobile
+    $(document).ready(function() {
+        $('.content').on('click', function() {
+            if ($(window).width() <= 992) {
+                $('#sidebar').removeClass('sidebar-open');
+            }
+        });
+    });
 </script>
 
-<!-- Syncfusion script manager -->
 <ejs-scripts></ejs-scripts>
-
-<!-- LIB JS -->
-<script src="~/js/core/jquery.min.js"></script>
-<script src="~/js/core/popper.min.js"></script>
-<script src="~/js/core/bootstrap-material-design.min.js"></script>
-<script src="~/js/plugins/moment-with-locales.min.js"></script>
-<script src="~/js/plugins/bootstrap-datetimepicker.js"></script>
-<script src="~/js/plugins/nouislider.min.js"></script>
-<script src="~/js/plugins/bootstrap-tagsinput.js"></script>
-<script src="~/js/plugins/bootstrap-selectpicker.js"></script>
-<script src="~/js/plugins/jasny-bootstrap.min.js"></script>
-<script src="~/js/material-kit.js?v=2.2.0"></script>
-<script src="~/js/datatable/jquery.dataTables.min.js"></script>
-<script src="https://nightly.datatables.net/responsive/js/dataTables.responsive.min.js"></script>
-
-<script src="~/js/site.js"></script>
-
 @RenderSection("Scripts", required: false)
 
 </body>

@@ -7,7 +7,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.ts --fix",
-    "build:wc": "vite build --config vite.config.webcomponent.js"
+    "build:wc": "vite build --config vite.config.webcomponent.js",
+    "build:staging": "vite build --mode staging"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",

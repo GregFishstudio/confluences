@@ -1,83 +1,204 @@
 ﻿@model IEnumerable<mvc.Models.ExercicesAlone>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Exercices en Autonomie";
 }
 
-<h1>Index</h1>
+<style>
+    :root {
+        --bg-gradient: linear-gradient(135deg, #f0f4ff 0%, #f1fff5 50%, #ffffff 100%);
+        --primary-modern: #4e73df;
+        --border-soft: rgba(0, 0, 0, 0.06);
+        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    }
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.ExerciceDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ExerciceName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ExerciceLink)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.AudioLink)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CorrectionDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CorrectionLink)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsHomeworkAdditionnal)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.HomeworkV2)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Teacher)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.ExerciceDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ExerciceName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ExerciceLink)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.AudioLink)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CorrectionDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CorrectionLink)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsHomeworkAdditionnal)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.HomeworkV2.HomeworkV2name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Teacher.Id)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ExerciceId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ExerciceId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ExerciceId">Delete</a>
-            </td>
-        </tr>
+    body, .bgImage {
+        background: var(--bg-gradient) !important;
+        background-attachment: fixed !important;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        color: #2e3d49;
+    }
+
+    /* Header Glassmorphism */
+    .header-glass {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 20px;
+        padding: 1.5rem 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+    }
+
+    /* Table Container */
+    .admin-card {
+        background: #ffffff;
+        border-radius: 24px;
+        border: 1px solid var(--border-soft);
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+    }
+
+    .custom-table thead th {
+        background-color: #f8f9fc;
+        color: #858796;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 0.05em;
+        padding: 1rem 1.2rem;
+        border: none;
+    }
+
+    .custom-table tbody td {
+        padding: 1rem 1.2rem;
+        vertical-align: middle;
+        border-top: 1px solid #f1f3f9;
+        font-size: 0.85rem;
+    }
+
+    /* Resource Icons Styling */
+    .resource-link {
+        width: 38px;
+        height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        transition: 0.2s;
+        text-decoration: none !important;
+    }
+    .link-exercise { background: #ebf8ff; color: #3182ce; }
+    .link-audio { background: #faf5ff; color: #805ad5; }
+    .link-correction { background: #f0fff4; color: #38a169; }
+    
+    .resource-link:hover { transform: translateY(-2px); filter: brightness(0.95); }
+
+    /* Text & Badge Styling */
+    .date-text { font-weight: 600; color: #718096; display: block; font-size: 0.8rem; }
+    .exercice-name { font-weight: 700; color: #2d3748; }
+    
+    .type-badge {
+        padding: 0.25rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.65rem;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+    .badge-add { background: #fff5f5; color: #c53030; }
+    .badge-std { background: #f7fafc; color: #4a5568; }
+
+    /* Action Buttons */
+    .action-btn-group { display: flex; gap: 5px; justify-content: flex-end; }
+    .btn-circle-sm {
+        width: 32px; height: 32px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 8px;
+        background: #f8f9fc;
+        color: #4e73df;
+        transition: 0.2s;
+        border: 1px solid #eef0f7;
+    }
+    .btn-circle-sm:hover { background: #4e73df; color: white; }
+    .btn-circle-sm.delete:hover { background: #e74a3b; border-color: #e74a3b; color: white; }
+</style>
+
+<div class="container-fluid py-4 px-md-5">
+
+    <div class="header-glass d-flex flex-wrap justify-content-between align-items-center mt-3">
+        <div>
+            <h1 class="h3 font-weight-bold mb-1">📖 @ViewData["Title"]</h1>
+            <p class="text-muted small mb-0">Gestion des ressources, audios et corrections pour le travail autonome</p>
+        </div>
+        <a class="btn btn-primary rounded-pill px-4 shadow-sm font-weight-bold" asp-action="Create">
+            <i class="fas fa-plus-circle mr-2"></i> Nouvel exercice
+        </a>
+    </div>
+
+    <div class="admin-card">
+        <div class="table-responsive">
+            <table id="exerciceAloneTable" class="table custom-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Dates (Ex. / Corr.)</th>
+                        <th>Nom de l'exercice</th>
+                        <th class="text-center">Ressources</th>
+                        <th>Type</th>
+                        <th>Devoir lié</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model) {
+                        <tr>
+                            <td>
+                                <span class="date-text"><i class="far fa-edit fa-xs mr-1"></i> @item.ExerciceDate.ToShortDateString()</span>
+                                <span class="date-text text-success"><i class="far fa-check-square fa-xs mr-1"></i> @item.CorrectionDate.ToShortDateString()</span>
+                            </td>
+                            <td>
+                                <span class="exercice-name">@Html.DisplayFor(modelItem => item.ExerciceName)</span>
+                                <div class="text-muted x-small">Formateur ID: @item.Teacher.Id</div>
+                            </td>
+                            <td class="text-center">
+                                @if (!string.IsNullOrEmpty(item.ExerciceLink)) {
+                                    <a href="@item.ExerciceLink" target="_blank" class="resource-link link-exercise" title="Lien Exercice"><i class="fas fa-file-alt"></i></a>
+                                }
+                                @if (!string.IsNullOrEmpty(item.AudioLink)) {
+                                    <a href="@item.AudioLink" target="_blank" class="resource-link link-audio" title="Lien Audio"><i class="fas fa-headphones"></i></a>
+                                }
+                                @if (!string.IsNullOrEmpty(item.CorrectionLink)) {
+                                    <a href="@item.CorrectionLink" target="_blank" class="resource-link link-correction" title="Lien Correction"><i class="fas fa-graduation-cap"></i></a>
+                                }
+                            </td>
+                            <td>
+                                @if (item.IsHomeworkAdditionnal) {
+                                    <span class="type-badge badge-add">Additionnel</span>
+                                } else {
+                                    <span class="type-badge badge-std">Standard</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="text-muted font-weight-bold" style="font-size: 0.8rem;">@item.HomeworkV2.HomeworkV2name</span>
+                            </td>
+                            <td>
+                                <div class="action-btn-group">
+                                    <a asp-action="Edit" asp-route-id="@item.ExerciceId" class="btn-circle-sm" title="Modifier">
+                                        <i class="fas fa-pen fa-xs"></i>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.ExerciceId" class="btn-circle-sm" title="Détails">
+                                        <i class="fas fa-eye fa-xs"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.ExerciceId" class="btn-circle-sm delete" title="Supprimer">
+                                        <i class="fas fa-trash fa-xs"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#exerciceAloneTable').DataTable({
+                "pagingType": "simple_numbers",
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/French.json",
+                    "searchPlaceholder": "Rechercher..."
+                },
+                "order": [[0, "desc"]],
+                "columnDefs": [
+                    { "orderable": false, "targets": [2, 5] }
+                ],
+                "dom": "<'row p-4'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                       "<'row'<'col-sm-12'tr>>" +
+                       "<'row p-4'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
+            });
+        });
+    </script>
 }
-    </tbody>
-</table>

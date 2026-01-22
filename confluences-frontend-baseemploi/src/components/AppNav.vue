@@ -229,7 +229,7 @@ const loggedIn = computed(() => authStore.loggedIn)
 
 // Déterminez l'URL de la plateforme MVC en fonction de l'environnement (Prod vs Dev)
 const MVC_URL = import.meta.env.PROD 
-  ? 'https://cours.confluences.ch/' 
+  ? 'https://test-cours.confluences.ch/' 
   : 'http://localhost:5002'
 
 const currentLogo = computed(() => {
@@ -256,8 +256,9 @@ const internalLinks = [
   { label: 'Stages par stagiaire', routeName: 'Stagiaires', icon: 'mdi-account-hard-hat', external: false },
   { label: 'Contacts', routeName: 'Contacts', icon: 'mdi-card-account-mail', external: false },
   { label: 'ARE', routeName: 'JobSearchAssistances', icon: 'mdi-account-cash', external: false },
-   { label: 'Registre de Présence', routeName: 'AttendanceRegister', icon: 'mdi-calendar-check', external: false },
-    { label: 'Suivi des Stagiaires', routeName: 'StagiairesFollowUp', icon: 'mdi-chart-line-variant', external: false },
+  { label: 'Registre de présence', routeName: 'AttendanceRegister', icon: 'mdi-calendar-check', external: false },
+  { label: 'Participation aux ateliers', routeName: 'AteliersFollowUp', icon: 'mdi-progress-check', external: false },
+  { label: 'Suivi des Stagiaires', routeName: 'StagiairesFollowUp', icon: 'mdi-account-eye', external: false },
 ]
 
 // Nouveau Lien de Navigation Externe

@@ -1,41 +1,193 @@
 ﻿@model IEnumerable<mvc.Models.AppointmentStudent>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Gestion des Inscriptions";
 }
 
-<h1>Index</h1>
+<style>
+    :root {
+        --bg-gradient: linear-gradient(135deg, #f0f4ff 0%, #f1fff5 50%, #ffffff 100%);
+        --primary-modern: #4e73df;
+        --border-soft: rgba(0, 0, 0, 0.06);
+        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    }
 
-<p>
-    <a class="btn btn-success" asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Appointment)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Student)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Appointment.AppointmentName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Student.Id)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.AppointmentStudentId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.AppointmentStudentId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.AppointmentStudentId">Delete</a>
-            </td>
-        </tr>
+    body, .bgImage {
+        background: var(--bg-gradient) !important;
+        background-attachment: fixed !important;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        color: #2e3d49;
+    }
+
+    /* Header Glassmorphism */
+    .header-glass {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 20px;
+        padding: 1.5rem 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+    }
+
+    /* Table Container */
+    .admin-card {
+        background: #ffffff;
+        border-radius: 24px;
+        border: 1px solid var(--border-soft);
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+    }
+
+    .custom-table thead th {
+        background-color: #f8f9fc;
+        color: #858796;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        padding: 1.2rem 1.5rem;
+        border: none;
+    }
+
+    .custom-table tbody td {
+        padding: 1rem 1.5rem;
+        vertical-align: middle;
+        border-top: 1px solid #f1f3f9;
+    }
+
+    /* Student Profile Styling */
+    .student-pill {
+        display: inline-flex;
+        align-items: center;
+        background: #f8f9fc;
+        padding: 0.5rem 1rem;
+        border-radius: 12px;
+        border: 1px solid #eef0f7;
+    }
+
+    .student-avatar {
+        width: 32px;
+        height: 32px;
+        background: var(--primary-modern);
+        color: white;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.8rem;
+        margin-right: 10px;
+    }
+
+    /* Appointment Badge */
+    .appointment-badge {
+        background: rgba(78, 115, 223, 0.1);
+        color: var(--primary-modern);
+        padding: 0.4rem 0.8rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    /* Action Buttons */
+    .action-btn-group { display: flex; gap: 8px; justify-content: flex-end; }
+    
+    .btn-circle-sm {
+        width: 35px; height: 35px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 10px;
+        background: #f8f9fc;
+        border: 1px solid #eef0f7;
+        color: #4e73df;
+        transition: 0.2s;
+    }
+    .btn-circle-sm:hover { background: #4e73df; color: white; transform: translateY(-2px); }
+    .btn-circle-sm.delete:hover { background: #e74a3b; color: white; border-color: #e74a3b; }
+</style>
+
+<div class="container-fluid py-4 px-md-5">
+
+    <div class="header-glass d-flex flex-wrap justify-content-between align-items-center mt-3">
+        <div>
+            <h1 class="h3 font-weight-bold mb-1">👥 @ViewData["Title"]</h1>
+            <p class="text-muted small mb-0">Suivi des étudiants inscrits aux différents rendez-vous</p>
+        </div>
+        <a class="btn btn-success rounded-pill px-4 shadow-sm font-weight-bold" asp-action="Create">
+            <i class="fas fa-user-plus mr-2"></i> Inscrire un étudiant
+        </a>
+    </div>
+
+    <div class="admin-card">
+        <div class="table-responsive">
+            <table id="inscriptionTable" class="table custom-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Rendez-vous</th>
+                        <th>Étudiant</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model) {
+                        <tr>
+                            <td>
+                                <span class="appointment-badge">
+                                    <i class="far fa-calendar-check mr-2"></i>
+                                    @Html.DisplayFor(modelItem => item.Appointment.AppointmentName)
+                                </span>
+                            </td>
+                            <td>
+                                <div class="student-pill">
+                                    <div class="student-avatar">
+                                        @(item.Student?.Firstname?.Substring(0, 1) ?? "U")
+                                    </div>
+                                    <div>
+                                        <div class="font-weight-bold text-dark" style="font-size: 0.9rem;">
+                                            @item.Student.Firstname @item.Student.LastName
+                                        </div>
+                                        <div class="text-muted x-small">@item.Student.Email</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-btn-group">
+                                    <a asp-action="Edit" asp-route-id="@item.AppointmentStudentId" class="btn-circle-sm" title="Modifier">
+                                        <i class="fas fa-pen fa-sm"></i>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.AppointmentStudentId" class="btn-circle-sm" title="Détails">
+                                        <i class="fas fa-eye fa-sm"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.AppointmentStudentId" class="btn-circle-sm delete" title="Supprimer">
+                                        <i class="fas fa-trash fa-sm"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#inscriptionTable').DataTable({
+                "pagingType": "simple_numbers",
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/French.json",
+                    "searchPlaceholder": "Rechercher une inscription..."
+                },
+                "columnDefs": [
+                    { "orderable": false, "targets": 2 }
+                ],
+                "dom": "<'row p-4'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                       "<'row'<'col-sm-12'tr>>" +
+                       "<'row p-4'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
+            });
+        });
+    </script>
 }
-    </tbody>
-</table>

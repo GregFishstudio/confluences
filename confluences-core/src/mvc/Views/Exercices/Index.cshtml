@@ -1,65 +1,206 @@
 ﻿@model IEnumerable<mvc.Models.Exercice>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Gestion des Exercices";
 }
 
-<h1>Index</h1>
+<style>
+    :root {
+        --bg-gradient: linear-gradient(135deg, #f0f4ff 0%, #f1fff5 50%, #ffffff 100%);
+        --primary-modern: #4e73df;
+        --border-soft: rgba(0, 0, 0, 0.06);
+        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    }
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.ExerciceDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ExerciceName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ExerciceLink)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsHomeworkAdditionnal)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Teacher)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Theory)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.ExerciceDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ExerciceName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ExerciceLink)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsHomeworkAdditionnal)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Teacher.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Theory.TeacherId)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ExerciceId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ExerciceId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ExerciceId">Delete</a>
-            </td>
-        </tr>
+    body, .bgImage {
+        background: var(--bg-gradient) !important;
+        background-attachment: fixed !important;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        color: #2e3d49;
+    }
+
+    /* Header Glassmorphism */
+    .header-glass {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 20px;
+        padding: 1.5rem 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+    }
+
+    /* Table Container */
+    .admin-card {
+        background: #ffffff;
+        border-radius: 24px;
+        border: 1px solid var(--border-soft);
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+    }
+
+    .custom-table thead th {
+        background-color: #f8f9fc;
+        color: #858796;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        padding: 1.2rem 1.5rem;
+        border: none;
+    }
+
+    .custom-table tbody td {
+        padding: 1.2rem 1.5rem;
+        vertical-align: middle;
+        border-top: 1px solid #f1f3f9;
+        font-size: 0.9rem;
+    }
+
+    /* Link & Badge Styling */
+    .exercise-link {
+        color: var(--primary-modern);
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .exercise-link:hover { text-decoration: underline; }
+
+    .date-badge {
+        background: #f0f2f5;
+        padding: 0.4rem 0.8rem;
+        border-radius: 10px;
+        font-weight: 600;
+        color: #4a5568;
+        font-size: 0.85rem;
+    }
+
+    .type-badge {
+        padding: 0.3rem 0.7rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+    .badge-homework { background: #fff5f5; color: #c53030; border: 1px solid #feb2b2; }
+    .badge-standard { background: #ebf8ff; color: #3182ce; border: 1px solid #bee3f8; }
+
+    /* Action Buttons */
+    .action-btn-group { display: flex; gap: 8px; justify-content: flex-end; }
+    
+    .btn-circle-sm {
+        width: 35px; height: 35px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 10px;
+        background: #f8f9fc;
+        border: 1px solid #eef0f7;
+        color: #4e73df;
+        transition: 0.2s;
+    }
+    .btn-circle-sm:hover { background: #4e73df; color: white; transform: translateY(-2px); }
+    .btn-circle-sm.delete:hover { background: #e74a3b; color: white; border-color: #e74a3b; }
+</style>
+
+<div class="container-fluid py-4 px-md-5">
+
+    <div class="header-glass d-flex flex-wrap justify-content-between align-items-center mt-3">
+        <div>
+            <h1 class="h3 font-weight-bold mb-1">📝 @ViewData["Title"]</h1>
+            <p class="text-muted small mb-0">Gestion de la banque d'exercices et des devoirs</p>
+        </div>
+        <a class="btn btn-primary rounded-pill px-4 shadow-sm font-weight-bold" asp-action="Create">
+            <i class="fas fa-plus-circle mr-2"></i> Nouvel exercice
+        </a>
+    </div>
+
+    <div class="admin-card">
+        <div class="table-responsive">
+            <table id="exerciseTable" class="table custom-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Nom de l'exercice</th>
+                        <th>Lien / Ressource</th>
+                        <th>Type</th>
+                        <th>Formateur</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model) {
+                        <tr>
+                            <td>
+                                <span class="date-badge">
+                                    <i class="far fa-calendar-alt text-primary mr-1"></i>
+                                    @item.ExerciceDate.ToString("dd/MM/yyyy")
+                                </span>
+                            </td>
+                            <td>
+                                <span class="font-weight-bold text-dark">@Html.DisplayFor(modelItem => item.ExerciceName)</span>
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.ExerciceLink)) {
+                                    <a href="@item.ExerciceLink" target="_blank" class="exercise-link">
+                                        <i class="fas fa-external-link-alt fa-xs"></i> Voir la ressource
+                                    </a>
+                                } else {
+                                    <span class="text-muted small italic">Aucun lien</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.IsHomeworkAdditionnal) {
+                                    <span class="type-badge badge-homework">Devoir Sup.</span>
+                                } else {
+                                    <span class="type-badge badge-standard">Standard</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-user-circle text-muted mr-2"></i>
+                                    <span class="small font-weight-bold">@item.Teacher.Firstname @item.Teacher.LastName</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-btn-group">
+                                    <a asp-action="Edit" asp-route-id="@item.ExerciceId" class="btn-circle-sm" title="Modifier">
+                                        <i class="fas fa-pen fa-sm"></i>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.ExerciceId" class="btn-circle-sm" title="Détails">
+                                        <i class="fas fa-eye fa-sm"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.ExerciceId" class="btn-circle-sm delete" title="Supprimer">
+                                        <i class="fas fa-trash fa-sm"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#exerciseTable').DataTable({
+                "pagingType": "simple_numbers",
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/French.json",
+                    "searchPlaceholder": "Rechercher un exercice..."
+                },
+                "order": [[0, "desc"]],
+                "columnDefs": [
+                    { "orderable": false, "targets": 5 }
+                ],
+                "dom": "<'row p-4'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                       "<'row'<'col-sm-12'tr>>" +
+                       "<'row p-4'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
+            });
+        });
+    </script>
 }
-    </tbody>
-</table>

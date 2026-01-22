@@ -52,4 +52,6 @@
     <ProjectReference Include="..\..\Confluences.Persistence\Confluences.Persistence.csproj" />
   </ItemGroup>
 
+
+
 </Project>

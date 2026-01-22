@@ -3,33 +3,123 @@
     ViewData["Title"] = "Cours précédents";
 }
 
-<br />
-<br />
+<style>
+    :root {
+        --bg-gradient: linear-gradient(135deg, #f0f4ff 0%, #f1fff5 50%, #ffffff 100%);
+        --primary-modern: #4e73df;
+        --border-soft: rgba(0, 0, 0, 0.05);
+        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    }
+
+    body, .bgImage {
+        background: var(--bg-gradient) !important;
+        background-attachment: fixed !important;
+        font-family: 'Inter', sans-serif;
+        color: #2e3d49;
+    }
+
+    .calendar-container {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: var(--card-shadow);
+        padding: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    /* --- Custom FullCalendar Overrides --- */
+    .fc { font-family: 'Inter', sans-serif; }
+    
+    /* Toolbar styling */
+    .fc-header-toolbar {
+        margin-bottom: 2rem !important;
+        padding: 0.5rem;
+    }
+
+    .fc-toolbar-title {
+        font-weight: 800 !important;
+        color: #2b2d42;
+        text-transform: capitalize;
+    }
+
+    /* Buttons styling */
+    .fc-button-primary {
+        background-color: white !important;
+        border: 1px solid #e3e6f0 !important;
+        color: #4e73df !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+        text-transform: capitalize !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
+    }
+
+    .fc-button-primary:hover {
+        background-color: #4e73df !important;
+        color: white !important;
+        border-color: #4e73df !important;
+        transform: translateY(-1px);
+    }
+
+    .fc-button-active {
+        background-color: #4e73df !important;
+        border-color: #4e73df !important;
+        color: white !important;
+    }
+
+    /* Table styling */
+    .fc-theme-standard td, .fc-theme-standard th {
+        border-color: #f1f3f9 !important;
+    }
+
+    .fc-col-header-cell {
+        background: #f8f9fc;
+        padding: 12px 0 !important;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #858796;
+    }
+
+    .fc-daygrid-day-number {
+        font-weight: 600;
+        padding: 10px !important;
+        color: #5a5c69;
+    }
+
+    /* Events styling */
+    .fc-event {
+        border-radius: 8px !important;
+        padding: 4px 8px !important;
+        font-size: 0.85rem !important;
+        border: none !important;
+        box-shadow: 0 2px 6px rgba(78, 115, 223, 0.15);
+    }
+</style>
+
 <partial name="_Notification.cshtml" />
-<body data-parallax="true" class="bgImage">
-    <div class="container">
-        <div class="about-team team-1">
-            <div class="row">
-                <div class="col-md-12 ml-auto mr-auto text-center d-flex">
-                    <div class="card">
-                        <div class="card-body flex-fill">
-                            <h3 class="title">@ViewData["Title"]</h3>
-                            <div id='calendar'></div>
-                        </div>
-                        <!-- end content-->
-                    </div>
-                    <!--  end card  -->
-                </div>
+
+<div class="container py-5 px-md-5">
+    
+    <div class="text-center mb-5">
+        <h1 class="font-weight-bold text-gray-800">🕒 @ViewData["Title"]</h1>
+        <p class="text-muted">Retrouvez l'historique de vos leçons et supports de cours</p>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="calendar-container">
+                <div id='calendar'></div>
             </div>
         </div>
-</body>
-
+    </div>
+</div>
 
 @section Scripts{
     <script src='~/lib/calendar/main.js'></script>
     <script src='~/lib/calendar/locales/fr-ch.js'></script>
     <script>
-
         document.addEventListener('DOMContentLoaded', function () {
             var calendarEl = document.getElementById('calendar');
 
@@ -42,49 +132,25 @@
                     right: 'dayGridDay,dayGridWeek,dayGridMonth'
                 },
                 initialView: 'dayGridWeek',
-                navLinks: true, // can click day/week names to navigate views
-                editable: true,
-                dayMaxEvents: true, // allow "more" link when too many events
+                navLinks: true, 
+                editable: false, // On désactive l'édition pour l'historique
+                dayMaxEvents: true, 
                 locale: 'fr-ch',
                 height: 'auto',
                 displayEventTime: false,
                 eventSources: [
                     {
-                        url: '@ViewData["URLClientMVC"]api/calendar?userId=@ViewData["USERID"]', // use the `url` property
+                        url: '@ViewData["URLClientMVC"]api/calendar?userId=@ViewData["USERID"]',
+                        color: '#4e73df',
+                        textColor: '#ffffff'
                     }
-                    @*{
-                        url: '@ViewData["URLClientMVC"]api/calendar?sessionid=1&homeworktypeid=2', // use the `url` property
-                        color: 'yellow',    // an option!
-                        textColor: 'black'  // an option!
-                    },
-                    {
-                        url: '@ViewData["URLClientMVC"]api/calendar?sessionid=1&homeworktypeid=3', // use the `url` property
-                        color: 'orange',    // an option!
-                        textColor: 'black'  // an option!
-                    }*@
-                    // any other sources...
                 ],
-                validRange:  {
-                   end: new Date()
+                validRange: {
+                   end: new Date() // Empêche de naviguer dans le futur pour l'historique
                 }
             });
 
             calendar.render();
-
-            var x = document.getElementsByClassName("fc-header-toolbar fc-toolbar fc-toolbar-ltr");
-            //alert(x.length);
-            var i;
-            for (i = 0; i < x.length; i++) {
-                x[i].className += " row";
-            }
-            var x = document.getElementsByClassName("fc-toolbar-chunk");
-            //alert(x.length);
-            var i;
-            for (i = 0; i < x.length; i++) {
-                x[i].className += " d-block mx-auto";
-            }
         });
-
-
     </script>
 }

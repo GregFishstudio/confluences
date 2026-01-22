@@ -112,6 +112,8 @@ namespace Api.Controllers
             return session;
         }
 
+        
+
         private bool SessionExists(int id)
         {
             return _context.Sessions.Any(e => e.SessionId == id);

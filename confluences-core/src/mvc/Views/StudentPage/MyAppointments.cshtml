@@ -3,62 +3,177 @@
     ViewData["Title"] = "Mes rendez-vous";
 }
 
-<br />
-<br />
+<style>
+    :root {
+        --bg-gradient: linear-gradient(135deg, #f0f4ff 0%, #f1fff5 50%, #ffffff 100%);
+        --primary-modern: #4e73df;
+        --border-soft: rgba(0, 0, 0, 0.05);
+        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    }
+
+    body, .bgImage {
+        background: var(--bg-gradient) !important;
+        background-attachment: fixed !important;
+        font-family: 'Inter', sans-serif;
+        color: #2e3d49;
+    }
+
+    .appointment-card {
+        background: #ffffff;
+        border-radius: 20px;
+        border: 1px solid var(--border-soft);
+        box-shadow: var(--card-shadow);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        display: flex;
+    }
+
+    .appointment-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Barre latérale de couleur selon le type (Hebdo ou Ponctuel) */
+    .app-indicator {
+        width: 8px;
+        background: var(--primary-modern);
+    }
+    .app-indicator.weekly { background: #1cc88a; }
+
+    .app-content {
+        padding: 1.5rem;
+        flex-grow: 1;
+    }
+
+    .app-time {
+        font-weight: 700;
+        color: var(--primary-modern);
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 0.5rem;
+    }
+
+    .app-title {
+        font-weight: 800;
+        font-size: 1.2rem;
+        color: #2b2d42;
+        margin-bottom: 0.5rem;
+    }
+
+    .app-date {
+        color: #858796;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .attendees-list {
+        background: #f8f9fc;
+        padding: 0.8rem 1rem;
+        border-radius: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .attendee-badge {
+        background: #ffffff;
+        border: 1px solid #e3e6f0;
+        padding: 0.3rem 0.8rem;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #4e73df;
+    }
+
+    .badge-recurrence {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 800;
+        padding: 0.3rem 0.6rem;
+        border-radius: 6px;
+        background: rgba(78, 115, 223, 0.1);
+        color: var(--primary-modern);
+    }
+</style>
+
 <partial name="_Notification.cshtml" />
-<body data-parallax="true" class="bgImage">
-    <div class="container">
-        <div class="about-team team-1">
-            <div class="row">
-                <div class="col-md-12 ml-auto mr-auto text-center d-flex">
-                    <div class="card">
-                        <div class="card-body flex-fill">
-                            <h3 class="title">@ViewData["Title"]</h3>
-                            @foreach (AppointmentStudent appointmentStudents in Model.AppointmentStudents)
-                            {
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col" colspan="1">@appointmentStudents.Appointment.AppointmentName</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <th scope="row">
-                                                @if (appointmentStudents.Appointment.IsWeekly)
-                                                {
-                                                    WriteLiteral("Tous les ");
-                                                    @appointmentStudents.Appointment.DateStart.ToString("dddd")
-                                                    WriteLiteral("s");
-                                                }
-                                                else
-                                                {
-                                                    @appointmentStudents.Appointment.DateStart.ToString("dddd dd MMMM yyyy").First().ToString().ToUpper()@appointmentStudents.Appointment.DateStart.ToString("dddd dd MMMM yyyy").Substring(1)
-                                                }
-                                                <p>
-                                                    @appointmentStudents.Appointment.DateStart.ToString("HH:mm -")
-                                                    @appointmentStudents.Appointment.DateEnd.ToString("HH:mm")
-                                                </p>
-                                                <p class="font-weight-normal">
-                                                    @*@Model.Firstname*@
-                                                    @foreach (var student in appointmentStudents.Appointment.AppointmentStudents)
-                                                    {
-                                                        <template>
-                                                            &nbsp;
-                                                        </template>
-                                                        @student.Student.Firstname
-                                                    }
-                                                </p>
-                                            </th>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            }
-                        </div>
-                        <!-- end content-->
-                    </div>
-                    <!--  end card  -->
+
+<div class="container py-5 px-md-5">
+    
+    <div class="text-center mb-5">
+        <h1 class="font-weight-bold text-gray-800">🗓️ @ViewData["Title"]</h1>
+        <p class="text-muted">Consultez et gérez vos séances à venir</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            @if (Model.AppointmentStudents == null || !Model.AppointmentStudents.Any())
+            {
+                <div class="text-center py-5 bg-white rounded-xl shadow-sm border">
+                    <img src="~/img/empty_calendar.svg" style="width: 150px; opacity: 0.5;" class="mb-4" />
+                    <h5 class="text-muted">Aucun rendez-vous planifié.</h5>
                 </div>
-            </div>
+            }
+            else
+            {
+                @foreach (AppointmentStudent appointmentStudents in Model.AppointmentStudents.OrderBy(a => a.Appointment.DateStart))
+                {
+                    var app = appointmentStudents.Appointment;
+                    <div class="appointment-card">
+                        <div class="app-indicator @(app.IsWeekly ? "weekly" : "")"></div>
+                        
+                        <div class="app-content">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="app-time">
+                                    <i class="far fa-clock"></i>
+                                    @app.DateStart.ToString("HH:mm") — @app.DateEnd.ToString("HH:mm")
+                                </div>
+                                @if (app.IsWeekly)
+                                {
+                                    <span class="badge-recurrence"><i class="fas fa-redo-alt mr-1"></i> Hebdomadaire</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-recurrence" style="background:rgba(133,135,150,0.1); color:#858796;">Séance unique</span>
+                                }
+                            </div>
+
+                            <h3 class="app-title">@app.AppointmentName</h3>
+
+                            <div class="app-date">
+                                <i class="far fa-calendar-alt"></i>
+                                @if (app.IsWeekly)
+                                {
+                                    <span>Chaque <strong>@app.DateStart.ToString("dddd")</strong></span>
+                                }
+                                else
+                                {
+                                    <span>@app.DateStart.ToString("dddd dd MMMM yyyy")</span>
+                                }
+                            </div>
+
+                            <div class="attendees-list">
+                                <span class="text-muted x-small text-uppercase font-weight-bold mr-2">Participants :</span>
+                                @foreach (var student in app.AppointmentStudents)
+                                {
+                                    <span class="attendee-badge shadow-sm">
+                                        <i class="fas fa-user-circle mr-1"></i> @student.Student.Firstname
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
         </div>
-</body>
+    </div>
+</div>

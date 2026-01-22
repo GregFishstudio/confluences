@@ -117,6 +117,7 @@
 <script>
 import store from "@/store"
 import { mapState } from "vuex"
+import API_BASE from "@/services/api";
 
 export default {
   data() {

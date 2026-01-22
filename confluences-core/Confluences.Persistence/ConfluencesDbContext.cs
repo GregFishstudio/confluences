@@ -61,8 +61,11 @@ namespace Confluences.Persistence
         public virtual DbSet<StageFile> StageFiles => Set<StageFile>();
         public virtual DbSet<Presence> Presences { get; set; }
         public virtual DbSet<SessionReport> SessionReports { get; set; }
+        public virtual DbSet<AccompanyingPresence> AccompanyingPresences { get; set; }
         // Views
         public virtual DbSet<Ressource> Ressources => Set<Ressource>();
+
+        public virtual DbSet<StagiaireNiveau> StagiaireNiveaux { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -104,7 +107,13 @@ namespace Confluences.Persistence
             });
             // ----------------------------------------------------
 
+            builder.Entity<AccompanyingPresence>()
+                    .HasKey(ap => ap.AccompanyingPresenceId);
 
+            builder.Entity<AccompanyingPresence>()
+                 .HasIndex(ap => new { ap.StagiaireId, ap.Date, ap.ActivityName })
+                 .IsUnique();
+            
             builder.Entity<ApplicationUser>(b =>
             {
                 // Each User can have many UserClaims

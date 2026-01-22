@@ -42,6 +42,8 @@ import TypeIntershipActivityList from '../views/TypeIntershipActivityList.vue'
 import TypeIntershipActivityEdit from '../views/TypeIntershipActivityEdit.vue'
 import AttendanceRegister from '../views/AttendanceRegister.vue';
 import StagiairesFollowUp from '../views/FollowUpPage.vue';
+import AteliersFollowUp from '../views/AccompanyingPresence.vue';
+
 import Login from '../views/Login.vue'
 import Callback from '../views/Callback.vue'
 import NotFound from '../views/NotFound.vue'
@@ -72,7 +74,11 @@ const routes = [
     component: AttendanceRegister,
     meta: { requiresAuth: true } 
   },
-
+{
+    path: '/stagiaires/Atliers',
+    name: 'AteliersFollowUp', 
+    component: AteliersFollowUp,
+  },
     {
     path: '/stagiaires/follow-up',
     name: 'StagiairesFollowUp', 

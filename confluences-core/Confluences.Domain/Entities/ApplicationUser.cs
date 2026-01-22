@@ -22,6 +22,10 @@ namespace Confluences.Domain.Entities
         public bool HasSeenHelpVideo { get; set; }
         public string? Language { get; set; }
         public string? Nationality { get; set; }
+        public DateTime? DateDebutParticipation { get; set; }
+
+        public string? OralLevel { get; set; }
+        public string? WrittenLevel { get; set; }
 
         public virtual ICollection<ApplicationUserClaim>? Claims { get; set; }
         public virtual ICollection<ApplicationUserLogin>? Logins { get; set; }

@@ -12,178 +12,165 @@ namespace Api.Documents
     public class AttestationSessionDocument : IDocument
     {
         private readonly ApplicationUser _stagiaire;
-        private readonly List<string> _ateliers;
-        private readonly double _globalRate;
+        private readonly string _courseName;
+        private readonly List<string> _ateliersSuivis;
+        private readonly double _tauxParticipation;
         private readonly int _year;
-        private readonly string _quarter;
-        private readonly byte[] _logo;
+        private readonly string _trimestre;
+        private readonly byte[] _logoBytes;
+        private readonly string _oralLevel;
+        private readonly string _writtenLevel;
+        private readonly DateTime _startDate;
+        private readonly DateTime _endDate;
 
-        // Palette (Identique au modèle)
-        private readonly CultureInfo _frenchCulture = new CultureInfo("fr-FR");
-        private static readonly Color PrimaryColor = Color.FromHex("#2D3748");
-        private static readonly Color AccentColor = Color.FromHex("#00B4B0");
+        private bool IsTelecours => _courseName.ToLower().Contains("télécours") || _courseName.ToLower().Contains("telecours");
+
+        private static readonly Color PrimaryColor = Color.FromHex("#1A202C");
         private static readonly Color MediumGrey = Color.FromHex("#718096");
+        private static readonly Color AccentColor = Color.FromHex("#00B4B0");
+        private static readonly Color LightGrey = Color.FromHex("#EDF2F7");
+        private readonly CultureInfo _fr = new CultureInfo("fr-FR");
 
-        // Typographie
-        private readonly TextStyle _titleStyle = TextStyle.Default.FontFamily("Arial").FontSize(24).Bold().FontColor(PrimaryColor);
-
-        public AttestationSessionDocument(
-            ApplicationUser stagiaire,
-            List<string> ateliers,
-            double globalRate,
-            int year,
-            string quarter,
-            byte[] logoBytes)
+        public AttestationSessionDocument(ApplicationUser stagiaire, string courseName, string oralLevel, string writtenLevel, List<string> ateliersSuivis, double tauxParticipation, int year, string trimestre, byte[] logoBytes, DateTime startDate, DateTime endDate)
         {
             _stagiaire = stagiaire;
-            _ateliers = ateliers ?? new List<string>();
-            _globalRate = globalRate;
+            _courseName = courseName ?? "Français & Intégration";
+            _oralLevel = oralLevel;
+            _writtenLevel = writtenLevel;
+            _ateliersSuivis = ateliersSuivis ?? new List<string>();
+            _tauxParticipation = tauxParticipation;
             _year = year;
-            _quarter = quarter;
-            _logo = logoBytes ?? Array.Empty<byte>();
+            _trimestre = trimestre;
+            _logoBytes = logoBytes ?? Array.Empty<byte>();
+            _startDate = startDate;
+            _endDate = endDate;
         }
-
-        public DocumentMetadata GetMetadata() => new DocumentMetadata
-        {
-            Title = $"Attestation Session - {_stagiaire.LastName}",
-            Author = "Association Confluences"
-        };
 
         public void Compose(IDocumentContainer document)
         {
             document.Page(page =>
             {
-                page.Margin(50);
-                page.DefaultTextStyle(TextStyle.Default.FontFamily("Calibri").FontSize(11).FontColor(PrimaryColor));
-                page.Header().Element(RenderHeader);
-                page.Content().Element(RenderContent);
-                page.Footer().Element(RenderFooter);
-            });
-        }
+                page.Size(PageSizes.A4);
+                page.Margin(1, Unit.Inch);
+                page.DefaultTextStyle(x => x.FontFamily("Helvetica").FontSize(11).FontColor(PrimaryColor));
 
-        private void RenderHeader(IContainer container)
-        {
-            container.PaddingBottom(25).Column(col =>
-            {
-                col.Item().Row(row =>
-                {
-                    row.ConstantItem(100).Height(45).PaddingTop(5).Element(logo =>
-                    {
-                        if (_logo.Length > 0) logo.Image(_logo).FitArea();
-                        else logo.Text("Confluences").FontSize(16).FontColor(AccentColor).SemiBold();
-                    });
-
-                    row.RelativeItem().AlignRight().PaddingTop(8).Column(c =>
-                    {
-                        c.Spacing(3);
-                        c.Item().Text("Association Confluences").SemiBold().FontSize(10).FontColor(PrimaryColor);
-                        c.Item().Text("Chemin de Renens 52e, 1004 Lausanne").FontSize(9).FontColor(MediumGrey);
-                        c.Item().Text("confluences.vaud@gmail.com").FontSize(9).FontColor(MediumGrey);
-                    });
-                });
-                col.Item().PaddingTop(15).LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
-            });
-        }
-
-        private void RenderContent(IContainer container)
-        {
-            container.Column(col =>
-            {
-                col.Spacing(25);
-
-                // TITRE
-                col.Item().AlignCenter().Text("ATTESTATION").Style(_titleStyle).LetterSpacing(0.5f);
+                page.Header().Element(ComposeHeader);
+                page.Content().Element(ComposeContent);
                 
-                // SOUS-TITRE
-                col.Item().AlignCenter().Text($"SESSION {_quarter} / {_year}")
-                    .FontSize(14).SemiBold().FontColor(MediumGrey);
-
-                col.Item().Width(80).AlignCenter().PaddingTop(6).LineHorizontal(2).LineColor(AccentColor);
-
-                // PHRASE INTRODUCTIVE
-                col.Item().PaddingTop(20).AlignCenter().Text("L'association Confluences atteste que")
-                    .FontSize(12);
-
-                // NOM STAGIAIRE
-                col.Item().AlignCenter().PaddingVertical(5).Text($"{_stagiaire.Firstname} {_stagiaire.LastName}")
-                    .FontSize(28).Bold().FontColor(AccentColor);
-
-                // PHRASE SUITE
-                col.Item().AlignCenter().Text(t => {
-                    t.Span("a suivi les mesures d'insertion avec un taux de présence de ");
-                    t.Span($"{_globalRate:F0}%").Bold().FontColor(PrimaryColor);
-                    t.Span(".");
+                page.Footer().AlignCenter().Text(x => {
+                    x.Span("Association Confluences - Chemin de Renens 52e, 1004 Lausanne").FontSize(8).FontColor(Colors.Grey.Medium);
                 });
-
-                // LISTE DES ATELIERS
-                col.Item().PaddingTop(30).Element(RenderAteliersList);
-
-                // SIGNATURE
-                col.Item().PaddingTop(50).Element(RenderSignature);
             });
         }
 
-        private void RenderAteliersList(IContainer container)
-        {
-            container.Column(col =>
-            {
-                col.Spacing(10);
-
-                col.Item().PaddingBottom(10).Text("Activités et Ateliers suivis :")
-                    .FontSize(14).Bold().FontColor(PrimaryColor);
-                
-                // Barre de séparation
-                col.Item().Width(40).PaddingBottom(10).LineHorizontal(1).LineColor(AccentColor);
-
-                if (_ateliers != null && _ateliers.Any())
-                {
-                    foreach (var atelier in _ateliers)
-                    {
-                        col.Item().Row(row =>
-                        {
-                            // CORRECTION : On remplace Canvas/Paint par un simple bloc avec Background
-                            row.ConstantItem(15).PaddingTop(8).Element(e => 
-                            {
-                                e.Height(4).Width(4).Background(AccentColor);
-                            });
-                            
-                            row.RelativeItem().Text(atelier)
-                                .FontSize(12).FontColor(PrimaryColor);
-                        });
-                    }
-                }
-                else
-                {
-                    col.Item().Text("Aucun atelier spécifique enregistré pour cette session.")
-                        .Italic().FontColor(MediumGrey);
-                }
-            });
-        }
-
-        private void RenderSignature(IContainer container)
+        private void ComposeHeader(IContainer container)
         {
             container.Row(row =>
             {
+                // Logo à gauche
                 row.RelativeItem().Column(col =>
                 {
-                    col.Item().Text($"Fait à Lausanne, le {DateTime.Now.ToString("dd MMMM yyyy", _frenchCulture)}")
-                        .FontSize(10).FontColor(MediumGrey);
+                    if (_logoBytes.Length > 0)
+                        col.Item().Height(55).Image(_logoBytes).FitHeight();
+                    else
+                        col.Item().Text("CONFLUENCES").FontSize(22).ExtraBold().FontColor(AccentColor);
                 });
 
-                row.RelativeItem().AlignRight().Column(col =>
+                // BLOC ADRESSE EN HAUT À DROITE
+                row.RelativeItem().AlignRight().PaddingTop(8).Column(c =>
                 {
-                    col.Item().Width(180).LineHorizontal(1).LineColor(AccentColor);
-                    col.Item().PaddingTop(6).Text("La Direction")
-                        .SemiBold().FontSize(12).FontColor(PrimaryColor);
+                    c.Spacing(3);
+                    c.Item().Text("Association Confluences").SemiBold().FontSize(10).FontColor(PrimaryColor);
+                    c.Item().Text("Chemin de Renens 52e, 1004 Lausanne").FontSize(9).FontColor(MediumGrey);
+                    c.Item().Text("confluences.vaud@gmail.com").FontSize(9).FontColor(MediumGrey);
                 });
             });
         }
 
-        private void RenderFooter(IContainer container)
+        private void ComposeContent(IContainer container)
         {
-            container.PaddingTop(15).BorderTop(1).BorderColor(Colors.Grey.Lighten2).AlignCenter()
-                .Text("Document généré par Confluences. Veuillez contacter l'administration pour toute vérification.")
-                .FontSize(8).FontColor(Colors.Grey.Medium);
+            container.PaddingTop(40).Column(col =>
+            {
+                col.Spacing(25);
+
+                // Titre
+                col.Item().AlignCenter().Column(c => {
+                    c.Item().Text("ATTESTATION").FontSize(28).ExtraBold().LetterSpacing(0.1f);
+                    c.Item().PaddingTop(4).AlignCenter().Width(80).LineHorizontal(2).LineColor(AccentColor);
+                });
+
+                // Introduction
+                col.Item().PaddingTop(10).AlignCenter().Text(t => {
+                    t.Span("L'association ").FontSize(13);
+                    t.Span("CONFLUENCES").FontSize(13).Bold();
+                    t.Span(" atteste que").FontSize(13);
+                });
+
+                // Nom du bénéficiaire
+                col.Item().AlignCenter().Background(LightGrey).Padding(12).Text($"{_stagiaire.Firstname} {_stagiaire.LastName}")
+                    .FontSize(24).ExtraBold().FontColor(PrimaryColor).AlignCenter();
+
+                // Détails de la formation obligatoire
+                col.Item().Column(c => {
+                    if (IsTelecours)
+                    {
+                        c.Item().Text(t => {
+                            t.Span("a suivi la formation ");
+                            t.Span("“Français en Télécours”").Bold();
+                            t.Span(" (3 heures par semaine)");
+                        });
+                    }
+                    else
+                    {
+                        c.Item().Text(t => {
+                            t.Span("a suivi la formation ");
+                            t.Span("“Français & Intégration”").Bold();
+                            t.Span(" (15 heures par semaine)");
+                        });
+                    }
+                    
+                    c.Item().PaddingTop(5).Text($"Niveau atteint : {_oralLevel ?? "A1"} (oral) / {_writtenLevel ?? "A1"} (écrit)").Italic().FontSize(10);
+                });
+
+                // SÉPARATION ET ATELIERS FACULTATIFS
+                if (!IsTelecours && _ateliersSuivis.Any())
+                {
+                    col.Item().Column(aCol => {
+                        // LA PHRASE DE SÉPARATION
+                        aCol.Item().PaddingBottom(8).Text("a aussi bénéficié d’accompagnements et d’ateliers facultatifs :")
+                            .SemiBold().FontColor(AccentColor);
+
+                        aCol.Item().Table(table => {
+                            table.ColumnsDefinition(columns => {
+                                columns.ConstantColumn(15);
+                                columns.RelativeColumn();
+                            });
+                            foreach (var atelier in _ateliersSuivis) {
+                                table.Cell().PaddingTop(2).Text("•");
+                                table.Cell().PaddingTop(2).Text(atelier).FontSize(10);
+                            }
+                        });
+                    });
+                }
+
+                // Période et Taux
+                col.Item().PaddingTop(10).Column(pCol => {
+                    pCol.Item().Text(t => {
+                        t.Span("Période : du ");
+                        t.Span($"{_startDate.ToString("dd MMMM", _fr)} au {_endDate.ToString("dd MMMM yyyy", _fr)}").Bold();
+                    });
+                    pCol.Item().Text($"Taux global de participation : {_tauxParticipation:F1}%");
+                });
+
+                // Signature
+                col.Item().PaddingTop(40).Row(row => {
+                    row.RelativeItem().Text($"Lausanne, le {DateTime.Now.ToString("dd MMMM yyyy", _fr)}");
+                    row.RelativeItem().AlignRight().Column(sig => {
+                        sig.Item().Text("La Direction").Bold();
+                        sig.Item().PaddingTop(40).Width(120).LineHorizontal(1);
+                    });
+                });
+            });
         }
     }
 }

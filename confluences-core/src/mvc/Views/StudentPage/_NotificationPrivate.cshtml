@@ -1,16 +1,107 @@
 ﻿@model mvc.Models.AspNetUser
 
-<div class="cardBox" id="notifBoxPrivate" onclick="location.href='@Url.Action("Private", "Jitsi", new { roomName = Model.UserName, isPrivateRoom = false})'">
-    <div class="imgCard"></div>
-    <div class="textBoxCard">
-        <div class="textContentCard">
-            <p class="h1Card">Quelqu'un vous appelle</p>
-        </div>
-        <p class="pCard">
-            Cliquer pour rejoindre
-        </p>
-        <div>
-        </div>
+<style>
+    /* Conteneur de la notification flottante */
+    .call-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: none; /* Masqué par défaut */
+        align-items: center;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 24px;
+        padding: 12px 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        max-width: 320px;
+        animation: slideIn 0.5s ease-out;
+    }
+
+    .call-notification:hover {
+        transform: scale(1.02);
+        background: rgba(255, 255, 255, 0.95);
+    }
+
+    /* Animation d'entrée */
+    @@keyframes slideIn {
+        from { transform: translateX(120%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Icône d'appel pulsante */
+    .call-icon-wrapper {
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, #4361ee, #4cc9f0);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        margin-right: 15px;
+        position: relative;
+    }
+
+    .call-icon-wrapper::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 16px;
+        background: #4361ee;
+        opacity: 0.5;
+        animation: pulse 1.5s infinite;
+    }
+
+    @@keyframes pulse {
+        0% { transform: scale(1); opacity: 0.5; }
+        100% { transform: scale(1.5); opacity: 0; }
+    }
+
+    .call-text-content {
+        flex-grow: 1;
+    }
+
+    .call-title {
+        margin: 0;
+        font-weight: 800;
+        font-size: 0.95rem;
+        color: #1a1c23;
+    }
+
+    .call-subtitle {
+        margin: 0;
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+
+    .call-badge {
+        background: #10b981;
+        color: white;
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 10px;
+        text-transform: uppercase;
+        margin-top: 4px;
+        display: inline-block;
+    }
+</style>
+
+<div class="call-notification" id="notifBoxPrivate" onclick="joinCall()">
+    <div class="call-icon-wrapper">
+        <i class="fas fa-video"></i>
+    </div>
+    <div class="call-text-content">
+        <p class="call-title">Appel entrant</p>
+        <p class="call-subtitle">Cliquer pour rejoindre</p>
+        <span class="call-badge">Direct</span>
     </div>
 </div>
 
@@ -18,66 +109,58 @@
     let audioContext;
 
     function initializeAudioContext() {
-        // Create the AudioContext after a user gesture
         if (!audioContext) {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
         }
-
-        playSong();
+        playCallMelody();
     }
 
-    function playSong() {
+    function playCallMelody() {
         const notes = [
-            { frequency: 261.63, duration: 0.5 },  // C4
-            { frequency: 293.66, duration: 0.5 },  // D4
-            { frequency: 329.63, duration: 0.5 },  // E4
-            { frequency: 349.23, duration: 0.5 },  // F4
-            { frequency: 392.00, duration: 0.5 },  // G4
-            { frequency: 440.00, duration: 0.5 },  // A4
-            { frequency: 493.88, duration: 0.5 },  // B4
-            { frequency: 523.25, duration: 1.0 }   // C5
+            { freq: 523.25, type: 'sine' }, // C5
+            { freq: 659.25, type: 'sine' }, // E5
+            { freq: 783.99, type: 'sine' }  // G5
         ];
 
-        let currentTime = audioContext.currentTime;
-
-        notes.forEach(note => {
-            playTone(audioContext, note.frequency, note.duration, currentTime);
-            currentTime += note.duration;
-        });
+        let time = audioContext.currentTime;
+        // On joue une petite boucle mélodique 2 fois
+        for(let i=0; i<2; i++) {
+            notes.forEach(note => {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                
+                osc.type = note.type;
+                osc.frequency.setValueAtTime(note.freq, time);
+                
+                gain.gain.setValueAtTime(0.1, time);
+                gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.5);
+                
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                
+                osc.start(time);
+                osc.stop(time + 0.5);
+                time += 0.2;
+            });
+            time += 0.4;
+        }
     }
 
-    function playTone(audioContext, frequency, duration, startTime) {
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-        gainNode.gain.setValueAtTime(1, audioContext.currentTime);
-
-        oscillator.start(startTime);
-        oscillator.stop(startTime + duration);
+    function joinCall() {
+        location.href = '@Url.Action("Private", "Jitsi", new { roomName = Model.UserName, isPrivateRoom = false })';
     }
 
     document.addEventListener("DOMContentLoaded", function () {
         startConnectionPrivateJitsi().then(() => {
-            privateJitsi.invoke("AddToGroup", "SchoolClassRoom_" + "@Model.UserName").catch(function (err) {
-                return console.error(err.toString());
-            });
+            
+            privateJitsi.invoke("AddToGroup", "SchoolClassRoom_" + "@Model.UserName").catch(err => console.error(err));
 
             privateJitsi.on("JitsiPrivateNotification", function (message) {
+                // Gestion de l'audio (nécessite une interaction préalable sur la page pour fonctionner)
+                try { initializeAudioContext(); } catch(e) { console.warn("Audio bloqué par le navigateur"); }
+
                 sessionStorage.setItem('isPrivateButtonVisible', 'true');
-                isButtonVisible = sessionStorage.getItem('isPrivateButtonVisible');
-
-                if (isButtonVisible === 'true') {
-                    document.getElementById('notifBoxPrivate').style.display = 'flex';
-                }
-                else {
-                    document.getElementById('notifBoxPrivate').style.display = 'none';
-                }
-
+                document.getElementById('notifBoxPrivate').style.display = 'flex';
             });
 
             privateJitsi.on("StopPrivateClassRoom", function (message) {
@@ -86,6 +169,4 @@
             });
         });
     });
-
-    
 </script>

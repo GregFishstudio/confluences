@@ -1,56 +1,167 @@
 ﻿@model mvc.Models.AspNetUser
 @{
-    ViewData["Title"] = "Aide";
+    ViewData["Title"] = "Centre d'Aide";
 }
 
-<br />
-<br />
+<style>
+    :root {
+        --bg-gradient: linear-gradient(135deg, #f0f4ff 0%, #f1fff5 50%, #ffffff 100%);
+        --primary-modern: #4e73df;
+        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    }
+
+    body, .bgImage {
+        background: var(--bg-gradient) !important;
+        background-attachment: fixed !important;
+        background-image: none !important;
+        font-family: 'Inter', sans-serif;
+        color: #2e3d49;
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    .help-container {
+        padding-top: 5rem;
+        padding-bottom: 5rem;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 30px;
+        padding: 3rem;
+        box-shadow: var(--card-shadow);
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .video-wrapper {
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        border: 1px solid rgba(0,0,0,0.05);
+        margin-bottom: 2.5rem;
+    }
+
+    .section-title {
+        font-weight: 800;
+        font-size: 2rem;
+        color: #2b2d42;
+        margin-bottom: 1rem;
+    }
+
+    .language-section {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        border: 1px solid rgba(0,0,0,0.03);
+    }
+
+    .btn-lang {
+        background: #f8f9fc;
+        border: 2px solid #eef0f7;
+        color: #4e73df;
+        padding: 0.8rem 1.5rem;
+        border-radius: 15px;
+        font-weight: 700;
+        transition: all 0.2s;
+        margin: 5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-lang:hover {
+        background: var(--primary-modern);
+        color: white;
+        border-color: var(--primary-modern);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(78, 115, 223, 0.2);
+    }
+
+    .btn-lang i { font-size: 1.1rem; }
+
+    .help-hint {
+        font-size: 0.9rem;
+        color: #858796;
+        margin-bottom: 2rem;
+    }
+</style>
+
 <partial name="_Notification.cshtml" />
-<body data-parallax="true" class="bgImage">
-    <div class="container">
-        <div class="about-team team-1">
-            <div class="row">
-                <div class="col-md-12 ml-auto mr-auto text-center d-flex">
-                    <div class="card">
-                        <div class="card-body flex-fill">
-                            <h3 class="title">Aide</h3>
-                            <div class="embed-responsive embed-responsive-16by9">
-                                <iframe class="embed-responsive-item" src="@Model.SessionStudents.First().Session.SchoolClassRoom.ExplanationVideoLink" allowfullscreen></iframe>
-                            </div>
-                            <br />
-                            @foreach (var schoolClassRoomExplanation in Model.SessionStudents.First().Session.SchoolClassRoom.SchoolClassRoomExplanations)
-                            {
-                                <button class="btn btn-primary" value="@schoolClassRoomExplanation.AudioLink">@schoolClassRoomExplanation.LanguageName</button>
-                            }
-                        </div>
-                        <!-- end content-->
-                    </div>
-                    <!--  end card  -->
-                </div>
+
+<div class="container help-container">
+    <div class="glass-card text-center">
+        <header class="mb-4">
+            <h1 class="section-title">Comment ça marche ?</h1>
+            <p class="help-hint">Regardez la vidéo ci-dessous pour apprendre à utiliser votre espace de cours.</p>
+        </header>
+
+       <div class="video-wrapper">
+    <div class="embed-responsive embed-responsive-16by9">
+        @if (Model.SessionStudents != null && Model.SessionStudents.Any())
+        {
+            <iframe class="embed-responsive-item" 
+                    src="@Model.SessionStudents.First().Session.SchoolClassRoom.ExplanationVideoLink" 
+                    allowfullscreen></iframe>
+        }
+        else
+        {
+            <div class="p-5 text-center">
+                <i class="fas fa-exclamation-triangle fa-2x text-warning mb-3"></i>
+                <p>Aucune session active trouvée pour votre profil.</p>
             </div>
+        }
+    </div>
+</div>
+
+<div class="language-section shadow-sm">
+    <h5 class="font-weight-bold mb-3 text-dark">Besoin d'explications dans une autre langue ?</h5>
+    <div class="d-flex flex-wrap justify-content-center">
+        @if (Model.SessionStudents != null && Model.SessionStudents.Any())
+        {
+            @foreach (var explanation in Model.SessionStudents.First().Session.SchoolClassRoom.SchoolClassRoomExplanations)
+            {
+                <button class="btn btn-lang" value="@explanation.AudioLink">
+                    <i class="fas fa-volume-up"></i> @explanation.LanguageName
+                </button>
+            }
+        }
+    </div>
+</div>
+
+        <div class="mt-5">
+            <a href="/" class="text-muted small text-decoration-none">
+                <i class="fas fa-arrow-left mr-1"></i> Retour au tableau de bord
+            </a>
         </div>
-</body>
+    </div>
+</div>
 
 @section Scripts {
     <script>
-        // Let's create a soundboard module ("sb")
-        var sb = {
-            song: null,
+        // Module Soundboard optimisé
+        const Soundboard = {
+            audio: new Audio(),
             init: function () {
-                sb.song = new Audio();
-                sb.listeners();
-            },
-            listeners: function () {
-                $("button").click(sb.play);
+                document.querySelectorAll(".btn-lang").forEach(btn => {
+                    btn.addEventListener("click", this.play.bind(this));
+                });
             },
             play: function (e) {
-                sb.song.src = e.target.value;
-                sb.song.play();
+                const url = e.currentTarget.value;
+                if (!url) return;
+                
+                this.audio.src = url;
+                this.audio.play().catch(err => {
+                    console.error("Erreur de lecture audio : ", err);
+                    alert("Impossible de lire l'audio. Vérifiez votre connexion.");
+                });
             }
         };
 
-        $(document).ready(sb.init);
-
+        $(document).ready(() => Soundboard.init());
     </script>
 }
-
