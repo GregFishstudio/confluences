@@ -193,7 +193,7 @@ const getUserManager = () => {
 }
 
 onMounted(async () => {
-  const returnUrl = route.query.returnUrl || '/entreprises'
+  const returnUrl = route.query.returnUrl || '/presence'
   console.log('📍 Page Login - returnUrl:', returnUrl)
 
   // Si une session existe déjà → passe directement à la page interne
@@ -217,7 +217,7 @@ function checkExistingSession() {
       user,
       expiresAt: user.expires_at
     })
-    router.push(route.query.returnUrl || '/entreprises')
+    router.push(route.query.returnUrl || '/presence')
     return true
   }
   return false
@@ -265,7 +265,7 @@ async function handleLogin() {
       expiresAt: user.expires_at
     })
 
-    router.push('/entreprises')
+    router.push('/presence')
   } catch (err) {
     console.error('❌ Erreur login:', err)
     error.value = 'Nom d’utilisateur ou mot de passe incorrect'

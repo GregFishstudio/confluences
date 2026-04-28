@@ -40,7 +40,6 @@
         overflow: hidden;
     }
 
-    /* Boutons d'ajout (agrandis comme demandé) */
     .btn-add-user {
         padding: 0.6rem 1.2rem;
         border-radius: 12px;
@@ -62,7 +61,6 @@
         transform: translateY(-2px);
     }
 
-    /* Correction des boutons d'action (Appeler/Supprimer) */
     .btn-circle-action {
         width: 42px;
         height: 42px;
@@ -102,13 +100,27 @@
     }
     .admin-dock a { color: #a0aec0; margin-right: 1.5rem; font-size: 0.85rem; }
     .admin-dock a:hover { color: white; text-decoration: none; }
+    
+    .delete-session-link {
+        color: #cbd5e0;
+        font-size: 0.75rem;
+        transition: color 0.2s;
+        text-decoration: none;
+    }
+    .delete-session-link:hover {
+        color: #e53e3e !important;
+    }
 </style>
 
 <div class="container-fluid py-4 px-md-5">
     
-    <div class="header-glass d-flex justify-content-between align-items-center">
+    <div class="header-glass d-flex justify-content-between align-items-center flex-wrap gap-3">
         <h1 class="h2 font-weight-bold mb-0">@Model.SchoolClassRoomName</h1>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 align-items-center">
+            <a class="btn btn-outline-success rounded-pill px-4" asp-controller="Sessions" asp-action="Create" asp-route-classRoomId="@Model.SchoolClassRoomId">
+                <i class="fas fa-plus-circle"></i> Nouvelle Session
+            </a>
+
             @if (Model.Sessions.Any()) {
                 <a class="btn btn-primary rounded-pill px-4" href="@Url.Action("Index", "HomeworkV2s", new { id = Model.Sessions.FirstOrDefault().SessionId })">Devoirs</a>
             }
@@ -122,7 +134,16 @@
     {
         <div class="session-card">
             <div class="px-4 py-3 border-bottom d-flex justify-content-between align-items-center bg-light">
-                <span class="badge badge-primary px-3 py-2">Session @session.DateStart.Year</span>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="badge badge-primary px-3 py-2">Session @session.DateStart.Year</span>
+                    
+                    <a asp-controller="Sessions" asp-action="Delete" asp-route-id="@session.SessionId" 
+                       class="delete-session-link" 
+                       onclick="return confirm('Confirmer la suppression de cette session ? Cela effacera tous les accès étudiants/formateurs rattachés.')">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </a>
+                </div>
+                
                 <div class="d-flex gap-2">
                     <a asp-controller="SessionTeachers" asp-action="Create" asp-route-id="@session.SessionId" class="btn-add-user">
                         <i class="fas fa-user-tie"></i> + Formateur
@@ -151,11 +172,11 @@
                                     <a data-userConnected="@st.Teacher.UserName" 
                                        href="@Url.Action("Private", "Jitsi", new { roomName = st.Teacher.UserName, isPrivateRoom = true})" 
                                        class="btn-circle-action callButton callUnAvailable">
-                                        <img src="~/img/Conference.png" style="width: 25px;" />
+                                         <img src="~/img/Conference.png" style="width: 25px;" />
                                     </a>
                                     <a asp-controller="SessionTeachers" asp-action="Delete" asp-route-id="@st.SessionId" asp-route-id2="@st.Teacher.Id" 
                                        class="btn-circle-action text-danger">
-                                        <i class="fas fa-trash-alt"></i>
+                                         <i class="fas fa-trash-alt"></i>
                                     </a>
                                 </div>
                             </div>
@@ -177,11 +198,11 @@
                                         <a data-userConnected="@ss.Student.UserName" 
                                            href="@Url.Action("Private", "Jitsi", new { roomName = ss.Student.UserName, isPrivateRoom = true})" 
                                            class="callButton callUnAvailable text-primary" style="font-size: 1.2rem;">
-                                            <i class="fas fa-phone-alt"></i>
+                                             <i class="fas fa-phone-alt"></i>
                                         </a>
                                         <a asp-controller="SessionStudents" asp-action="Delete" asp-route-id="@ss.SessionId" asp-route-id2="@ss.Student.Id" 
                                            class="text-danger" style="font-size: 1.2rem;">
-                                            <i class="fas fa-times-circle"></i>
+                                             <i class="fas fa-times-circle"></i>
                                         </a>
                                     </div>
                                 </div>
@@ -204,7 +225,6 @@
 
 @section Scripts {
     <script>
-        // Logique de scroll auto
         function updateScrollbar() {
             var messagesContent = document.querySelector(".messages-content");
             if (messagesContent) {
@@ -212,7 +232,6 @@
             }
         }
 
-        // SignalR : Réception des messages de chat
         connection.on("SendStudentMessage", function (message) {
             if (message.includes("Jitsi") || message.includes("rejoindre")) return;
             
@@ -228,7 +247,6 @@
             }
         });
 
-        // Envoi de message
         function insertMessage() {
             var msg = document.getElementById('messageInput').value;
             if ($.trim(msg) == '') return false;
@@ -242,7 +260,6 @@
             document.getElementById('messageInput').value = '';
         }
 
-        // Archivage
         document.getElementById("Archived").onclick = function () {
             if (confirm('Êtes-vous sûr de vouloir archiver cette classe ?')) {
                 location.href='@Url.Action("archive", "SchoolClassRooms", new { id = Model.SchoolClassRoomId })';

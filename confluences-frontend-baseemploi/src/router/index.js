@@ -63,24 +63,26 @@ const routes = [
     name: 'Login',
     component: Login,
   },
+  { path: '/calendrier', name: 'calendrier', component: () => import('@/views/CalendrierView.vue') },
+  { path: '/participants', name: 'Participants', component: () => import('@/views/ParticipantView.vue') },
    {
     path: '/home',
     name: 'Home',
     component: Home,
   },
   {
-    path: '/attendance',
+    path: '/presence',
     name: 'AttendanceRegister',
     component: AttendanceRegister,
     meta: { requiresAuth: true } 
   },
 {
-    path: '/stagiaires/Atliers',
+    path: '/ateliers',
     name: 'AteliersFollowUp', 
     component: AteliersFollowUp,
   },
     {
-    path: '/stagiaires/follow-up',
+    path: '/suivi',
     name: 'StagiairesFollowUp', 
     component: StagiairesFollowUp,
   },
@@ -92,24 +94,24 @@ const routes = [
     component: EntrepriseEdit,
     meta: { requiresAuth: true },
     props: true,
-    beforeEnter: (routeTo, routeFrom, next) => {
-      store.dispatch('entreprise/fetchEntreprise', routeTo.params.id)
-        .then(entreprise => {
-          if (entreprise == undefined) {
-            next({ name: '404', params: { resource: 'entreprise' } })
-          } else {
-            routeTo.params.entreprise = entreprise
-            next()
-          }
-        })
-        .catch(error => {
-          if (error.response && error.response.status == 404) {
-            next({ name: '404', params: { resource: 'entreprise' } })
-          } else {
-            next(routeFrom)
-          }
-        })
-    }
+   beforeEnter: (routeTo, routeFrom, next) => {
+  console.log("1. Tentative d'entrée dans la route pour l'ID:", routeTo.params.id);
+  
+  store.dispatch('entreprise/fetchEntreprise', routeTo.params.id)
+    .then(entreprise => {
+      console.log("2. Réponse reçue du store:", entreprise);
+      if (entreprise == undefined) {
+        next({ name: '404', params: { resource: 'entreprise' } });
+      } else {
+        routeTo.params.entreprise = entreprise;
+        next();
+      }
+    })
+    .catch(error => {
+      console.error("3. Erreur dans le beforeEnter:", error);
+      next(routeFrom);
+    });
+}
   },
 
   // Stages
@@ -570,40 +572,35 @@ function isTeacher() {
 
 // --- Global Before Guard ---
 
-router.beforeEach(async (to, from, next) => {
-  NProgress.start()
+router.beforeEach((to, from, next) => {
+  NProgress.start();
 
-  const user = JSON.parse(localStorage.getItem('user') || 'null')
-  const token = user?.access_token
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  const token = user?.access_token;
+  const publicPaths = ['/login', '/callback', '/unauthorized'];
 
-  const publicPaths = ['/login', '/callback', '/unauthorized']
   if (publicPaths.includes(to.path)) {
-    NProgress.done()
-    return next()
+    return next();
   }
 
-  // 🔒 Auth requise
   if (to.matched.some(r => r.meta.requiresAuth)) {
     if (!token) {
-      console.warn('🚫 Aucun token détecté, redirection vers /login')
-      NProgress.done()
-      return next({ name: 'Login', query: { returnUrl: to.fullPath } })
+      return next({ name: 'Login', query: { returnUrl: to.fullPath } });
     }
 
-    // 🧩 Vérifie le rôle seulement si besoin
     if (!isTeacher()) {
-      console.warn('⚠️ Accès refusé : non-teacher')
-      NProgress.done()
-      return next({ name: 'Unauthorized' })
+      return next({ name: 'Unauthorized' });
     }
   }
 
-  next()
-  NProgress.done()
-})
+  next();
+});
+
+router.afterEach(() => {
+  NProgress.done();
+});
 
 
 
-router.afterEach(() => NProgress.done())
 
 export default router

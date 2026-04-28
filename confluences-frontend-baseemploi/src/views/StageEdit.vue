@@ -366,7 +366,7 @@ import { useStore } from 'vuex';
 import DeleteStage from '@/components/DeleteStage.vue'
 import StageFileList from '@/components/StageFileList.vue'
 import moment from 'moment'
-import API_BASE from "@/services/api";
+import API_BASE, {apiFetch} from '@/services/api'
 
 const router = useRouter(); 
 const store = useStore();
@@ -449,28 +449,25 @@ function formatDate(date) {
 
 // Téléchargement du Bilan (Copié depuis StagesList)
 const downloadBilan = async (id) => {
-    if (!id) return;
-    const now = new Date().toISOString();
-    const token = localStorage.getItem("token") || localStorage.getItem("access_token");
+  if (!id) return
+  const now = new Date().toISOString()
 
-    const res = await fetch(`${API_BASE}/api/documents/bilan/${id}?date=${now}`, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-    });
+  const res = await apiFetch(`${API_BASE}/api/documents/bilan/${id}?date=${now}`, {
+    headers: { 'Content-Type': '' } // override pour pas envoyer application/json sur un PDF
+  })
 
-    if (res.ok) {
-        const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `bilan-${id}.pdf`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-    } else {
-        console.error("Échec du téléchargement du bilan:", res.status);
-    }
-};
+  if (res?.ok) {
+    const blob = await res.blob()
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `bilan-${id}.pdf`
+    link.click()
+    window.URL.revokeObjectURL(url)
+  } else {
+    console.error('Échec du téléchargement du bilan:', res?.status)
+  }
+}
 
 async function submit() {
   const { valid: formValid } = await formStage.value.validate();

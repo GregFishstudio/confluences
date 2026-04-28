@@ -31,7 +31,7 @@
         class="are-table"
         @click:row="selectRow"
         @update:items-per-page="updateNumberItems"
-        :options.sync="options"
+        v-model:options="options"
         mobile-breakpoint="0"
       >
         <template v-slot:top>
@@ -49,19 +49,32 @@
         </template>
 
         <template v-slot:item.typeJobSearchAssistance.description="{ item }">
-          <v-chip small color="primary lighten-5" text-color="primary darken-3" class="font-weight-medium">
+          <v-chip 
+            v-if="item.typeJobSearchAssistance" 
+            small 
+            color="primary lighten-5" 
+            text-color="primary darken-3" 
+            class="font-weight-medium"
+          >
             {{ item.typeJobSearchAssistance.description }}
           </v-chip>
+          <span v-else class="grey--text italic text-caption">Non spécifié</span>
         </template>
 
         <template v-slot:item.typeJobSearchAssistanceOccurrence.description="{ item }">
-          <v-chip x-small color="orange lighten-5" text-color="orange darken-4">
+          <v-chip 
+            v-if="item.typeJobSearchAssistanceOccurrence" 
+            x-small 
+            color="orange lighten-5" 
+            text-color="orange darken-4"
+          >
             {{ item.typeJobSearchAssistanceOccurrence.description }}
           </v-chip>
+          <span v-else class="grey--text text-caption">-</span>
         </template>
 
         <template v-slot:item.website="{ item }">
-          <a v-if="item.website" :href="item.website" target="_blank" class="text-decoration-none">
+          <a v-if="item.website" :href="item.website" target="_blank" class="text-decoration-none" @click.stop>
             <v-icon small color="blue" class="mr-1">mdi-web</v-icon>Lien
           </a>
           <span v-else class="grey--text">N/A</span>
@@ -70,7 +83,7 @@
         <template v-slot:item.keyWords="{ item }">
           <div class="d-flex flex-wrap" style="max-width: 250px;">
             <v-chip
-              v-for="(word, index) in item.keyWords.split(',').map(s => s.trim()).filter(s => s.length > 0)"
+              v-for="(word, index) in (item.keyWords || '').split(',').map(s => s.trim()).filter(s => s.length > 0)"
               :key="index"
               x-small
               class="ma-05"
@@ -83,12 +96,12 @@
         </template>
         
         <template v-slot:no-data>
-            <div class="pa-4 text-center">
-                <v-icon large color="grey lighten-1" class="mb-2">mdi-alert-circle-outline</v-icon>
-                <p class="text-subtitle-1 grey--text">
-                    Aucune aide à la recherche d'emploi trouvée.
-                </p>
-            </div>
+          <div class="pa-4 text-center">
+            <v-icon large color="grey lighten-1" class="mb-2">mdi-alert-circle-outline</v-icon>
+            <p class="text-subtitle-1 grey--text">
+              Aucune aide à la recherche d'emploi trouvée.
+            </p>
+          </div>
         </template>
       </v-data-table>
     </v-card>
@@ -107,7 +120,10 @@ const router = useRouter();
 
 // --- État Réactif ---
 const search = ref('');
-const options = ref({}); 
+const options = ref({
+    page: 1,
+    itemsPerPage: 10
+}); 
 
 // --- Computed Properties ---
 const jobSearchAssistance = computed(() => store.state.jobSearchAssistance);
@@ -128,23 +144,26 @@ const headers = [
 
 // --- Hooks ---
 
-// FIX: Charger les données au montage pour résoudre le problème de rechargement
 onBeforeMount(() => {
+    // Charger les données
     store.dispatch('jobSearchAssistance/fetchJobSearchAssistances', true);
+    
+    // Restaurer la page depuis le store si elle existe
+    if (store.state.settings.currentPageJobSearchAssistance) {
+        options.value.page = store.state.settings.currentPageJobSearchAssistance;
+    }
 });
 
-// Hook de navigation de sortie (sauvegarde la page actuelle)
 onBeforeRouteLeave((routeTo, routeFrom, next) => {
+    // Sauvegarder la position de pagination
     store.dispatch('settings/setCurrentPageJobSearchAssistance', { number: options.value.page });
     next();
 });
 
-// Initialisation (simule le 'created')
-options.value.page = store.state.settings.currentPageJobSearchAssistance;
-
 // --- Méthodes ---
 const selectRow = (event, row) => {
-    const item = row ? row.item : event;
+    // Gestion de la compatibilité selon la version de Vuetify
+    const item = row?.item ? row.item : event;
     const id = item.jobSearchAssistanceId || item.JobSearchAssistanceId;
 
     if (id) {
@@ -163,22 +182,20 @@ const updatePageSearch = () => {
 };
 
 const formatDate = (date) => {
-    return moment(date, 'YYYY-MM-DD').format('YYYY-MM-DD');
+    if (!date) return '-';
+    return moment(date).format('YYYY-MM-DD');
 };
 </script>
 
 <style scoped>
-/* Styles pour un look moderne et cliquable */
 .are-table >>> tbody tr:hover {
   cursor: pointer;
-  /* Ombre plus douce */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transform: translateY(-1px);
   transition: all 0.2s ease-in-out;
 }
 
 .are-table >>> thead th {
-    /* En-têtes discrets */
     color: #424242 !important; 
     font-size: 0.85rem;
     letter-spacing: 0.5px;

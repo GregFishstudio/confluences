@@ -1,114 +1,112 @@
 <template>
-  <v-dialog 
-    :model-value="modelValue" 
+  <v-dialog
+    :model-value="modelValue"
     @update:model-value="closeModal"
-    max-width="800px" 
-    
+    max-width="800px"
     scrollable
   >
     <v-card class="d-flex flex-column" style="max-height: 90vh;">
-      
+
       <v-toolbar flat color="primary" dark dense>
         <v-toolbar-title>
-           Bilan : {{ stagiaireData.prenom }} {{ stagiaireData.nom }}
-           <span class="text-caption ml-2" style="opacity: 0.8;">({{ periodInfo.label }})</span>
+          Bilan : {{ stagiaireData?.prenom }} {{ stagiaireData?.nom }} 
+          <span class="text-caption ml-2" style="opacity: 0.8;">({{stagiaireData?.niveau }} Session {{ periodInfo?.quarter }} — {{ periodInfo?.year }})</span>
         </v-toolbar-title>
-        <v-spacer></v-spacer>
+        
         <v-btn icon @click="closeModal">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-toolbar>
 
-      <v-tabs v-model="activeTab" background-color="grey lighten-4" color="primary" grow>
+      <v-tabs v-model="activeTab" bg-color="grey-lighten-4" color="primary" grow>
         <v-tab>
-            <v-icon left small>mdi-school</v-icon> Cours
+          Partie 1
         </v-tab>
         <v-tab v-if="hasSpecificTab">
-            <v-icon left small>mdi-puzzle</v-icon> Spécifique
+          Partie 2
         </v-tab>
         <v-tab>
-            <v-icon left small>mdi-flag-checkered</v-icon> Synthèse
+          Partie 3
         </v-tab>
       </v-tabs>
 
       <v-card-text class="pa-4 flex-grow-1" style="overflow-y: auto;">
-        
+
         <div v-if="isLoadingData" class="d-flex justify-center align-center py-10">
-             <v-progress-circular indeterminate color="primary"></v-progress-circular>
+          <v-progress-circular indeterminate color="primary"></v-progress-circular>
         </div>
 
         <v-window v-else v-model="activeTab" class="pt-2">
-            
-            <v-window-item>
-                <v-alert border="left" colored-border color="primary" elevation="1" class="mb-4">
-                    <div class="text-subtitle-2">Formation suivie</div>
-                    <div class="text-body-2 grey--text text--darken-2">
-                        {{ stagiaireData.courseDetails?.mainInfo || 'Non spécifié' }}
-                        <span v-if="stagiaireData.oralLevel"> ({{ stagiaireData.oralLevel }})</span>
-                    </div>
-                </v-alert>
 
-                <v-textarea
-                    v-model="bilanText"
-                    label="Évaluation linguistique / Globale"
-                    placeholder="Progrès, assiduité, acquis..."
-                    outlined
-                    rows="10"
-                ></v-textarea>
-            </v-window-item>
+          <!-- Onglet Cours -->
+          <v-window-item>
+            <label class="text-caption font-weight-bold">Evaluation</label>
+            <v-textarea
+              v-model="bilanText"
+              label="Évaluation linguistique / Globale"
+              placeholder="Progrès, assiduité, acquis..."
+              variant="outlined"
+              rows="10"
+            ></v-textarea>
+          </v-window-item>
 
-            <v-window-item v-if="hasSpecificTab">
-                
-                <template v-if="isFrancaisIntegration">
-                    <div class="text-overline primary--text mb-2">Français & Intégration</div>
-                    
-                    <label class="text-caption font-weight-bold">Insertion Socio-Pro</label>
-                    <v-textarea v-model="socialInsertionText" outlined dense rows="3" class="mb-2"></v-textarea>
-                    
-                    <label class="text-caption font-weight-bold">Compétences Numériques</label>
-                    <v-textarea v-model="digitalSkillsText" outlined dense rows="3" class="mb-2"></v-textarea>
-                    
-                    <label class="text-caption font-weight-bold">Accompagnement Individualisé</label>
-                    <v-textarea v-model="individualAccompanyingText" outlined dense rows="3"></v-textarea>
-                </template>
+          <!-- Onglet Spécifique -->
+          <v-window-item v-if="hasSpecificTab">
+            <template v-if="isFrancaisIntegration">
+              <label class="text-caption font-weight-bold">Insertion Socio</label>
+              <v-textarea v-model="socialInsertionText" variant="outlined" density="compact" rows="3" class="mb-2"></v-textarea>
+              <label class="text-caption font-weight-bold">Compétences Numériques</label>
+              <v-textarea v-model="digitalSkillsText" variant="outlined" density="compact" rows="3" class="mb-2"></v-textarea>
+              <label class="text-caption font-weight-bold">Accompagnement Individualisé</label>
+              <v-textarea v-model="individualAccompanyingText" variant="outlined" density="compact" rows="3"></v-textarea>
+            </template>
+            <template v-else-if="isTelecours">
+              <label class="text-caption font-weight-bold">Visites à Domicile</label>
+              <v-textarea
+                v-model="homeVisitsText"
+                variant="outlined"
+                rows="8"
+                placeholder="Compte rendu des visites..."
+              ></v-textarea>
+            </template>
+          </v-window-item>
 
-                <template v-else-if="isTelecours">
-                    <div class="text-overline primary--text mb-2">Spécifique Télécours</div>
-                    <label class="text-caption font-weight-bold">Visites à Domicile</label>
-                    <v-textarea 
-                        v-model="homeVisitsText" 
-                        outlined 
-                        rows="8" 
-                        placeholder="Compte rendu des visites..."
-                    ></v-textarea>
-                </template>
-            </v-window-item>
+          <!-- Onglet Synthèse -->
+          <v-window-item>
+            <label class="text-caption font-weight-bold">Synthèse/Insertion Socio</label>
+  <div class="d-flex align-center mb-4">
+    <div class="text-h6" :class="`text-${perspectiveConfig.color}`">
+    </div>
+  </div>
 
-            <v-window-item>
-                <div class="text-subtitle-1 mb-2">Perspectives</div>
-                <v-textarea
-                    v-model="followUpActions"
-                    label="Actions à entreprendre / Objectifs"
-                    outlined
-                    rows="6"
-                ></v-textarea>
-                <div class="caption grey--text mt-2">
-                    * Ce texte apparaîtra en bas du PDF.
-                </div>
-            </v-window-item>
 
+  <v-textarea
+    v-model="followUpActions"
+    :color="perspectiveConfig.color"
+    variant="outlined"
+    rows="8"
+    placeholder="Insertion sociale/synthèse"
+    clearable
+    counter
+  ></v-textarea>
+
+  <div class="d-flex align-center mt-2 text-grey-darken-1">
+    <v-icon size="16" class="mr-1">mdi-information-outline</v-icon>
+    <span class="text-caption italic">Ce texte sera automatiquement intégré en bas du document PDF final.</span>
+  </div>
+</v-window-item>
         </v-window>
       </v-card-text>
 
       <v-divider></v-divider>
 
-      <v-card-actions class="grey lighten-5 pa-4">
+      <v-card-actions class="bg-grey-lighten-5 pa-4">
         <v-spacer></v-spacer>
-        <v-btn text color="grey darken-1" @click="closeModal" :disabled="isSaving">
-            Annuler
+        <v-btn variant="text" color="grey-darken-1" @click="closeModal" :disabled="isSaving">
+          Annuler
         </v-btn>
-        <v-btn color="primary" depressed @click="saveBilan" :loading="isSaving">
-            Enregistrer
+        <v-btn color="primary" variant="flat" @click="saveBilan" :loading="isSaving">
+          Enregistrer
         </v-btn>
       </v-card-actions>
 
@@ -116,163 +114,151 @@
   </v-dialog>
 </template>
 
-<script>
-import API_BASE from "@/services/api";
+<script setup>
+import { ref, computed, watch } from 'vue'
+import API_BASE, { apiFetch } from '@/services/api'
 
-export default {
-    // Utilisation de modelValue pour compatibilité Vue 3 / Vuetify 3 (ou script setup parent)
-    props: {
-        modelValue: { type: Boolean, default: false }, 
-        stagiaireData: { type: Object, required: true },
-        periodInfo: { type: Object, required: true }
-    },
-    emits: ['update:modelValue', 'bilan-saved'],
-    data() {
-        return {
-            activeTab: 0,
-            isLoadingData: false,
-            isSaving: false,
+const props = defineProps({
+  modelValue:    { type: Boolean, default: false },
+  stagiaireData: { type: Object,  required: true },
+  periodInfo:    { type: Object,  required: true },
+})
+const emit = defineEmits(['update:modelValue', 'bilan-saved'])
 
-            // Champs Formulaire
-            bilanText: '',
-            followUpActions: '',
-            socialInsertionText: '',
-            digitalSkillsText: '',
-            individualAccompanyingText: '',
-            homeVisitsText: '',
-        };
-    },
-    computed: {
-        isFrancaisIntegration() {
-            return this.stagiaireData.mesureType === 'Français & Intégration';
-        },
-        isTelecours() {
-            const type = this.stagiaireData.mesureType || '';
-            // Détection souple (gère "Télécours" ou "Français en Télécours")
-            return type.toLowerCase().includes('télécours');
-        },
-        hasSpecificTab() {
-            return this.isFrancaisIntegration || this.isTelecours;
-        }
-    },
-    watch: {
-        // Surveiller l'ouverture pour charger les données
-        modelValue(isOpen) {
-            if (isOpen) {
-                this.activeTab = 0;
-                this.fetchBilanData();
-            }
-        }
-    },
-    methods: {
-        closeModal() {
-            // Emet l'événement standard pour fermer v-model
-            this.$emit('update:modelValue', false);
-        },
+// ─── State ────────────────────────────────────────────────────────────────────
+const activeTab                  = ref(0)
+const isLoadingData              = ref(false)
+const isSaving                   = ref(false)
+const bilanText                  = ref('')
+const followUpActions            = ref('')
+const socialInsertionText        = ref('')
+const digitalSkillsText          = ref('')
+const individualAccompanyingText = ref('')
+const homeVisitsText             = ref('')
 
-        resetForm() {
-            this.bilanText = '';
-            this.followUpActions = '';
-            this.socialInsertionText = '';
-            this.digitalSkillsText = '';
-            this.individualAccompanyingText = '';
-            this.homeVisitsText = '';
-        },
+// ─── Computed ─────────────────────────────────────────────────────────────────
+const isFrancaisIntegration = computed(() => {
+  const type = props.stagiaireData?.mesureType || ''
+  return type === 'Français & Intégration' || type === 'fi_a1' || type === 'fi_a2'
+})
 
-        async fetchBilanData() {
-            this.isLoadingData = true;
-            this.resetForm();
+const isTelecours = computed(() => {
+  const type = props.stagiaireData?.mesureType || ''
+  return type.toLowerCase().includes('télécours') || type === 'telecours'
+})
 
-            const { stagiaireId } = this.stagiaireData;
-            const { year, quarter } = this.periodInfo;
-            const token = localStorage.getItem("access_token");
+const hasSpecificTab = computed(() => isFrancaisIntegration.value || isTelecours.value)
 
-            // URL Endpoint : Adaptez si nécessaire
-            // L'endpoint doit renvoyer le JSON sauvegardé pour ce trimestre
-            const url = `${API_BASE}/api/documents/bilan-session-data/${stagiaireId}?year=${year}&quarter=${quarter}`;
+// ─── Watcher — charge les données à l'ouverture ───────────────────────────────
+watch(() => props.modelValue, (isOpen) => {
+  if (isOpen) {
+    activeTab.value = 0
+    fetchBilanData()
+  }
+})
 
-            try {
-                const response = await fetch(url, {
-                    method: 'GET',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (response.ok) {
-            const text = await response.text(); // Lire en texte d'abord
-            if (text) {
-                const data = JSON.parse(text);
-                this.bilanText = data.evaluationText || '';
-                        this.followUpActions = data.followUpActions || '';
-                        this.socialInsertionText = data.socialInsertionText || '';
-                        this.digitalSkillsText = data.digitalSkillsText || '';
-                        this.individualAccompanyingText = data.individualAccompanyingText || '';
-                        this.homeVisitsText = data.homeVisitsText || '';
-                    }
-                    else {
-                this.resetForm(); // Pas de données encore créées pour ce trimestre
-            }
-                }
-            } catch (e) {
-                console.error("Erreur chargement données:", e);
-            } finally {
-                this.isLoadingData = false;
-            }
-        },
-
-        async saveBilan() {
-    this.isSaving = true;
-
-    const payload = {
-        // L'ID doit correspondre à un ID existant dans AspNetUsers
-        stagiaireId: this.stagiaireData.stagiaireId.toString(), 
-       year: parseInt(this.periodInfo.year), // <-- Correction ici
-        quarter: this.periodInfo.quarter.toString(), // <-- Correction ici
-        
-        // --- IMPORTANT : Forcer une chaîne vide "" si le texte est null/undefined ---
-        evaluationText: this.bilanText || "", 
-        followUpActions: this.followUpActions || "", 
-        
-        // Pour WorkshopsJson (not null), on envoie une liste vide qui sera sérialisée
-        selectedWorkshops: [], 
-        
-        // Ces champs sont "Nullable" en BDD, donc moins risqués, mais restons prudents
-        socialInsertionText: this.socialInsertionText || "",
-        digitalSkillsText: this.digitalSkillsText || "",
-        individualAccompanyingText: this.individualAccompanyingText || "",
-        homeVisitsText: this.homeVisitsText || "",
-        
-        globalRate: parseFloat(this.stagiaireData.globalRate || 0)
+const perspectiveConfig = computed(() => {
+  if (isTelecours.value) {
+    return {
+      label: 'Insertion sociale',
+      icon: 'mdi-account-group-outline',
+      color: 'teal-darken-1',
+      help: 'Décrivez ici les démarches d’insertion et l’évolution sociale du participant.'
     };
+  }
+  return {
+    label: 'Perspectives / Objectifs',
+    icon: 'mdi-trending-up',
+    color: 'primary',
+    help: 'Indiquez les actions à entreprendre et les objectifs pour la suite du parcours.'
+  };
+});
 
-    try {
-        const token = localStorage.getItem("access_token");
-        const response = await fetch(`${API_BASE}/api/documents/save-bilan-session`, { 
-            method: 'POST', 
-            headers: { 
-                'Content-Type': 'application/json', 
-                'Authorization': `Bearer ${token}` 
-            },
-            body: JSON.stringify(payload) 
-        });
+// ─── Methods ──────────────────────────────────────────────────────────────────
+const closeModal = () => emit('update:modelValue', false)
 
-        if (!response.ok) {
-            const errorMsg = await response.text();
-            throw new Error(errorMsg);
-        }
-
-        this.$emit('bilan-saved', payload);
-        this.closeModal();
-    } catch (error) {
-        console.error("Erreur BDD précise:", error);
-        alert("Erreur serveur : " + error.message);
-    } finally {
-        this.isSaving = false;
-    }
+const resetForm = () => {
+  bilanText.value                  = ''
+  followUpActions.value            = ''
+  socialInsertionText.value        = ''
+  digitalSkillsText.value          = ''
+  individualAccompanyingText.value = ''
+  homeVisitsText.value             = ''
 }
-    }
-};
-</script>
 
-<style scoped>
-/* Ajustement mineur si nécessaire */
-</style>
+const fetchBilanData = async () => {
+  isLoadingData.value = true
+  resetForm()
+
+  // Support des deux formats d'ID (ancien store stagiaireId, nouveau store id)
+  const userId  = props.stagiaireData?.id || props.stagiaireData?.stagiaireId
+  const { year, quarter } = props.periodInfo
+  const token   = localStorage.getItem('access_token')
+
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/documents/bilan-session-data/${userId}?year=${year}&quarter=${quarter}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    if (res.ok) {
+      const text = await res.text()
+      if (text) {
+        const data               = JSON.parse(text)
+        bilanText.value                  = data.evaluationText              || ''
+        followUpActions.value            = data.followUpActions             || ''
+        socialInsertionText.value        = data.socialInsertionText         || ''
+        digitalSkillsText.value          = data.digitalSkillsText           || ''
+        individualAccompanyingText.value = data.individualAccompanyingText  || ''
+        homeVisitsText.value             = data.homeVisitsText              || ''
+      }
+    }
+  } catch (e) {
+    console.error('Erreur chargement données:', e)
+  } finally {
+    isLoadingData.value = false
+  }
+}
+
+const saveBilan = async () => {
+  isSaving.value = true
+
+  // Support des deux formats d'ID
+  const userId = props.stagiaireData?.id || props.stagiaireData?.stagiaireId
+  if (!userId) {
+    alert('Erreur : identifiant du participant introuvable.')
+    isSaving.value = false
+    return
+  }
+
+  const payload = {
+    stagiaireId:                  String(userId),
+    year:                         parseInt(props.periodInfo.year),
+    quarter:                      String(props.periodInfo.quarter),
+    evaluationText:               bilanText.value                  || '',
+    followUpActions:              followUpActions.value            || '',
+    selectedWorkshops:            [],
+    socialInsertionText:          socialInsertionText.value        || '',
+    digitalSkillsText:            digitalSkillsText.value         || '',
+    individualAccompanyingText:   individualAccompanyingText.value || '',
+    homeVisitsText:               homeVisitsText.value             || '',
+    globalRate:                   parseFloat(props.stagiaireData?.globalRate || 0),
+  }
+
+  try {
+    const token = localStorage.getItem('access_token')
+    const res   = await fetch(`${API_BASE}/api/documents/save-bilan-session`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body:    JSON.stringify(payload),
+    })
+    if (!res.ok) throw new Error(await res.text())
+    emit('bilan-saved', payload)
+    closeModal()
+  } catch (e) {
+    console.error('Erreur BDD:', e)
+    alert('Erreur serveur : ' + e.message)
+  } finally {
+    isSaving.value = false
+  }
+}
+</script>

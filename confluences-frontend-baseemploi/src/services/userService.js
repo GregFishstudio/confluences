@@ -8,13 +8,16 @@
 
 import axios from 'axios'
 
-// CORRECTION: Remplacer process.env par import.meta.env
 const API_URL = import.meta.env.VITE_API_URL
-const CONTROLLER = '/api/Users'
 
 export default {
-  // Récupère tous les utilisateurs
+  // Récupère tous les utilisateurs (id, nom, niveau...)
   getUsers() {
-    return axios.get(API_URL + CONTROLLER)
+    return axios.get(API_URL + '/api/Users')
+  },
+
+  // Récupère les stagiaires (dateDebutParticipation, prenom, typeAffiliation...)
+  getStagiaires() {
+    return axios.get(API_URL + '/api/Stagiaires')
   }
 }

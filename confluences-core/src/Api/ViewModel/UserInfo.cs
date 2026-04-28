@@ -10,5 +10,7 @@ namespace Api.ViewModel
         public string Id { get; set; }
         public string Nom { get; set; }
         public string Niveau { get; set; }
+        public DateTime? DateDebutParticipation { get; set; }
+
     }
 }

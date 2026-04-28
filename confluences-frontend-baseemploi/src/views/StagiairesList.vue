@@ -26,15 +26,10 @@
         :search="search"
         :options.sync="options"
         @update:items-per-page="updateNumberItems"
+        @click:row="handleRowClick"
         mobile-breakpoint="0"
       >
-        <template v-slot:top>
-          <v-toolbar flat>
-            <v-toolbar-title class="text-h5 font-weight-bold">
-              Liste des stagiaires
-            </v-toolbar-title>
-          </v-toolbar>
-        </template>
+
 
         <template v-slot:item.username="{ item }">
           <v-chip color="secondary lighten-5" text-color="secondary darken-4">
@@ -117,7 +112,7 @@
 <script>
 import store from "@/store"
 import { mapState } from "vuex"
-import API_BASE from "@/services/api";
+import API_BASE, {apiFetch} from '@/services/api'
 
 export default {
   data() {
@@ -206,6 +201,24 @@ export default {
         return []
       }
     },
+
+    handleRowClick(event, row) {
+    if (row && row.item) {
+      this.editStagiaire(row.item)
+    } else {
+      console.warn("Aucun stagiaire trouvé dans le clic :", row)
+    }
+  },
+
+  editStagiaire(stagiaire) {
+    this.$router.push({
+      name: "Stagiaire-Modifier",
+      params: { 
+        id: stagiaire.stagiaireId,
+        stagiaire: stagiaire
+      }
+    })
+  },
 
     /* 🔵 OUVERTURE MODALE */
     async openModal(stagiaire) {

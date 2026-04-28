@@ -175,7 +175,9 @@ namespace mvc.Controllers
             aspNetUserFromApi.WantsMoreHomeworks = aspNetUser.WantsMoreHomeworks;
             aspNetUserFromApi.Nationality = aspNetUser.Nationality;
             aspNetUserFromApi.Language = aspNetUser.Language;
-
+            aspNetUserFromApi.CurrentSessionNumber = aspNetUser.CurrentSessionNumber; // <--- ICI
+            aspNetUserFromApi.CurrentSessionYear = aspNetUser.CurrentSessionYear;     // <--- ICI
+            
             if (ModelState.IsValid)
             {
                 // Préparation de la requête update à l'API

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Confluences.Domain.Entities;
 using Confluences.Domain.Entities.Views;
-using System; // Ajouté pour utiliser DateTime
+using System;
 
 namespace Confluences.Persistence
 {
@@ -62,83 +62,61 @@ namespace Confluences.Persistence
         public virtual DbSet<Presence> Presences { get; set; }
         public virtual DbSet<SessionReport> SessionReports { get; set; }
         public virtual DbSet<AccompanyingPresence> AccompanyingPresences { get; set; }
-        // Views
+        
+        public DbSet<SessionFormation> SessionFormations { get; set; }
+        public DbSet<JourFerie>        JoursFeries       { get; set; }
+        public DbSet<PeriodeVacance>   PeriodesVacances  { get; set; }
+
         public virtual DbSet<Ressource> Ressources => Set<Ressource>();
-
+        public DbSet<MatrixColumn> MatrixColumns { get; set; }
         public virtual DbSet<StagiaireNiveau> StagiaireNiveaux { get; set; } = null!;
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-
-        }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            
             base.OnModelCreating(builder);
-            // Customize the ASP.NET Identity model and override the defaults if needed.
-            // For example, you can rename the ASP.NET Identity table names and more.
-            // Add your customizations after calling base.OnModelCreating(builder);
-            
-            // --- Configuration de l'entité PRESENCE (AJOUTÉ) ---
+
+            // --- CONFIGURATION PRESENCE (ON GARDE STAGIAIREID COMME AVANT) ---
             builder.Entity<Presence>(entity =>
             {
-                entity.ToTable("Presences"); // Nom de la table
+                entity.ToTable("Presences");
                 entity.HasKey(p => p.Id);
 
-                // Clé étrangère vers ApplicationUser (Stagiaire)
                 entity.HasOne(p => p.Stagiaire)
                       .WithMany() 
                       .HasForeignKey(p => p.StagiaireId)
                       .IsRequired();
                 
-                // Clé étrangère vers Stage (optionnel)
                 entity.HasOne(p => p.Stage)
                       .WithMany() 
                       .HasForeignKey(p => p.StageId)
                       .IsRequired(false); 
 
-                // Index unique pour éviter qu'un stagiaire ait deux entrées pour le même jour
-                // Nous utilisons Date.Date pour s'assurer qu'on compare la partie jour de la DateTime
                 entity.HasIndex(p => new { p.StagiaireId, p.Date }).IsUnique();
-                
-                // Assurez-vous que le statut est bien stocké
                 entity.Property(p => p.Statut).HasMaxLength(2).IsRequired();
             });
-            // ----------------------------------------------------
 
-            builder.Entity<AccompanyingPresence>()
-                    .HasKey(ap => ap.AccompanyingPresenceId);
+            // --- CONFIGURATION ACCOMPANYING PRESENCE (CORRIGÉE POUR USERID) ---
+            builder.Entity<AccompanyingPresence>(entity =>
+            {
+                entity.HasKey(ap => ap.AccompanyingPresenceId);
 
-            builder.Entity<AccompanyingPresence>()
-                 .HasIndex(ap => new { ap.StagiaireId, ap.Date, ap.ActivityName })
-                 .IsUnique();
+                // On utilise UserId ici car c'est le nouveau nom dans votre classe AccompanyingPresence.cs
+                entity.HasIndex(ap => new { ap.UserId, ap.Date, ap.ActivityName }).IsUnique();
+
+                // Relation avec l'utilisateur Identity
+                entity.HasOne(ap => ap.User)
+                      .WithMany()
+                      .HasForeignKey(ap => ap.UserId)
+                      .IsRequired();
+            });
             
+            // --- CONFIGURATION IDENTITY ---
             builder.Entity<ApplicationUser>(b =>
             {
-                // Each User can have many UserClaims
-                b.HasMany(e => e.Claims)
-                    .WithOne(e => e.User)
-                    .HasForeignKey(uc => uc.UserId)
-                    .IsRequired();
-
-                // Each User can have many UserLogins
-                b.HasMany(e => e.Logins)
-                    .WithOne(e => e.User)
-                    .HasForeignKey(ul => ul.UserId)
-                    .IsRequired();
-
-                // Each User can have many UserTokens
-                b.HasMany(e => e.Tokens)
-                    .WithOne(e => e.User)
-                    .HasForeignKey(ut => ut.UserId)
-                    .IsRequired();
-
-                // Each User can have many entries in the UserRole join table
-                b.HasMany(e => e.UserRoles)
-                    .WithOne(e => e.User)
-                    .HasForeignKey(ur => ur.UserId)
-                    .IsRequired();
+                b.HasMany(e => e.Claims).WithOne(e => e.User).HasForeignKey(uc => uc.UserId).IsRequired();
+                b.HasMany(e => e.Logins).WithOne(e => e.User).HasForeignKey(ul => ul.UserId).IsRequired();
+                b.HasMany(e => e.Tokens).WithOne(e => e.User).HasForeignKey(ut => ut.UserId).IsRequired();
+                b.HasMany(e => e.UserRoles).WithOne(e => e.User).HasForeignKey(ur => ur.UserId).IsRequired();
 
                 b.HasMany(e => e.EntreprisFormateurIdDernierContacts)
                     .WithOne(e => e.FormateurDernierContact)
@@ -147,63 +125,35 @@ namespace Confluences.Persistence
                 b.HasMany(e => e.EntreprisStagiaireIdDernierContactNavigations)
                     .WithOne(e => e.StagiaireDernier)
                     .HasForeignKey(ur => ur.StagiaireIdDernierContact);
-
             });
 
             builder.Entity<ApplicationRole>(b =>
             {
-                // Each Role can have many entries in the UserRole join table
-                b.HasMany(e => e.UserRoles)
-                    .WithOne(e => e.Role)
-                    .HasForeignKey(ur => ur.RoleId)
-                    .IsRequired();
-
-                // Each Role can have many associated RoleClaims
-                b.HasMany(e => e.RoleClaims)
-                    .WithOne(e => e.Role)
-                    .HasForeignKey(rc => rc.RoleId)
-                    .IsRequired();
-
+                b.HasMany(e => e.UserRoles).WithOne(e => e.Role).HasForeignKey(ur => ur.RoleId).IsRequired();
+                b.HasMany(e => e.RoleClaims).WithOne(e => e.Role).HasForeignKey(rc => rc.RoleId).IsRequired();
             });
 
+            // --- RELATIONS TABLES DE LIAISON ---
             builder.Entity<SessionTeacher>().HasKey(st => new { st.SessionId, st.TeacherId });
             builder.Entity<SessionStudent>().HasKey(st => new { st.SessionId, st.StudentId });
             builder.Entity<EntrepriseMetier>().HasKey(st => new { st.EntrepriseId, st.TypeMetierId });
             builder.Entity<EntrepriseOffre>().HasKey(st => new { st.EntrepriseId, st.TypeOffreId });
             builder.Entity<EntrepriseDomaine>().HasKey(st => new { st.EntrepriseId, st.TypeDomaineId });
             
-            builder.Entity<TypeMetier>(entity => {
-                entity.HasIndex(e => e.Libelle).IsUnique();
+            // --- INDEX UNIQUES ---
+            builder.Entity<TypeMetier>(e => e.HasIndex(x => x.Libelle).IsUnique());
+            builder.Entity<TypeAffiliation>(e => {
+                e.HasIndex(x => x.Code).IsUnique();
+                e.HasIndex(x => x.Libelle).IsUnique();
             });
-            builder.Entity<TypeAffiliation>(entity => {
-                entity.HasIndex(e => e.Code).IsUnique();
-            });
-            builder.Entity<TypeAffiliation>(entity => {
-                entity.HasIndex(e => e.Libelle).IsUnique();
-            });
-            builder.Entity<TypeAnnonce>(entity => {
-                entity.HasIndex(e => e.Libelle).IsUnique();
-            });
-            builder.Entity<TypeDomaine>(entity => {
-                entity.HasIndex(e => e.Libelle).IsUnique();
-            });
-            builder.Entity<TypeEntreprise>(entity => {
-                entity.HasIndex(e => e.Nom).IsUnique();
-            });
-            builder.Entity<TypeMoyen>(entity => {
-                entity.HasIndex(e => e.Libelle).IsUnique();
-            });
-            builder.Entity<TypeOffre>(entity => {
-                entity.HasIndex(e => e.Libelle).IsUnique();
-            });
-            builder.Entity<TypeStage>(entity => {
-                entity.HasIndex(e => e.Nom).IsUnique();
-            });
+            builder.Entity<TypeAnnonce>(e => e.HasIndex(x => x.Libelle).IsUnique());
+            builder.Entity<TypeDomaine>(e => e.HasIndex(x => x.Libelle).IsUnique());
+            builder.Entity<TypeEntreprise>(e => e.HasIndex(x => x.Nom).IsUnique());
+            builder.Entity<TypeMoyen>(e => e.HasIndex(x => x.Libelle).IsUnique());
+            builder.Entity<TypeOffre>(e => e.HasIndex(x => x.Libelle).IsUnique());
+            builder.Entity<TypeStage>(e => e.HasIndex(x => x.Nom).IsUnique());
 
-            builder.Entity<Ressource>(entity =>
-            {
-                entity.HasNoKey();
-            });
+            builder.Entity<Ressource>(e => e.HasNoKey());
         }
     }
 }

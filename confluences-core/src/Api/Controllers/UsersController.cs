@@ -1,8 +1,8 @@
 ﻿/**
  * Projet: Gestion des stagiaires
  * Auteur : Tim Allemann
- * Date : 16.09.2020
- * Description : Contrôleur permettant de lire les utilisateurs sur la table AspNetUsers, seul l'identifiant et le nom sont transmis
+ * Date : 16.09.2020 (Mis à jour 08.04.2026)
+ * Description : Contrôleur permettant de lire/modifier les utilisateurs sur la table AspNetUsers
  * Fichier : UsersController.cs
  **/
 
@@ -14,8 +14,7 @@ using Api.ViewModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using System;
 
 namespace Api.Controllers
 {
@@ -31,31 +30,79 @@ namespace Api.Controllers
             _context = context;
         }
 
-        // GET: api/UsersController
+        // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserInfo>>> GetUsers()
+public async Task<ActionResult<IEnumerable<object>>> GetUsers()
+{
+    var users = await _context.Users
+        .AsNoTracking()
+        .Include(u => u.SessionStudents)
+            .ThenInclude(ss => ss.Session)
+                .ThenInclude(s => s.SchoolClassRoom)
+        .Include(u => u.TypeAffiliation)
+        .OrderBy(u => u.Firstname)
+        .Select(u => new
         {
-            var aspnetusers = await _context.Users
-                                    .AsNoTracking()
-                                    .Include(a => a.SessionStudents)
-                                        .ThenInclude(a => a.Session)
-                                            .ThenInclude(a => a.SchoolClassRoom)
-                                    .OrderBy(a => a.Firstname)
-                                    .Select(v => new UserInfo 
-                                    { 
-                                        Id = v.Id.ToString(), 
-                                        Nom = v.Firstname + " " + v.LastName,
-                                        // Logique pour extraire le nom de la classe/session la plus récente (trié par DateStart)
-                                        Niveau = v.SessionStudents
-                                                    .OrderByDescending(ss => ss.Session.DateStart)
-                                                    .Select(ss => ss.Session.SchoolClassRoom.SchoolClassRoomName)
-                                                    .FirstOrDefault() ?? "N/A"
-                                    })
-                                    .ToListAsync();
+            id                    = u.Id,
+            prenom                = u.Firstname,
+            nom                   = u.LastName,
+            userName              = u.UserName,
+            email                 = u.Email,
+            phoneNumber           = u.PhoneNumber,
+            birthday              = u.Birthday,
+            nationality           = u.Nationality,
+            language              = u.Language,
+            dateDebutParticipation = u.DateDebutParticipation,
+            typeAffiliation       = u.TypeAffiliation == null ? null : new
+            {
+                id   = u.TypeAffiliation.TypeAffiliationId,
+                name = u.TypeAffiliation.Libelle
+            },
+            niveau = u.SessionStudents
+                .OrderByDescending(ss => ss.Session.DateStart)
+                .Select(ss => ss.Session.SchoolClassRoom.SchoolClassRoomName)
+                .FirstOrDefault() ?? "N/A",
+            currentSessionNumber = u.SessionStudents
+                .OrderByDescending(ss => ss.Session.DateStart)
+                .Select(ss => (int?)ss.Session.SessionNumberId)
+                .FirstOrDefault(),
+            currentSessionYear = u.SessionStudents
+                .OrderByDescending(ss => ss.Session.DateStart)
+                .Select(ss => (int?)ss.Session.DateStart.Year)
+                .FirstOrDefault(),
+        })
+        .ToListAsync();
 
+    return Ok(users);
+}
 
-            return aspnetusers;
+        // PUT: api/Users/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutUser(string id, [FromBody] UserUpdateDto dto)
+        {
+            if (id != dto.Id)
+                return BadRequest();
+
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+                return NotFound();
+
+            user.DateDebutParticipation = dto.DateDebutParticipation;
+
+            _context.Entry(user).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Users.Any(e => e.Id == id))
+                    return NotFound();
+                throw;
+            }
+
+            return NoContent();
         }
-
     }
 }

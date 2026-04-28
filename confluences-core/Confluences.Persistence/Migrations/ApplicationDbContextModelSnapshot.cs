@@ -44,13 +44,14 @@ namespace IdentityServerAspNetIdentity.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("StagiaireId")
+                    b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("StagiaireId");
 
                     b.HasKey("AccompanyingPresenceId");
 
-                    b.HasIndex("StagiaireId", "Date", "ActivityName")
+                    b.HasIndex("UserId", "Date", "ActivityName")
                         .IsUnique();
 
                     b.ToTable("AccompanyingPresences");
@@ -167,6 +168,12 @@ namespace IdentityServerAspNetIdentity.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text");
+
+                    b.Property<int?>("CurrentSessionNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("CurrentSessionYear")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("DateDebutParticipation")
                         .HasColumnType("timestamp without time zone");
@@ -908,6 +915,29 @@ namespace IdentityServerAspNetIdentity.Migrations
                     b.ToTable("JobSearchAssistances");
                 });
 
+            modelBuilder.Entity("Confluences.Domain.Entities.JourFerie", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Label")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("JoursFeries");
+                });
+
             modelBuilder.Entity("Confluences.Domain.Entities.LastContact", b =>
                 {
                     b.Property<int>("LastContactId")
@@ -935,6 +965,64 @@ namespace IdentityServerAspNetIdentity.Migrations
                     b.HasIndex("EntrepriseId");
 
                     b.ToTable("LastContacts");
+                });
+
+            modelBuilder.Entity("Confluences.Domain.Entities.MatrixColumn", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MatrixColumns");
+                });
+
+            modelBuilder.Entity("Confluences.Domain.Entities.PeriodeVacance", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PeriodesVacances");
                 });
 
             modelBuilder.Entity("Confluences.Domain.Entities.Presence", b =>
@@ -1054,6 +1142,47 @@ namespace IdentityServerAspNetIdentity.Migrations
                     b.ToTable("Sessions");
                 });
 
+            modelBuilder.Entity("Confluences.Domain.Entities.SessionFormation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime?>("VacanceEnd")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime?>("VacanceStart")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SessionFormations");
+                });
+
             modelBuilder.Entity("Confluences.Domain.Entities.SessionNumber", b =>
                 {
                     b.Property<int>("SessionNumberId")
@@ -1113,7 +1242,6 @@ namespace IdentityServerAspNetIdentity.Migrations
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("WorkshopsJson")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("Year")
@@ -1622,13 +1750,13 @@ namespace IdentityServerAspNetIdentity.Migrations
 
             modelBuilder.Entity("Confluences.Domain.Entities.AccompanyingPresence", b =>
                 {
-                    b.HasOne("Confluences.Domain.Entities.ApplicationUser", "Stagiaire")
+                    b.HasOne("Confluences.Domain.Entities.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("StagiaireId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Stagiaire");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Confluences.Domain.Entities.AnnouncePageLink", b =>

@@ -12,6 +12,10 @@ namespace Api.Documents
         private readonly ApplicationUser _stagiaire;
         private readonly string _evaluationText;
         private readonly string _followUpActions;
+        private readonly string _socialInsertionText;
+        private readonly string _digitalSkillsText;
+        private readonly string _individualAccompanyingText;
+        private readonly string _homeVisitsText;
         private readonly double _globalRate;
         private readonly int _year;
         private readonly string _quarter;
@@ -19,16 +23,15 @@ namespace Api.Documents
         private readonly string _courseName;
         private readonly DateTime _startDate;
         private readonly DateTime _endDate;
-
+        private readonly CultureInfo _fr = new CultureInfo("fr-FR");
         // Détection de la mesure
         private bool IsTelecours => _courseName.ToLower().Contains("télécours") || _courseName.ToLower().Contains("telecours");
 
-        // Palette
+        // Palette & Culture
         private readonly CultureInfo _frenchCulture = new CultureInfo("fr-FR");
-        private static readonly Color PrimaryColor = Color.FromHex("#1A202C");
-        private static readonly Color AccentColor = Color.FromHex("#00B4B0");
-        private static readonly Color MediumGrey = Color.FromHex("#718096");
-        private static readonly Color LightGrey = Color.FromHex("#EDF2F7");
+        private static readonly Color PrimaryColor = Colors.Black;
+        private static readonly Color AccentColor = Color.FromHex("#4A90E2"); // Bleu pour les sous-titres
+        private static readonly Color LightGrey = Color.FromHex("#F0F0F0");
 
         public BilanSessionDocument(
             ApplicationUser stagiaire,
@@ -40,9 +43,13 @@ namespace Api.Documents
             int year,
             string quarter,
             byte[] logoBytes,
-            string courseName,    // <--- NOUVEAU
-            DateTime startDate,   // <--- NOUVEAU
-            DateTime endDate)     // <--- NOUVEAU
+            string courseName,
+            DateTime startDate,
+            DateTime endDate,
+            string socialInsertionText = "",
+            string digitalSkillsText = "",
+            string individualAccompanyingText = "",
+            string homeVisitsText = "")
         {
             _stagiaire = stagiaire;
             _evaluationText = evaluationText;
@@ -54,6 +61,11 @@ namespace Api.Documents
             _courseName = courseName ?? "Français & Intégration";
             _startDate = startDate;
             _endDate = endDate;
+            
+            _socialInsertionText = socialInsertionText;
+            _digitalSkillsText = digitalSkillsText;
+            _individualAccompanyingText = individualAccompanyingText;
+            _homeVisitsText = homeVisitsText;
         }
 
         public void Compose(IDocumentContainer document)
@@ -61,97 +73,112 @@ namespace Api.Documents
             document.Page(page =>
             {
                 page.Size(PageSizes.A4);
-                page.Margin(1, Unit.Inch);
+                page.Margin(0.75f, Unit.Inch);
                 page.DefaultTextStyle(x => x.FontFamily("Helvetica").FontSize(11).FontColor(PrimaryColor));
 
                 page.Header().Element(RenderHeader);
                 page.Content().Element(RenderContent);
-                page.Footer().AlignCenter().Text(x => {
-                    x.Span("Association Confluences - Chemin de Renens 52e, 1004 Lausanne").FontSize(8).FontColor(Colors.Grey.Medium);
-                });
+                
+                // Ajout du pied de page pour la signature
             });
         }
 
         private void RenderHeader(IContainer container)
         {
-            container.Row(row =>
+            container.Column(col =>
             {
-                row.RelativeItem().Column(col =>
+                col.Item().Row(row =>
                 {
-                    if (_logo.Length > 0)
-                        col.Item().Height(55).Image(_logo).FitHeight();
-                    else
-                        col.Item().Text("CONFLUENCES").FontSize(22).ExtraBold().FontColor(AccentColor);
+                    // Logo à gauche
+                    row.RelativeItem().Column(c =>
+                    {
+                        if (_logo.Length > 0)
+                            c.Item().Height(60).Image(_logo).FitHeight();
+                        else
+                            c.Item().Text("CONFLUENCES").FontSize(20).ExtraBold().FontColor(AccentColor);
+                    });
+
+                    // Coordonnées à droite
+                    row.RelativeItem().AlignRight().Column(c =>
+                    {
+                        c.Item().Text("www.confluences.ch").FontSize(9);
+                        c.Item().Text("confluences.vaud@gmail.com").FontSize(9);
+                        c.Item().Text("Chemin de Renens 52e").FontSize(9);
+                        c.Item().Text("1004 Lausanne").FontSize(9);
+                        c.Item().Text("077 / 520 02 84").FontSize(9);
+                    });
                 });
 
-                row.RelativeItem().AlignRight().PaddingTop(8).Column(c =>
-                {
-                    c.Spacing(3);
-                    c.Item().Text("Association Confluences").SemiBold().FontSize(10);
-                    c.Item().Text("Chemin de Renens 52e, 1004 Lausanne").FontSize(9).FontColor(MediumGrey);
-                    c.Item().Text("confluences.vaud@gmail.com").FontSize(9).FontColor(MediumGrey);
-                });
+                col.Item().PaddingTop(5).LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
             });
         }
 
         private void RenderContent(IContainer container)
         {
-            container.PaddingTop(30).Column(col =>
+            container.PaddingTop(20).Column(col =>
             {
-                col.Spacing(20);
+                col.Spacing(15);
 
-                // TITRE DYNAMIQUE (Mesure + Dates)
-                col.Item().AlignCenter().Column(c => {
-                    c.Item().AlignCenter().Text(t => {
-                        t.Span("Bilan de mesure ").FontSize(16).SemiBold();
-                        t.Span(_courseName).FontSize(16).Bold().FontColor(AccentColor);
-                    });
-                    c.Item().AlignCenter().Text(t => {
-                        t.Span("Période du ");
-                        t.Span(_startDate.ToString("dd MMMM", _frenchCulture)).Bold();
-                        t.Span(" au ");
-                        t.Span(_endDate.ToString("dd MMMM yyyy", _frenchCulture)).Bold();
-                    });
-                    c.Item().PaddingTop(5).AlignCenter().Width(60).LineHorizontal(2).LineColor(AccentColor);
+                // Titre : Bilan de mesure + Dates
+                col.Item().AlignCenter().Text(t =>
+                {
+                    t.Span("Bilan de mesure ").FontSize(14).FontColor(AccentColor);
+                    t.Span(_courseName).FontSize(14).Bold().FontColor(AccentColor);
+                    t.Span($" ({_startDate:dd.MM} - {_endDate:dd.MM.yyyy})").FontSize(14).FontColor(AccentColor);
                 });
 
-                // BLOC NOM (Identique Attestation)
-                col.Item().PaddingTop(10).AlignCenter().Background(LightGrey).Padding(12).Text($"{_stagiaire.Firstname} {_stagiaire.LastName}")
-                    .FontSize(24).ExtraBold().FontColor(PrimaryColor).AlignCenter();
-
-                // INFO TAUX
-                col.Item().AlignCenter().Text(t => {
-                    t.Span("Taux global de présence sur le trimestre : ").FontSize(10).FontColor(MediumGrey);
-                    t.Span($"{_globalRate:F1}%").FontSize(10).Bold().FontColor(PrimaryColor);
+                // Participant
+                col.Item().PaddingTop(10).Text(t =>
+                {
+                    t.Span("Participant-e : ").Underline();
+                    t.Span($" {_stagiaire.Firstname?.ToUpper()} {_stagiaire.LastName}").FontSize(16).Bold();
                 });
 
-                // SECTIONS DE TEXTE
-                col.Item().PaddingTop(10).Element(c => RenderSection(c, "Évaluation Qualitative & Progression", _evaluationText));
-                col.Item().PaddingTop(10).Element(c => RenderSection(c, "Pistes de travail & Suivi", _followUpActions));
+                // 1. Évaluation Qualitative
+                col.Item().Element(c => RenderSection(c, $"Cours de français (niveau {_stagiaire.OralLevel})", _evaluationText));
 
-// --- BLOC NIVEAUX ACTUELS (AJOUTÉ ICI) ---
-        col.Item().PaddingTop(20).Background(LightGrey).Padding(10).Row(row =>
-        {
-            row.RelativeItem().Column(c =>
-            {
-                c.Item().Text("Niveau actuel (Oral) :").FontSize(10).SemiBold().FontColor(MediumGrey);
-                c.Item().Text(_stagiaire.OralLevel ?? "Non évalué").FontSize(14).Bold().FontColor(AccentColor);
-            });
+                // 2. Blocs Spécifiques (Conditionnels)
+                if (IsTelecours)
+                {
+                    if (!string.IsNullOrWhiteSpace(_homeVisitsText))
+                        col.Item().Element(c => RenderSection(c, "Visites à domicile", _homeVisitsText));
 
-            row.RelativeItem().Column(c =>
-            {
-                c.Item().Text("Niveau actuel (Écrit) :").FontSize(10).SemiBold().FontColor(MediumGrey);
-                c.Item().Text(_stagiaire.WrittenLevel ?? "Non évalué").FontSize(14).Bold().FontColor(AccentColor);
-            });
+                     if (!string.IsNullOrWhiteSpace(_followUpActions))
+                    col.Item().Element(c => RenderSection(c, "Insertion sociale", _followUpActions));
+                }
+                else
+                {
+                    if (!string.IsNullOrWhiteSpace(_socialInsertionText))
+                        col.Item().Element(c => RenderSection(c, "Insertion sociale", _socialInsertionText));
+                    
+                    if (!string.IsNullOrWhiteSpace(_digitalSkillsText))
+                        col.Item().Element(c => RenderSection(c, "Utilisation de l’informatique", _digitalSkillsText));
+                    
+                    if (!string.IsNullOrWhiteSpace(_individualAccompanyingText))
+                        col.Item().Element(c => RenderSection(c, "Accompagnement individualisé", _individualAccompanyingText));
+                        
+                    if (!string.IsNullOrWhiteSpace(_followUpActions))
+                    col.Item().Element(c => RenderSection(c, "Perspectives et objectifs", _followUpActions));
+                }
+
+                // 3. Perspectives / Synthèse
+                
+
+                // 4. Niveau actuel
+                col.Item().PaddingTop(10).Text(t =>
+{
+    t.Span("Niveau actuel : ").FontSize(11).FontColor(Colors.Grey.Darken2);
+    
+    // Bloc Oral
+    t.Span(" Oral ").FontSize(11).FontColor(AccentColor).Italic();
+    t.Span(_stagiaire.OralLevel ?? "A1.1").FontSize(12).Bold().FontColor(AccentColor);
+    
+    t.Span("  |  ").FontSize(11).FontColor(Colors.Grey.Lighten1); // Séparateur plus élégant
+    
+    // Bloc Écrit
+    t.Span("Écrit ").FontSize(11).FontColor(AccentColor).Italic();
+    t.Span(_stagiaire.WrittenLevel ?? "A1.1").FontSize(12).Bold().FontColor(AccentColor);
 });
-                // SIGNATURE
-                col.Item().PaddingTop(40).Row(row => {
-                    row.RelativeItem().Text($"Lausanne, le {DateTime.Now.ToString("dd MMMM yyyy", _frenchCulture)}");
-                    row.RelativeItem().AlignRight().Column(sig => {
-                        sig.Item().Text("Direction / Responsable de formation").Bold();
-                        sig.Item().PaddingTop(40).Width(150).LineHorizontal(1).LineColor(PrimaryColor);
-                    });
-                });
             });
         }
 
@@ -159,14 +186,14 @@ namespace Api.Documents
         {
             container.Column(col =>
             {
-                col.Spacing(8);
-                col.Item().Text(title).FontSize(14).Bold().FontColor(PrimaryColor);
-                col.Item().LineHorizontal(1).LineColor(LightGrey);
+                col.Item().PaddingBottom(5).Text(title).FontSize(12).FontColor(AccentColor).Italic();
+                
+                col.Item().Text(string.IsNullOrWhiteSpace(content) ? "Non renseigné" : content)
+                   .FontSize(10)
+                   .LineHeight(1.2f)
+                   .Justify();
 
-                if (string.IsNullOrWhiteSpace(content))
-                    col.Item().Text("Aucune information saisie pour cette section.").Italic().FontColor(MediumGrey).FontSize(10);
-                else
-                    col.Item().Text(content).FontSize(11).LineHeight(1.4f);
+                col.Item().PaddingVertical(5).LineHorizontal(0.5f).LineColor(Colors.Grey.Lighten2);
             });
         }
     }

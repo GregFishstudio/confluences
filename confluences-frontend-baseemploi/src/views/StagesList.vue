@@ -120,7 +120,7 @@ import { useRouter, onBeforeRouteLeave } from 'vue-router';
 import CreateStage from '@/components/CreateStage.vue';
 import FilterStage from '@/components/FilterStage.vue';
 import moment from 'moment';
-import API_BASE from "@/services/api";
+import API_BASE, {apiFetch} from '@/services/api'
 
 const store = useStore();
 const router = useRouter();

@@ -210,12 +210,11 @@ namespace Api.Controllers
 
             // 4. Générer le document 
             var doc = new AttestationPresenceDocument(
-                startDate,          // Date de début du mois (inclusive)
-                exclusiveEndDate.AddDays(-1), // Date de fin du mois (pour l'affichage sur le PDF)
-                presences, 
-                stagiaire, 
-                logoBytes
-            );
+    startDate,
+    exclusiveEndDate.AddDays(-1),
+    presences,
+    stagiaire
+);
 
             var pdfBytes = doc.GeneratePdf();
 

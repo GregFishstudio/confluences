@@ -50,7 +50,8 @@ namespace Api
                             "http://localhost:5002",
                             "http://localhost",
                             "https://test-baseemploi.confluences.ch",
-                            "https://baseemploi.confluences.ch"
+                            "https://baseemploi.confluences.ch",
+                            "https://cours.confluences.ch"                            
                         )
                         .AllowAnyHeader()
                         .AllowAnyMethod()
@@ -163,6 +164,8 @@ namespace Api
                 opt.AddPolicy("Teacher", p => p.RequireClaim(ClaimTypes.Role, "Teacher"));
                 opt.AddPolicy("Student", p => p.RequireClaim(ClaimTypes.Role, "Student"));
             });
+            
+            services.AddMemoryCache(); // 👈 manquait probablement
 
             // ----------------------------------------------------
             // AUTOMAPPER
@@ -213,7 +216,14 @@ namespace Api
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseStaticFiles();
+           app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        ctx.Context.Response.Headers["Access-Control-Allow-Origin"] = 
+            Configuration["URLMVC"];
+    }
+});
 
             app.UseEndpoints(endpoints =>
             {

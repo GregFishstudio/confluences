@@ -36,7 +36,6 @@ namespace Api.Controllers
                             .OrderBy(a => a.Firstname)
                             .ToListAsync();
 
-
             return ApplicationUsers;
         }
 

@@ -15,6 +15,7 @@ import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+import { fr } from 'vuetify/locale'
 
 // --- Icônes Material Design ---
 import '@mdi/font/css/materialdesignicons.css'
@@ -40,6 +41,11 @@ const vuetify = createVuetify({
   components,
   directives,
   icons: { defaultSet: 'mdi' },
+  locale: {
+    locale: 'fr',       // langue par défaut
+    fallback: 'en',     // si quelque chose manque
+    messages: { fr },   // les traductions françaises
+  },
 })
 const pinia = createPinia()
 

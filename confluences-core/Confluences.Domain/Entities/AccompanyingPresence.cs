@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema; // Important pour [Column]
 
 namespace Confluences.Domain.Entities
 {
@@ -8,8 +9,14 @@ namespace Confluences.Domain.Entities
         [Key]
         public int AccompanyingPresenceId { get; set; }
         
-        public string StagiaireId { get; set; }
-        public ApplicationUser Stagiaire { get; set; }
+        // On utilise UserId dans le code pour la clarté avec Identity
+        // Mais on dit à la DB de pointer vers l'ancienne colonne StagiaireId
+        [Column("StagiaireId")]
+        public string UserId { get; set; }
+
+        // Propriété de navigation vers l'utilisateur Identity
+        [ForeignKey("UserId")]
+        public ApplicationUser User { get; set; }
 
         public DateTime Date { get; set; }
 

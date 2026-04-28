@@ -27,6 +27,9 @@ namespace Confluences.Domain.Entities
         public string? OralLevel { get; set; }
         public string? WrittenLevel { get; set; }
 
+        public int? CurrentSessionNumber { get; set; }
+        public int? CurrentSessionYear { get; set; }
+
         public virtual ICollection<ApplicationUserClaim>? Claims { get; set; }
         public virtual ICollection<ApplicationUserLogin>? Logins { get; set; }
         public virtual ICollection<ApplicationUserToken>? Tokens { get; set; }

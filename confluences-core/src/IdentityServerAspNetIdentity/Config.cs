@@ -84,9 +84,9 @@ namespace IdentityServerAspNetIdentity
                     AllowAccessTokensViaBrowser = true,
 
                     AllowOfflineAccess = true,
-                    AccessTokenLifetime = 900, // 1 hour = 3600 seconds
-                    IdentityTokenLifetime = 900,
-                    SlidingRefreshTokenLifetime = 900,
+                    AccessTokenLifetime = 86400, // 1 hour = 3600 seconds
+                    IdentityTokenLifetime = 86400,
+                    SlidingRefreshTokenLifetime = 86400,
                     RefreshTokenUsage = TokenUsage.OneTimeOnly,
                     RefreshTokenExpiration = TokenExpiration.Sliding,
                     UpdateAccessTokenClaimsOnRefresh = true,

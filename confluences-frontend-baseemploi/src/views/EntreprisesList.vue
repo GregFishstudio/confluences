@@ -17,29 +17,30 @@
         </v-col>
 
         <v-col cols="12" sm="4" md="3" class="d-flex justify-end">
-          <CreateEntreprise />
+          <CreateEntreprise @created="fetchData" />
         </v-col>
       </v-row>
     </v-card>
     
     <v-card class="elevation-4" rounded="lg">
       <v-data-table
-        :headers="headers"
-        :items="Array.isArray(entreprise.entreprises) ? entreprise.entreprises : []"
-        :items-per-page="settings.itemsPerPage"
-        :search="search"
-        class="entreprise-table"
-        @click:row="selectRow"
-        @update:items-per-page="updateNumberItems"
-        :options.sync="options"
-        :item-class="needsToBeRecalled"
-        mobile-breakpoint="0"
-      >
+  :headers="headers"
+  :items="entreprisesList"
+  item-key="entrepriseId"
+  :items-per-page="settings.itemsPerPage"
+  :search="search"
+  :loading="loading"
+  loading-text="Chargement des entreprises en cours..."
+  class="entreprise-table"
+  @click:row="logClick"
+  @update:items-per-page="updateNumberItems"
+  :options.sync="options"
+  :item-class="getRowClass"
+  mobile-breakpoint="0"
+>
         <template v-slot:top>
           <v-toolbar flat>
-            <v-toolbar-title class="text-h5 font-weight-bold">
-              Liste des entreprises
-            </v-toolbar-title>
+          
             <v-spacer></v-spacer>
 
             <FilterEntreprise />
@@ -51,7 +52,6 @@
                 color="red darken-1"
                 @click="clearFilter"
                 class="pa-0 font-weight-bold"
-                title="Effacer les filtres actifs"
               >
                 Effacer le filtre
               </v-btn>
@@ -72,8 +72,8 @@
         <template v-slot:item.dateLastRecall="{ item }">
           <v-chip 
             small 
-            :color="needsToBeRecalled(item) ? 'orange lighten-4' : (formatDate(item.dateLastRecall) ? 'green lighten-4' : 'grey lighten-3')"
-            :text-color="needsToBeRecalled(item) ? 'orange darken-4' : (formatDate(item.dateLastRecall) ? 'green darken-4' : 'grey darken-1')"
+            :color="isRecallAlert(item.dateLastRecall) ? 'orange lighten-4' : (formatDate(item.dateLastRecall) ? 'green lighten-4' : 'grey lighten-3')"
+            :text-color="isRecallAlert(item.dateLastRecall) ? 'orange darken-4' : (formatDate(item.dateLastRecall) ? 'green darken-4' : 'grey darken-1')"
           >
             {{ formatDate(item.dateLastRecall) || 'À définir' }}
           </v-chip>
@@ -89,7 +89,7 @@
             <div class="pa-4 text-center">
                 <v-icon large color="grey lighten-1" class="mb-2">mdi-alert-circle-outline</v-icon>
                 <p class="text-subtitle-1 grey--text">
-                    Aucune entreprise trouvée. Modifiez les filtres ou la recherche.
+                    Aucune entreprise trouvée.
                 </p>
             </div>
         </template>
@@ -105,36 +105,6 @@ import CreateEntreprise from '@/components/CreateEntreprise.vue'
 import FilterEntreprise from '@/components/FilterEntreprise.vue'
 import moment from 'moment'
 
-// Fonctions de chargement des données (inchangées)
-function getEntreprises(routeTo, next) {
-  store.dispatch('entreprise/fetchEntreprises', true).then(() => {
-    next()
-  })
-}
-
-function getEntreprisesWithFilter(routeTo, next, filter) {
-  store.dispatch('entreprise/saveFilterEntreprise', filter).then(() => {
-    next()
-  })
-}
-
-function loadData(routeTo, routeFrom, next) {
-  const filter = store.state.entreprise.filter;
-  if (
-    filter.metiers.length > 0 ||
-    filter.offres.length > 0 ||
-    filter.domaines.length > 0 ||
-    filter.codePostal != null ||
-    filter.nom != null ||
-    filter.createur != null ||
-    filter.dateModification != null
-  ) {
-    getEntreprisesWithFilter(routeTo, next, filter)
-  } else {
-    getEntreprises(routeTo, next)
-  }
-}
-
 export default {
   components: {
     CreateEntreprise,
@@ -142,140 +112,136 @@ export default {
   },
 
   data: () => ({
+    loading: false,
     options: {},
     search: '',
     headers: [
-      {
-        text: 'Nom',
-        value: 'nom',
-        class: 'font-weight-bold'
-      },
+      { text: 'Nom', value: 'nom', class: 'font-weight-bold' },
       { text: 'Domaine', value: 'domaines' },
       { text: 'Ville', value: 'ville' },
       { text: 'Catégorie', value: 'typeEntreprise.nom' },
       { text: 'Dernier contact', value: 'dateDernierContact' },
       { text: 'Date de rappel', value: 'dateLastRecall' },
       { text: 'Total Stages', value: 'totalInterships', align: 'center' }
-    ],
-    entreprises: []
+    ]
   }),
-
-  // Hooks de navigation (inchangés)
-  beforeRouteEnter(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteUpdate(routeTo, routeFrom, next) {
-    loadData(routeTo, routeFrom, next)
-  },
-  beforeRouteLeave(routeTo, routeFrom, next) {
-    store
-      .dispatch('settings/setCurrentPageEntreprise', {
-        number: this.options.page
-      })
-      .then(() => {})
-    next()
-  },
-
-  created() {
-    this.options.page = store.state.settings.currentPageEntreprise
-  },
 
   computed: {
     ...mapState(['entreprise', 'settings']),
+    
+    entreprisesList() {
+      return Array.isArray(this.entreprise.entreprises) ? this.entreprise.entreprises : [];
+    },
+
     isFilterActive() {
-      const filter = this.entreprise.filter;
-      return (
-        filter.metiers.length > 0 ||
-        filter.offres.length > 0 ||
-        filter.domaines.length > 0 ||
-        filter.codePostal != null ||
-        filter.nom != null ||
-        filter.createur != null ||
-        filter.dateModification != null
-      );
+      const f = this.entreprise.filter;
+      return !!(f.metiers.length || f.offres.length || f.domaines.length || 
+             f.codePostal || f.nom || f.createur || f.dateModification);
+    },
+
+    // Optimisation : Calculé une seule fois pour toutes les lignes
+    recallThreshold() {
+      const now = new Date();
+      return new Date(now.getFullYear(), now.getMonth() - 2, now.getDate());
     }
   },
 
- methods: {
-    selectRow(event, row) {
-        let item;
+  async created() {
+    this.options.page = this.settings.currentPageEntreprise || 1;
+    await this.fetchData();
+  },
 
-        // --- Fix 1: Handle Vuetify 3 / Modern structure (event, { item }) ---
-        if (row && row.item) {
-            item = row.item;
-        } 
-        // --- Fix 2: Handle Vuetify 2 structure (item only) ---
-        else if (event && event.nom) {
-            item = event;
+  beforeRouteLeave(routeTo, routeFrom, next) {
+    store.dispatch('settings/setCurrentPageEntreprise', { number: this.options.page });
+    next();
+  },
+
+  methods: {
+    async fetchData() {
+      this.loading = true;
+      try {
+        const filter = this.entreprise.filter;
+        if (this.isFilterActive) {
+          await store.dispatch('entreprise/saveFilterEntreprise', filter);
         } else {
-            console.error("ERROR: Row object structure unexpected.", event);
-            return;
+          await store.dispatch('entreprise/fetchEntreprises', true);
         }
-
-        // Find the ID, checking for casing differences (camelCase vs. PascalCase)
-        const id = item.entrepriseId || item.EntrepriseId; 
-        
-        if (!id) {
-            console.error("CRITICAL: Final ID not found in item.", item);
-            return;
-        }
-
-        this.$router.push({
-            name: 'Entreprise-Modifier',
-            params: { id: id }
-        });
-    },
-    updateNumberItems(event) {
-      store
-        .dispatch('settings/setItemsPerPage', {
-          number: event
-        })
-        .then(() => {})
-    },
-    updatePageSearch() {
-      this.options.page = 1
-    },
-    needsToBeRecalled: function(item) {
-      const date = new Date(item.dateLastRecall)
-      const twoMonthsAgo = new Date(
-        new Date().getFullYear(),
-        new Date().getMonth() - 2,
-        new Date().getDate()
-      )
-      const today = new Date()
-
-      if (isNaN(date)) return '';
-      
-      return date >= twoMonthsAgo && date <= today ? 'style-recall-alert' : ''
-    },
-    formatDate(value) {
-      let date = moment(value).format('YYYY-MM-DD')
-      if (date == 'Invalid date') {
-        date = null
+      } finally {
+        this.loading = false;
       }
-      return date
     },
-    clearFilter() {
+
+    isRecallAlert(dateString) {
+      if (!dateString) return false;
+      const date = new Date(dateString);
+      return !isNaN(date) && date >= this.recallThreshold && date <= new Date();
+    },
+
+    getRowClass(item) {
+      return this.isRecallAlert(item.dateLastRecall) ? 'style-recall-alert' : '';
+    },
+
+    logClick(event, row) {
+  // row.item contient ton objet entreprise
+  if (row && row.item) {
+    this.selectRow(row.item);
+  } else {
+    console.warn("Aucun item trouvé dans le clic :", row);
+  }
+},
+
+selectRow(item) {
+  if (!item) {
+    console.warn("Aucun item reçu :", item);
+    return;
+  }
+
+  const id = item.entrepriseId || item.id || item.EntrepriseId;
+
+  console.log("Navigation vers entreprise :", id, item);
+
+  if (!id) {
+    console.error("Aucun ID trouvé dans :", item);
+    return;
+  }
+
+  this.$router.push({
+    name: 'Entreprise-Modifier',
+    params: {
+      id: id,
+      entreprise: item
+    }
+  });
+},
+    updateNumberItems(val) {
+      store.dispatch('settings/setItemsPerPage', { number: val });
+    },
+
+    updatePageSearch() {
+      this.options.page = 1;
+    },
+
+    formatDate(value) {
+      if (!value) return null;
+      const date = moment(value);
+      return date.isValid() ? date.format('YYYY-MM-DD') : null;
+    },
+
+    async clearFilter() {
       const emptyFilter = {
-        metiers: [],
-        offres: [],
-        domaines: [],
-        codePostal: null,
-        nom: null,
-        createur: null,
-        dateModification: null
+        metiers: [], offres: [], domaines: [],
+        codePostal: null, nom: null, createur: null, dateModification: null
       };
-      // Sauvegarde le filtre vide et recharge la liste
-      store.dispatch('entreprise/saveFilterEntreprise', emptyFilter).then(() => {
-        store.dispatch('entreprise/fetchEntreprises', true)
-      })
+      this.loading = true;
+      await store.dispatch('entreprise/saveFilterEntreprise', emptyFilter);
+      await store.dispatch('entreprise/fetchEntreprises', true);
+      this.loading = false;
     }
   }
 }
 </script>
 
 <style scoped>
-/* Le style du tableau reste inchangé pour garder l'aspect moderne */
 .style-recall-alert {
   background-color: #fff3e0 !important;
   border-left: 4px solid #ff9800 !important;
@@ -283,22 +249,13 @@ export default {
 
 .entreprise-table >>> tbody tr:hover {
   cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
-  transition: all 0.2s ease-in-out;
+  background-color: #f5f5f5 !important;
+  transition: background-color 0.2s ease;
 }
 
-.entreprise-table >>> thead th {
-    color: #424242 !important; 
-    font-size: 0.85rem;
-    letter-spacing: 0.5px;
-}
-
-/* Le texte "Effacer le filtre" utilise la classe v-btn text */
-/* On s'assure qu'il ressemble plus à un lien qu'à un bouton */
 .filter-clear-text .v-btn {
     text-decoration: underline;
-    text-transform: none; /* Pas de majuscules */
-    min-width: unset; /* Retirer la largeur minimale du bouton */
+    text-transform: none;
+    min-width: unset;
 }
 </style>

@@ -1,210 +1,152 @@
-<template>
- <v-navigation-drawer
-  v-if="isDesktop"
-  permanent
-  location="left"
-  width="280"
-  color="surface"
-  class="border-e"
-  elevation="1"
- >
-  <div class="logo">
-   <img :src="currentLogo" alt="Logo Confluences" class="logo-img"/>
-  </div>
-  
-  <v-list density="comfortable" nav class="pa-3">
-   <v-list-item
-    v-for="link in visibleLinks"
-    :key="link.label"
-    :to="link.external ? null : { name: link.routeName }"
-    :href="link.external ? link.url : null"
-    :target="link.external ? '_blank' : null"
-    :prepend-icon="link.icon"
-    :title="link.label"
-    link
-    color="primary"
-    class="mb-1 rounded-lg"
-    variant="text"
-   />
-
-   <v-expansion-panels v-if="loggedIn" variant="accordion">
-    <v-expansion-panel value="config" class="mt-2">
-     <v-expansion-panel-title class="px-2">
-      <template #default="{ expanded }">
-       <v-list-item class="pa-0">
-        <template #prepend>
-         <v-icon :icon="expanded ? 'mdi-cog' : 'mdi-cog-outline'" />
-        </template>
-        <v-list-item-title class="text-body-1 font-weight-medium">
-         Configuration
-        </v-list-item-title>
-       </v-list-item>
-      </template>
-     </v-expansion-panel-title>
-     <v-expansion-panel-text>
-      <v-list density="compact" class="py-0">
-       <v-list-item
-        v-for="cLink in configurationLinks"
-        :key="cLink.label"
-        :to="{ name: cLink.routeName }"
-        :title="cLink.label"
-        link
-        class="rounded-lg my-1"
-        variant="text"
-       />
-      </v-list>
-     </v-expansion-panel-text>
-    </v-expansion-panel>
-   </v-expansion-panels>
-  </v-list>
-
-  <template #append>
-   <div class="pa-3">
-    <v-divider class="mb-3" />
+ <template>
+  <v-navigation-drawer
+    v-if="isDesktop"
+    permanent
+    location="left"
+    width="280"
+    :color="darkTheme ? '#1A237E' : '#E3F2FD'" 
+    elevation="0"
+    class="main-sidebar"
+  >
+    <div class="logo-container">
+      <img :src="currentLogo" alt="Logo" class="logo-img"/>
+    </div>
     
-    <v-btn
-     @click="toggleTheme"
-     variant="text"
-     block
-     class="justify-start mb-2 rounded-lg"
-     height="48"
-    >
-     <template #prepend>
-      <v-icon :icon="darkTheme ? 'mdi-weather-sunny' : 'mdi-weather-night'" />
-     </template>
-     <span class="text-body-2">
-      {{ darkTheme ? 'Mode clair' : 'Mode sombre' }}
-     </span>
-    </v-btn>
+    <v-list density="comfortable" nav class="px-4">
+      <v-list-subheader class="text-uppercase font-weight-bold text-caption">Menu Participants</v-list-subheader>
 
-    <v-btn
-     block
-     :color="loggedIn ? 'error' : 'primary'"
-     :variant="loggedIn ? 'outlined' : 'flat'"
-     class="font-weight-bold rounded-lg"
-     size="large"
-     @click="loggedIn ? authStore.logout() : goToLogin()"
-    >
-     <template #prepend>
-      <v-icon :icon="loggedIn ? 'mdi-logout' : 'mdi-account-circle-outline'" />
-     </template>
-     {{ loggedIn ? 'Déconnexion' : 'Connexion' }}
-    </v-btn>
-   </div>
-  </template>
- </v-navigation-drawer>
+      <v-list-item
+        v-for="link in internalLinks2"
+        :key="link.label"
+        :to="{ name: link.routeName }"
+        :prepend-icon="link.icon"
+        :title="link.label"
+        link
+        color="primary"
+        class="mb-2 menu-item"
+        variant="flat"
+      />
 
- <v-app-bar 
-  color="surface"
-  flat
-  class="border-b"
-  :class="{ 'ml-0': isDesktop }"
-  elevation="1"
- >
-  <template v-if="isMobile">
-   <v-app-bar-nav-icon 
-    @click="mobileDrawer = !mobileDrawer"
-    variant="text"
-    size="small"
-   />
-   
-   <div class="logo">
-    <img :src="currentLogo" alt="Logo Confluences" class="logo-img"/>
-   </div>
-  </template>
+      <v-list-subheader class="text-uppercase font-weight-bold text-caption">Menu Stagiaire</v-list-subheader>
+      
+      <v-list-item
+        v-for="link in internalLinks"
+        :key="link.label"
+        :to="{ name: link.routeName }"
+        :prepend-icon="link.icon"
+        :title="link.label"
+        link
+        color="primary"
+        class="mb-2 menu-item"
+        variant="flat"
+      />
+      <v-list-subheader class="text-uppercase font-weight-bold text-caption">Menu Marrainage</v-list-subheader>
 
-  <v-spacer />
-  
- </v-app-bar>
+      <v-list-group v-if="loggedIn" value="config">
+        <template #activator="{ props }">
+          <v-list-item
+            v-bind="props"
+            prepend-icon="mdi-tune-variant"
+            title="Configuration"
+            class="menu-item"
+          ></v-list-item>
+        </template>
 
- <v-navigation-drawer
+        <v-list-item
+          v-for="cLink in configurationLinks"
+          :key="cLink.label"
+          :to="{ name: cLink.routeName }"
+          :title="cLink.label"
+          size="small"
+          class="sub-item"
+        />
+      </v-list-group>
+    </v-list>
+
+    <template #append>
+      <div class="pa-4 bottom-actions">
+      
+
+        <v-btn
+          block
+          :color="loggedIn ? 'error' : 'primary'"
+          variant="tonal"
+          class="font-weight-bold"
+          @click="loggedIn ? authStore.logout() : goToLogin()"
+          :prepend-icon="loggedIn ? 'mdi-power' : 'mdi-login-variant'"
+        >
+          {{ loggedIn ? 'Déconnexion' : 'Connexion' }}
+        </v-btn>
+      </div>
+    </template>
+  </v-navigation-drawer>
+
+<v-navigation-drawer
   v-model="mobileDrawer"
   v-if="isMobile"
-  location="left"
   temporary
   width="300"
-  color="surface" 
- >
-  <v-list density="comfortable" nav class="pa-3">
-   <v-list-item
-    :title="loggedIn ? 'Déconnexion' : 'Connexion'"
-    :prepend-icon="loggedIn ? 'mdi-logout' : 'mdi-account-circle-outline'"
-    :color="loggedIn ? 'error' : 'primary'"
-    @click="loggedIn ? authStore.logout() : goToLogin()"
-    link
-    class="font-weight-bold mb-3 rounded-lg"
-   ></v-list-item>
+>
+  <div class="logo-container">
+    <img :src="currentLogo" alt="Logo" class="logo-img" style="max-height: 40px;"/>
+  </div>
 
-   <v-divider class="mb-3"></v-divider>
-   
-   <v-list-item
-    v-for="link in visibleLinks"
-    :key="link.label"
-    :to="link.external ? null : { name: link.routeName }"
-    :href="link.external ? link.url : null"
-    :target="link.external ? '_blank' : null"
-    :prepend-icon="link.icon"
-    :title="link.label"
-    link
-    color="primary"
-    class="mb-1 rounded-lg"
-    variant="text"
-    @click="mobileDrawer = false"
-   />
+  <v-list nav class="pa-4">
+    <v-list-subheader class="text-uppercase font-weight-bold text-caption">Menu Participants</v-list-subheader>
+    <v-list-item
+      v-for="link in internalLinks2"
+      :key="link.label"
+      :to="{ name: link.routeName }"
+      :prepend-icon="link.icon"
+      :title="link.label"
+      color="primary"
+      @click="mobileDrawer = false"
+    />
 
-   <v-expansion-panels v-if="loggedIn" variant="accordion">
-    <v-expansion-panel value="config" class="mt-2">
-     <v-expansion-panel-title class="px-2">
-      <template #default="{ expanded }">
-       <v-list-item class="pa-0">
-        <template #prepend>
-         <v-icon :icon="expanded ? 'mdi-cog' : 'mdi-cog-outline'" />
-        </template>
-        <v-list-item-title class="text-body-1 font-weight-medium">
-         Configuration
-        </v-list-item-title>
-       </v-list-item>
-      </template>
-     </v-expansion-panel-title>
-     <v-expansion-panel-text>
-      <v-list density="compact" class="py-0">
-       <v-list-item
-        v-for="cLink in configurationLinks"
-        :key="cLink.label"
-        :to="{ name: cLink.routeName }"
-        :title="cLink.label"
-        link
-        class="rounded-lg my-1"
-        variant="text"
-        @click="mobileDrawer = false"
-       />
-      </v-list>
-     </v-expansion-panel-text>
-    </v-expansion-panel>
-   </v-expansion-panels>
+    <v-list-subheader class="text-uppercase font-weight-bold text-caption mt-2">Menu Stagiaire</v-list-subheader>
+    <v-list-item
+      v-for="link in internalLinks"
+      :key="link.label"
+      :to="{ name: link.routeName }"
+      :prepend-icon="link.icon"
+      :title="link.label"
+      color="primary"
+      @click="mobileDrawer = false"
+    />
+
+    <v-list-subheader class="text-uppercase font-weight-bold text-caption mt-2">Configuration</v-list-subheader>
+    <v-list-item
+      v-for="cLink in configurationLinks"
+      :key="cLink.label"
+      :to="{ name: cLink.routeName }"
+      :title="cLink.label"
+      size="small"
+      @click="mobileDrawer = false"
+    />
   </v-list>
 
   <template #append>
-   <div class="pa-3">
-    <v-divider class="mb-3" />
-    
-    <v-btn
-     @click="toggleTheme"
-     variant="text"
-     block
-     class="justify-start mb-2 rounded-lg"
-     height="48"
-    >
-     <template #prepend>
-      <v-icon :icon="darkTheme ? 'mdi-weather-sunny' : 'mdi-weather-night'" />
-     </template>
-     <span class="text-body-2">
-      {{ darkTheme ? 'Mode clair' : 'Mode sombre' }}
-     </span>
-    </v-btn>
-   </div>
+    <div class="pa-4">
+      <v-btn
+        block
+        :color="loggedIn ? 'error' : 'primary'"
+        variant="tonal"
+        class="font-weight-bold"
+        @click="loggedIn ? authStore.logout() : goToLogin()"
+        :prepend-icon="loggedIn ? 'mdi-power' : 'mdi-login-variant'"
+      >
+        {{ loggedIn ? 'Déconnexion' : 'Connexion' }}
+      </v-btn>
+    </div>
   </template>
- </v-navigation-drawer>
+</v-navigation-drawer>
+
+<v-app-bar v-if="isMobile" flat color="primary">
+  <v-app-bar-nav-icon color="white" @click="mobileDrawer = !mobileDrawer" />
+  <v-toolbar-title class="text-white font-weight-bold">Confluences</v-toolbar-title>
+</v-app-bar>
+
+  
 </template>
 
 
@@ -256,9 +198,17 @@ const internalLinks = [
   { label: 'Stages par stagiaire', routeName: 'Stagiaires', icon: 'mdi-account-hard-hat', external: false },
   { label: 'Contacts', routeName: 'Contacts', icon: 'mdi-card-account-mail', external: false },
   { label: 'ARE', routeName: 'JobSearchAssistances', icon: 'mdi-account-cash', external: false },
-  { label: 'Registre de présence', routeName: 'AttendanceRegister', icon: 'mdi-calendar-check', external: false },
-  { label: 'Participation aux ateliers', routeName: 'AteliersFollowUp', icon: 'mdi-progress-check', external: false },
-  { label: 'Suivi des Stagiaires', routeName: 'StagiairesFollowUp', icon: 'mdi-account-eye', external: false },
+ 
+]
+
+const internalLinks2 = [
+ 
+  { label: 'Fiche de présence', routeName: 'AttendanceRegister', icon: 'mdi-calendar-check', external: false },
+  { label: 'Accomp. & Ateliers', routeName: 'AteliersFollowUp', icon: 'mdi-progress-check', external: false },
+  { label: 'Bilans & attestations', routeName: 'StagiairesFollowUp', icon: 'mdi-account-eye', external: false },
+  { label: 'Calendrier de formation', routeName: 'calendrier', icon: 'mdi-calendar-edit',  external: false },
+  { label: 'Participants', routeName: 'Participants', icon: 'mdi-account',  external: false },
+
 ]
 
 // Nouveau Lien de Navigation Externe
@@ -288,42 +238,68 @@ const visibleLinks = computed(() => (loggedIn.value ? [...internalLinks, externa
 </script>
 
 <style scoped>
-.border-b {
- border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+/* Conteneur principal du menu avec une bordure subtile plutôt qu'une ombre portée */
+.main-sidebar {
+  border-right: 1px solid v-bind('darkTheme ? "#283593" : "#BBDEFB"') !important;
 }
 
-.border-e {
- border-right: 1px solid rgba(0, 0, 0, 0.12);
+.logo-container {
+  padding: 32px 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-:deep(.v-list-item--active) {
- background-color: rgba(var(--v-theme-primary), 0.08);
- color: rgb(var(--v-theme-primary));
-}
-
-:deep(.v-expansion-panel-title__overlay) {
- background-color: transparent;
-}
-
-.logo {
- padding: 10px; 
- width: 100%; 
- height: 64px; 
- display: flex;
- align-items: center;
- justify-content: center;
-}
 .logo-img {
- max-width: 100%; 
- height: auto;
- object-fit: contain;
- max-height: 40px; 
+  max-height: 48px;
+  /* On booste un peu le logo sur le fond bleu */
+  filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.1));
 }
 
-@media (max-width: 720px) {
- .logo {
-  height: 48px; 
-  justify-content: flex-start;
- }
+/* Éléments du menu */
+.menu-item {
+  margin-bottom: 4px;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  /* Couleur du texte quand non-actif */
+  color: v-bind('darkTheme ? "#C5CAE9" : "#1976D2"') !important;
+}
+
+.menu-item:hover {
+  background-color: v-bind('darkTheme ? "#283593" : "#BBDEFB"') !important;
+  transform: translateX(5px);
+}
+
+/* État Actif : Très contrasté */
+:deep(.v-list-item--active) {
+  background: #1976D2 !important; /* Bleu soutenu */
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(25, 118, 210, 0.4);
+}
+
+/* Icônes */
+:deep(.v-list-item__prepend > .v-icon) {
+  opacity: 1;
+  color: inherit;
+}
+
+/* Configuration (Sous-menu) */
+.sub-item {
+  margin-left: 12px;
+  font-size: 0.85rem !important;
+  opacity: 0.8;
+}
+
+/* Zone du bas (Actions) */
+.bottom-actions {
+  /* Fond un peu plus sombre que le reste du menu pour créer un bloc */
+  background: v-bind('darkTheme ? "#121858" : "#D1E9FF"');
+  border-top: 1px solid v-bind('darkTheme ? "#283593" : "#BBDEFB"');
+  padding: 16px;
+}
+
+.action-btn {
+  font-weight: 600 !important;
+  color: v-bind('darkTheme ? "#C5CAE9" : "#1565C0"') !important;
 }
 </style>
