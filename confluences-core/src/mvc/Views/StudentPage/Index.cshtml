@@ -6,114 +6,81 @@
 }
 
 <style>
-    :root {
-        /* Dégradé harmonisé (Bleu -> Vert -> Blanc) */
-        --bg-gradient: linear-gradient(135deg, #f0f4ff 0%, #f1fff5 50%, #ffffff 100%);
-        --primary-modern: #4e73df;
-        --border-soft: rgba(0, 0, 0, 0.06);
-        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-    }
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+    .sp-root { font-family: 'DM Sans', sans-serif; color: #1a1a2e; }
 
-    /* FORCE LE FOND : On cible tous les conteneurs possibles qui pourraient porter le vert */
-    html, body, .bgImage, #wrapper, #content-wrapper {
-        background: var(--bg-gradient) !important;
-        background-attachment: fixed !important;
-        background-image: var(--bg-gradient) !important;
-        min-height: 100vh !important;
+    .sp-hero {
+        background: #0d1b3e; border-radius: 20px;
+        padding: 28px 28px 24px; margin-bottom: 1.5rem;
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 16px; flex-wrap: wrap; position: relative; overflow: hidden;
     }
+    .sp-hero::before {
+        content: ''; position: absolute; inset: 0;
+        background: radial-gradient(ellipse 70% 80% at 100% 50%, rgba(0,180,176,0.15) 0%, transparent 70%);
+    }
+    .sp-hero-left { position: relative; }
+    .sp-hero-greeting { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin: 0 0 4px; }
+    .sp-hero-name { font-family: 'Lora', serif; font-size: 24px; font-weight: 600; color: #fff; margin: 0; }
+    .sp-hero-sub { font-size: 13px; color: rgba(255,255,255,0.5); margin: 4px 0 0; }
+    .sp-hero-date { font-size: 12px; color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.07); border-radius: 8px; padding: 6px 14px; position: relative; white-space: nowrap; }
 
-    /* Suppression des éventuelles images de fond héritées du thème */
-    body::before, body::after {
-        display: none !important;
-    }
+    .sp-card { background: #fff; border-radius: 18px; border: 1px solid #f1f3f9; box-shadow: 0 2px 16px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 1.25rem; }
+    .sp-card-header { display: flex; align-items: center; gap: 8px; padding: 14px 18px; border-bottom: 1px solid #f1f3f9; font-size: 12px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #aaa; }
+    .sp-card-header i { font-size: 14px; color: #1a1a2e; }
 
-    .dashboard-card {
-        background: rgba(255, 255, 255, 0.8) !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        border-radius: 24px;
-        box-shadow: var(--card-shadow);
-        margin-bottom: 2rem;
-        overflow: hidden;
-    }
+    .sp-welcome { background: #0d1b3e; border-radius: 18px; margin-bottom: 1.25rem; overflow: hidden; }
+    .sp-welcome-inner { padding: 20px; }
+    .sp-welcome-title { font-size: 14px; font-weight: 500; color: #fff; margin: 0 0 12px; display: flex; align-items: center; gap: 8px; }
+    .sp-welcome-title i { color: #00B4B0; }
+    .sp-lang-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .sp-lang-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 8px; padding: 5px 12px; font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+    .sp-lang-btn:hover { background: #00B4B0; border-color: #00B4B0; }
+    .sp-got-it { display: inline-flex; align-items: center; gap: 6px; background: #00B4B0; color: #fff; border-radius: 10px; padding: 8px 18px; font-size: 13px; font-weight: 500; text-decoration: none; transition: opacity 0.15s; }
+    .sp-got-it:hover { opacity: 0.85; color: #fff; text-decoration: none; }
 
-    .card-header-modern {
-        padding: 1.25rem 1.5rem;
-        background: rgba(255, 255, 255, 0.4);
-        border-bottom: 1px solid var(--border-soft);
-        font-weight: 700;
-        color: var(--primary-modern);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
+    .sp-hw-type { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: #aaa; padding: 10px 18px 4px; }
+    .sp-hw-item { display: flex; align-items: center; gap: 12px; padding: 12px 18px; text-decoration: none; border-bottom: 1px solid #f1f3f9; transition: background 0.1s; }
+    .sp-hw-item:last-child { border-bottom: none; }
+    .sp-hw-item:hover { background: #fafbff; text-decoration: none; }
+    .sp-hw-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .sp-hw-dot.today { background: #1a1a2e; }
+    .sp-hw-dot.future { background: #00B4B0; }
+    .sp-hw-name { font-size: 13px; font-weight: 500; color: #1a1a2e; margin: 0; flex: 1; }
+    .sp-hw-date { font-size: 11px; color: #aaa; white-space: nowrap; }
+    .sp-hw-arrow { font-size: 11px; color: #aaa; }
 
-    .homework-item {
-        display: flex;
-        align-items: center;
-        background: #ffffff !important; /* Items opaques pour lire sur le dégradé */
-        padding: 1.2rem;
-        margin: 0.8rem 1.2rem;
-        border-radius: 18px;
-        transition: all 0.2s ease;
-        text-decoration: none !important;
-        color: #2e3d49;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-    }
+    .sp-teacher { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid #f1f3f9; }
+    .sp-teacher:last-child { border-bottom: none; }
+    .sp-teacher-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid #f1f3f9; }
+    .sp-teacher-name { font-size: 13px; font-weight: 500; color: #1a1a2e; flex: 1; }
+    .sp-video-btn { width: 34px; height: 34px; border-radius: 10px; background: #f8f9fc; border: 1px solid #eef0f7; display: flex; align-items: center; justify-content: center; color: #6c757d; transition: all 0.15s; text-decoration: none; }
+    .sp-video-btn:hover { background: #1a1a2e; color: #fff; border-color: #1a1a2e; text-decoration: none; }
+    .sp-online-dot { width: 10px; height: 10px; border-radius: 50%; background: #dee2e6; border: 2px solid #fff; position: absolute; bottom: 0; right: 0; }
 
-    .homework-item:hover {
-        transform: translateX(5px);
-        box-shadow: 0 5px 15px rgba(78, 115, 223, 0.1);
-    }
-
-    .avatar-modern {
-        width: 55px;
-        height: 55px;
-        border-radius: 18px;
-        object-fit: cover;
-        border: 2px solid white;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-
-    .online-dot {
-        position: absolute;
-        bottom: -2px;
-        right: -2px;
-        width: 14px;
-        height: 14px;
-        background: #cbd5e0;
-        border: 3px solid white;
-        border-radius: 50%;
-    }
-
-    .btn-call-round {
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
-        background: #f0f3ff;
-        color: var(--primary-modern);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: 0.2s;
-    }
+    .sp-student-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 16px 18px; }
+    .sp-student-item { text-align: center; }
+    .sp-student-avatar-wrap { position: relative; display: inline-block; margin-bottom: 4px; }
+    .sp-student-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #f1f3f9; }
+    .sp-student-name { font-size: 11px; color: #6c757d; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sp-student-call { font-size: 10px; color: #00B4B0; text-decoration: none; }
+    .sp-student-call:hover { text-decoration: underline; }
 </style>
 
 <partial name="_Notification.cshtml" />
 <partial name="_NotificationPrivate.cshtml" />
 
-<div class="container py-4 px-md-5">
-    
-    <div class="d-flex align-items-center justify-content-between mb-5 mt-2">
-        <div>
-            <h1 class="h2 font-weight-bold mb-0">Bonjour, <span class="text-primary">@Model.Firstname</span> !</h1>
-            <p class="text-muted mb-0">Ravi de vous revoir dans votre espace d'apprentissage.</p>
-        </div>
-        <div class="text-right d-none d-md-block">
-            <span class="badge badge-white shadow-sm px-3 py-2 rounded-pill text-dark font-weight-bold bg-white">
-                @DateTime.Now.ToString("dd MMMM yyyy")
-            </span>
+<div class="container-fluid py-4 px-md-4 sp-root">
+    <div class="row">
+        <div class="col-12">
+            <div class="sp-hero">
+                <div class="sp-hero-left">
+                    <p class="sp-hero-greeting">Bienvenue</p>
+                    <h1 class="sp-hero-name">Bonjour, @Model.Firstname</h1>
+                    <p class="sp-hero-sub">Ravi de vous revoir dans votre espace d'apprentissage.</p>
+                </div>
+                <span class="sp-hero-date">@DateTime.Now.ToString("dd MMMM yyyy")</span>
+            </div>
         </div>
     </div>
 
@@ -123,102 +90,110 @@
             @if (!Model.HasSeenHelpVideo)
             {
                 var session = Model.SessionStudents.FirstOrDefault()?.Session;
-                if (session != null) {
-                    <div class="dashboard-card border-0" style="background: linear-gradient(135deg, #4e73df 0%, #224abe 100%) !important; color: white;">
-                        <div class="p-4">
-                            <h4 class="font-weight-bold mb-4 text-white"><i class="fas fa-play-circle mr-2"></i> Guide de bienvenue</h4>
-                            <div class="embed-responsive embed-responsive-16by9 rounded-lg shadow-lg mb-4">
-                                <iframe class="embed-responsive-item" src="@session.SchoolClassRoom.ExplanationVideoLink" allowfullscreen></iframe>
+                if (session != null)
+                {
+                    <div class="sp-welcome">
+                        <div class="embed-responsive embed-responsive-16by9">
+                            <iframe class="embed-responsive-item" src="@session.SchoolClassRoom.ExplanationVideoLink" allowfullscreen></iframe>
+                        </div>
+                        <div class="sp-welcome-inner">
+                            <p class="sp-welcome-title"><i class="fas fa-headphones"></i> Traductions audio disponibles</p>
+                            <div class="sp-lang-btns">
+                                @foreach (var exp in session.SchoolClassRoom.SchoolClassRoomExplanations)
+                                {
+                                    <button type="button" class="sp-lang-btn" value="@exp.AudioLink">@exp.LanguageName</button>
+                                }
                             </div>
-                            
-                            <div class="bg-white p-3 rounded-xl text-dark text-center">
-                                <p class="font-weight-bold mb-2">Traductions audios :</p>
-                                <div class="d-flex flex-wrap justify-content-center gap-2 mb-3">
-                                    @foreach (var exp in session.SchoolClassRoom.SchoolClassRoomExplanations) {
-                                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 font-weight-bold" value="@exp.AudioLink">@exp.LanguageName</button>
-                                    }
-                                </div>
-                                <a class="btn btn-primary rounded-pill px-4 font-weight-bold" asp-controller="StudentPage" asp-action="IGetIt">J'ai compris</a>
-                            </div>
+                            <a class="sp-got-it" asp-controller="StudentPage" asp-action="IGetIt">
+                                <i class="fas fa-check"></i> J'ai compris
+                            </a>
                         </div>
                     </div>
                 }
             }
 
-            <div class="dashboard-card">
-                <div class="card-header-modern">
-                    <i class="fas fa-book-open"></i> Mon Parcours
+            <div class="sp-card">
+                <div class="sp-card-header">
+                    <i class="fas fa-book-open"></i> Mon parcours
                 </div>
-                <div class="py-3">
-                    @{ var sessionData = Model.SessionStudents.FirstOrDefault()?.Session; }
-                    @if (sessionData?.HomeworkV2s != null && sessionData.HomeworkV2s.Any(h => h.HomeworkV2date.Date >= DateTime.Now.Date))
+                @{
+                    var sessionData = Model.SessionStudents.FirstOrDefault()?.Session;
+                }
+                @if (sessionData?.HomeworkV2s != null && sessionData.HomeworkV2s.Any(h => h.HomeworkV2date.Date >= DateTime.Now.Date))
+                {
+                    var homeworks = sessionData.HomeworkV2s
+                        .Where(h => h.HomeworkV2date.Date == DateTime.Now.Date || (h.HomeworkV2date.Date >= DateTime.Now.Date && h.IsFutur))
+                        .OrderBy(h => h.HomeworkType.HomeworkOrder);
+                    int currentType = 0;
+                    @foreach (var hw in homeworks)
                     {
-                        var homeworks = sessionData.HomeworkV2s
-                            .Where(h => h.HomeworkV2date.Date == DateTime.Now.Date || (h.HomeworkV2date.Date >= DateTime.Now.Date && h.IsFutur))
-                            .OrderBy(h => h.HomeworkType.HomeworkOrder);
-
-                        int currentType = 0;
-                        @foreach (var hw in homeworks)
+                        if (currentType != hw.HomeworkTypeId)
                         {
-                            if (currentType != hw.HomeworkTypeId) {
-                                <div class="px-4 mt-3 mb-1"><span class="small font-weight-bold text-muted text-uppercase">@hw.HomeworkType.HomeworkTypeName</span></div>
-                                currentType = hw.HomeworkTypeId;
-                            }
-                            <a asp-controller="HomeworkV2s" asp-action="Details" asp-route-id="@hw.HomeworkV2id" class="homework-item">
-                                <div class="status-indicator" style="background: @(hw.HomeworkV2date.Date > DateTime.Now.Date ? "#36b9cc" : "#4e73df")"></div>
-                                <div class="flex-grow-1">
-                                    <h6 class="font-weight-bold mb-0">@hw.HomeworkV2name</h6>
-                                    <small class="text-muted">Pour le @hw.HomeworkV2date.ToString("dd MMM")</small>
-                                </div>
-                                <i class="fas fa-chevron-right text-muted"></i>
-                            </a>
+                            <div class="sp-hw-type">@hw.HomeworkType.HomeworkTypeName</div>
+                            currentType = hw.HomeworkTypeId;
                         }
+                        <a asp-controller="HomeworkV2s" asp-action="Details" asp-route-id="@hw.HomeworkV2id" class="sp-hw-item">
+                            <span class="sp-hw-dot @(hw.HomeworkV2date.Date > DateTime.Now.Date ? "future" : "today")"></span>
+                            <span class="sp-hw-name">@hw.HomeworkV2name</span>
+                            <span class="sp-hw-date">@hw.HomeworkV2date.ToString("dd MMM")</span>
+                            <i class="fas fa-chevron-right sp-hw-arrow"></i>
+                        </a>
                     }
-                </div>
+                }
+                else
+                {
+                    <div style="padding:24px 18px; text-align:center; color:#aaa; font-size:13px;">
+                        <i class="fas fa-check-circle" style="color:#00B4B0; margin-bottom:8px; font-size:20px; display:block;"></i>
+                        Aucun devoir à venir pour le moment.
+                    </div>
+                }
             </div>
         </div>
 
         <div class="col-lg-4">
-            <div class="dashboard-card">
-                <div class="card-header-modern"><i class="fas fa-user-tie"></i> Formateurs</div>
-                <div class="p-0">
-                    @foreach (var st in Model.SessionStudents.First().Session.SessionTeachers.OrderBy(s => s.Order))
+            <div class="sp-card">
+                <div class="sp-card-header">
+                    <i class="fas fa-chalkboard-teacher"></i> Formateurs
+                </div>
+                @foreach (var st in Model.SessionStudents.First().Session.SessionTeachers.OrderBy(s => s.Order))
+                {
+                    <div class="sp-teacher">
+                        <div style="position:relative; flex-shrink:0;">
+                            <img class="sp-teacher-avatar" src="@(baseApiUrl + st.Teacher.PathImage)" onerror="this.src='/img/avatar.jpg'" />
+                            <div data-userconnected="@st.Teacher.UserName" class="userconnected sp-online-dot"></div>
+                        </div>
+                        <span class="sp-teacher-name">@st.Teacher.Firstname</span>
+                        <a data-userConnected="@st.Teacher.UserName"
+                           class="sp-video-btn callButton callUnAvailable"
+                           href="@Url.Action("Private", "Jitsi", new { roomName = st.Teacher.UserName, isPrivateRoom = true })"
+                           title="Appel vidéo">
+                            <i class="fas fa-video" style="font-size:13px;"></i>
+                        </a>
+                    </div>
+                }
+            </div>
+
+            <div class="sp-card">
+                <div class="sp-card-header">
+                    <i class="fas fa-users"></i> Ma classe
+                </div>
+                <div class="sp-student-grid">
+                    @foreach (var ss in Model.SessionStudents.First().Session.SessionStudents)
                     {
-                        <div class="d-flex align-items-center p-3 border-bottom border-light">
-                            <div class="position-relative mr-3">
-                                <img class="avatar-modern" src="@(baseApiUrl + st.Teacher.PathImage)" onerror="this.src='/img/avatar.jpg'">
-                                <div data-userconnected="@st.Teacher.UserName" class="userconnected online-dot"></div>
+                        if (ss.Student.UserName == currentUserName?.ToString()) continue;
+                        <div class="sp-student-item">
+                            <div class="sp-student-avatar-wrap">
+                                <img class="sp-student-avatar" src="@(baseApiUrl + ss.Student.PathImage)" onerror="this.src='/img/avatar.jpg'" />
+                                <div data-userconnected="@ss.Student.UserName" class="userconnected sp-online-dot"></div>
                             </div>
-                            <div class="flex-grow-1">
-                                <div class="font-weight-bold text-dark small">@st.Teacher.Firstname</div>
-                            </div>
-                            <a data-userConnected="@st.Teacher.UserName" class="btn-call-round callButton callUnAvailable" href="@Url.Action("Private", "Jitsi", new { roomName = st.Teacher.UserName, isPrivateRoom = true})">
-                                <i class="fas fa-video"></i>
+                            <span class="sp-student-name">@ss.Student.Firstname</span>
+                            <a data-userConnected="@ss.Student.UserName"
+                               href="@Url.Action("Private", "Jitsi", new { roomName = ss.Student.UserName, isPrivateRoom = true })"
+                               class="sp-student-call callButton callUnAvailable">
+                                <i class="fas fa-phone-alt" style="font-size:10px;"></i>
                             </a>
                         </div>
                     }
-                </div>
-            </div>
-
-            <div class="dashboard-card">
-                <div class="card-header-modern"><i class="fas fa-users"></i> Ma Classe</div>
-                <div class="p-3">
-                    <div class="row no-gutters">
-                        @foreach (var ss in Model.SessionStudents.First().Session.SessionStudents)
-                        {
-                            if (ss.Student.UserName == currentUserName.ToString()) continue;
-                            <div class="col-4 text-center mb-3">
-                                <div class="position-relative d-inline-block mb-1">
-                                    <img class="avatar-modern" style="width: 45px; height: 45px;" src="@(baseApiUrl + ss.Student.PathImage)" onerror="this.src='/img/avatar.jpg'">
-                                    <div data-userconnected="@ss.Student.UserName" class="userconnected online-dot"></div>
-                                </div>
-                                <div class="x-small font-weight-bold text-truncate">@ss.Student.Firstname</div>
-                                <a data-userConnected="@ss.Student.UserName" href="@Url.Action("Private", "Jitsi", new { roomName = ss.Student.UserName, isPrivateRoom = true})" class="text-primary callButton callUnAvailable">
-                                    <i class="fas fa-phone-alt fa-xs"></i>
-                                </a>
-                            </div>
-                        }
-                    </div>
                 </div>
             </div>
         </div>
@@ -228,22 +203,22 @@
 <partial name="../Chat/ChatStudent.cshtml" />
 
 @section Scripts {
-    <script>
-        const App = {
-            audio: new Audio(),
-            init() {
-                document.querySelectorAll("button[value]").forEach(btn => {
-                    btn.onclick = () => { this.audio.src = btn.value; this.audio.play(); };
-                });
-                if(window.connectionJitsi) connectionJitsi.start();
-            }
-        };
-        $(document).ready(() => App.init());
-        function insertMessage() {
-            const input = document.getElementById('messageInput');
-            if (!input.value.trim()) return;
-            $.post("/Chat/StudentSendMessageToClassRoom", { message: input.value, userName: '@currentUserName' });
-            input.value = '';
+<script>
+    const App = {
+        audio: new Audio(),
+        init() {
+            document.querySelectorAll("button[value]").forEach(btn => {
+                btn.onclick = () => { this.audio.src = btn.value; this.audio.play(); };
+            });
+            if (window.connectionJitsi) connectionJitsi.start();
         }
-    </script>
+    };
+    $(document).ready(() => App.init());
+    function insertMessage() {
+        const input = document.getElementById('messageInput');
+        if (!input.value.trim()) return;
+        $.post("/Chat/StudentSendMessageToClassRoom", { message: input.value, userName: '@currentUserName' });
+        input.value = '';
+    }
+</script>
 }

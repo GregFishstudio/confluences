@@ -3,444 +3,208 @@
 }
 @model IEnumerable<mvc.Models.AspNetUser>
 
-<div class="main-content">
-    <div class="container-fluid">
-        <!-- Header Hero Section -->
-        <div class="row">
-            <div class="col-12">
-                <div class="hero-section text-center">
-                    <div class="hero-content">
-                        <img class="hero-logo" src="~/img/logo_confluences.png" alt="Logo Confluences" />
-                        <p class="hero-subtitle">Intégration par l'autonomisation</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mission Section -->
-        <div class="row mt-5">
-            <div class="col-12">
-                <div class="section-header">
-                    <h2>L'association Confluences</h2>
-                    <div class="header-divider"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-4 mb-4">
-                <div class="mission-card">
-                    <div class="card-icon">
-                        <i class="material-icons">groups</i>
-                    </div>
-                    <h4>Intégration des migrants</h4>
-                    <p>L'association Confluences s'est donné pour but de contribuer à l'intégration des migrants par leur autonomisation.</p>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="mission-card">
-                    <div class="card-icon">
-                        <i class="material-icons">school</i>
-                    </div>
-                    <h4>Formations et cours</h4>
-                    <p>Pour atteindre son objectif, Confluences organise des cours de français, des formations et crée des projets d'insertion socio-professionnelle.</p>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="mission-card">
-                    <div class="card-icon">
-                        <i class="material-icons">connect_without_contact</i>
-                    </div>
-                    <h4>Réseaux de contacts</h4>
-                    <p>Confluences oeuvre à développer des réseaux de contacts dans la société d'accueil pour mettre en valeur les ressources des migrants.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Team Section -->
-        <div class="row mt-5">
-            <div class="col-12">
-                <div class="section-header">
-                    <h2>Notre Équipe</h2>
-                    <p class="section-subtitle">Des professionnels engagés pour votre intégration</p>
-                    <div class="header-divider"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            @foreach (var teacher in Model.OrderBy(t => t.Firstname))
-            {
-                <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
-                    <div class="team-member-card">
-                        <div class="member-photo">
-                            <img src="@(ViewData["URLAPI"] + teacher.PathImage)" alt="@teacher.Firstname @teacher.LastName" />
-                            <div class="member-overlay">
-                                <a href="tel:@teacher.PhoneNumber" class="btn btn-primary btn-sm">
-                                    <i class="material-icons">call</i>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="member-info">
-                            <h5 class="member-name">@teacher.Firstname @teacher.LastName</h5>
-                            <div class="member-role">
-                                @if (teacher.Firstname == "Jean-Marc")
-                                {
-                                    <span class='badge badge-admin'>Administration</span>
-                                }
-                                else if (teacher.Firstname == "Marie-Laure")
-                                {
-                                    <span class='badge badge-stage'>Stages et apprentissages</span>
-                                }
-                                else
-                                {
-                                    <span class='badge badge-teaching'>Enseignement</span>
-                                }
-                            </div>
-                            <div class="member-contact">
-                                <a href="tel:@teacher.PhoneNumber" class="contact-phone">
-                                    <i class="material-icons">phone_iphone</i>
-                                    @teacher.PhoneNumber
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-
-        <!-- Quick Stats -->
-        <div class="row mt-5">
-            <div class="col-12">
-                <div class="stats-section">
-                    <div class="row">
-                        <div class="col-md-3 col-6 text-center">
-                            <div class="stat-item">
-                                <div class="stat-number">50+</div>
-                                <div class="stat-label">Étudiants accompagnés</div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6 text-center">
-                            <div class="stat-item">
-                                <div class="stat-number">15+</div>
-                                <div class="stat-label">Stages réalisés</div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6 text-center">
-                            <div class="stat-item">
-                                <div class="stat-number">4</div>
-                                <div class="stat-label">Enseignants dédiés</div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6 text-center">
-                            <div class="stat-item">
-                                <div class="stat-number">100%</div>
-                                <div class="stat-label">Engagement</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <style>
-    /* Variables */
-    :root {
-        --primary: #1B3C70;
-        --accent: #00B4B0;
-        --success: #28a745;
-        --warning: #ffc107;
-        --danger: #dc3545;
-        --light: #f8f9fa;
-        --dark: #343a40;
-        --sidebar-width: 250px;
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+
+    .home-root { font-family: 'DM Sans', sans-serif; color: #1a1a2e; }
+
+    /* ── HERO ── */
+    .home-hero {
+        position: relative; overflow: hidden;
+        background: #0d1b3e;
+        border-radius: 24px; margin-bottom: 3rem;
+        padding: 72px 40px 64px;
+        display: flex; flex-direction: column; align-items: center; text-align: center;
+    }
+    .home-hero::before {
+        content: ''; position: absolute; inset: 0;
+        background: radial-gradient(ellipse 80% 60% at 50% 120%, rgba(0,180,176,0.18) 0%, transparent 70%);
+    }
+    .home-hero-logo { height: 90px; margin-bottom: 28px; filter: brightness(0) invert(1); position: relative; }
+    .home-hero-tagline {
+        font-family: 'Lora', serif; font-style: italic;
+        font-size: 22px; color: rgba(255,255,255,0.75);
+        letter-spacing: 0.01em; position: relative; margin: 0;
     }
 
-    /* Main Content Area */
-    .main-content {
-      padding:0;
-        min-height: 100vh;
+    /* ── SECTION HEADER ── */
+    .home-section-header { margin-bottom: 2rem; }
+    .home-section-eyebrow {
+        font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+        color: #00B4B0; font-weight: 500; margin: 0 0 8px;
     }
-
-    /* Hero Section */
-    .hero-section {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-        border-radius: 15px;
-        padding: 60px 20px;
-        margin-bottom: 30px;
-        color: white;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    .home-section-title {
+        font-family: 'Lora', serif; font-size: 28px; font-weight: 600;
+        color: #1a1a2e; margin: 0 0 6px;
     }
+    .home-section-sub { font-size: 14px; color: #6c757d; margin: 0; }
 
-    .hero-logo {
-        max-height: 120px;
-        margin-bottom: 20px;
-        filter: brightness(0) invert(1);
+    /* ── MISSION CARDS ── */
+    .home-missions { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 4rem; }
+    .home-mission {
+        background: #fff; border-radius: 18px; border: 1px solid #f1f3f9;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+        padding: 28px 24px; transition: transform 0.2s, box-shadow 0.2s;
     }
-
-    .hero-title {
-        font-size: 3rem;
-        font-weight: 700;
-        margin-bottom: 10px;
+    .home-mission:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
+    .home-mission-icon {
+        width: 48px; height: 48px; border-radius: 14px;
+        background: #0d1b3e; display: flex; align-items: center; justify-content: center;
+        margin-bottom: 18px;
     }
+    .home-mission-icon .material-icons { font-size: 24px; color: #00B4B0; }
+    .home-mission-title { font-size: 15px; font-weight: 500; color: #1a1a2e; margin: 0 0 10px; }
+    .home-mission-text { font-size: 13px; color: #6c757d; line-height: 1.7; margin: 0; }
 
-    .hero-subtitle {
-        font-size: 1.5rem;
-        opacity: 0.9;
-        font-weight: 300;
+    /* ── TEAM ── */
+    .home-team { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 4rem; }
+    .home-member {
+        background: #fff; border-radius: 18px; border: 1px solid #f1f3f9;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+        overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;
     }
-
-    /* Section Headers */
-    .section-header {
-        text-align: center;
-        margin-bottom: 40px;
+    .home-member:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(0,0,0,0.08); }
+    .home-member-photo { position: relative; height: 220px; overflow: hidden; }
+    .home-member-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+    .home-member:hover .home-member-photo img { transform: scale(1.05); }
+    .home-member-overlay {
+        position: absolute; inset: 0;
+        background: linear-gradient(to top, rgba(13,27,62,0.85) 0%, transparent 55%);
+        opacity: 0; transition: opacity 0.3s;
+        display: flex; align-items: flex-end; padding: 16px;
     }
-
-    .section-header h2 {
-        color: var(--primary);
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 15px;
+    .home-member:hover .home-member-overlay { opacity: 1; }
+    .home-member-call {
+        display: inline-flex; align-items: center; gap: 5px;
+        background: #00B4B0; color: #fff; border-radius: 8px;
+        padding: 6px 12px; font-size: 12px; font-weight: 500;
+        text-decoration: none; transition: opacity 0.15s;
     }
-
-    .section-subtitle {
-        color: #6c757d;
-        font-size: 1.2rem;
-        margin-bottom: 20px;
+    .home-member-call:hover { opacity: 0.85; color: #fff; text-decoration: none; }
+    .home-member-call .material-icons { font-size: 15px; }
+    .home-member-info { padding: 16px 18px 18px; }
+    .home-member-name { font-size: 14px; font-weight: 500; color: #1a1a2e; margin: 0 0 8px; }
+    .home-member-badge {
+        display: inline-block; padding: 3px 10px;
+        border-radius: 20px; font-size: 11px; font-weight: 500; margin-bottom: 10px;
     }
-
-    .header-divider {
-        width: 80px;
-        height: 4px;
-        background: var(--accent);
-        margin: 0 auto;
-        border-radius: 2px;
+    .badge-admin  { background: #ede9fe; color: #5b21b6; }
+    .badge-stage  { background: #fce7f3; color: #9d174d; }
+    .badge-teaching { background: #e0f2fe; color: #0c4a6e; }
+    .home-member-phone {
+        display: flex; align-items: center; gap: 5px;
+        font-size: 12px; color: #aaa; text-decoration: none;
     }
+    .home-member-phone:hover { color: #00B4B0; text-decoration: none; }
+    .home-member-phone .material-icons { font-size: 14px; }
 
-    /* Mission Cards */
-    .mission-card {
-        background: white;
-        border-radius: 15px;
-        padding: 30px 25px;
-        text-align: center;
-        height: 100%;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        transition: all 0.3s ease;
-        border: 1px solid #e9ecef;
+    /* ── STATS ── */
+    .home-stats {
+        background: #0d1b3e; border-radius: 20px;
+        padding: 40px 32px; margin-bottom: 2rem;
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0;
     }
-
-    .mission-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    .home-stat { text-align: center; padding: 16px 8px; position: relative; }
+    .home-stat + .home-stat::before {
+        content: ''; position: absolute; left: 0; top: 20%; bottom: 20%;
+        width: 1px; background: rgba(255,255,255,0.1);
     }
-
-    .card-icon {
-        width: 80px;
-        height: 80px;
-        margin: 0 auto 20px;
-        background: linear-gradient(135deg, var(--accent), var(--primary));
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
+    .home-stat-num {
+        font-family: 'Lora', serif; font-size: 36px; font-weight: 600;
+        color: #00B4B0; line-height: 1; margin-bottom: 8px;
     }
+    .home-stat-label { font-size: 12px; color: rgba(255,255,255,0.5); font-weight: 400; }
 
-    .card-icon .material-icons {
-        font-size: 2.5rem;
-    }
-
-    .mission-card h4 {
-        color: var(--primary);
-        font-weight: 600;
-        margin-bottom: 15px;
-        font-size: 1.3rem;
-    }
-
-    .mission-card p {
-        color: #6c757d;
-        line-height: 1.6;
-        margin: 0;
-    }
-
-    /* Team Member Cards */
-    .team-member-card {
-        background: white;
-        border-radius: 15px;
-        overflow: hidden;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        transition: all 0.3s ease;
-        height: 100%;
-    }
-
-    .team-member-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-    }
-
-    .member-photo {
-        position: relative;
-        height: 250px;
-        overflow: hidden;
-    }
-
-    .member-photo img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: all 0.3s ease;
-    }
-
-    .team-member-card:hover .member-photo img {
-        transform: scale(1.1);
-    }
-
-    .member-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(27, 60, 112, 0.8);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transition: all 0.3s ease;
-    }
-
-    .team-member-card:hover .member-overlay {
-        opacity: 1;
-    }
-
-    .member-info {
-        padding: 20px;
-        text-align: center;
-    }
-
-    .member-name {
-        color: var(--primary);
-        font-weight: 600;
-        margin-bottom: 10px;
-        font-size: 1.1rem;
-    }
-
-    .member-role {
-        margin-bottom: 15px;
-    }
-
-    .badge {
-        display: inline-block;
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: white;
-    }
-
-    .badge-admin {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-    }
-
-    .badge-stage {
-        background: linear-gradient(135deg, #f093fb, #f5576c);
-    }
-
-    .badge-teaching {
-        background: linear-gradient(135deg, #4facfe, #00f2fe);
-    }
-
-    .member-contact {
-        margin-top: 10px;
-    }
-
-    .contact-phone {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #6c757d;
-        text-decoration: none;
-        font-size: 0.9rem;
-        transition: color 0.3s ease;
-    }
-
-    .contact-phone:hover {
-        color: var(--accent);
-    }
-
-    .contact-phone .material-icons {
-        font-size: 1rem;
-        margin-right: 5px;
-    }
-
-    /* Stats Section */
-    .stats-section {
-        background: white;
-        border-radius: 15px;
-        padding: 40px 20px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-    }
-
-    .stat-item {
-        padding: 20px 10px;
-    }
-
-    .stat-number {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: var(--primary);
-        margin-bottom: 10px;
-    }
-
-    .stat-label {
-        color: #6c757d;
-        font-size: 0.9rem;
-        font-weight: 500;
-    }
-
-    /* Responsive Design */
-    @@media (max-width: 768px) {
-        .main-content {
-            margin-left: 0;
-            padding: 15px;
-        }
-
-        .hero-title {
-            font-size: 2rem;
-        }
-
-        .hero-subtitle {
-            font-size: 1.2rem;
-        }
-
-        .section-header h2 {
-            font-size: 2rem;
-        }
-
-        .mission-card, .team-member-card {
-            margin-bottom: 20px;
-        }
-
-        .stat-number {
-            font-size: 2rem;
-        }
-    }
-
-    /* Animation pour le contenu */
-    .main-content > .container-fluid > .row {
-        animation: fadeInUp 0.6s ease-out;
-    }
-
-    @@keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    @@media (max-width: 600px) {
+        .home-hero { padding: 48px 24px 40px; border-radius: 16px; }
+        .home-hero-tagline { font-size: 17px; }
+        .home-stat + .home-stat::before { display: none; }
     }
 </style>
+
+<div class="container-fluid py-4 px-md-4 home-root">
+    <div class="home-hero">
+        <img class="home-hero-logo" src="~/img/logo_confluences.png" alt="Logo Confluences" />
+        <p class="home-hero-tagline">Intégration par l'autonomisation</p>
+    </div>
+    <div class="home-section-header">
+        <p class="home-section-eyebrow">Qui sommes-nous</p>
+        <h2 class="home-section-title">L'association Confluences</h2>
+    </div>
+    <div class="home-missions">
+        <div class="home-mission">
+            <div class="home-mission-icon"><i class="material-icons">groups</i></div>
+            <p class="home-mission-title">Intégration des migrants</p>
+            <p class="home-mission-text">L'association Confluences s'est donné pour but de contribuer à l'intégration des migrants par leur autonomisation.</p>
+        </div>
+        <div class="home-mission">
+            <div class="home-mission-icon"><i class="material-icons">school</i></div>
+            <p class="home-mission-title">Formations et cours</p>
+            <p class="home-mission-text">Confluences organise des cours de français, des formations et crée des projets d'insertion socio-professionnelle.</p>
+        </div>
+        <div class="home-mission">
+            <div class="home-mission-icon"><i class="material-icons">connect_without_contact</i></div>
+            <p class="home-mission-title">Réseaux de contacts</p>
+            <p class="home-mission-text">Confluences œuvre à développer des réseaux de contacts pour mettre en valeur les ressources des migrants.</p>
+        </div>
+    </div>
+
+    <div class="home-section-header">
+        <p class="home-section-eyebrow">L'équipe</p>
+        <h2 class="home-section-title">Notre équipe</h2>
+        <p class="home-section-sub">Des professionnels engagés pour votre intégration</p>
+    </div>
+    <div class="home-team">
+        @foreach (var teacher in Model.OrderBy(t => t.Firstname))
+        {
+            <div class="home-member">
+                <div class="home-member-photo">
+                    <img src="@(ViewData["URLAPI"] + teacher.PathImage)" alt="@teacher.Firstname @teacher.LastName" />
+                    <div class="home-member-overlay">
+                        <a href="tel:@teacher.PhoneNumber" class="home-member-call">
+                            <i class="material-icons">call</i> Appeler
+                        </a>
+                    </div>
+                </div>
+                <div class="home-member-info">
+                    <p class="home-member-name">@teacher.Firstname @teacher.LastName</p>
+                    @if (teacher.Firstname == "Jean-Marc")
+                    {
+                        <span class="home-member-badge badge-admin">Administration</span>
+                    }
+                    else if (teacher.Firstname == "Marie-Laure")
+                    {
+                        <span class="home-member-badge badge-stage">Stages</span>
+                    }
+                    else
+                    {
+                        <span class="home-member-badge badge-teaching">Enseignement</span>
+                    }
+                    <a href="tel:@teacher.PhoneNumber" class="home-member-phone">
+                        <i class="material-icons">phone_iphone</i> @teacher.PhoneNumber
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="home-stats">
+        <div class="home-stat">
+            <div class="home-stat-num">50+</div>
+            <div class="home-stat-label">Étudiants accompagnés</div>
+        </div>
+        <div class="home-stat">
+            <div class="home-stat-num">15+</div>
+            <div class="home-stat-label">Stages réalisés</div>
+        </div>
+        <div class="home-stat">
+            <div class="home-stat-num">4</div>
+            <div class="home-stat-label">Enseignants dédiés</div>
+        </div>
+        <div class="home-stat">
+            <div class="home-stat-num">100%</div>
+            <div class="home-stat-label">Engagement</div>
+        </div>
+    </div>
+
+</div>

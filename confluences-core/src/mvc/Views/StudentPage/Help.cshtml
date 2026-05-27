@@ -1,167 +1,114 @@
 ﻿@model mvc.Models.AspNetUser
 @{
-    ViewData["Title"] = "Centre d'Aide";
+    ViewData["Title"] = "Centre d'aide";
 }
 
 <style>
-    :root {
-        --bg-gradient: linear-gradient(135deg, #f0f4ff 0%, #f1fff5 50%, #ffffff 100%);
-        --primary-modern: #4e73df;
-        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-    }
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+    .sp-root { font-family: 'DM Sans', sans-serif; color: #1a1a2e; }
 
-    body, .bgImage {
-        background: var(--bg-gradient) !important;
-        background-attachment: fixed !important;
-        background-image: none !important;
-        font-family: 'Inter', sans-serif;
-        color: #2e3d49;
-        min-height: 100vh;
-        margin: 0;
-    }
+    .sp-page-header { margin-bottom: 2rem; }
+    .sp-page-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; margin: 0 0 6px; }
+    .sp-page-title { font-family: 'Lora', serif; font-size: 26px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .sp-page-sub { font-size: 13px; color: #6c757d; margin: 4px 0 0; }
 
-    .help-container {
-        padding-top: 5rem;
-        padding-bottom: 5rem;
-    }
+    .sp-card { background: #fff; border-radius: 20px; border: 1px solid #f1f3f9; box-shadow: 0 2px 16px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 1.5rem; }
 
-    .glass-card {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        border-radius: 30px;
-        padding: 3rem;
-        box-shadow: var(--card-shadow);
-        max-width: 900px;
-        margin: 0 auto;
-    }
+    .sp-video-wrap { border-radius: 16px; overflow: hidden; margin-bottom: 1.5rem; border: 1px solid #f1f3f9; }
 
-    .video-wrapper {
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-        border: 1px solid rgba(0,0,0,0.05);
-        margin-bottom: 2.5rem;
+    .sp-lang-section { padding: 20px 24px; }
+    .sp-lang-title { font-size: 12px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #aaa; margin: 0 0 12px; }
+    .sp-lang-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+    .sp-lang-btn {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: #f8f9fc; border: 1px solid #eef0f7;
+        border-radius: 10px; padding: 8px 16px;
+        font-size: 13px; font-weight: 500; color: #1a1a2e;
+        cursor: pointer; font-family: 'DM Sans', sans-serif;
+        transition: all 0.15s;
     }
+    .sp-lang-btn:hover { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+    .sp-lang-btn i { font-size: 12px; }
 
-    .section-title {
-        font-weight: 800;
-        font-size: 2rem;
-        color: #2b2d42;
-        margin-bottom: 1rem;
-    }
+    .sp-empty { padding: 40px 24px; text-align: center; color: #aaa; font-size: 13px; }
+    .sp-empty i { font-size: 28px; display: block; margin-bottom: 10px; color: #eef0f7; }
 
-    .language-section {
-        background: white;
-        border-radius: 20px;
-        padding: 2rem;
-        border: 1px solid rgba(0,0,0,0.03);
-    }
-
-    .btn-lang {
-        background: #f8f9fc;
-        border: 2px solid #eef0f7;
-        color: #4e73df;
-        padding: 0.8rem 1.5rem;
-        border-radius: 15px;
-        font-weight: 700;
-        transition: all 0.2s;
-        margin: 5px;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .btn-lang:hover {
-        background: var(--primary-modern);
-        color: white;
-        border-color: var(--primary-modern);
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(78, 115, 223, 0.2);
-    }
-
-    .btn-lang i { font-size: 1.1rem; }
-
-    .help-hint {
-        font-size: 0.9rem;
-        color: #858796;
-        margin-bottom: 2rem;
-    }
+    .sp-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #aaa; text-decoration: none; transition: color 0.15s; margin-top: 1rem; }
+    .sp-back:hover { color: #1a1a2e; text-decoration: none; }
 </style>
 
 <partial name="_Notification.cshtml" />
 
-<div class="container help-container">
-    <div class="glass-card text-center">
-        <header class="mb-4">
-            <h1 class="section-title">Comment ça marche ?</h1>
-            <p class="help-hint">Regardez la vidéo ci-dessous pour apprendre à utiliser votre espace de cours.</p>
-        </header>
+<div class="container-fluid py-4 px-md-4 sp-root">
+    <div class="sp-page-header">
+        <p class="sp-page-eyebrow">Support</p>
+        <h1 class="sp-page-title">Centre d'aide</h1>
+        <p class="sp-page-sub">Apprenez à utiliser votre espace de cours</p>
+    </div>
 
-       <div class="video-wrapper">
-    <div class="embed-responsive embed-responsive-16by9">
+    <div style="max-width:720px;">
+
         @if (Model.SessionStudents != null && Model.SessionStudents.Any())
         {
-            <iframe class="embed-responsive-item" 
-                    src="@Model.SessionStudents.First().Session.SchoolClassRoom.ExplanationVideoLink" 
-                    allowfullscreen></iframe>
+            var session = Model.SessionStudents.First().Session;
+
+            <div class="sp-card">
+                <div class="sp-video-wrap">
+                    <div class="embed-responsive embed-responsive-16by9">
+                        <iframe class="embed-responsive-item"
+                                src="@session.SchoolClassRoom.ExplanationVideoLink"
+                                allowfullscreen></iframe>
+                    </div>
+                </div>
+
+                @if (session.SchoolClassRoom.SchoolClassRoomExplanations.Any())
+                {
+                    <div class="sp-lang-section">
+                        <p class="sp-lang-title">Explications audio dans une autre langue</p>
+                        <div class="sp-lang-btns">
+                            @foreach (var explanation in session.SchoolClassRoom.SchoolClassRoomExplanations)
+                            {
+                                <button class="sp-lang-btn" value="@explanation.AudioLink">
+                                    <i class="fas fa-volume-up"></i> @explanation.LanguageName
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
         }
         else
         {
-            <div class="p-5 text-center">
-                <i class="fas fa-exclamation-triangle fa-2x text-warning mb-3"></i>
-                <p>Aucune session active trouvée pour votre profil.</p>
+            <div class="sp-card">
+                <div class="sp-empty">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Aucune session active trouvée pour votre profil.
+                </div>
             </div>
         }
-    </div>
-</div>
 
-<div class="language-section shadow-sm">
-    <h5 class="font-weight-bold mb-3 text-dark">Besoin d'explications dans une autre langue ?</h5>
-    <div class="d-flex flex-wrap justify-content-center">
-        @if (Model.SessionStudents != null && Model.SessionStudents.Any())
-        {
-            @foreach (var explanation in Model.SessionStudents.First().Session.SchoolClassRoom.SchoolClassRoomExplanations)
-            {
-                <button class="btn btn-lang" value="@explanation.AudioLink">
-                    <i class="fas fa-volume-up"></i> @explanation.LanguageName
-                </button>
-            }
-        }
-    </div>
-</div>
+        <a href="/" class="sp-back">
+            <i class="fas fa-arrow-left"></i> Retour au tableau de bord
+        </a>
 
-        <div class="mt-5">
-            <a href="/" class="text-muted small text-decoration-none">
-                <i class="fas fa-arrow-left mr-1"></i> Retour au tableau de bord
-            </a>
-        </div>
     </div>
 </div>
 
 @section Scripts {
-    <script>
-        // Module Soundboard optimisé
-        const Soundboard = {
-            audio: new Audio(),
-            init: function () {
-                document.querySelectorAll(".btn-lang").forEach(btn => {
-                    btn.addEventListener("click", this.play.bind(this));
+<script>
+    const Soundboard = {
+        audio: new Audio(),
+        init() {
+            document.querySelectorAll(".sp-lang-btn").forEach(btn => {
+                btn.addEventListener("click", e => {
+                    const url = e.currentTarget.value;
+                    if (!url) return;
+                    this.audio.src = url;
+                    this.audio.play().catch(() => alert("Impossible de lire l'audio."));
                 });
-            },
-            play: function (e) {
-                const url = e.currentTarget.value;
-                if (!url) return;
-                
-                this.audio.src = url;
-                this.audio.play().catch(err => {
-                    console.error("Erreur de lecture audio : ", err);
-                    alert("Impossible de lire l'audio. Vérifiez votre connexion.");
-                });
-            }
-        };
-
-        $(document).ready(() => Soundboard.init());
-    </script>
+            });
+        }
+    };
+    $(document).ready(() => Soundboard.init());
+</script>
 }

@@ -1,75 +1,76 @@
 ﻿@model mvc.Models.Theory
 
 @{
-    ViewData["Title"] = "Supprimer";
+    ViewData["Title"] = "Supprimer un cours";
 }
 
-<br />
-<br />
-<br />
-<br />
-<body data-parallax="true" class="bgImage">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header card-header-primary card-header-icon">
-                        <div class="card-icon">
-                            <h4 class="card-title">@ViewData["Title"]</h4>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="toolbar">
-                            <!--        Here you can write extra buttons/actions for the toolbar              -->
-                        </div>
-                        <h3>Êtes-vous sur de vouloir supprimer ce cours ?</h3>
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+    .hw-root { font-family: 'DM Sans', sans-serif; }
+    .hw-card { background: #fff; border-radius: 20px; border: 1px solid #f1f3f9; box-shadow: 0 4px 24px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 2rem; }
+    .hw-topbar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #f1f3f9; gap: 12px; flex-wrap: wrap; }
+    .hw-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; margin: 0 0 4px; }
+    .hw-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .hw-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #6c757d; text-decoration: none; border: 1px solid #eef0f7; border-radius: 10px; padding: 7px 14px; transition: all 0.15s; }
+    .hw-back:hover { background: #f8f9fc; color: #1a1a2e; text-decoration: none; }
+    .hw-body { padding: 1.5rem; }
+    .hw-warning { display: flex; align-items: center; gap: 10px; background: #FCEBEB; border: 1px solid #F09595; border-radius: 12px; padding: 14px 16px; margin-bottom: 1.5rem; font-size: 13px; color: #A32D2D; font-weight: 500; }
+    .hw-dl { display: grid; grid-template-columns: 180px 1fr; gap: 0; margin-bottom: 1.5rem; }
+    .hw-dt { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #aaa; padding: 12px 0; border-bottom: 1px solid #f1f3f9; display: flex; align-items: center; }
+    .hw-dd { font-size: 13px; color: #1a1a2e; padding: 12px 0; border-bottom: 1px solid #f1f3f9; margin: 0; word-break: break-all; }
+    .hw-actions { display: flex; align-items: center; gap: 10px; }
+    .hw-btn-delete { display: inline-flex; align-items: center; gap: 6px; background: #A32D2D; color: #fff; border: none; border-radius: 10px; padding: 9px 20px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.15s; }
+    .hw-btn-delete:hover { opacity: 0.85; }
+    .hw-btn-cancel { display: inline-flex; align-items: center; gap: 6px; background: #f8f9fc; color: #6c757d; border: 1px solid #eef0f7; border-radius: 10px; padding: 9px 20px; font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.15s; }
+    .hw-btn-cancel:hover { background: #eef0f7; color: #1a1a2e; text-decoration: none; }
+</style>
 
-                        <div>
-                            <dl class="row">
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.TheoryDate)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.TheoryDate)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.TheoryName)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.TheoryName)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.TheoryLink)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.TheoryLink)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.HomeworkV2)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.HomeworkV2.HomeworkV2name)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.Teacher)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.Teacher.Id)
-                                </dd>
-                            </dl>
+<div class="container-fluid py-4 px-md-4 hw-root">
+    <div class="hw-card" style="max-width:560px;">
 
-                            <form asp-action="Delete">
-                                <input type="hidden" asp-for="TheoryId" />
-                                <input type="submit" value="Supprimer" class="btn btn-danger" /> |
-                                <a href="javascript:history.back()">Revenir à la page précédente</a>
-                            </form>
-                        </div>
-                    </div>
-                    <!-- end content-->
-                </div>
-                <!--  end card  -->
+        <div class="hw-topbar">
+            <div>
+                <p class="hw-eyebrow">Cours</p>
+                <h1 class="hw-title">Supprimer un cours</h1>
             </div>
-            <!-- end col-md-12 -->
+            <a href="javascript:history.back()" class="hw-back">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
         </div>
+
+        <div class="hw-body">
+            <div class="hw-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                Êtes-vous sûr de vouloir supprimer ce cours ? Cette action est irréversible.
+            </div>
+
+            <div class="hw-dl">
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.TheoryDate)</span>
+                <span class="hw-dd">@Model.TheoryDate.ToString("dd MMM yyyy")</span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.TheoryName)</span>
+                <span class="hw-dd">@Html.DisplayFor(model => model.TheoryName)</span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.TheoryLink)</span>
+                <span class="hw-dd">@Html.DisplayFor(model => model.TheoryLink)</span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.HomeworkV2)</span>
+                <span class="hw-dd">@Html.DisplayFor(model => model.HomeworkV2.HomeworkV2name)</span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.Teacher)</span>
+                <span class="hw-dd">@Html.DisplayFor(model => model.Teacher.Id)</span>
+            </div>
+
+            <form asp-action="Delete" class="hw-actions">
+                <input type="hidden" asp-for="TheoryId" />
+                <button type="submit" class="hw-btn-delete">
+                    <i class="fas fa-trash"></i> Supprimer définitivement
+                </button>
+                <a href="javascript:history.back()" class="hw-btn-cancel">
+                    Annuler
+                </a>
+            </form>
+        </div>
+
     </div>
-</body>
+</div>

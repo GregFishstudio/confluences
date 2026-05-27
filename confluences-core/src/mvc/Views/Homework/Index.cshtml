@@ -1,124 +1,65 @@
-﻿@model IEnumerable<mvc.Models.Homework>
+@model IEnumerable<mvc.Models.Homework>
 
 @{
     ViewData["Title"] = "Gestion des Devoirs";
 }
 
 <style>
-    :root {
-        --bg-gradient: linear-gradient(135deg, #f0f4ff 0%, #f1fff5 50%, #ffffff 100%);
-        --primary-modern: #4e73df;
-        --border-soft: rgba(0, 0, 0, 0.06);
-        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-    }
-
-    body, .bgImage {
-        background: var(--bg-gradient) !important;
-        background-attachment: fixed !important;
-        font-family: 'Inter', 'Segoe UI', sans-serif;
-        color: #2e3d49;
-    }
-
-    /* Header Glassmorphism */
-    .header-glass {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        border-radius: 20px;
-        padding: 1.5rem 2rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
-        margin-bottom: 2rem;
-    }
-
-    /* Table Container */
-    .admin-card {
-        background: #ffffff;
-        border-radius: 24px;
-        border: 1px solid var(--border-soft);
-        box-shadow: var(--card-shadow);
-        overflow: hidden;
-    }
-
-    .custom-table thead th {
-        background-color: #f8f9fc;
-        color: #858796;
-        font-weight: 700;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        letter-spacing: 0.05em;
-        padding: 1.2rem 1.5rem;
-        border: none;
-    }
-
-    .custom-table tbody td {
-        padding: 1.2rem 1.5rem;
-        vertical-align: middle;
-        border-top: 1px solid #f1f3f9;
-        font-size: 0.9rem;
-    }
-
-    /* Badge Styling */
-    .type-badge {
-        padding: 0.4rem 0.8rem;
-        border-radius: 10px;
-        font-weight: 700;
-        font-size: 0.75rem;
-        text-transform: uppercase;
-    }
-    .badge-homework { background: #e0e7ff; color: #4338ca; }
-
-    .date-pill {
-        background: #f0f2f5;
-        padding: 0.4rem 0.8rem;
-        border-radius: 10px;
-        font-weight: 600;
-        color: #4a5568;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    /* Action Buttons */
-    .action-btn-group { display: flex; gap: 8px; justify-content: flex-end; }
-    
-    .btn-circle-sm {
-        width: 35px; height: 35px;
-        display: flex; align-items: center; justify-content: center;
-        border-radius: 10px;
-        background: #f8f9fc;
-        border: 1px solid #eef0f7;
-        color: #4e73df;
-        transition: 0.2s;
-    }
-    .btn-circle-sm:hover { background: #4e73df; color: white; transform: translateY(-2px); }
-    .btn-circle-sm.delete:hover { background: #e74a3b; color: white; border-color: #e74a3b; }
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+    .hw-root { font-family: 'DM Sans', sans-serif; }
+    .hw-card { background: #fff; border-radius: 20px; border: 1px solid #f1f3f9; box-shadow: 0 4px 24px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 2rem; }
+    .hw-topbar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid #f1f3f9; gap: 12px; flex-wrap: wrap; }
+    .hw-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; margin: 0 0 4px; }
+    .hw-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .hw-subtitle { font-size: 12px; color: #aaa; margin: 4px 0 0; }
+    .hw-btn-new { display: inline-flex; align-items: center; gap: 6px; background: #1a1a2e; color: #fff; border-radius: 10px; padding: 9px 18px; font-size: 13px; font-weight: 500; text-decoration: none; transition: opacity 0.15s; white-space: nowrap; }
+    .hw-btn-new:hover { opacity: 0.8; color: #fff; text-decoration: none; }
+    .hw-toolbar { display: flex; align-items: center; gap: 10px; padding: 1rem 1.5rem; border-bottom: 1px solid #f1f3f9; }
+    .hw-search { flex: 1; max-width: 320px; background: #f8f9fc; border: 1px solid #eef0f7; border-radius: 10px; padding: 8px 14px; font-size: 13px; color: #1a1a2e; font-family: 'DM Sans', sans-serif; outline: none; }
+    .hw-search:focus { border-color: #c0c8e8; background: #fff; }
+    .hw-table { width: 100%; border-collapse: collapse; }
+    .hw-table thead th { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #aaa; padding: 10px 1.5rem; border-bottom: 1px solid #f1f3f9; text-align: left; background: #f8f9fc; }
+    .hw-table tbody tr { border-bottom: 1px solid #f1f3f9; transition: background 0.1s; }
+    .hw-table tbody tr:hover { background: #fafbfe; }
+    .hw-table tbody td { padding: 12px 1.5rem; font-size: 13px; color: #1a1a2e; vertical-align: middle; }
+    .hw-date-pill { display: inline-flex; align-items: center; gap: 5px; background: #f0f2f5; border-radius: 8px; padding: 4px 10px; font-size: 12px; font-weight: 500; color: #4a5568; }
+    .hw-badge { display: inline-block; padding: 3px 9px; border-radius: 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; background: #e0e7ff; color: #4338ca; }
+    .hw-teacher { display: flex; align-items: center; gap: 6px; }
+    .hw-avatar-sm { width: 26px; height: 26px; border-radius: 50%; background: #1a1a2e; color: #fff; font-size: 10px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .hw-actions { display: flex; gap: 5px; justify-content: flex-end; }
+    .hw-action-btn { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; background: #f8f9fc; color: #555; border: 1px solid #eef0f7; text-decoration: none; font-size: 11px; transition: all 0.15s; }
+    .hw-action-btn:hover { background: #1a1a2e; color: #fff; border-color: #1a1a2e; text-decoration: none; }
+    .hw-action-btn.danger:hover { background: #A32D2D; border-color: #A32D2D; color: #fff; }
+    .hw-footer { padding: 10px 1.5rem; font-size: 12px; color: #aaa; border-top: 1px solid #f1f3f9; }
 </style>
 
-<div class="container-fluid py-4 px-md-5">
+<div class="container-fluid py-4 px-md-4 hw-root">
+    <div class="hw-card">
 
-    <div class="header-glass d-flex flex-wrap justify-content-between align-items-center mt-3">
-        <div>
-            <h1 class="h3 font-weight-bold mb-1">📚 @ViewData["Title"]</h1>
-            <p class="text-muted small mb-0">
+        <div class="hw-topbar">
+            <div>
+                <p class="hw-eyebrow">Pédagogie</p>
+                <h1 class="hw-title">Gestion des Devoirs</h1>
                 @if (ViewData["SchoolClassRoomId"] != null && Model.Any())
                 {
-                    <span>Classe <strong>@Model.First().Session.SchoolClassRoom.SchoolClassRoomName</strong> — Session @Model.First().Session.SessionNumberId (@Model.First().Session.DateStart.Year)</span>
+                    <p class="hw-subtitle">Classe <strong>@Model.First().Session.SchoolClassRoom.SchoolClassRoomName</strong> — Session @Model.First().Session.SessionNumberId (@Model.First().Session.DateStart.Year)</p>
                 }
                 else
                 {
-                    <span>Liste globale des devoirs assignés</span>
+                    <p class="hw-subtitle">Liste globale des devoirs assignés</p>
                 }
-            </p>
+            </div>
+            <a asp-action="Create" asp-route-sessionid="@ViewData["SessionId"]" class="hw-btn-new">
+                <i class="fas fa-plus"></i> Nouveau devoir
+            </a>
         </div>
-        <a class="btn btn-primary rounded-pill px-4 shadow-sm font-weight-bold" asp-action="Create" asp-route-sessionid="@ViewData["SessionId"]">
-            <i class="fas fa-plus-circle mr-2"></i> Nouveau devoir
-        </a>
-    </div>
 
-    <div class="admin-card">
+        <div class="hw-toolbar">
+            <input type="text" id="hwSearch" class="hw-search" placeholder="Rechercher un devoir...">
+        </div>
+
         <div class="table-responsive">
-            <table id="homeworkTable" class="table custom-table mb-0">
+            <table class="hw-table">
                 <thead>
                     <tr>
                         <th>Date</th>
@@ -126,46 +67,33 @@
                         <th>Exercice</th>
                         <th>Type</th>
                         <th>Formateur</th>
-                        <th class="text-right">Actions</th>
+                        <th style="text-align:right;">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @foreach (var item in Model) {
+                <tbody id="hwTableBody">
+                    @foreach (var item in Model)
+                    {
                         <tr>
                             <td>
-                                <span class="date-pill">
-                                    <i class="far fa-calendar-alt text-primary"></i>
+                                <span class="hw-date-pill">
+                                    <i class="far fa-calendar-alt" style="color:#4e73df;"></i>
                                     @item.HomeworkDate.ToString("dd MMM yyyy")
                                 </span>
                             </td>
+                            <td style="font-weight:600;">@Html.DisplayFor(modelItem => item.ClassName)</td>
+                            <td style="color:#6c757d;">@Html.DisplayFor(modelItem => item.ExerciceName)</td>
+                            <td><span class="hw-badge">@Html.DisplayFor(modelItem => item.HomeworkType.HomeworkTypeName)</span></td>
                             <td>
-                                <span class="font-weight-bold text-dark">@Html.DisplayFor(modelItem => item.ClassName)</span>
-                            </td>
-                            <td>
-                                <span class="text-muted">@Html.DisplayFor(modelItem => item.ExerciceName)</span>
-                            </td>
-                            <td>
-                                <span class="type-badge badge-homework">
-                                    @Html.DisplayFor(modelItem => item.HomeworkType.HomeworkTypeName)
-                                </span>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-user-circle text-muted mr-2"></i>
-                                    <span class="small">@item.Teacher.Firstname</span>
+                                <div class="hw-teacher">
+                                    <span class="hw-avatar-sm">@(item.Teacher.Firstname?.Substring(0,1))</span>
+                                    <span style="font-size:12px;">@item.Teacher.Firstname</span>
                                 </div>
                             </td>
                             <td>
-                                <div class="action-btn-group">
-                                    <a asp-action="Edit" asp-route-id="@item.HomeworkId" class="btn-circle-sm" title="Modifier">
-                                        <i class="fas fa-pen fa-sm"></i>
-                                    </a>
-                                    <a asp-action="Details" asp-route-id="@item.HomeworkId" class="btn-circle-sm" title="Détails">
-                                        <i class="fas fa-eye fa-sm"></i>
-                                    </a>
-                                    <a asp-action="Delete" asp-route-id="@item.HomeworkId" class="btn-circle-sm delete" title="Supprimer">
-                                        <i class="fas fa-trash fa-sm"></i>
-                                    </a>
+                                <div class="hw-actions">
+                                    <a asp-action="Edit" asp-route-id="@item.HomeworkId" class="hw-action-btn" title="Modifier"><i class="fas fa-pen"></i></a>
+                                    <a asp-action="Details" asp-route-id="@item.HomeworkId" class="hw-action-btn" title="Détails"><i class="fas fa-eye"></i></a>
+                                    <a asp-action="Delete" asp-route-id="@item.HomeworkId" class="hw-action-btn danger" title="Supprimer"><i class="fas fa-trash"></i></a>
                                 </div>
                             </td>
                         </tr>
@@ -173,26 +101,32 @@
                 </tbody>
             </table>
         </div>
+
+        <div class="hw-footer" id="hwFooter"></div>
     </div>
 </div>
 
 @section Scripts {
     <script>
-        $(document).ready(function () {
-            $('#homeworkTable').DataTable({
-                "pagingType": "simple_numbers",
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/French.json",
-                    "searchPlaceholder": "Rechercher un devoir..."
-                },
-                "order": [[0, "desc"]],
-                "columnDefs": [
-                    { "orderable": false, "targets": 5 }
-                ],
-                "dom": "<'row p-4'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
-                       "<'row'<'col-sm-12'tr>>" +
-                       "<'row p-4'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
-            });
-        });
+        (function () {
+            var input = document.getElementById('hwSearch');
+            var tbody = document.getElementById('hwTableBody');
+            var footer = document.getElementById('hwFooter');
+            var total = tbody.rows.length;
+
+            function update() {
+                var q = input.value.toLowerCase();
+                var visible = 0;
+                for (var i = 0; i < tbody.rows.length; i++) {
+                    var match = tbody.rows[i].textContent.toLowerCase().indexOf(q) >= 0;
+                    tbody.rows[i].style.display = match ? '' : 'none';
+                    if (match) visible++;
+                }
+                footer.textContent = q ? (visible + ' résultat' + (visible !== 1 ? 's' : '') + ' sur ' + total) : (total + ' devoir' + (total !== 1 ? 's' : ''));
+            }
+
+            input.addEventListener('input', update);
+            update();
+        })();
     </script>
 }

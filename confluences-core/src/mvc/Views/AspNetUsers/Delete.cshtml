@@ -1,155 +1,82 @@
-﻿@model mvc.Models.AspNetUser
+@model mvc.Models.AspNetUser
 
 @{
-    ViewData["Title"] = "Supprimer";
+    ViewData["Title"] = "Supprimer un utilisateur";
 }
-<br />
-<br />
-<br />
-<br />
-<body data-parallax="true" class="bgImage">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header card-header-primary card-header-icon">
-                        <div class="card-icon">
-                            <h4 class="card-title">@ViewData["Title"]</h4>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="toolbar">
-                            <!--        Here you can write extra buttons/actions for the toolbar              -->
-                        </div>
-                        <h3>Êtes-vous sur de vouloir supprimer cette donnée ?</h3>
-                        <div>
-                            <h4>Utilisateur-trice</h4>
-                            <hr />
-                            <dl class="row">
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.AccessFailedCount)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.AccessFailedCount)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.ConcurrencyStamp)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.ConcurrencyStamp)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.Email)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.Email)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.EmailConfirmed)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.EmailConfirmed)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.LockoutEnabled)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.LockoutEnabled)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.LockoutEnd)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.LockoutEnd)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.NormalizedEmail)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.NormalizedEmail)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.NormalizedUserName)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.NormalizedUserName)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.PasswordHash)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.PasswordHash)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.PhoneNumber)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.PhoneNumber)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.PhoneNumberConfirmed)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.PhoneNumberConfirmed)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.SecurityStamp)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.SecurityStamp)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.TwoFactorEnabled)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.TwoFactorEnabled)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.UserName)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.UserName)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.Birthday)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.Birthday)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.Firstname)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.Firstname)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.LastName)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.LastName)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.Gender)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.Gender.GenderName)
-                                </dd>
-                            </dl>
 
-                            <form asp-action="Delete">
-                                <input type="hidden" asp-for="Id" />
-                                <input type="submit" value="Supprimer" class="btn btn-danger" /> |
-                                <a asp-action="Index">Retourner à la liste</a>
-                            </form>
-                        </div>
-                    </div>
-                    <!-- end content-->
-                </div>
-                <!--  end card  -->
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+    .hw-root { font-family: 'DM Sans', sans-serif; }
+    .hw-card { background: #fff; border-radius: 20px; border: 1px solid #f1f3f9; box-shadow: 0 4px 24px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 2rem; }
+    .hw-topbar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid #f1f3f9; gap: 12px; flex-wrap: wrap; }
+    .hw-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; margin: 0 0 4px; }
+    .hw-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .hw-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #6c757d; text-decoration: none; border: 1px solid #eef0f7; border-radius: 10px; padding: 7px 14px; transition: all 0.15s; }
+    .hw-back:hover { background: #f8f9fc; color: #1a1a2e; text-decoration: none; }
+    .hw-body { padding: 1.5rem; }
+    .hw-warning { display: flex; align-items: center; gap: 10px; background: #FCEBEB; border: 1px solid #F09595; border-radius: 12px; padding: 14px 16px; margin-bottom: 1.5rem; font-size: 13px; color: #A32D2D; font-weight: 500; }
+    .hw-user-row { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid #f1f3f9; margin-bottom: 1rem; }
+    .hw-avatar { width: 52px; height: 52px; border-radius: 50%; background: #1a1a2e; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 600; color: #fff; text-transform: uppercase; flex-shrink: 0; }
+    .hw-user-name { font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0 0 2px; }
+    .hw-user-sub { font-size: 12px; color: #aaa; }
+    .hw-dl { display: grid; grid-template-columns: 160px 1fr; gap: 0; margin-bottom: 1.5rem; }
+    .hw-dt { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #aaa; padding: 10px 0; border-bottom: 1px solid #f1f3f9; display: flex; align-items: center; }
+    .hw-dd { font-size: 13px; color: #1a1a2e; padding: 10px 0; border-bottom: 1px solid #f1f3f9; margin: 0; }
+    .hw-actions { display: flex; align-items: center; gap: 10px; padding-top: 0.5rem; }
+    .hw-btn-delete { display: inline-flex; align-items: center; gap: 6px; background: #A32D2D; color: #fff; border: none; border-radius: 10px; padding: 9px 20px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.15s; }
+    .hw-btn-delete:hover { opacity: 0.85; }
+    .hw-btn-cancel { display: inline-flex; align-items: center; gap: 6px; background: #f8f9fc; color: #6c757d; border: 1px solid #eef0f7; border-radius: 10px; padding: 9px 20px; font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.15s; }
+    .hw-btn-cancel:hover { background: #eef0f7; color: #1a1a2e; text-decoration: none; }
+</style>
+
+<div class="container-fluid py-4 px-md-4 hw-root">
+    <div class="hw-card" style="max-width:560px;">
+
+        <div class="hw-topbar">
+            <div>
+                <p class="hw-eyebrow">Utilisateurs</p>
+                <h1 class="hw-title">Supprimer un utilisateur</h1>
             </div>
-            <!-- end col-md-12 -->
+            <a asp-action="Index" class="hw-back">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
         </div>
+
+        <div class="hw-body">
+            <div class="hw-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                Êtes-vous sûr de vouloir supprimer cet-te utilisateur-trice ? Cette action est irréversible.
+            </div>
+
+            <div class="hw-user-row">
+                <div class="hw-avatar">
+                    @(Model.Firstname?.Length > 0 ? Model.Firstname[0].ToString() : "")@(Model.LastName?.Length > 0 ? Model.LastName[0].ToString() : "")
+                </div>
+                <div>
+                    <p class="hw-user-name">@Model.Firstname @Model.LastName</p>
+                    <p class="hw-user-sub">@Model.Email</p>
+                </div>
+            </div>
+
+            <div class="hw-dl">
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.UserName)</span>
+                <span class="hw-dd">@Html.DisplayFor(model => model.UserName)</span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.Birthday)</span>
+                <span class="hw-dd">@Model.Birthday.ToString("dd/MM/yyyy")</span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.Gender)</span>
+                <span class="hw-dd">@Html.DisplayFor(model => model.Gender.GenderName)</span>
+            </div>
+
+            <form asp-action="Delete" class="hw-actions">
+                <input type="hidden" asp-for="Id" />
+                <button type="submit" class="hw-btn-delete">
+                    <i class="fas fa-trash"></i> Supprimer définitivement
+                </button>
+                <a asp-action="Index" class="hw-btn-cancel">Annuler</a>
+            </form>
+        </div>
+
     </div>
-</body>
-
-
+</div>

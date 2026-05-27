@@ -1,35 +1,66 @@
-﻿@model mvc.Models.AnnouncePage
+@model mvc.Models.AnnouncePage
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Nouvelle annonce";
 }
 
-<h1>Create</h1>
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+    .hw-root { font-family: 'DM Sans', sans-serif; }
+    .hw-card { background: #fff; border-radius: 20px; border: 1px solid #f1f3f9; box-shadow: 0 4px 24px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 2rem; }
+    .hw-topbar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid #f1f3f9; gap: 12px; flex-wrap: wrap; }
+    .hw-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; margin: 0 0 4px; }
+    .hw-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .hw-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #6c757d; text-decoration: none; border: 1px solid #eef0f7; border-radius: 10px; padding: 7px 14px; transition: all 0.15s; }
+    .hw-back:hover { background: #f8f9fc; color: #1a1a2e; text-decoration: none; }
+    .hw-form-body { padding: 2rem 1.5rem; }
+    .hw-field { margin-bottom: 1.25rem; }
+    .hw-label { display: block; font-size: 12px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: #aaa; margin-bottom: 6px; }
+    .hw-input { width: 100%; background: #f8f9fc; border: 1px solid #eef0f7; border-radius: 10px; padding: 9px 14px; font-size: 13px; color: #1a1a2e; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.15s, background 0.15s; }
+    .hw-input:focus { border-color: #c0c8e8; background: #fff; box-shadow: 0 0 0 3px rgba(78,115,223,0.08); }
+    .hw-checkbox-field { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: #f8f9fc; border: 1px solid #eef0f7; border-radius: 10px; cursor: pointer; margin-bottom: 1.25rem; }
+    .hw-checkbox-field input[type="checkbox"] { width: 16px; height: 16px; accent-color: #1a1a2e; cursor: pointer; }
+    .hw-checkbox-label { font-size: 13px; color: #1a1a2e; cursor: pointer; margin: 0; }
+    .hw-validation { font-size: 12px; color: #A32D2D; margin-top: 4px; }
+    .hw-btn-save { display: inline-flex; align-items: center; gap: 6px; background: #1a1a2e; color: #fff; border: none; border-radius: 10px; padding: 9px 20px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.15s; }
+    .hw-btn-save:hover { opacity: 0.8; }
+</style>
 
-<h4>AnnouncePage</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="AnnouncePageName" class="control-label"></label>
-                <input asp-for="AnnouncePageName" class="form-control" />
-                <span asp-validation-for="AnnouncePageName" class="text-danger"></span>
+<div class="container-fluid py-4 px-md-4 hw-root">
+    <div class="hw-card" style="max-width:600px;">
+
+        <div class="hw-topbar">
+            <div>
+                <p class="hw-eyebrow">Annonces</p>
+                <h1 class="hw-title">Nouvelle annonce</h1>
             </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsActivated" /> @Html.DisplayNameFor(model => model.IsActivated)
-                </label>
+            <a asp-action="Index" class="hw-back">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+
+        <form asp-action="Create" class="hw-form-body">
+            <div asp-validation-summary="ModelOnly" class="hw-validation" style="margin-bottom:1rem;"></div>
+
+            <div class="hw-field">
+                <label asp-for="AnnouncePageName" class="hw-label"></label>
+                <input asp-for="AnnouncePageName" class="hw-input" />
+                <span asp-validation-for="AnnouncePageName" class="hw-validation"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
+
+            <label class="hw-checkbox-field">
+                <input type="checkbox" value="true" asp-for="IsActivated" />
+                <span class="hw-checkbox-label">@Html.DisplayNameFor(model => model.IsActivated)</span>
+            </label>
+
+            <button type="submit" class="hw-btn-save">
+                <i class="fas fa-save"></i> Créer
+            </button>
         </form>
+
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

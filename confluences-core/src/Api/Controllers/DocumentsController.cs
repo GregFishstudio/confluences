@@ -32,15 +32,15 @@ namespace Api.Controllers
             ILogger<DocumentsController> logger,
             UserManager<ApplicationUser> userManager)
         {
-            _db = db;
-            _env = env;
-            _logger = logger;
+            _db          = db;
+            _env         = env;
+            _logger      = logger;
             _userManager = userManager;
         }
 
-        // --------------------------------------------------
-        // --- ATTESTATION TRIMESTRE DE STAGE (CONSERVÉ) ---
-        // --------------------------------------------------
+        // ──────────────────────────────────────────────────────────────────────
+        // ATTESTATION TRIMESTRE DE STAGE (conservé)
+        // ──────────────────────────────────────────────────────────────────────
         [HttpGet("attestation-trimestre/{stagiaireId}")]
         public IActionResult AttestationTrimestre(
             string stagiaireId,
@@ -58,18 +58,15 @@ namespace Api.Controllers
             if (!stages.Any())
                 return NotFound("Aucun stage trouvé pour ce trimestre.");
 
-            var stagiaire = stages.First().Stagiaire;
-            var logoBytes = GetLogoBytes();
-
-            var doc = new AttestationTrimestreDocument(stagiaire, stages, year, trimestre, logoBytes);
-            var pdfBytes = doc.GeneratePdf();
-
-            return File(pdfBytes, "application/pdf", $"attestation-{stagiaireId}-{year}-{trimestre}.pdf");
+            var doc = new AttestationTrimestreDocument(
+                stages.First().Stagiaire, stages, year, trimestre, GetLogoBytes());
+            return File(doc.GeneratePdf(), "application/pdf",
+                $"attestation-{stagiaireId}-{year}-{trimestre}.pdf");
         }
 
-        // --------------------------------------------------
-        // --- BILAN DE STAGE (CONSERVÉ) ---
-        // --------------------------------------------------
+        // ──────────────────────────────────────────────────────────────────────
+        // BILAN DE STAGE (conservé)
+        // ──────────────────────────────────────────────────────────────────────
         [HttpGet("bilan/{id}")]
         public IActionResult BilanStage(int id)
         {
@@ -84,16 +81,14 @@ namespace Api.Controllers
             if (stage == null || stage.Stagiaire == null)
                 return NotFound($"Stage ID {id} non trouvé.");
 
-            var logoBytes = GetLogoBytes();
-            var doc = new BilanStageDocument(stage, stage.Stagiaire, logoBytes);
-            var pdfBytes = doc.GeneratePdf();
-
-            return File(pdfBytes, "application/pdf", $"bilan-stage-{id}-{stage.Stagiaire.LastName}.pdf");
+            var doc = new BilanStageDocument(stage, stage.Stagiaire, GetLogoBytes());
+            return File(doc.GeneratePdf(), "application/pdf",
+                $"bilan-stage-{id}-{stage.Stagiaire.LastName}.pdf");
         }
 
-        // --------------------------------------------------
-        // --- SAUVEGARDE DES BILANS DE SESSION (CONSERVÉ) ---
-        // --------------------------------------------------
+        // ──────────────────────────────────────────────────────────────────────
+        // SAUVEGARDE BILAN DE SESSION
+        // ──────────────────────────────────────────────────────────────────────
         [HttpPost("save-bilan-session")]
         public async Task<IActionResult> SaveBilanSession([FromBody] SaveBilanSessionRequest request)
         {
@@ -105,8 +100,8 @@ namespace Api.Controllers
 
             var report = await _db.SessionReports.FirstOrDefaultAsync(r =>
                 r.StagiaireId == request.UserId &&
-                r.Year == request.Year &&
-                r.Quarter == request.Quarter);
+                r.Year        == request.Year   &&
+                r.Quarter     == request.Quarter);
 
             bool isNew = (report == null);
             if (isNew)
@@ -114,21 +109,21 @@ namespace Api.Controllers
                 report = new SessionReport
                 {
                     StagiaireId = request.UserId,
-                    Year = request.Year,
-                    Quarter = request.Quarter,
-                    CreatedAt = DateTime.Now
+                    Year        = request.Year,
+                    Quarter     = request.Quarter,
+                    CreatedAt   = DateTime.Now,
                 };
                 _db.SessionReports.Add(report);
             }
 
-            report.UpdatedAt = DateTime.Now;
-            report.EvaluationText = request.EvaluationText;
-            report.FollowUpActions = request.FollowUpActions;
-            report.GlobalRate = request.GlobalRate;
-            report.SocialInsertionText = request.SocialInsertionText;
-            report.DigitalSkillsText = request.DigitalSkillsText;
+            report.UpdatedAt                  = DateTime.Now;
+            report.EvaluationText             = request.EvaluationText;
+            report.FollowUpActions            = request.FollowUpActions;
+            report.GlobalRate                 = request.GlobalRate;
+            report.SocialInsertionText        = request.SocialInsertionText;
+            report.DigitalSkillsText          = request.DigitalSkillsText;
             report.IndividualAccompanyingText = request.IndividualAccompanyingText;
-            report.HomeVisitsText = request.HomeVisitsText;
+            report.HomeVisitsText             = request.HomeVisitsText;
 
             if (request.SelectedWorkshops != null)
                 report.WorkshopsJson = JsonSerializer.Serialize(request.SelectedWorkshops);
@@ -144,6 +139,9 @@ namespace Api.Controllers
             }
         }
 
+        // ──────────────────────────────────────────────────────────────────────
+        // LECTURE DONNÉES BILAN DE SESSION
+        // ──────────────────────────────────────────────────────────────────────
         [HttpGet("bilan-session-data/{userId}")]
         public async Task<IActionResult> GetBilanSessionData(
             string userId,
@@ -154,30 +152,41 @@ namespace Api.Controllers
 
             var report = await _db.SessionReports
                 .AsNoTracking()
-                .Where(r => r.StagiaireId == userId && r.Year == year && r.Quarter == quarter)
+                .Where(r =>
+                    r.StagiaireId == userId &&
+                    r.Year        == year   &&
+                    r.Quarter     == quarter)
                 .Select(r => new
                 {
-                    r.StagiaireId, r.Year, r.Quarter,
-                    r.EvaluationText, r.FollowUpActions, r.GlobalRate,
-                    r.SocialInsertionText, r.DigitalSkillsText,
-                    r.IndividualAccompanyingText, r.HomeVisitsText, r.WorkshopsJson
+                    r.StagiaireId,
+                    r.Year,
+                    r.Quarter,
+                    r.EvaluationText,
+                    r.FollowUpActions,
+                    r.GlobalRate,
+                    r.SocialInsertionText,
+                    r.DigitalSkillsText,
+                    r.IndividualAccompanyingText,
+                    r.HomeVisitsText,
+                    r.WorkshopsJson,
                 })
                 .FirstOrDefaultAsync();
 
             return Ok(report);
         }
 
-        // --------------------------------------------------
-        // --- GÉNÉRATION PDF BILAN DE SESSION ---
-        // Utilise les vraies dates de la session en DB
-        // --------------------------------------------------
+        // ──────────────────────────────────────────────────────────────────────
+        // PDF — BILAN DE SESSION
+        // ──────────────────────────────────────────────────────────────────────
         [HttpGet("bilan-session/{userId}")]
         public async Task<IActionResult> GenerateBilanSessionPdf(
             string userId,
             [FromQuery] int year,
             [FromQuery] string trimestre,
             [FromQuery] string mesure,
-            [FromQuery] string? sessionName = null)
+            [FromQuery] string startDate  = null,   // date début session du calendrier
+            [FromQuery] string endDate    = null,   // date fin session du calendrier
+            [FromQuery] string sessionName = null)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return NotFound("Utilisateur introuvable.");
@@ -185,14 +194,15 @@ namespace Api.Controllers
             if (!trimestre.StartsWith("T")) trimestre = $"T{trimestre}";
 
             var report = await _db.SessionReports.FirstOrDefaultAsync(r =>
-                r.StagiaireId == userId && r.Year == year && r.Quarter == trimestre);
+                r.StagiaireId == userId &&
+                r.Year        == year   &&
+                r.Quarter     == trimestre);
 
-            if (report == null) return NotFound($"Aucun bilan trouvé pour {trimestre}/{year}.");
+            if (report == null)
+                return NotFound($"Aucun bilan trouvé pour {trimestre}/{year}.");
 
-            string courseName = DetermineCourseName(mesure, null);
-
-            // ── Vraies dates depuis la session en DB ──────────────────────────
-            var (startDate, endDate) = await ResolveSessionDates(year, trimestre, mesure, sessionName);
+            var (periodStart, periodEnd) = ResolveSessionDates(startDate, endDate, year, trimestre);
+            var activitiesSummary = await BuildActivitiesSummary(userId, periodStart, periodEnd);
 
             var doc = new BilanSessionDocument(
                 user,
@@ -204,37 +214,41 @@ namespace Api.Controllers
                 year,
                 trimestre,
                 GetLogoBytes(),
-                courseName,
-                startDate,
-                endDate,
+                DetermineCourseName(mesure, null),
+                periodStart,
+                periodEnd,
                 report.SocialInsertionText,
                 report.DigitalSkillsText,
                 report.IndividualAccompanyingText,
-                report.HomeVisitsText
+                report.HomeVisitsText,
+                activitiesSummary
             );
 
-            return File(doc.GeneratePdf(), "application/pdf", $"Bilan-Session-{user.LastName}.pdf");
+            return File(doc.GeneratePdf(), "application/pdf",
+                $"Bilan-Session-{user.LastName}.pdf");
         }
 
-        // --------------------------------------------------
-        // --- ATTESTATION DE SESSION ---
-        // Utilise les vraies dates de la session en DB
-        // --------------------------------------------------
+        // ──────────────────────────────────────────────────────────────────────
+        // PDF — ATTESTATION DE SESSION
+        // ──────────────────────────────────────────────────────────────────────
         [HttpGet("attestation-session/{userId}")]
         public async Task<IActionResult> GenerateAttestationSessionPdf(
             string userId,
             [FromQuery] int year,
             [FromQuery] string trimestre,
             [FromQuery] string mesure,
-            [FromQuery] string? sessionName = null)
+            [FromQuery] string startDate   = null,   // date début session du calendrier
+            [FromQuery] string endDate     = null,   // date fin session du calendrier
+            [FromQuery] string sessionName = null)
         {
             if (!trimestre.StartsWith("T")) trimestre = $"T{trimestre}";
 
-            // ── Vraies dates depuis la session en DB ──────────────────────────
-            var (startDate, endDate) = await ResolveSessionDates(year, trimestre, mesure, sessionName);
+            var (periodStart, periodEnd) = ResolveSessionDates(startDate, endDate, year, trimestre);
 
             var user = await _db.Users
-                .Include(u => u.SessionStudents).ThenInclude(ss => ss.Session).ThenInclude(s => s.SchoolClassRoom)
+                .Include(u => u.SessionStudents)
+                    .ThenInclude(ss => ss.Session)
+                    .ThenInclude(s  => s.SchoolClassRoom)
                 .SingleOrDefaultAsync(u => u.Id == userId);
 
             if (user == null) return NotFound("Stagiaire introuvable.");
@@ -242,279 +256,229 @@ namespace Api.Controllers
             string courseName = DetermineCourseName(mesure,
                 user.SessionStudents
                     .Select(ss => ss.Session)
-                    .FirstOrDefault(s => s.DateStart <= endDate && s.DateEnd >= startDate)
+                    .FirstOrDefault(s => s.DateStart <= periodEnd && s.DateEnd >= periodStart)
                     ?.SchoolClassRoom?.SchoolClassRoomName);
 
             var report = await _db.SessionReports.FirstOrDefaultAsync(r =>
-                r.StagiaireId == userId && r.Year == year && r.Quarter == trimestre);
+                r.StagiaireId == userId &&
+                r.Year        == year   &&
+                r.Quarter     == trimestre);
 
-            var presencesParActivite = await _db.AccompanyingPresences
-                .Where(ap => ap.UserId == userId && ap.Date >= startDate && ap.Date <= endDate)
-                .GroupBy(ap => ap.ActivityName)
-                .Select(g => new { ActivityKey = g.Key, Count = g.Count() })
-                .ToListAsync();
-
-            var activityKeys = presencesParActivite.Select(p => p.ActivityKey).ToList();
-            var columns = await _db.MatrixColumns
-                .Where(c => activityKeys.Contains(c.Key))
+            var allColumns = await _db.MatrixColumns
                 .Select(c => new { c.Key, c.Label, c.Type })
+                .OrderBy(c => c.Type).ThenBy(c => c.Label)
                 .ToListAsync();
 
-            var ateliersSuivis = presencesParActivite
-                .Join(columns, p => p.ActivityKey, c => c.Key,
-                      (p, c) => $"{c.Label}|{c.Type}|{p.Count}")
-                .OrderBy(a => a)
+            var presencesCount = await _db.AccompanyingPresences
+                .Where(ap => ap.UserId == userId && ap.Date >= periodStart && ap.Date <= periodEnd)
+                .GroupBy(ap => ap.ActivityName)
+                .Select(g => new { Key = g.Key, Count = g.Count() })
+                .ToListAsync();
+            var countByKey = presencesCount.ToDictionary(p => p.Key, p => p.Count);
+
+            var ateliersSuivis = allColumns
+                .Select(c => {
+                    int cnt = countByKey.TryGetValue(c.Key, out var n) ? n : 0;
+                    return $"{c.Label}|{c.Type}|{cnt}";
+                })
                 .ToList();
 
-            var doc = new AttestationSessionDocument(
-                user,
-                courseName,
-                user.OralLevel,
-                user.WrittenLevel,
-                ateliersSuivis,
-                report?.GlobalRate ?? 0,
-                year,
-                trimestre,
-                GetLogoBytes(),
-                GetSignatureBytes(),
-                startDate,   // ← vraies dates
-                endDate      // ← vraies dates
-            );
+            // Calculer le vrai taux de participation (fériés et vacances exclus du dénominateur)
+            var rawPresences = await _db.Presences
+                .AsNoTracking()
+                .Where(p => p.StagiaireId == userId && p.Date >= periodStart && p.Date <= periodEnd)
+                .ToDictionaryAsync(p => p.Date.Date, p => p.Statut);
 
-            return File(doc.GeneratePdf(), "application/pdf", $"Attestation-{user.LastName}.pdf");
+            var feriesSession = await _db.JoursFeries
+                .Where(f => f.Date >= periodStart && f.Date <= periodEnd)
+                .Select(f => f.Date.Date)
+                .ToListAsync();
+
+            var vacancesSession = await _db.PeriodesVacances
+                .Where(v => v.EndDate >= periodStart && v.StartDate <= periodEnd)
+                .ToListAsync();
+
+            bool IsVacanceSession(DateTime d) =>
+                vacancesSession.Any(v => d >= v.StartDate.Date && d <= v.EndDate.Date);
+
+            double absScore = 0, totalDays = 0;
+            for (var d = periodStart; d <= periodEnd; d = d.AddDays(1))
+            {
+                if (d.DayOfWeek == DayOfWeek.Saturday || d.DayOfWeek == DayOfWeek.Sunday) continue;
+                if (feriesSession.Contains(d.Date) || IsVacanceSession(d.Date)) continue;
+                totalDays++;
+                string st = rawPresences.TryGetValue(d.Date, out var sv)
+                    ? (string.IsNullOrWhiteSpace(sv) ? "p" : sv.Trim().ToLower()) : "p";
+                if (st == "a" || st == "e") absScore += 1;
+                else if (st == "r")         absScore += 0.5;
+            }
+            double tauxParticipation = totalDays > 0
+                ? Math.Min(100.0, Math.Floor((totalDays - absScore) / totalDays * 100.0))
+                : 100.0;
+
+            var doc = new AttestationSessionDocument(
+                user, courseName, user.OralLevel, user.WrittenLevel,
+                ateliersSuivis, tauxParticipation, year, trimestre,
+                GetLogoBytes(), GetSignatureBytes(), periodStart, periodEnd);
+
+            return File(doc.GeneratePdf(), "application/pdf",
+                $"Attestation-{user.LastName}.pdf");
         }
 
-        // --------------------------------------------------
-        // --- ATTESTATION DE PRÉSENCE ---
-        // --------------------------------------------------
+        // ──────────────────────────────────────────────────────────────────────
+        // PDF — ATTESTATION DE PRÉSENCE
+        // ──────────────────────────────────────────────────────────────────────
         [HttpGet("attestationpresence/{userId}")]
         public async Task<IActionResult> GenerateAttestationPresencePdf(
             string userId,
-            [FromQuery] int?    year         = null,
-            [FromQuery] int?    month        = null,
-            [FromQuery] string? startDate    = null,
-            [FromQuery] string? endDate      = null,
-            [FromQuery] string? sessionName  = null,
-            [FromQuery] string? sessionType  = "fi",
-            [FromQuery] int?    sessionMonth = null)
+            [FromQuery] string startDate      = null,
+            [FromQuery] string endDate        = null,
+            [FromQuery] string sessionEndDate = null,   // fin globale de session (signature)
+            [FromQuery] string sessionName    = null,
+            [FromQuery] string sessionType    = "fi",
+            [FromQuery] int?   sessionMonth   = null,
+            [FromQuery] int?   year           = null,
+            [FromQuery] int?   month          = null)
         {
             var frenchCulture = new System.Globalization.CultureInfo("fr-FR");
-
-            // ── 1. Résolution de la période ──────────────────────────────────
             DateTime periodStart;
-            DateTime printedMonthEnd;
+            DateTime periodEnd;
             string   periodLabel;
 
             if (!string.IsNullOrEmpty(startDate) && !string.IsNullOrEmpty(endDate))
             {
                 if (!DateTime.TryParse(startDate, out periodStart) ||
-                    !DateTime.TryParse(endDate,   out var sessionEndDate))
-                    return BadRequest("Dates de session invalides (attendu : yyyy-MM-dd).");
+                    !DateTime.TryParse(endDate,   out periodEnd))
+                    return BadRequest("Dates invalides (attendu : yyyy-MM-dd).");
 
-                periodStart     = periodStart.Date;
-                printedMonthEnd = new DateTime(sessionEndDate.Year, sessionEndDate.Month,
-                    DateTime.DaysInMonth(sessionEndDate.Year, sessionEndDate.Month));
-
+                periodStart = periodStart.Date;
+                periodEnd   = periodEnd.Date;
                 periodLabel = !string.IsNullOrEmpty(sessionName)
                     ? $"Session {sessionName}"
-                    : $"{periodStart:dd/MM/yyyy} → {printedMonthEnd:dd/MM/yyyy}";
+                    : $"{periodStart:dd/MM/yyyy} → {periodEnd:dd/MM/yyyy}";
             }
             else if (year.HasValue && month.HasValue)
             {
                 if (month < 1 || month > 12)
                     return BadRequest("Le mois doit être compris entre 1 et 12.");
-
-                printedMonthEnd = new DateTime(year.Value, month.Value,
-                    DateTime.DaysInMonth(year.Value, month.Value));
                 periodStart = new DateTime(year.Value, month.Value, 1);
+                periodEnd   = new DateTime(year.Value, month.Value,
+                    DateTime.DaysInMonth(year.Value, month.Value));
                 periodLabel = periodStart.ToString("MMMM yyyy", frenchCulture);
             }
             else
             {
-                return BadRequest("Veuillez fournir soit (year + month) soit (startDate + endDate).");
+                return BadRequest("Veuillez fournir soit (startDate + endDate) soit (year + month).");
             }
 
-            // ── 2. Recherche de la session en DB ─────────────────────────────
-            // Priorité : nom exact → type+chevauchement → pas de session
-            SessionFormation? dbSession = null;
+            // Mois dans la session
+            int moisSession = sessionMonth ?? 1;
+            int targetDays  = CalculerJoursCibles(sessionType ?? "fi", moisSession);
 
-            if (!string.IsNullOrEmpty(sessionName))
-            {
-                dbSession = await _db.SessionFormations
-                    .FirstOrDefaultAsync(s => s.Name == sessionName);
-            }
-
-            if (dbSession == null)
-            {
-                dbSession = await _db.SessionFormations
-                    .Where(s =>
-                        printedMonthEnd >= s.StartDate &&
-                        printedMonthEnd <= s.EndDate &&
-                        (
-                            s.Type == (sessionType ?? "") ||
-                            (s.Type.Contains("fi") && !(sessionType ?? "").Contains("tele")) ||
-                            (s.Type == "telecours" && (sessionType ?? "").Contains("tele"))
-                        ))
-                    .OrderByDescending(s => s.StartDate)
-                    .FirstOrDefaultAsync();
-            }
-
-            // ── 3. Les vraies dates de la session remplacent le fallback ──────
-            if (dbSession != null)
-            {
-                periodStart = dbSession.StartDate.Date;
-                // Fin imprimée = fin de la session entière (pas juste fin du mois)
-                printedMonthEnd = dbSession.EndDate.Date;
-            }
-
-            // ── 4. Contexte session ──────────────────────────────────────────
-            int moisSession = sessionMonth ?? DeduireMonsDansSession(printedMonthEnd, dbSession);
-            int targetDays  = CalculerJoursCibles(dbSession?.Type ?? sessionType ?? "fi", moisSession);
-
-            if (!sessionMonth.HasValue && dbSession != null)
-            {
-                var monthsIn = ((printedMonthEnd.Year  - dbSession.StartDate.Year) * 12
-                               + printedMonthEnd.Month - dbSession.StartDate.Month) + 1;
-                moisSession = Math.Max(1, Math.Min(3, monthsIn));
-                targetDays  = CalculerJoursCibles(dbSession.Type ?? sessionType ?? "fi", moisSession);
-            }
+            // Date de fin de session globale — fournie par le front (ex: 18 juin pour S2)
+            DateTime sessionEnd = DateTime.MinValue;
+            if (!string.IsNullOrEmpty(sessionEndDate) && DateTime.TryParse(sessionEndDate, out var parsedSessionEnd))
+                sessionEnd = parsedSessionEnd.Date;
 
             var sessionCtx = new SessionContext
             {
                 SessionMonth      = moisSession,
-                SessionType       = dbSession?.Type ?? sessionType ?? "fi",
+                SessionType       = sessionType ?? "fi",
                 SessionTargetDays = targetDays,
-                SessionName       = sessionName ?? dbSession?.Name ?? periodLabel,
+                SessionName       = sessionName ?? periodLabel,
                 SessionStartDate  = periodStart,
+                SessionEndDate    = sessionEnd,
             };
 
-            // ── 5. Utilisateur ───────────────────────────────────────────────
             var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null) return NotFound("Stagiaire introuvable.");
 
-            // ── 6. Présences sur toute la plage de la session ────────────────
-            var displayStart = periodStart;
-            var displayEnd   = printedMonthEnd;
-
             var existingPresences = await _db.Presences
                 .AsNoTracking()
-                .Where(p => p.StagiaireId == userId
-                            && p.Date >= displayStart
-                            && p.Date <= displayEnd)
+                .Where(p => p.StagiaireId == userId && p.Date >= periodStart && p.Date <= periodEnd)
                 .ToDictionaryAsync(p => p.Date.Date, p => p.Statut);
 
             var joursFeries = await _db.JoursFeries
-                .Where(f => f.Date >= displayStart && f.Date <= displayEnd)
+                .Where(f => f.Date >= periodStart && f.Date <= periodEnd)
                 .Select(f => f.Date.Date)
                 .ToListAsync();
 
             var periodesVacances = await _db.PeriodesVacances
-                .Where(v => v.EndDate >= displayStart && v.StartDate <= displayEnd)
+                .Where(v => v.EndDate >= periodStart && v.StartDate <= periodEnd)
                 .ToListAsync();
 
             bool IsVacance(DateTime d) =>
-                periodesVacances.Any(v => d >= v.StartDate.Date && d <= v.EndDate.Date) ||
-                (dbSession?.VacanceStart.HasValue == true &&
-                 d >= dbSession.VacanceStart!.Value.Date &&
-                 dbSession.VacanceEnd.HasValue &&
-                 d <= dbSession.VacanceEnd!.Value.Date);
+                periodesVacances.Any(v => d >= v.StartDate.Date && d <= v.EndDate.Date);
 
-            var fullMonthPresences = new List<AttendanceEntryDto>();
-            for (var date = displayStart; date <= displayEnd; date = date.AddDays(1))
+            var fullPresences = new List<AttendanceEntryDto>();
+            for (var date = periodStart; date <= periodEnd; date = date.AddDays(1))
             {
                 if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
                     continue;
 
                 string status;
-                if (joursFeries.Contains(date.Date))
-                    status = "f";
-                else if (IsVacance(date.Date))
-                    status = "v";
-                else
-                    status = existingPresences.TryGetValue(date.Date, out var s)
+                if (joursFeries.Contains(date.Date))   status = "f";
+                else if (IsVacance(date.Date))         status = "v";
+                else status = existingPresences.TryGetValue(date.Date, out var s)
                         ? (string.IsNullOrWhiteSpace(s) ? "p" : s.Trim().ToLower())
                         : "p";
 
-                fullMonthPresences.Add(new AttendanceEntryDto
-                {
-                    StagiaireId = userId,
-                    Date        = date,
-                    Statut      = status
-                });
+                fullPresences.Add(new AttendanceEntryDto
+                    { StagiaireId = userId, Date = date, Statut = status });
             }
 
-            // ── 7. Génération PDF ────────────────────────────────────────────
-            var doc = new AttestationPresenceDocument(
-                periodStart,
-                printedMonthEnd,
-                fullMonthPresences,
+            var docPdf = new AttestationPresenceDocument(
+                periodStart, periodEnd, fullPresences,
                 new List<ApplicationUser> { user },
-                GetLogoBytes(),
-                null,
-                sessionCtx
-            );
+                GetLogoBytes(), null, sessionCtx);
 
-            var fileName = string.IsNullOrEmpty(sessionName)
-                ? $"Presence-{user.LastName}-{printedMonthEnd:yyyy-MM}.pdf"
-                : $"Presence-{user.LastName}-{sessionName}.pdf";
+            var fileName = !string.IsNullOrEmpty(sessionName)
+                ? $"Presence-{user.LastName}-{sessionName}-M{moisSession}.pdf"
+                : $"Presence-{user.LastName}-{periodEnd:yyyy-MM}.pdf";
 
-            return File(doc.GeneratePdf(), "application/pdf", fileName);
+            return File(docPdf.GeneratePdf(), "application/pdf", fileName);
         }
 
-        // --------------------------------------------------
-        // --- HELPERS PRIVÉS ---
-        // --------------------------------------------------
+        // ══════════════════════════════════════════════════════════════════════
+        // HELPERS PRIVÉS
+        // ══════════════════════════════════════════════════════════════════════
 
         /// <summary>
-        /// Résout les dates réelles d'une session :
-        /// 1) par nom exact   2) par type + chevauchement trimestre   3) fallback calendaire
+        /// Agrège les AccompanyingPresences sur une plage de dates et joint
+        /// les libellés MatrixColumns pour produire la liste affichée dans le PDF.
         /// </summary>
-        private async Task<(DateTime Start, DateTime End)> ResolveSessionDates(
-            int year, string trimestre, string mesure, string? sessionName)
+        private async Task<List<ActivitySummaryItem>> BuildActivitiesSummary(
+            string userId, DateTime startDate, DateTime endDate)
         {
-            if (!string.IsNullOrEmpty(sessionName))
-            {
-                var byName = await _db.SessionFormations
-                    .FirstOrDefaultAsync(s => s.Name == sessionName);
-                if (byName != null)
-                    return (byName.StartDate.Date, byName.EndDate.Date);
-            }
+            var presences = await _db.AccompanyingPresences
+                .Where(ap =>
+                    ap.UserId == userId &&
+                    ap.Date   >= startDate &&
+                    ap.Date   <= endDate)
+                .GroupBy(ap => ap.ActivityName)
+                .Select(g => new { ActivityKey = g.Key, Count = g.Count() })
+                .ToListAsync();
 
-            var (fallbackStart, fallbackEnd) = GetQuarterDates(year, trimestre);
-            bool isTele = (mesure ?? "").ToLower().Contains("tele");
+            if (!presences.Any()) return new List<ActivitySummaryItem>();
 
-            var byType = await _db.SessionFormations
-                .Where(s =>
-                    s.EndDate >= fallbackStart &&
-                    s.StartDate <= fallbackEnd &&
-                    (isTele
-                        ? s.Type == "telecours"
-                        : (s.Type == "fi_a1" || s.Type == "fi_a2" || s.Type.StartsWith("fi"))))
-                .OrderByDescending(s => s.StartDate)
-                .FirstOrDefaultAsync();
+            var keys = presences.Select(p => p.ActivityKey).ToList();
+            var cols = await _db.MatrixColumns
+                .Where(c => keys.Contains(c.Key))
+                .Select(c => new { c.Key, c.Label, c.Type })
+                .ToListAsync();
 
-            if (byType != null)
-                return (byType.StartDate.Date, byType.EndDate.Date);
-
-            return (fallbackStart, fallbackEnd);
-        }
-
-        private static int DeduireMonsDansSession(DateTime date, SessionFormation? session = null)
-        {
-            if (session?.StartDate != null)
-            {
-                var months = ((date.Year  - session.StartDate.Year) * 12
-                             + date.Month - session.StartDate.Month) + 1;
-                return Math.Max(1, Math.Min(3, months));
-            }
-            int quarterStartMonth = ((date.Month - 1) / 3) * 3 + 1;
-            return Math.Max(1, Math.Min(3, date.Month - quarterStartMonth + 1));
+            return presences
+                .Join(cols, p => p.ActivityKey, c => c.Key,
+                      (p, c) => new ActivitySummaryItem
+                          { Label = c.Label, Type = c.Type, Count = p.Count })
+                .OrderBy(x => x.Type).ThenBy(x => x.Label)
+                .ToList();
         }
 
         private static int CalculerJoursCibles(string sessionType, int moisSession)
         {
-            bool isTelecours = sessionType?.ToLower().Contains("tele") == true;
-            return (isTelecours, moisSession) switch
+            bool isTele = sessionType?.ToLower().Contains("tele") == true;
+            return (isTele, moisSession) switch
             {
                 (true,  1) => 10,
                 (true,  2) => 20,
@@ -525,57 +489,80 @@ namespace Api.Controllers
             };
         }
 
-        private string DetermineCourseName(string frontalMesure, string? dbSessionName)
+        private string DetermineCourseName(string frontalMesure, string dbSessionName)
         {
-            string nameToAnalyze = !string.IsNullOrEmpty(frontalMesure) ? frontalMesure : dbSessionName ?? "";
-            if (string.IsNullOrEmpty(nameToAnalyze)) return "Français & Intégration";
-            var lower = nameToAnalyze.ToLower();
-            if (lower.Contains("telecours") || lower.Contains("télécours")) return "Français en Télécours";
-            if (lower.Contains("a2")) return "Français & Intégration (Niveau A2)";
-            if (lower.Contains("a1")) return "Français & Intégration (Niveau A1)";
+            string n = !string.IsNullOrEmpty(frontalMesure) ? frontalMesure : dbSessionName ?? "";
+            if (string.IsNullOrEmpty(n)) return "Français & Intégration";
+            var l = n.ToLower();
+            if (l.Contains("telecours") || l.Contains("télécours")) return "Français en Télécours";
+            if (l.Contains("a2")) return "Français & Intégration (Niveau A2)";
+            if (l.Contains("a1")) return "Français & Intégration (Niveau A1)";
             return "Français & Intégration";
         }
 
         private byte[] GetLogoBytes()
         {
-            var logoPath = Path.Combine(_env.WebRootPath, "Upload/images/logo.png");
-            try { if (System.IO.File.Exists(logoPath)) return System.IO.File.ReadAllBytes(logoPath); }
+            var p = Path.Combine(_env.WebRootPath, "Upload/images/logo.png");
+            try { if (System.IO.File.Exists(p)) return System.IO.File.ReadAllBytes(p); }
             catch (Exception ex) { _logger.LogError(ex, "Erreur lecture logo"); }
             return Array.Empty<byte>();
         }
 
         private byte[] GetSignatureBytes()
         {
-            var path = Path.Combine(_env.WebRootPath, "Upload/images/signature.png");
-            try { if (System.IO.File.Exists(path)) return System.IO.File.ReadAllBytes(path); }
+            var p = Path.Combine(_env.WebRootPath, "Upload/images/signature.png");
+            try { if (System.IO.File.Exists(p)) return System.IO.File.ReadAllBytes(p); }
             catch (Exception ex) { _logger.LogError(ex, "Erreur lecture signature"); }
             return Array.Empty<byte>();
         }
 
-        private (DateTime Start, DateTime End) GetQuarterDates(int year, string quarter)
+        /// <summary>
+        /// Résout les dates de session : utilise les dates du calendrier si fournies,
+        /// sinon replie sur le trimestre calendaire (T1=jan-mar, etc.).
+        /// </summary>
+        private (DateTime Start, DateTime End) ResolveSessionDates(
+            string startDateStr, string endDateStr, int year, string quarter)
         {
+            if (!string.IsNullOrEmpty(startDateStr) && !string.IsNullOrEmpty(endDateStr)
+                && DateTime.TryParse(startDateStr, out var s)
+                && DateTime.TryParse(endDateStr,   out var e))
+                return (s.Date, e.Date);
+
+            // Fallback : trimestre calendaire
             if (!int.TryParse(quarter.Replace("T", ""), out int q)) q = 1;
-            DateTime start = new DateTime(year, (q - 1) * 3 + 1, 1);
+            q = Math.Max(1, Math.Min(4, q));
+            var start = new DateTime(year, (q - 1) * 3 + 1, 1);
             return (start.Date, start.AddMonths(3).AddDays(-1).Date);
         }
     }
 
-    // --------------------------------------------------
-    // --- DTO POUR LA SAUVEGARDE ---
-    // --------------------------------------------------
+    // ══════════════════════════════════════════════════════════════════════════
+    // DTOs
+    // ══════════════════════════════════════════════════════════════════════════
+
     public class SaveBilanSessionRequest
     {
-        public string UserId { get; set; }
+        public string UserId      { get; set; }
         public string StagiaireId { get => UserId; set => UserId = value; }
-        public int Year { get; set; }
-        public string Quarter { get; set; }
-        public string EvaluationText { get; set; }
-        public string FollowUpActions { get; set; }
-        public double GlobalRate { get; set; }
-        public string SocialInsertionText { get; set; }
-        public string DigitalSkillsText { get; set; }
+        public int    Year        { get; set; }
+        public string Quarter     { get; set; }
+        public string EvaluationText             { get; set; }
+        public string FollowUpActions            { get; set; }
+        public double GlobalRate                 { get; set; }
+        public string SocialInsertionText        { get; set; }
+        public string DigitalSkillsText          { get; set; }
         public string IndividualAccompanyingText { get; set; }
-        public string HomeVisitsText { get; set; }
-        public List<string> SelectedWorkshops { get; set; }
+        public string HomeVisitsText             { get; set; }
+        public List<string> SelectedWorkshops    { get; set; }
+    }
+
+    /// <summary>
+    /// Résumé d'une activité d'accompagnement passé au BilanSessionDocument.
+    /// </summary>
+    public class ActivitySummaryItem
+    {
+        public string Label { get; set; }
+        public string Type  { get; set; }   // "acco" | "atelier"
+        public int    Count { get; set; }
     }
 }

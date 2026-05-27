@@ -24,15 +24,23 @@ namespace Api.Controllers
             _context = context;
         }
 
-        // GET: api/SessionStudents
+        // GET: api/SessionStudents?year=2026&quarter=1
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SessionStudent>>> GetSessionStudents()
+        public async Task<ActionResult<IEnumerable<SessionStudent>>> GetSessionStudents(
+            [FromQuery] int? year,
+            [FromQuery] int? quarter)
         {
+            var startOfYear = year.HasValue ? new DateTime(year.Value, 1, 1) : (DateTime?)null;
+            var endOfYear   = year.HasValue ? new DateTime(year.Value, 12, 31) : (DateTime?)null;
+
             return await _context.SessionStudents
-                                         .AsNoTracking()
-                                         .Include(s => s.Session)
-                                         .Include(s => s.Student)
-                                         .ToListAsync();
+                .AsNoTracking()
+                .Include(s => s.Session)
+                .Include(s => s.Student)
+                .Where(s => s.Session != null)
+                .Where(s => !year.HasValue    || (s.Session.DateStart >= startOfYear && s.Session.DateStart <= endOfYear))
+                .Where(s => !quarter.HasValue || s.Session.SessionNumberId == quarter.Value)
+                .ToListAsync();
         }
 
         // GET: api/SessionStudents/5
@@ -55,8 +63,6 @@ namespace Api.Controllers
         }
 
         // POST: api/SessionStudents
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
         public async Task<ActionResult<SessionStudent>> PostSessionStudent(SessionStudent sessionStudent)
         {
@@ -77,7 +83,7 @@ namespace Api.Controllers
                 }
             }
 
-            return CreatedAtAction("GetSessionStudent", new { sessionId = sessionStudent.SessionId, studentId= sessionStudent.StudentId }, sessionStudent);
+            return CreatedAtAction("GetSessionStudent", new { sessionId = sessionStudent.SessionId, studentId = sessionStudent.StudentId }, sessionStudent);
         }
 
         // DELETE: api/SessionStudents/5

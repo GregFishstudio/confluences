@@ -1,185 +1,164 @@
 ﻿@model mvc.Models.Theory
 
 @{
-    ViewData["Title"] = "Modifier";
+    ViewData["Title"] = "Modifier un cours";
 }
 
-<br />
-<br />
-<br />
-<br />
-<body data-parallax="true" class="bgImage">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header card-header-primary card-header-icon">
-                        <div class="card-icon">
-                            <h4 class="card-title">@ViewData["Title"]</h4>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="toolbar">
-                            <!--        Here you can write extra buttons/actions for the toolbar              -->
-                        </div>
-                        <div>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <form enctype="multipart/form-data" asp-action="Edit">
-                                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                                        <input type="hidden" asp-for="TheoryId" />
-                                        <div class="form-group">
-                                            <label asp-for="TheoryName" class="control-label"></label>
-                                            <input asp-for="TheoryName" class="form-control" />
-                                            <span asp-validation-for="TheoryName" class="text-danger"></span>
-                                        </div>
-                                        <div class="border border-primary px-2">
-                                            <div class="form-group">
-                                                <label asp-for="VideoLink" class="control-label"></label>
-                                                <input asp-for="VideoLink" class="form-control" />
-                                                <span asp-validation-for="VideoLink" class="text-danger"></span>
-                                            </div>
-                                            <div class="form-group form-file-upload form-file-multiple">
-                                                <label class="control-label">ou</label>
-                                                <input name="fileVideo" type="file" multiple="" class="inputFileHidden">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control inputFileVisible" placeholder="Ajouter une vidéo">
-                                                    <span class="input-group-btn">
-                                                        <button type="button" class="btn btn-fab btn-round btn-primary">
-                                                            <i class="material-icons">attach_file</i>
-                                                        </button>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="border border-primary px-2">
-                                            <div class="form-group">
-                                                <label asp-for="AudioLink" class="control-label"></label>
-                                                <input asp-for="AudioLink" class="form-control" />
-                                                <span asp-validation-for="AudioLink" class="text-danger"></span>
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="control-label">ou</label>
-                                            </div>
-                                            <div class="form-group form-file-upload form-file-multiple">
-                                                <input name="fileAudio" type="file" multiple="" class="inputFileHidden">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control inputFileVisible" placeholder="Ajouter un mp3">
-                                                    <span class="input-group-btn">
-                                                        <button type="button" class="btn btn-fab btn-round btn-primary">
-                                                            <i class="material-icons">attach_file</i>
-                                                        </button>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="border border-primary px-2">
-                                            <div class="form-group">
-                                                <label asp-for="AudioLinkSecond" class="control-label"></label>
-                                                <input asp-for="AudioLinkSecond" class="form-control" />
-                                                <span asp-validation-for="AudioLinkSecond" class="text-danger"></span>
-                                            </div>
-                                            <div class="form-group form-file-upload form-file-multiple">
-                                                <label class="control-label">ou</label>
-                                                <input name="fileAudioSecond" type="file" multiple="" class="inputFileHidden">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control inputFileVisible" placeholder="Ajouter un mp3">
-                                                    <span class="input-group-btn">
-                                                        <button type="button" class="btn btn-fab btn-round btn-primary">
-                                                            <i class="material-icons">attach_file</i>
-                                                        </button>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="border border-primary px-2">
-                                            <div class="form-group">
-                                                <label asp-for="AudioLinkThird" class="control-label"></label>
-                                                <input asp-for="AudioLinkThird" class="form-control" />
-                                                <span asp-validation-for="AudioLinkThird" class="text-danger"></span>
-                                            </div>
-                                            <div class="form-group form-file-upload form-file-multiple">
-                                                <label class="control-label">ou</label>
-                                                <input name="fileAudioThird" type="file" multiple="" class="inputFileHidden">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control inputFileVisible" placeholder="Ajouter un mp3">
-                                                    <span class="input-group-btn">
-                                                        <button type="button" class="btn btn-fab btn-round btn-primary">
-                                                            <i class="material-icons">attach_file</i>
-                                                        </button>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="border border-primary px-2">
-                                            <div class="form-group">
-                                                <label asp-for="TheoryLink" class="control-label"></label>
-                                                <input asp-for="TheoryLink" class="form-control" />
-                                                <span asp-validation-for="TheoryLink" class="text-danger"></span>
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="control-label">ou</label>
-                                            </div>
-                                            <div class="form-group form-file-upload form-file-multiple">
-                                                <input name="files" type="file" class="inputFileHidden">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control inputFileVisible" placeholder="Ajouter un fichier">
-                                                    <span class="input-group-btn">
-                                                        <button type="button" class="btn btn-fab btn-round btn-primary">
-                                                            <i class="material-icons">attach_file</i>
-                                                        </button>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label asp-for="TeacherId" class="control-label"></label>
-                                            <select asp-for="TeacherId" class="form-control" asp-items="ViewBag.TeacherId"></select>
-                                            <span asp-validation-for="TeacherId" class="text-danger"></span>
-                                        </div>
-                                        <div class="form-group">
-                                            <label asp-for="HomeworkV2id" class="control-label"></label>
-                                            <select asp-for="HomeworkV2id" class="form-control" asp-items="ViewBag.HomeworkV2id"></select>
-                                            <span asp-validation-for="HomeworkV2id" class="text-danger"></span>
-                                        </div>
-                                        <input asp-for="TheoryDate" type="hidden" class="form-control datetimepicker" value="@Model.TheoryDate.ToString("yyyy-MM-dd")" />
-                                        <div class="form-group">
-                                            <input type="submit" value="Sauvegarder" class="btn btn-success" />
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <a href="javascript:history.back()">Revenir à la page précédente</a>
-                        </div>
-                    </div>
-                    <!-- end content-->
-                </div>
-                <!--  end card  -->
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+    .hw-root { font-family: 'DM Sans', sans-serif; }
+    .hw-card { background: #fff; border-radius: 20px; border: 1px solid #f1f3f9; box-shadow: 0 4px 24px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 2rem; }
+    .hw-topbar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #f1f3f9; gap: 12px; flex-wrap: wrap; }
+    .hw-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; margin: 0 0 4px; }
+    .hw-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .hw-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #6c757d; text-decoration: none; border: 1px solid #eef0f7; border-radius: 10px; padding: 7px 14px; transition: all 0.15s; }
+    .hw-back:hover { background: #f8f9fc; color: #1a1a2e; text-decoration: none; }
+    .hw-form-body { padding: 1.5rem; }
+    .hw-field { margin-bottom: 1.25rem; }
+    .hw-label { display: block; font-size: 12px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: #aaa; margin-bottom: 6px; }
+    .hw-input, .hw-select { width: 100%; background: #f8f9fc; border: 1px solid #eef0f7; border-radius: 10px; padding: 9px 14px; font-size: 13px; color: #1a1a2e; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.15s, background 0.15s; appearance: none; -webkit-appearance: none; }
+    .hw-input:focus, .hw-select:focus { border-color: #c0c8e8; background: #fff; box-shadow: 0 0 0 3px rgba(78,115,223,0.08); }
+    .hw-select-wrap { position: relative; }
+    .hw-select-wrap::after { content: '\f078'; font-family: 'Font Awesome 5 Free'; font-weight: 900; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #aaa; pointer-events: none; }
+    .hw-validation { font-size: 12px; color: #A32D2D; margin-top: 4px; }
+    .hw-section { margin-bottom: 1.5rem; }
+    .hw-section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: #aaa; margin: 0 0 10px; }
+    .hw-media-block { background: #f8f9fc; border: 1px solid #eef0f7; border-radius: 12px; padding: 14px 16px; margin-bottom: 1rem; }
+    .hw-or { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 0.06em; margin: 8px 0; }
+    .hw-file-btn { display: inline-flex; align-items: center; gap: 6px; background: #fff; border: 1px solid #eef0f7; border-radius: 8px; padding: 7px 14px; font-size: 13px; color: #6c757d; cursor: pointer; transition: all 0.15s; }
+    .hw-file-btn:hover { background: #eef0f7; color: #1a1a2e; }
+    .hw-btn-save { display: inline-flex; align-items: center; gap: 6px; background: #1a1a2e; color: #fff; border: none; border-radius: 10px; padding: 9px 20px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.15s; }
+    .hw-btn-save:hover { opacity: 0.8; }
+</style>
+
+<div class="container-fluid py-4 px-md-4 hw-root">
+    <div class="hw-card" style="max-width:660px;">
+
+        <div class="hw-topbar">
+            <div>
+                <p class="hw-eyebrow">Cours</p>
+                <h1 class="hw-title">Modifier un cours</h1>
             </div>
-            <!-- end col-md-12 -->
+            <a href="javascript:history.back()" class="hw-back">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
         </div>
+
+        <form enctype="multipart/form-data" asp-action="Edit" class="hw-form-body">
+            <div asp-validation-summary="ModelOnly" class="hw-validation" style="margin-bottom:1rem;"></div>
+            <input type="hidden" asp-for="TheoryId" />
+            <input asp-for="TheoryDate" type="hidden" value="@Model.TheoryDate.ToString("yyyy-MM-dd")" />
+
+            <div class="hw-field">
+                <label asp-for="TheoryName" class="hw-label"></label>
+                <input asp-for="TheoryName" class="hw-input" />
+                <span asp-validation-for="TheoryName" class="hw-validation"></span>
+            </div>
+
+            <div class="hw-section">
+                <p class="hw-section-title">Vidéo</p>
+                <div class="hw-media-block">
+                    <div class="hw-field">
+                        <label asp-for="VideoLink" class="hw-label"></label>
+                        <input asp-for="VideoLink" class="hw-input" placeholder="https://..." />
+                        <span asp-validation-for="VideoLink" class="hw-validation"></span>
+                    </div>
+                    <p class="hw-or">ou uploader un fichier</p>
+                    <label class="hw-file-btn">
+                        <i class="fas fa-paperclip"></i> Choisir une vidéo
+                        <input name="fileVideo" type="file" multiple style="display:none;" />
+                    </label>
+                </div>
+            </div>
+
+            <div class="hw-section">
+                <p class="hw-section-title">Audio 1</p>
+                <div class="hw-media-block">
+                    <div class="hw-field">
+                        <label asp-for="AudioLink" class="hw-label"></label>
+                        <input asp-for="AudioLink" class="hw-input" placeholder="https://..." />
+                        <span asp-validation-for="AudioLink" class="hw-validation"></span>
+                    </div>
+                    <p class="hw-or">ou uploader un fichier</p>
+                    <label class="hw-file-btn">
+                        <i class="fas fa-paperclip"></i> Choisir un mp3
+                        <input name="fileAudio" type="file" multiple style="display:none;" />
+                    </label>
+                </div>
+            </div>
+
+            <div class="hw-section">
+                <p class="hw-section-title">Audio 2</p>
+                <div class="hw-media-block">
+                    <div class="hw-field">
+                        <label asp-for="AudioLinkSecond" class="hw-label"></label>
+                        <input asp-for="AudioLinkSecond" class="hw-input" placeholder="https://..." />
+                        <span asp-validation-for="AudioLinkSecond" class="hw-validation"></span>
+                    </div>
+                    <p class="hw-or">ou uploader un fichier</p>
+                    <label class="hw-file-btn">
+                        <i class="fas fa-paperclip"></i> Choisir un mp3
+                        <input name="fileAudioSecond" type="file" multiple style="display:none;" />
+                    </label>
+                </div>
+            </div>
+
+            <div class="hw-section">
+                <p class="hw-section-title">Audio 3</p>
+                <div class="hw-media-block">
+                    <div class="hw-field">
+                        <label asp-for="AudioLinkThird" class="hw-label"></label>
+                        <input asp-for="AudioLinkThird" class="hw-input" placeholder="https://..." />
+                        <span asp-validation-for="AudioLinkThird" class="hw-validation"></span>
+                    </div>
+                    <p class="hw-or">ou uploader un fichier</p>
+                    <label class="hw-file-btn">
+                        <i class="fas fa-paperclip"></i> Choisir un mp3
+                        <input name="fileAudioThird" type="file" multiple style="display:none;" />
+                    </label>
+                </div>
+            </div>
+
+            <div class="hw-section">
+                <p class="hw-section-title">Fichier cours</p>
+                <div class="hw-media-block">
+                    <div class="hw-field">
+                        <label asp-for="TheoryLink" class="hw-label"></label>
+                        <input asp-for="TheoryLink" class="hw-input" placeholder="https://..." />
+                        <span asp-validation-for="TheoryLink" class="hw-validation"></span>
+                    </div>
+                    <p class="hw-or">ou uploader un fichier</p>
+                    <label class="hw-file-btn">
+                        <i class="fas fa-paperclip"></i> Choisir un fichier
+                        <input name="files" type="file" style="display:none;" />
+                    </label>
+                </div>
+            </div>
+
+            <div class="hw-field">
+                <label asp-for="TeacherId" class="hw-label"></label>
+                <div class="hw-select-wrap">
+                    <select asp-for="TeacherId" class="hw-select" asp-items="ViewBag.TeacherId"></select>
+                </div>
+                <span asp-validation-for="TeacherId" class="hw-validation"></span>
+            </div>
+
+            <div class="hw-field">
+                <label asp-for="HomeworkV2id" class="hw-label"></label>
+                <div class="hw-select-wrap">
+                    <select asp-for="HomeworkV2id" class="hw-select" asp-items="ViewBag.HomeworkV2id"></select>
+                </div>
+                <span asp-validation-for="HomeworkV2id" class="hw-validation"></span>
+            </div>
+
+            <button type="submit" class="hw-btn-save">
+                <i class="fas fa-save"></i> Sauvegarder
+            </button>
+        </form>
+
     </div>
-</body>
+</div>
 
 @section Scripts {
-
-    <script>
-        $('.datetimepicker').datetimepicker({
-            locale: 'fr',
-            format: 'yyyy-MM-DD',
-            icons: {
-                time: "fa fa-clock-o",
-                date: "fa fa-calendar",
-                up: "fa fa-chevron-up",
-                down: "fa fa-chevron-down",
-                previous: 'fa fa-chevron-left',
-                next: 'fa fa-chevron-right',
-                today: 'fa fa-screenshot',
-                clear: 'fa fa-trash',
-                close: 'fa fa-remove'
-            }
-        });
-    </script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

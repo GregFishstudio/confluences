@@ -4,149 +4,130 @@
     ViewData["Title"] = "Cours";
 }
 
-<br />
-<br />
-<br />
-<br />
-<body data-parallax="true" class="bgImage">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header card-header-primary card-header-icon">
-                        <div class="card-icon">
-                            <h4 class="card-title">@Html.DisplayFor(model => model.TheoryName)</h4>
-                        </div>
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+    .hw-root { font-family: 'DM Sans', sans-serif; }
+    .hw-card { background: #fff; border-radius: 20px; border: 1px solid #f1f3f9; box-shadow: 0 4px 24px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 2rem; }
+    .hw-topbar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #f1f3f9; gap: 12px; flex-wrap: wrap; }
+    .hw-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; margin: 0 0 4px; }
+    .hw-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .hw-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #6c757d; text-decoration: none; border: 1px solid #eef0f7; border-radius: 10px; padding: 7px 14px; transition: all 0.15s; }
+    .hw-back:hover { background: #f8f9fc; color: #1a1a2e; text-decoration: none; }
+    .hw-body { padding: 1.5rem; }
+    .hw-section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: #aaa; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid #f1f3f9; }
+    .hw-section { margin-bottom: 2rem; }
+    .hw-audio { width: 100%; border-radius: 10px; margin-bottom: 10px; }
+    .hw-video-wrap { border-radius: 12px; overflow: hidden; border: 1px solid #f1f3f9; margin-bottom: 1rem; }
+    .hw-doc-wrap { border-radius: 12px; overflow: hidden; border: 1px solid #f1f3f9; margin-bottom: 1rem; }
+    .hw-download-btn { display: inline-flex; align-items: center; gap: 6px; background: #1a1a2e; color: #fff; border-radius: 10px; padding: 9px 18px; font-size: 13px; font-weight: 500; text-decoration: none; transition: opacity 0.15s; margin-top: 8px; }
+    .hw-download-btn:hover { opacity: 0.8; color: #fff; text-decoration: none; }
+    .hw-teacher-actions { display: flex; gap: 8px; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #f1f3f9; flex-wrap: wrap; }
+    .hw-btn-edit { display: inline-flex; align-items: center; gap: 6px; background: #1a1a2e; color: #fff; border-radius: 10px; padding: 8px 16px; font-size: 13px; font-weight: 500; text-decoration: none; transition: opacity 0.15s; }
+    .hw-btn-edit:hover { opacity: 0.8; color: #fff; text-decoration: none; }
+    .hw-btn-del { display: inline-flex; align-items: center; gap: 6px; background: #FCEBEB; color: #A32D2D; border: 1px solid #F09595; border-radius: 10px; padding: 8px 16px; font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.15s; }
+    .hw-btn-del:hover { background: #A32D2D; color: #fff; text-decoration: none; }
+</style>
+
+<div class="container-fluid py-4 px-md-4 hw-root">
+    <div class="hw-card">
+
+        <div class="hw-topbar">
+            <div>
+                <p class="hw-eyebrow">Cours</p>
+                <h1 class="hw-title">@Model.TheoryName</h1>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                @if ((bool)ViewData["IsTeacher"])
+                {
+                    <a asp-action="Edit" asp-route-id="@Model.TheoryId" class="hw-back" style="color:#1a1a2e;">
+                        <i class="fas fa-pen"></i> Modifier
+                    </a>
+                    <a asp-action="Delete" asp-route-id="@Model.TheoryId" class="hw-back" style="color:#A32D2D; border-color:#F09595;">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </a>
+                }
+                <a href="javascript:history.back()" class="hw-back">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+
+        <div class="hw-body">
+
+            @if (Model.AudioLink != null || Model.AudioLinkSecond != null || Model.AudioLinkThird != null)
+            {
+                <div class="hw-section">
+                    <p class="hw-section-title">Audio</p>
+                    @if (Model.AudioLink != null)
+                    {
+                        <audio controls class="hw-audio">
+                            <source src="@(Model.AudioLink.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? Model.AudioLink : ViewData["URLAPI"] + Model.AudioLink)" type="audio/mp3">
+                        </audio>
+                    }
+                    @if (Model.AudioLinkSecond != null)
+                    {
+                        <audio controls class="hw-audio">
+                            <source src="@(Model.AudioLinkSecond.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? Model.AudioLinkSecond : ViewData["URLAPI"] + Model.AudioLinkSecond)" type="audio/mp3">
+                        </audio>
+                    }
+                    @if (Model.AudioLinkThird != null)
+                    {
+                        <audio controls class="hw-audio">
+                            <source src="@(Model.AudioLinkThird.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? Model.AudioLinkThird : ViewData["URLAPI"] + Model.AudioLinkThird)" type="audio/mp3">
+                        </audio>
+                    }
+                </div>
+            }
+
+            @if (Model.VideoLink != null)
+            {
+                <div class="hw-section">
+                    <p class="hw-section-title">Vidéo</p>
+                    <div class="hw-video-wrap embed-responsive embed-responsive-16by9">
+                        @if (!Model.VideoLink.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                        {
+                            <iframe class="embed-responsive-item" src="@ViewData["URLAPI"]@Model.VideoLink" allowfullscreen></iframe>
+                        }
+                        else
+                        {
+                            <iframe class="embed-responsive-item" src="@Model.VideoLink" allowfullscreen></iframe>
+                        }
                     </div>
-                    <div class="card-body">
-                        <div class="toolbar">
-                            <!--        Here you can write extra buttons/actions for the toolbar              -->
-                        </div>
-                        <div>
-                            @if (Model.AudioLink != null)
-                            {
-                                @if (Model.AudioLink.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    <audio controls style="width: 100%;">
-                                        <source src="@Html.DisplayFor(model => model.AudioLink)" type="audio/mp3">
-                                        Il y a un problème avec le fichier mp3.
-                                    </audio>
-                                }
-                                else
-                                {
-                                    <audio controls style="width: 100%;">
-                                        <source src="@ViewData["URLAPI"]@Html.DisplayFor(model => model.AudioLink)" type="audio/mp3">
-                                        Il y a un problème avec le fichier mp3.
-                                    </audio>
-                                }
-                            }
-                            @if (Model.AudioLinkSecond != null)
-                            {
-                                @if (Model.AudioLinkSecond.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    <audio controls style="width: 100%;">
-                                        <source src="@Html.DisplayFor(model => model.AudioLinkSecond)" type="audio/mp3">
-                                        Il y a un problème avec le fichier mp3.
-                                    </audio>
-                                }
-                                else
-                                {
-                                    <audio controls style="width: 100%;">
-                                        <source src="@ViewData["URLAPI"]@Html.DisplayFor(model => model.AudioLinkSecond)" type="audio/mp3">
-                                        Il y a un problème avec le fichier mp3.
-                                    </audio>
-                                }
-                            }
-                            @if (Model.AudioLinkThird != null)
-                            {
-                                @if (Model.AudioLinkThird.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    <audio controls style="width: 100%;">
-                                        <source src="@Html.DisplayFor(model => model.AudioLinkThird)" type="audio/mp3">
-                                        Il y a un problème avec le fichier mp3.
-                                    </audio>
-                                }
-                                else
-                                {
-                                    <audio controls style="width: 100%;">
-                                        <source src="@ViewData["URLAPI"]@Html.DisplayFor(model => model.AudioLinkThird)" type="audio/mp3">
-                                        Il y a un problème avec le fichier mp3.
-                                    </audio>
-                                }
-                            }
+                </div>
+            }
 
-                            @if (Model.VideoLink != null)
-                            {
-                                <h2 class="bg-primary text-center text-white">Vidéo</h2>
-                                <div class="embed-responsive embed-responsive-16by9">
-                                    @if (Model.VideoLink != null)
-                                    {
-                                        @if (!Model.VideoLink.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-                                        {
-                                            <iframe class="embed-responsive-item" src="@ViewData["URLAPI"]@Html.DisplayFor(model => model.VideoLink)" allowfullscreen></iframe>
-                                        }
-                                        else
-                                        {
-                                            <iframe class="embed-responsive-item" src="@Html.DisplayFor(model => model.VideoLink)" allowfullscreen></iframe>
-                                        }
-                                    }
-
-                                </div>
-                            }
-                            <h2 class="bg-primary text-center text-white">Cours</h2>
-                            <dl class="row">
-                                <dd class="col-sm-12">
-                                    <div class="embed-responsive embed-responsive-1by1">
-                                        @if (Model.TheoryLink != null)
-                                        {
-                                            @if (Model.TheoryLink.ToLower().EndsWith("pdf"))
-                                            {
-                                                <ejs-pdfviewer id="pdfviewer" style="height:600px" serviceUrl="@ViewData["URLAPI"]api/PdfViewer" documentPath="@Model.TheoryLink"></ejs-pdfviewer>
-                                            }
-                                            else
-                                            {
-                                                @if (!Model.TheoryLink.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-                                                {
-                                                    <iframe class="embed-responsive-item" src="@ViewData["URLAPI"]@Html.DisplayFor(model => model.TheoryLink)" allowfullscreen></iframe>
-                                                }
-                                                else
-                                                {
-                                                    <iframe class="embed-responsive-item" src="@Html.DisplayFor(model => model.TheoryLink)" allowfullscreen></iframe>
-                                                }
-                                            }
-                                        }
-
-                                    </div>
-                                </dd>
-                            </dl>
-                            @if (Model.TheoryLink != null)
-                            {
+            @if (Model.TheoryLink != null)
+            {
+                <div class="hw-section">
+                    <p class="hw-section-title">Document de cours</p>
+                    <div class="hw-doc-wrap">
+                        @if (Model.TheoryLink.ToLower().EndsWith("pdf"))
+                        {
+                            <ejs-pdfviewer id="pdfviewer" style="height:600px"
+                                serviceUrl="@ViewData["URLAPI"]api/PdfViewer"
+                                documentPath="@Model.TheoryLink"></ejs-pdfviewer>
+                        }
+                        else
+                        {
+                            <div class="embed-responsive embed-responsive-1by1">
                                 @if (!Model.TheoryLink.StartsWith("http", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    <a class="btn btn-primary btn-block" href="@ViewData["URLAPI"]@Html.DisplayFor(model => model.TheoryLink)">Télécharger</a>
+                                    <iframe class="embed-responsive-item" src="@ViewData["URLAPI"]@Model.TheoryLink" allowfullscreen></iframe>
                                 }
                                 else
                                 {
-                                    <a class="btn btn-primary btn-block" href="@Html.DisplayFor(model => model.TheoryLink)">Télécharger</a>
+                                    <iframe class="embed-responsive-item" src="@Model.TheoryLink" allowfullscreen></iframe>
                                 }
-                            }
-
-                        </div>
-                        <div>
-                            @if ((bool)ViewData["IsTeacher"])
-                            {
-                                <a class="text-success" asp-action="Edit" asp-route-id="@Model.TheoryId">Modifier</a>
-                                <a class="text-danger" asp-action="Delete" asp-route-id="@Model.TheoryId">Supprimer</a>
-                            }
-                            <a class="d-block" href="javascript:history.back()">Revenir à la page précédente</a>
-                        </div>
-
+                            </div>
+                        }
                     </div>
-                    <!-- end content-->
+                    <a class="hw-download-btn"
+                       href="@(Model.TheoryLink.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? Model.TheoryLink : ViewData["URLAPI"] + Model.TheoryLink)">
+                        <i class="fas fa-download"></i> Télécharger
+                    </a>
                 </div>
-                <!--  end card  -->
-            </div>
-            <!-- end col-md-12 -->
+            }
+
         </div>
     </div>
-</body>
+</div>

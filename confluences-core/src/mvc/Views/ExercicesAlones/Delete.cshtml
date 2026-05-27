@@ -1,97 +1,83 @@
-﻿@model mvc.Models.ExercicesAlone
+@model mvc.Models.ExercicesAlone
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Supprimer l'exercice";
 }
 
-<br />
-<br />
-<br />
-<br />
-<body data-parallax="true" class="bgImage">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header card-header-primary card-header-icon">
-                        <div class="card-icon">
-                            <h4 class="card-title">@ViewData["Title"]</h4>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="toolbar">
-                            <!--        Here you can write extra buttons/actions for the toolbar              -->
-                        </div>
-                        <h3>Êtes-vous sur de vouloir supprimer cet exercice ?</h3>
-                        <hr />
-                        <dl class="row">
-                            <dt class="col-sm-2">
-                                @Html.DisplayNameFor(model => model.ExerciceDate)
-                            </dt>
-                            <dd class="col-sm-10">
-                                @Html.DisplayFor(model => model.ExerciceDate)
-                            </dd>
-                            <dt class="col-sm-2">
-                                @Html.DisplayNameFor(model => model.ExerciceName)
-                            </dt>
-                            <dd class="col-sm-10">
-                                @Html.DisplayFor(model => model.ExerciceName)
-                            </dd>
-                            <dt class="col-sm-2">
-                                @Html.DisplayNameFor(model => model.ExerciceLink)
-                            </dt>
-                            <dd class="col-sm-10">
-                                @Html.DisplayFor(model => model.ExerciceLink)
-                            </dd>
-                            <dt class="col-sm-2">
-                                @Html.DisplayNameFor(model => model.AudioLink)
-                            </dt>
-                            <dd class="col-sm-10">
-                                @Html.DisplayFor(model => model.AudioLink)
-                            </dd>
-                            <dt class="col-sm-2">
-                                @Html.DisplayNameFor(model => model.CorrectionDate)
-                            </dt>
-                            <dd class="col-sm-10">
-                                @Html.DisplayFor(model => model.CorrectionDate)
-                            </dd>
-                            <dt class="col-sm-2">
-                                @Html.DisplayNameFor(model => model.CorrectionLink)
-                            </dt>
-                            <dd class="col-sm-10">
-                                @Html.DisplayFor(model => model.CorrectionLink)
-                            </dd>
-                            <dt class="col-sm-2">
-                                @Html.DisplayNameFor(model => model.IsHomeworkAdditionnal)
-                            </dt>
-                            <dd class="col-sm-10">
-                                @Html.DisplayFor(model => model.IsHomeworkAdditionnal)
-                            </dd>
-                            <dt class="col-sm-2">
-                                @Html.DisplayNameFor(model => model.HomeworkV2)
-                            </dt>
-                            <dd class="col-sm-10">
-                                @Html.DisplayFor(model => model.HomeworkV2.HomeworkV2name)
-                            </dd>
-                            <dt class="col-sm-2">
-                                @Html.DisplayNameFor(model => model.Teacher)
-                            </dt>
-                            <dd class="col-sm-10">
-                                @Html.DisplayFor(model => model.Teacher.Id)
-                            </dd>
-                        </dl>
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+    .hw-root { font-family: 'DM Sans', sans-serif; }
+    .hw-card { background: #fff; border-radius: 20px; border: 1px solid #f1f3f9; box-shadow: 0 4px 24px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 2rem; }
+    .hw-topbar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid #f1f3f9; gap: 12px; flex-wrap: wrap; }
+    .hw-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; margin: 0 0 4px; }
+    .hw-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .hw-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #6c757d; text-decoration: none; border: 1px solid #eef0f7; border-radius: 10px; padding: 7px 14px; transition: all 0.15s; }
+    .hw-back:hover { background: #f8f9fc; color: #1a1a2e; text-decoration: none; }
+    .hw-body { padding: 1.5rem; }
+    .hw-warning { display: flex; align-items: center; gap: 10px; background: #FCEBEB; border: 1px solid #F09595; border-radius: 12px; padding: 14px 16px; margin-bottom: 1.5rem; font-size: 13px; color: #A32D2D; font-weight: 500; }
+    .hw-dl { display: grid; grid-template-columns: 180px 1fr; gap: 0; margin-bottom: 1.5rem; }
+    .hw-dt { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #aaa; padding: 10px 0; border-bottom: 1px solid #f1f3f9; display: flex; align-items: center; }
+    .hw-dd { font-size: 13px; color: #1a1a2e; padding: 10px 0; border-bottom: 1px solid #f1f3f9; margin: 0; }
+    .hw-actions { display: flex; align-items: center; gap: 10px; padding-top: 0.5rem; }
+    .hw-btn-delete { display: inline-flex; align-items: center; gap: 6px; background: #A32D2D; color: #fff; border: none; border-radius: 10px; padding: 9px 20px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.15s; }
+    .hw-btn-delete:hover { opacity: 0.85; }
+    .hw-btn-cancel { display: inline-flex; align-items: center; gap: 6px; background: #f8f9fc; color: #6c757d; border: 1px solid #eef0f7; border-radius: 10px; padding: 9px 20px; font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.15s; }
+    .hw-btn-cancel:hover { background: #eef0f7; color: #1a1a2e; text-decoration: none; }
+</style>
 
-                        <form asp-action="Delete">
-                            <input type="hidden" asp-for="ExerciceId" />
-                            <input type="submit" value="Supprimer l'exercice" class="btn btn-danger" />  |
-                            <a href="javascript:history.back()">Revenir à la page précédente</a>
-                        </form>
-                    </div>
-                    <!-- end content-->
-                </div>
-                <!--  end card  -->
+<div class="container-fluid py-4 px-md-4 hw-root">
+    <div class="hw-card" style="max-width:560px;">
+
+        <div class="hw-topbar">
+            <div>
+                <p class="hw-eyebrow">Exercices en Autonomie</p>
+                <h1 class="hw-title">Supprimer l'exercice</h1>
             </div>
-            <!-- end col-md-12 -->
+            <a href="javascript:history.back()" class="hw-back">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
         </div>
+
+        <div class="hw-body">
+            <div class="hw-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                Êtes-vous sûr de vouloir supprimer cet exercice ? Cette action est irréversible.
+            </div>
+
+            <div class="hw-dl">
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.ExerciceDate)</span>
+                <span class="hw-dd">@Html.DisplayFor(model => model.ExerciceDate)</span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.ExerciceName)</span>
+                <span class="hw-dd">@Html.DisplayFor(model => model.ExerciceName)</span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.CorrectionDate)</span>
+                <span class="hw-dd">@Html.DisplayFor(model => model.CorrectionDate)</span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.IsHomeworkAdditionnal)</span>
+                <span class="hw-dd">
+                    @if (Model.IsHomeworkAdditionnal)
+                    {
+                        <span style="color:#c53030; font-weight:600;">Additionnel</span>
+                    }
+                    else
+                    {
+                        <span style="color:#4a5568;">Standard</span>
+                    }
+                </span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.HomeworkV2)</span>
+                <span class="hw-dd">@Html.DisplayFor(model => model.HomeworkV2.HomeworkV2name)</span>
+            </div>
+
+            <form asp-action="Delete" class="hw-actions">
+                <input type="hidden" asp-for="ExerciceId" />
+                <button type="submit" class="hw-btn-delete">
+                    <i class="fas fa-trash"></i> Supprimer définitivement
+                </button>
+                <a href="javascript:history.back()" class="hw-btn-cancel">Annuler</a>
+            </form>
+        </div>
+
     </div>
-</body>
+</div>

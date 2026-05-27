@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="pa-4">
+  <v-container fluid class="pa-2 pa-md-4">
 
     <!-- Navigation période -->
     <v-card class="mb-4 elevation-2" rounded="lg">
@@ -66,7 +66,85 @@
 
       <v-divider></v-divider>
 
-      <v-card-text class="pa-0">
+      <!-- ── Vue MOBILE : cartes ── -->
+      <v-card-text class="pa-2 d-md-none">
+        <div v-if="!isLoading && filteredUsers.length === 0" class="text-center pa-8 text-grey">
+          <v-icon size="large" color="grey-lighten-1">mdi-account-search-outline</v-icon>
+          <div class="mt-2">Aucun participant trouvé.</div>
+        </div>
+
+        <v-card
+          v-for="user in filteredUsers" :key="'mob'+user.id"
+          class="mb-4 elevation-2" rounded="xl"
+        >
+          <!-- En-tête -->
+          <div class="d-flex align-center px-4 pt-4 pb-3 gap-3">
+            <v-avatar color="primary" size="40">
+              <span class="text-white font-weight-bold">
+                {{ (user.nom||'A').charAt(0) }}{{ (user.prenom||'A').charAt(0) }}
+              </span>
+            </v-avatar>
+            <div class="flex-grow-1">
+              <div class="font-weight-bold">{{ user.prenom }} {{ user.nom }}</div>
+              <div class="text-caption text-grey text-uppercase">{{ user.userName }}</div>
+              <v-chip size="x-small" color="primary" variant="tonal" class="mt-1">
+                {{ getUserSessionInfo(user) }}
+              </v-chip>
+            </div>
+            <v-btn icon size="small" color="grey-darken-1" variant="tonal"
+              @click="openSummary(user)">
+              <v-icon size="small">mdi-printer-eye</v-icon>
+            </v-btn>
+          </div>
+
+          <v-divider />
+
+          <!-- Accompagnements -->
+          <div class="px-4 pt-3 pb-2" v-if="accompanyingCols.length">
+            <div class="text-caption font-weight-bold text-blue-darken-2 mb-2">
+              <v-icon size="x-small" class="mr-1">mdi-account-heart</v-icon>Accompagnements
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+              <div
+                v-for="col in accompanyingCols" :key="col.key"
+                class="mobile-activity-chip acco-chip"
+                @click="openDateEditor(user, col)"
+              >
+                <div class="chip-label">{{ col.label }}</div>
+                <v-chip size="x-small" color="blue" variant="flat" class="mt-1">
+                  {{ getDatesCount(user.id, col.key) > 0
+                    ? getDatesCount(user.id, col.key) + ' séance' + (getDatesCount(user.id, col.key) > 1 ? 's' : '')
+                    : '+' }}
+                </v-chip>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ateliers -->
+          <div class="px-4 pt-2 pb-3" v-if="workshopCols.length">
+            <div class="text-caption font-weight-bold text-green-darken-2 mb-2">
+              <v-icon size="x-small" class="mr-1">mdi-hammer-wrench</v-icon>Ateliers
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+              <div
+                v-for="col in workshopCols" :key="col.key"
+                class="mobile-activity-chip atelier-chip"
+                @click="openDateEditor(user, col)"
+              >
+                <div class="chip-label">{{ col.label }}</div>
+                <v-chip size="x-small" color="green" variant="flat" class="mt-1">
+                  {{ getDatesCount(user.id, col.key) > 0
+                    ? getDatesCount(user.id, col.key) + ' séance' + (getDatesCount(user.id, col.key) > 1 ? 's' : '')
+                    : '+' }}
+                </v-chip>
+              </div>
+            </div>
+          </div>
+        </v-card>
+      </v-card-text>
+
+      <!-- ── Vue DESKTOP : tableau ── -->
+      <v-card-text class="pa-0 d-none d-md-block">
         <div class="table-container">
           <table class="matrix-table">
             <thead>
@@ -91,10 +169,10 @@
               <tr v-for="user in filteredUsers" :key="user.id" class="table-row">
                 <td class="sticky-col name-col">
                   <div class="user-info">
-                    <div class="name">{{ user.nom }} {{ user.prenom }}</div>
+                    <div class="name">{{ user.prenom }} {{ user.nom }}</div>
                     <div class="trigramme">{{ user.userName }}</div>
                     <div class="text-caption font-weight-bold text-medium-emphasis">{{ user.niveau }}</div>
-                    <div class="text-caption font-weight-bold text-primary">{{ getUserSessionInfo(user) }} ({{ currentYear }})</div>
+                    <div class="text-caption font-weight-bold text-primary">{{ getUserSessionInfo(user) }}</div>
                   </div>
                 </td>
 
@@ -146,8 +224,7 @@
     </v-card>
 
     <!-- ════════ Modal éditeur de dates ════════ -->
-    <v-dialog v-model="editorDialog" max-width="380px">
-      <v-card v-if="editingCell" rounded="lg">
+    <v-dialog v-model="editorDialog" max-width="680px"> <v-card v-if="editingCell" rounded="lg">
         <v-card-title
           class="py-3 px-4 d-flex align-center gap-2"
           :class="editingCell.column.type === 'acco' ? 'bg-acco-header' : 'bg-atelier-header'"
@@ -160,21 +237,58 @@
             {{ editingCell.column.type === 'acco' ? 'Accompagnement' : 'Atelier' }}
           </v-chip>
         </v-card-title>
-        <div class="px-4 pt-2 pb-1 text-caption text-grey">
-          <v-icon size="x-small">mdi-account</v-icon>
-          {{ editingCell.user.nom }} {{ editingCell.user.prenom }}
+        
+        <div class="px-4 pt-2 pb-1 text-subtitle-2 font-weight-medium text-grey-darken-2">
+          <v-icon size="small" class="mr-1">mdi-account</v-icon>
+          {{ editingCell.user.prenom }} {{ editingCell.user.nom }}
         </div>
-        <v-date-picker
-          v-model="datesPickerBuffer"
-          multiple hide-header scrollable width="100%"
-          locale="fr-CH" :first-day-of-week="1"
-          :color="editingCell.column.type === 'acco' ? 'blue' : 'green'"
-        ></v-date-picker>
+
+        <div class="d-flex flex-column flex-sm-row">
+          
+          <div class="flex-grow-1" style="max-width: 360px;">
+            <v-date-picker
+              :key="datePickerKey"
+              v-model="datesPickerBuffer"
+              v-model:month="calendarMonth"
+              v-model:year="calendarYear"
+              multiple
+              hide-header 
+              scrollable 
+              width="100%"
+              locale="fr-CH" 
+              :first-day-of-week="1"
+              :color="editingCell.column.type === 'acco' ? 'blue' : 'green'"
+            ></v-date-picker>
+          </div>
+
+          <div class="border-sm-left flex-grow-1 pa-4 bg-grey-lighten-5 d-flex flex-column" style="min-width: 240px; max-height: 320px;">
+            <div class="text-caption font-weight-bold text-uppercase text-grey mb-2">
+              Dates sélectionnées ({{ datesPickerBuffer.length }})
+            </div>
+            
+            <div class="overflow-y-auto pr-1 flex-grow-1" style="max-height: 240px;">
+              <div v-if="!datesPickerBuffer.length" class="text-caption text-grey italic mt-4 text-center">
+                Aucune date sélectionnée
+              </div>
+              <div class="d-flex flex-wrap gap-1" v-else>
+                <v-chip
+                  v-for="(date, idx) in sortedSelectedDates"
+                  :key="idx"
+                  size="small"
+                  closable
+                  :color="editingCell.column.type === 'acco' ? 'blue' : 'green'"
+                  variant="flat"
+                  @click:close="removeDateFromBuffer(date)"
+                >
+                  {{ formatDateShort(date) }}
+                </v-chip>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <v-divider></v-divider>
         <v-card-actions class="pa-3">
-          <div class="text-caption text-grey">
-            {{ datesPickerBuffer.length }} date{{ datesPickerBuffer.length > 1 ? 's' : '' }} sélectionnée{{ datesPickerBuffer.length > 1 ? 's' : '' }}
-          </div>
           <v-spacer></v-spacer>
           <v-btn variant="text" @click="editorDialog = false">Annuler</v-btn>
           <v-btn
@@ -190,7 +304,7 @@
       <v-card rounded="lg">
         <v-card-title class="d-flex align-center pa-4">
           <v-icon class="mr-2" color="primary">mdi-printer-eye</v-icon>
-          {{ selectedUser?.nom }} {{ selectedUser?.prenom }}
+          {{ selectedUser?.prenom }} {{ selectedUser?.nom }}
           <v-spacer></v-spacer>
           <v-btn icon size="small" @click="summaryDialog = false"><v-icon>mdi-close</v-icon></v-btn>
         </v-card-title>
@@ -385,12 +499,33 @@ const currentSessionDates = computed(() => {
   }
 })
 
-// ─── Label de navigation ──────────────────────────────────────────────────────
-const currentPeriodLabel = computed(() => {
-  if (currentSession.value?.name) return currentSession.value.name
-  return `Session ${currentQuarter.value} — ${currentYear.value}`
+// Clé qui force le re-mount du date-picker à chaque ouverture (sinon il navigue vers la date sélectionnée)
+const datePickerKey  = ref(0)
+const calendarMonth  = ref(new Date().getMonth())
+const calendarYear   = ref(new Date().getFullYear())
+
+// Trier les dates sélectionnées par ordre chronologique pour l'affichage à droite
+const sortedSelectedDates = computed(() => {
+  if (!datesPickerBuffer.value) return []
+  return [...datesPickerBuffer.value].sort((a, b) => new Date(a) - new Date(b))
 })
 
+// Formater les jetons de dates (ex: "Jeu. 14 mai")
+function formatDateShort(dateStr) {
+  const d = new Date(dateStr)
+  return d.toLocaleDateString('fr-CH', { weekday: 'short', day: 'numeric', month: 'short' })
+}
+
+// Permettre de retirer une date directement depuis la liste de droite
+function removeDateFromBuffer(dateToRemove) {
+  const tToRemove = new Date(dateToRemove).getTime()
+  datesPickerBuffer.value = datesPickerBuffer.value.filter(d => new Date(d).getTime() !== tToRemove)
+}
+
+// ─── Label de navigation ──────────────────────────────────────────────────────
+const currentPeriodLabel = computed(() =>
+  `Session ${currentQuarter.value} — ${currentYear.value}`
+)
 // ─── Dates réelles affichées en sous-titre ────────────────────────────────────
 const periodDateLabel = computed(() => {
   if (currentSession.value?.startDate) {
@@ -568,6 +703,10 @@ const saveCellChanges = async () => {
 const openDateEditor = (user, col) => {
   editingCell.value       = { user, column: col }
   datesPickerBuffer.value = [...(presencesMatrix.value[user.id]?.[col.key] || [])]
+  const today             = new Date()
+  calendarMonth.value     = today.getMonth()
+  calendarYear.value      = today.getFullYear()
+  datePickerKey.value++
   editorDialog.value      = true
 }
 
@@ -627,7 +766,7 @@ const saveConfiguration = async () => {
 }
 
 const copyToClipboard = () => {
-  let text = `Dates pour ${selectedUser.value.nom} ${selectedUser.value.prenom}\n\n`
+  let text = `Dates pour ${selectedUser.value.prenom} ${selectedUser.value.nom}\n\n`
   allColumnsOrdered.value.forEach(col => {
     const dates = getSortedDates(selectedUser.value.id, col.key)
     if (dates.length > 0) text += `${col.label} : ${dates.map(d => moment(d).format('DD.MM')).join(', ')}\n`
@@ -658,8 +797,7 @@ onMounted(async () => {
 .matrix-table th, .matrix-table td { border: 1px solid #e8e8e8; padding: 10px 8px; text-align: center; }
 
 .sticky-col { position: sticky; background: white; z-index: 2; }
-.name-col   { left: 0; text-align: center !important; min-width: 220px; box-shadow: 2px 0 5px rgba(0,0,0,0.06); }
-.matrix-table td.name-col { text-align: center !important; }
+.name-col   { left: 0; text-align: center!important; min-width: 220px; box-shadow: 2px 0 5px rgba(0,0,0,0.06); }
 .actions-col { right: 0; min-width: 60px; background: #fafafa; }
 
 .activity-header { position: sticky; top: 0; z-index: 3; min-width: 130px; }
@@ -699,4 +837,21 @@ onMounted(async () => {
 .user-info { padding: 4px 8px; }
 .user-info .name { font-weight: 700; color: #1a1a1a; }
 .user-info .trigramme { font-size: 0.72rem; color: #999; text-transform: uppercase; }
+
+/* ── Mobile activity chips ── */
+.mobile-activity-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+  min-width: 80px;
+  text-align: center;
+}
+.mobile-activity-chip:active { transform: scale(0.95); }
+.acco-chip    { background: #EFF6FF; border: 1px solid #BFDBFE; }
+.atelier-chip { background: #F0FDF4; border: 1px solid #BBF7D0; }
+.chip-label { font-size: 0.68rem; font-weight: 600; color: #374151; line-height: 1.2; margin-bottom: 4px; }
 </style>

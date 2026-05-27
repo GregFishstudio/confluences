@@ -1,47 +1,127 @@
 ﻿@model IEnumerable<mvc.Models.HomeworkStudent>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Rendus des participants";
 }
 
-<h1>Index</h1>
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+    .hw-root { font-family: 'DM Sans', sans-serif; }
+    .hw-card { background: #fff; border-radius: 20px; border: 1px solid #f1f3f9; box-shadow: 0 4px 24px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 2rem; }
+    .hw-topbar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #f1f3f9; gap: 12px; flex-wrap: wrap; }
+    .hw-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; margin: 0 0 4px; }
+    .hw-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .hw-btn-add { display: inline-flex; align-items: center; gap: 6px; background: #1a1a2e; color: #fff; border: none; border-radius: 10px; padding: 9px 18px; font-size: 13px; font-weight: 500; text-decoration: none; transition: opacity 0.15s; }
+    .hw-btn-add:hover { opacity: 0.8; color: #fff; text-decoration: none; }
+    .hw-toolbar { display: flex; align-items: center; gap: 8px; padding: 12px 1.5rem; border-bottom: 1px solid #f1f3f9; }
+    .hw-search-wrap { position: relative; flex: 1; min-width: 180px; }
+    .hw-search-wrap .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #aaa; }
+    .hw-search { width: 100%; background: #f8f9fc; border: 1px solid #eef0f7; border-radius: 10px; padding: 7px 12px 7px 32px; font-size: 13px; color: #1a1a2e; font-family: 'DM Sans', sans-serif; outline: none; }
+    .hw-search:focus { border-color: #c0c8e8; background: #fff; }
+    .hw-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .hw-table th { text-align: left; padding: 10px 1.5rem; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #aaa; border-bottom: 1px solid #f1f3f9; white-space: nowrap; }
+    .hw-table td { padding: 13px 1.5rem; border-bottom: 1px solid #f1f3f9; vertical-align: middle; color: #1a1a2e; }
+    .hw-table tbody tr:last-child td { border-bottom: none; }
+    .hw-table tbody tr { transition: background 0.1s; }
+    .hw-table tbody tr:hover { background: #fafbff; }
+    .date-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #6c757d; }
+    .file-chip { display: inline-flex; align-items: center; gap: 6px; background: #f8f9fc; border: 1px solid #eef0f7; border-radius: 8px; padding: 3px 10px; font-size: 12px; color: #1a1a2e; }
+    .actions-cell { display: flex; justify-content: flex-end; gap: 4px; }
+    .act-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid #eef0f7; background: #fff; display: inline-flex; align-items: center; justify-content: center; color: #6c757d; transition: all 0.15s; text-decoration: none; font-size: 13px; }
+    .act-btn:hover { background: #f8f9fc; color: #1a1a2e; border-color: #c0c8e8; text-decoration: none; }
+    .act-btn.del:hover { background: #FCEBEB; color: #A32D2D; border-color: #F09595; }
+    .hw-footer { padding: 12px 1.5rem; border-top: 1px solid #f1f3f9; font-size: 12px; color: #aaa; }
+</style>
 
-<p>
-    <a class="btn btn-success" asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.HomeworkStudentDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.HomeworkFile)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Homework)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.HomeworkStudentDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.HomeworkFile)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Homework.TeacherId)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.HomeworkStudentId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.HomeworkStudentId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.HomeworkStudentId">Delete</a>
-            </td>
-        </tr>
+<div class="container-fluid py-4 px-md-4 hw-root">
+    <div class="hw-card">
+
+        <div class="hw-topbar">
+            <div>
+                <p class="hw-eyebrow">Devoirs</p>
+                <h1 class="hw-title">Rendus des participants</h1>
+            </div>
+            <a asp-action="Create" class="hw-btn-add">
+                <i class="fas fa-plus"></i> Ajouter un rendu
+            </a>
+        </div>
+
+        <div class="hw-toolbar">
+            <div class="hw-search-wrap">
+                <i class="fas fa-search search-icon"></i>
+                <input class="hw-search" type="search" id="hw-search" placeholder="Rechercher..." />
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="hw-table">
+                <thead>
+                    <tr>
+                        <th>@Html.DisplayNameFor(model => model.HomeworkStudentDate)</th>
+                        <th>@Html.DisplayNameFor(model => model.HomeworkFile)</th>
+                        <th>Devoir</th>
+                        <th style="text-align:right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="hw-body">
+                    @foreach (var item in Model)
+                    {
+                        <tr data-search="@item.HomeworkFile @item.HomeworkStudentDate">
+                            <td>
+                                <span class="date-chip">
+                                    <i class="far fa-calendar-alt"></i>
+                                    @item.HomeworkStudentDate.ToString("dd MMM yyyy")
+                                </span>
+                            </td>
+                            <td>
+                                <span class="file-chip">
+                                    <i class="fas fa-paperclip" style="font-size:11px;color:#aaa;"></i>
+                                    @item.HomeworkFile
+                                </span>
+                            </td>
+                            <td style="color:#6c757d;">@item.Homework?.TeacherId</td>
+                            <td>
+                                <div class="actions-cell">
+                                    <a asp-action="Edit" asp-route-id="@item.HomeworkStudentId" class="act-btn" title="Modifier">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@item.HomeworkStudentId" class="act-btn" title="Détails">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.HomeworkStudentId" class="act-btn del" title="Supprimer">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="hw-footer" id="hw-count"></div>
+
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    (function () {
+        var rows = Array.from(document.querySelectorAll('#hw-body tr'));
+        var searchInput = document.getElementById('hw-search');
+        var countEl = document.getElementById('hw-count');
+        function update() {
+            var q = searchInput.value.toLowerCase();
+            var n = 0;
+            rows.forEach(function (r) {
+                var show = !q || r.dataset.search.toLowerCase().includes(q);
+                r.style.display = show ? '' : 'none';
+                if (show) n++;
+            });
+            countEl.textContent = n + ' rendu' + (n > 1 ? 's' : '') + ' affiché' + (n > 1 ? 's' : '');
+        }
+        searchInput.addEventListener('input', update);
+        update();
+    })();
+</script>
 }
-    </tbody>
-</table>

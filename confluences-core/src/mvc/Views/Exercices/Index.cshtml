@@ -5,175 +5,124 @@
 }
 
 <style>
-    :root {
-        --bg-gradient: linear-gradient(135deg, #f0f4ff 0%, #f1fff5 50%, #ffffff 100%);
-        --primary-modern: #4e73df;
-        --border-soft: rgba(0, 0, 0, 0.06);
-        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-    }
-
-    body, .bgImage {
-        background: var(--bg-gradient) !important;
-        background-attachment: fixed !important;
-        font-family: 'Inter', 'Segoe UI', sans-serif;
-        color: #2e3d49;
-    }
-
-    /* Header Glassmorphism */
-    .header-glass {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        border-radius: 20px;
-        padding: 1.5rem 2rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
-        margin-bottom: 2rem;
-    }
-
-    /* Table Container */
-    .admin-card {
-        background: #ffffff;
-        border-radius: 24px;
-        border: 1px solid var(--border-soft);
-        box-shadow: var(--card-shadow);
-        overflow: hidden;
-    }
-
-    .custom-table thead th {
-        background-color: #f8f9fc;
-        color: #858796;
-        font-weight: 700;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        letter-spacing: 0.05em;
-        padding: 1.2rem 1.5rem;
-        border: none;
-    }
-
-    .custom-table tbody td {
-        padding: 1.2rem 1.5rem;
-        vertical-align: middle;
-        border-top: 1px solid #f1f3f9;
-        font-size: 0.9rem;
-    }
-
-    /* Link & Badge Styling */
-    .exercise-link {
-        color: var(--primary-modern);
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-    }
-    .exercise-link:hover { text-decoration: underline; }
-
-    .date-badge {
-        background: #f0f2f5;
-        padding: 0.4rem 0.8rem;
-        border-radius: 10px;
-        font-weight: 600;
-        color: #4a5568;
-        font-size: 0.85rem;
-    }
-
-    .type-badge {
-        padding: 0.3rem 0.7rem;
-        border-radius: 20px;
-        font-size: 0.7rem;
-        font-weight: 800;
-        text-transform: uppercase;
-    }
-    .badge-homework { background: #fff5f5; color: #c53030; border: 1px solid #feb2b2; }
-    .badge-standard { background: #ebf8ff; color: #3182ce; border: 1px solid #bee3f8; }
-
-    /* Action Buttons */
-    .action-btn-group { display: flex; gap: 8px; justify-content: flex-end; }
-    
-    .btn-circle-sm {
-        width: 35px; height: 35px;
-        display: flex; align-items: center; justify-content: center;
-        border-radius: 10px;
-        background: #f8f9fc;
-        border: 1px solid #eef0f7;
-        color: #4e73df;
-        transition: 0.2s;
-    }
-    .btn-circle-sm:hover { background: #4e73df; color: white; transform: translateY(-2px); }
-    .btn-circle-sm.delete:hover { background: #e74a3b; color: white; border-color: #e74a3b; }
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+    .hw-root { font-family: 'DM Sans', sans-serif; }
+    .hw-card { background: #fff; border-radius: 20px; border: 1px solid #f1f3f9; box-shadow: 0 4px 24px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 2rem; }
+    .hw-topbar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #f1f3f9; gap: 12px; flex-wrap: wrap; }
+    .hw-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; margin: 0 0 4px; }
+    .hw-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .hw-btn-add { display: inline-flex; align-items: center; gap: 6px; background: #1a1a2e; color: #fff; border: none; border-radius: 10px; padding: 9px 18px; font-size: 13px; font-weight: 500; text-decoration: none; transition: opacity 0.15s; }
+    .hw-btn-add:hover { opacity: 0.8; color: #fff; text-decoration: none; }
+    .hw-toolbar { display: flex; align-items: center; gap: 8px; padding: 12px 1.5rem; border-bottom: 1px solid #f1f3f9; }
+    .hw-search-wrap { position: relative; flex: 1; min-width: 180px; }
+    .hw-search-wrap .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #aaa; }
+    .hw-search { width: 100%; background: #f8f9fc; border: 1px solid #eef0f7; border-radius: 10px; padding: 7px 12px 7px 32px; font-size: 13px; color: #1a1a2e; font-family: 'DM Sans', sans-serif; outline: none; }
+    .hw-search:focus { border-color: #c0c8e8; background: #fff; }
+    .hw-filter-btn { display: inline-flex; align-items: center; gap: 5px; background: #f8f9fc; border: 1px solid #eef0f7; border-radius: 10px; padding: 7px 14px; font-size: 13px; color: #6c757d; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+    .hw-filter-btn:hover, .hw-filter-btn.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+    .hw-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .hw-table th { text-align: left; padding: 10px 1.5rem; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #aaa; border-bottom: 1px solid #f1f3f9; white-space: nowrap; }
+    .hw-table td { padding: 13px 1.5rem; border-bottom: 1px solid #f1f3f9; vertical-align: middle; color: #1a1a2e; }
+    .hw-table tbody tr:last-child td { border-bottom: none; }
+    .hw-table tbody tr { transition: background 0.1s; }
+    .hw-table tbody tr:hover { background: #fafbff; }
+    .date-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #6c757d; }
+    .type-chip { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+    .type-sup { background: #FCEBEB; color: #A32D2D; }
+    .type-std { background: #E6F1FB; color: #0C447C; }
+    .resource-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #0C447C; text-decoration: none; }
+    .resource-link:hover { text-decoration: underline; }
+    .teacher-cell { display: flex; align-items: center; gap: 8px; }
+    .avatar { width: 26px; height: 26px; border-radius: 50%; background: #f0f2f5; border: 1px solid #eef0f7; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; color: #6c757d; flex-shrink: 0; }
+    .actions-cell { display: flex; justify-content: flex-end; gap: 4px; }
+    .act-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid #eef0f7; background: #fff; display: inline-flex; align-items: center; justify-content: center; color: #6c757d; transition: all 0.15s; text-decoration: none; font-size: 13px; }
+    .act-btn:hover { background: #f8f9fc; color: #1a1a2e; border-color: #c0c8e8; text-decoration: none; }
+    .act-btn.del:hover { background: #FCEBEB; color: #A32D2D; border-color: #F09595; }
+    .hw-footer { padding: 12px 1.5rem; border-top: 1px solid #f1f3f9; font-size: 12px; color: #aaa; }
 </style>
 
-<div class="container-fluid py-4 px-md-5">
+<div class="container-fluid py-4 px-md-4 hw-root">
+    <div class="hw-card">
 
-    <div class="header-glass d-flex flex-wrap justify-content-between align-items-center mt-3">
-        <div>
-            <h1 class="h3 font-weight-bold mb-1">📝 @ViewData["Title"]</h1>
-            <p class="text-muted small mb-0">Gestion de la banque d'exercices et des devoirs</p>
+        <div class="hw-topbar">
+            <div>
+                <p class="hw-eyebrow">Exercices</p>
+                <h1 class="hw-title">Gestion des exercices</h1>
+            </div>
+            <a asp-action="Create" class="hw-btn-add">
+                <i class="fas fa-plus"></i> Nouvel exercice
+            </a>
         </div>
-        <a class="btn btn-primary rounded-pill px-4 shadow-sm font-weight-bold" asp-action="Create">
-            <i class="fas fa-plus-circle mr-2"></i> Nouvel exercice
-        </a>
-    </div>
 
-    <div class="admin-card">
+        <div class="hw-toolbar">
+            <div class="hw-search-wrap">
+                <i class="fas fa-search search-icon"></i>
+                <input class="hw-search" type="search" id="hw-search" placeholder="Rechercher un exercice..." />
+            </div>
+            <button class="hw-filter-btn active" data-filter="all">Tous</button>
+            <button class="hw-filter-btn" data-filter="sup">Devoir sup.</button>
+            <button class="hw-filter-btn" data-filter="std">Standard</button>
+        </div>
+
         <div class="table-responsive">
-            <table id="exerciseTable" class="table custom-table mb-0">
+            <table class="hw-table">
                 <thead>
                     <tr>
                         <th>Date</th>
-                        <th>Nom de l'exercice</th>
-                        <th>Lien / Ressource</th>
+                        <th>Nom</th>
+                        <th>Ressource</th>
                         <th>Type</th>
                         <th>Formateur</th>
-                        <th class="text-right">Actions</th>
+                        <th style="text-align:right">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @foreach (var item in Model) {
-                        <tr>
+                <tbody id="hw-body">
+                    @foreach (var item in Model)
+                    {
+                        <tr data-type="@(item.IsHomeworkAdditionnal ? "sup" : "std")"
+                            data-search="@item.ExerciceName @item.Teacher?.Firstname @item.Teacher?.LastName">
                             <td>
-                                <span class="date-badge">
-                                    <i class="far fa-calendar-alt text-primary mr-1"></i>
-                                    @item.ExerciceDate.ToString("dd/MM/yyyy")
+                                <span class="date-chip">
+                                    <i class="far fa-calendar-alt"></i>
+                                    @item.ExerciceDate.ToString("dd MMM yyyy")
                                 </span>
                             </td>
+                            <td style="font-weight:500;">@item.ExerciceName</td>
                             <td>
-                                <span class="font-weight-bold text-dark">@Html.DisplayFor(modelItem => item.ExerciceName)</span>
-                            </td>
-                            <td>
-                                @if (!string.IsNullOrEmpty(item.ExerciceLink)) {
-                                    <a href="@item.ExerciceLink" target="_blank" class="exercise-link">
-                                        <i class="fas fa-external-link-alt fa-xs"></i> Voir la ressource
+                                @if (!string.IsNullOrEmpty(item.ExerciceLink))
+                                {
+                                    <a href="@item.ExerciceLink" target="_blank" class="resource-link">
+                                        <i class="fas fa-external-link-alt" style="font-size:11px;"></i> Voir
                                     </a>
-                                } else {
-                                    <span class="text-muted small italic">Aucun lien</span>
+                                }
+                                else
+                                {
+                                    <span style="color:#aaa;font-size:12px;">—</span>
                                 }
                             </td>
                             <td>
-                                @if (item.IsHomeworkAdditionnal) {
-                                    <span class="type-badge badge-homework">Devoir Sup.</span>
-                                } else {
-                                    <span class="type-badge badge-standard">Standard</span>
+                                @if (item.IsHomeworkAdditionnal)
+                                {
+                                    <span class="type-chip type-sup">Devoir sup.</span>
+                                }
+                                else
+                                {
+                                    <span class="type-chip type-std">Standard</span>
                                 }
                             </td>
                             <td>
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-user-circle text-muted mr-2"></i>
-                                    <span class="small font-weight-bold">@item.Teacher.Firstname @item.Teacher.LastName</span>
+                                <div class="teacher-cell">
+                                    <div class="avatar">
+                                        @(item.Teacher?.Firstname?.Length > 0 ? item.Teacher.Firstname[0].ToString() : "")@(item.Teacher?.LastName?.Length > 0 ? item.Teacher.LastName[0].ToString() : "")
+                                    </div>
+                                    <span style="color:#6c757d;">@item.Teacher?.Firstname @item.Teacher?.LastName</span>
                                 </div>
                             </td>
                             <td>
-                                <div class="action-btn-group">
-                                    <a asp-action="Edit" asp-route-id="@item.ExerciceId" class="btn-circle-sm" title="Modifier">
-                                        <i class="fas fa-pen fa-sm"></i>
-                                    </a>
-                                    <a asp-action="Details" asp-route-id="@item.ExerciceId" class="btn-circle-sm" title="Détails">
-                                        <i class="fas fa-eye fa-sm"></i>
-                                    </a>
-                                    <a asp-action="Delete" asp-route-id="@item.ExerciceId" class="btn-circle-sm delete" title="Supprimer">
-                                        <i class="fas fa-trash fa-sm"></i>
-                                    </a>
+                                <div class="actions-cell">
+                                    <a asp-action="Edit" asp-route-id="@item.ExerciceId" class="act-btn" title="Modifier"><i class="fas fa-pen"></i></a>
+                                    <a asp-action="Details" asp-route-id="@item.ExerciceId" class="act-btn" title="Détails"><i class="fas fa-eye"></i></a>
+                                    <a asp-action="Delete" asp-route-id="@item.ExerciceId" class="act-btn del" title="Supprimer"><i class="fas fa-trash"></i></a>
                                 </div>
                             </td>
                         </tr>
@@ -181,26 +130,39 @@
                 </tbody>
             </table>
         </div>
+
+        <div class="hw-footer" id="hw-count"></div>
     </div>
 </div>
 
 @section Scripts {
-    <script>
-        $(document).ready(function () {
-            $('#exerciseTable').DataTable({
-                "pagingType": "simple_numbers",
-                "language": {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/French.json",
-                    "searchPlaceholder": "Rechercher un exercice..."
-                },
-                "order": [[0, "desc"]],
-                "columnDefs": [
-                    { "orderable": false, "targets": 5 }
-                ],
-                "dom": "<'row p-4'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
-                       "<'row'<'col-sm-12'tr>>" +
-                       "<'row p-4'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
+<script>
+    (function () {
+        var rows = Array.from(document.querySelectorAll('#hw-body tr'));
+        var searchInput = document.getElementById('hw-search');
+        var countEl = document.getElementById('hw-count');
+        var currentFilter = 'all';
+        function applyFilters() {
+            var q = searchInput.value.toLowerCase();
+            var n = 0;
+            rows.forEach(function (r) {
+                var matchFilter = currentFilter === 'all' || r.dataset.type === currentFilter;
+                var matchSearch = !q || r.dataset.search.toLowerCase().includes(q);
+                r.style.display = (matchFilter && matchSearch) ? '' : 'none';
+                if (matchFilter && matchSearch) n++;
+            });
+            countEl.textContent = n + ' exercice' + (n > 1 ? 's' : '') + ' affiché' + (n > 1 ? 's' : '');
+        }
+        searchInput.addEventListener('input', applyFilters);
+        document.querySelectorAll('.hw-filter-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.hw-filter-btn').forEach(function (b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                applyFilters();
             });
         });
-    </script>
+        applyFilters();
+    })();
+</script>
 }

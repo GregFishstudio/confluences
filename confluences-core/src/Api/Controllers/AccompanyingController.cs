@@ -19,38 +19,41 @@ namespace Api.Controllers
         private readonly ConfluencesDbContext _context;
         private readonly ILogger<AccompanyingController> _logger;
 
-        public AccompanyingController(ConfluencesDbContext context, ILogger<AccompanyingController> logger)
+        public AccompanyingController(
+            ConfluencesDbContext context,
+            ILogger<AccompanyingController> logger)
         {
             _context = context;
-            _logger = logger;
+            _logger  = logger;
         }
 
-        // --- DTOs ---
-        public class SyncRequestDto 
+        // ── DTOs ──────────────────────────────────────────────────────────────
+        public class SyncRequestDto
         {
-            public string UserId { get; set; }
-            public string ActivityKey { get; set; }
-            public List<string> Dates { get; set; } 
-            public string PeriodStart { get; set; }        // ← string au lieu de DateTime
-    public string PeriodEnd { get; set; } 
+            public string       UserId      { get; set; }
+            public string       ActivityKey { get; set; }
+            public List<string> Dates       { get; set; }
+            public string       PeriodStart { get; set; }
+            public string       PeriodEnd   { get; set; }
         }
 
-        // --- GESTION DES COLONNES ---
+        // ── COLONNES ──────────────────────────────────────────────────────────
 
         [HttpGet("columns")]
         public async Task<IActionResult> GetColumns()
         {
-            try 
+            try
             {
                 var columns = await _context.MatrixColumns
                     .OrderBy(c => c.Type ?? "")
                     .ThenBy(c => c.DisplayOrder)
-                    .Select(c => new {
-                        id = c.Id,
-                        key = c.Key ?? "", 
-                        label = c.Label ?? "Sans nom",
-                        type = c.Type ?? "acco",
-                        displayOrder = c.DisplayOrder
+                    .Select(c => new
+                    {
+                        id           = c.Id,
+                        key          = c.Key   ?? "",
+                        label        = c.Label ?? "Sans nom",
+                        type         = c.Type  ?? "acco",
+                        displayOrder = c.DisplayOrder,
                     })
                     .ToListAsync();
 
@@ -78,7 +81,7 @@ namespace Api.Controllers
         {
             if (columns == null) return BadRequest("Liste de colonnes vide.");
 
-            try 
+            try
             {
                 foreach (var col in columns)
                 {
@@ -87,13 +90,13 @@ namespace Api.Controllers
 
                     if (existing != null)
                     {
-                        existing.Label = col.Label;
+                        existing.Label        = col.Label;
                         existing.DisplayOrder = col.DisplayOrder;
-                        existing.Type = col.Type;
+                        existing.Type         = col.Type;
                     }
-                    else 
+                    else
                     {
-                        col.Id = 0; 
+                        col.Id = 0;
                         _context.MatrixColumns.Add(col);
                     }
                 }
@@ -108,10 +111,75 @@ namespace Api.Controllers
             }
         }
 
-        // --- GESTION DES DONNÉES DE PRÉSENCE ---
+        // ── RÉSUMÉ DES ACTIVITÉS POUR LE BILAN ───────────────────────────────
+        // GET /api/accompanying/summary/{userId}?year=2026&quarter=1
+        // Retourne les activités (label, type, count) sur le trimestre calendaire.
+
+        [HttpGet("summary/{userId}")]
+        public async Task<IActionResult> GetSummary(
+            string userId,
+            [FromQuery] int year,
+            [FromQuery] string quarter)
+        {
+            // Normaliser "T1" → 1
+            if (!quarter.StartsWith("T")) quarter = $"T{quarter}";
+            int q = int.TryParse(quarter.Replace("T", ""), out var n)
+                ? Math.Max(1, Math.Min(4, n))
+                : 1;
+
+            // Dates du trimestre calendaire (fallback unique — pas de SessionFormation)
+            var startDate = new DateTime(year, (q - 1) * 3 + 1, 1);
+            var endDate   = startDate.AddMonths(3).AddDays(-1);
+
+            // Agrégation des présences par activité
+            var presences = await _context.AccompanyingPresences
+                .Where(ap =>
+                    ap.UserId == userId &&
+                    ap.Date   >= startDate &&
+                    ap.Date   <= endDate)
+                .GroupBy(ap => ap.ActivityName)
+                .Select(g => new { ActivityKey = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            if (!presences.Any())
+                return Ok(new List<object>());
+
+            var keys = presences.Select(p => p.ActivityKey).ToList();
+            var cols = await _context.MatrixColumns
+                .Where(c => keys.Contains(c.Key))
+                .Select(c => new { c.Key, c.Label, c.Type })
+                .ToListAsync();
+
+            var result = presences
+                .Join(cols,
+                    p => p.ActivityKey,
+                    c => c.Key,
+                    (p, c) =>
+                    {
+                        var lbl  = c.Label;
+                        var typ  = c.Type;
+                        var key  = c.Key;
+                        return new
+                        {
+                            activityKey = key,
+                            label       = lbl,
+                            type        = typ,
+                            count       = p.Count,
+                        };
+                    })
+                .OrderBy(x => x.type)
+                .ThenBy(x => x.label)
+                .ToList();
+
+            return Ok(result);
+        }
+
+        // ── MATRICE DE PRÉSENCES ──────────────────────────────────────────────
 
         [HttpGet("matrix")]
-        public async Task<IActionResult> GetMatrix([FromQuery] DateTime start, [FromQuery] DateTime end)
+        public async Task<IActionResult> GetMatrix(
+            [FromQuery] DateTime start,
+            [FromQuery] DateTime end)
         {
             try
             {
@@ -122,11 +190,11 @@ namespace Api.Controllers
 
                 var result = data
                     .GroupBy(x => new { x.UserId, x.ActivityName })
-                    .Select(g => new 
+                    .Select(g => new
                     {
                         UserId      = g.Key.UserId,
                         ActivityKey = g.Key.ActivityName,
-                        Dates       = g.Select(x => x.Date.ToString("yyyy-MM-dd")).ToList()
+                        Dates       = g.Select(x => x.Date.ToString("yyyy-MM-dd")).ToList(),
                     });
 
                 return Ok(result);
@@ -146,40 +214,50 @@ namespace Api.Controllers
 
             try
             {
-               var periodStart = DateTime.Parse(request.PeriodStart).Date;
-var periodEnd   = DateTime.Parse(request.PeriodEnd).Date;
+                var periodStart = DateTime.Parse(request.PeriodStart).Date;
+                var periodEnd   = DateTime.Parse(request.PeriodEnd).Date;
 
-var existing = await _context.AccompanyingPresences
-    .Where(ap =>
-        ap.UserId == request.UserId &&
-        ap.ActivityName == request.ActivityKey &&
-        ap.Date >= periodStart &&
-        ap.Date <= periodEnd)
-    .ToListAsync();
+                var existing = await _context.AccompanyingPresences
+                    .Where(ap =>
+                        ap.UserId       == request.UserId      &&
+                        ap.ActivityName == request.ActivityKey &&
+                        ap.Date         >= periodStart         &&
+                        ap.Date         <= periodEnd)
+                    .ToListAsync();
 
-var newDatesSet = request.Dates.Select(d => DateTime.Parse(d).Date).ToHashSet();
+                var newDatesSet = request.Dates
+                    .Select(d => DateTime.Parse(d).Date)
+                    .ToHashSet();
 
-var toDelete = existing.Where(e => !newDatesSet.Contains(e.Date.Date)).ToList();
-if (toDelete.Any()) _context.AccompanyingPresences.RemoveRange(toDelete);
+                var toDelete = existing
+                    .Where(e => !newDatesSet.Contains(e.Date.Date))
+                    .ToList();
+                if (toDelete.Any())
+                    _context.AccompanyingPresences.RemoveRange(toDelete);
 
-var existingDatesSet = existing.Select(e => e.Date.Date).ToHashSet();
-var toAdd = request.Dates
-    .Select(d => DateTime.Parse(d).Date)
-    .Where(d => !existingDatesSet.Contains(d))
-    .Distinct()
-    .Select(d => new AccompanyingPresence
-    {
-        UserId       = request.UserId,
-        ActivityName = request.ActivityKey,
-        Date         = d,
-        IsPresent    = true,
-        Notes        = ""
-    }).ToList();
+                var existingDatesSet = existing
+                    .Select(e => e.Date.Date)
+                    .ToHashSet();
 
-if (toAdd.Any()) await _context.AccompanyingPresences.AddRangeAsync(toAdd);
+                var toAdd = request.Dates
+                    .Select(d => DateTime.Parse(d).Date)
+                    .Where(d => !existingDatesSet.Contains(d))
+                    .Distinct()
+                    .Select(d => new AccompanyingPresence
+                    {
+                        UserId       = request.UserId,
+                        ActivityName = request.ActivityKey,
+                        Date         = d,
+                        IsPresent    = true,
+                        Notes        = "",
+                    })
+                    .ToList();
 
-await _context.SaveChangesAsync();
-return Ok();
+                if (toAdd.Any())
+                    await _context.AccompanyingPresences.AddRangeAsync(toAdd);
+
+                await _context.SaveChangesAsync();
+                return Ok();
             }
             catch (Exception ex)
             {

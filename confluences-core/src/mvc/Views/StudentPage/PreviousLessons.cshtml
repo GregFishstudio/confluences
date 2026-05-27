@@ -4,126 +4,71 @@
 }
 
 <style>
-    :root {
-        --bg-gradient: linear-gradient(135deg, #f0f4ff 0%, #f1fff5 50%, #ffffff 100%);
-        --primary-modern: #4e73df;
-        --border-soft: rgba(0, 0, 0, 0.05);
-        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+    .sp-root { font-family: 'DM Sans', sans-serif; color: #1a1a2e; }
+
+    .sp-page-header { margin-bottom: 2rem; }
+    .sp-page-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; margin: 0 0 6px; }
+    .sp-page-title { font-family: 'Lora', serif; font-size: 26px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .sp-page-sub { font-size: 13px; color: #6c757d; margin: 4px 0 0; }
+
+    .sp-calendar-wrap {
+        background: #fff; border-radius: 20px;
+        border: 1px solid #f1f3f9;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+        padding: 24px;
     }
 
-    body, .bgImage {
-        background: var(--bg-gradient) !important;
-        background-attachment: fixed !important;
-        font-family: 'Inter', sans-serif;
-        color: #2e3d49;
-    }
+    .fc { font-family: 'DM Sans', sans-serif !important; }
+    .fc-header-toolbar { margin-bottom: 1.5rem !important; }
+    .fc-toolbar-title { font-family: 'Lora', serif !important; font-size: 18px !important; font-weight: 600 !important; color: #1a1a2e !important; text-transform: capitalize; }
 
-    .calendar-container {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(12px);
-        border-radius: 24px;
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        box-shadow: var(--card-shadow);
-        padding: 2rem;
-        margin-bottom: 3rem;
-    }
-
-    /* --- Custom FullCalendar Overrides --- */
-    .fc { font-family: 'Inter', sans-serif; }
-    
-    /* Toolbar styling */
-    .fc-header-toolbar {
-        margin-bottom: 2rem !important;
-        padding: 0.5rem;
-    }
-
-    .fc-toolbar-title {
-        font-weight: 800 !important;
-        color: #2b2d42;
-        text-transform: capitalize;
-    }
-
-    /* Buttons styling */
     .fc-button-primary {
-        background-color: white !important;
-        border: 1px solid #e3e6f0 !important;
-        color: #4e73df !important;
-        border-radius: 12px !important;
-        font-weight: 600 !important;
-        text-transform: capitalize !important;
-        transition: all 0.2s ease !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
+        background: #f8f9fc !important; border: 1px solid #eef0f7 !important;
+        color: #1a1a2e !important; border-radius: 10px !important;
+        font-size: 12px !important; font-weight: 500 !important;
+        text-transform: capitalize !important; transition: all 0.15s !important;
+        box-shadow: none !important;
     }
+    .fc-button-primary:hover { background: #1a1a2e !important; color: #fff !important; border-color: #1a1a2e !important; }
+    .fc-button-primary.fc-button-active { background: #1a1a2e !important; color: #fff !important; border-color: #1a1a2e !important; }
+    .fc-button-primary:focus { box-shadow: none !important; }
 
-    .fc-button-primary:hover {
-        background-color: #4e73df !important;
-        color: white !important;
-        border-color: #4e73df !important;
-        transform: translateY(-1px);
-    }
+    .fc-theme-standard td, .fc-theme-standard th { border-color: #f1f3f9 !important; }
+    .fc-col-header-cell { background: #f8f9fc; padding: 10px 0 !important; font-size: 11px !important; text-transform: uppercase; letter-spacing: 0.06em; color: #aaa !important; font-weight: 500 !important; }
+    .fc-col-header-cell a { color: #aaa !important; }
+    .fc-daygrid-day-number { font-size: 13px !important; color: #6c757d !important; padding: 8px !important; font-weight: 400 !important; }
+    .fc-day-today { background: #fafbff !important; }
+    .fc-day-today .fc-daygrid-day-number { color: #1a1a2e !important; font-weight: 500 !important; }
 
-    .fc-button-active {
-        background-color: #4e73df !important;
-        border-color: #4e73df !important;
-        color: white !important;
-    }
-
-    /* Table styling */
-    .fc-theme-standard td, .fc-theme-standard th {
-        border-color: #f1f3f9 !important;
-    }
-
-    .fc-col-header-cell {
-        background: #f8f9fc;
-        padding: 12px 0 !important;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #858796;
-    }
-
-    .fc-daygrid-day-number {
-        font-weight: 600;
-        padding: 10px !important;
-        color: #5a5c69;
-    }
-
-    /* Events styling */
     .fc-event {
-        border-radius: 8px !important;
-        padding: 4px 8px !important;
-        font-size: 0.85rem !important;
-        border: none !important;
-        box-shadow: 0 2px 6px rgba(78, 115, 223, 0.15);
+        border-radius: 8px !important; border: none !important;
+        background: #1a1a2e !important; color: #fff !important;
+        padding: 3px 8px !important; font-size: 12px !important;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1) !important;
     }
 </style>
 
 <partial name="_Notification.cshtml" />
 
-<div class="container py-5 px-md-5">
-    
-    <div class="text-center mb-5">
-        <h1 class="font-weight-bold text-gray-800">🕒 @ViewData["Title"]</h1>
-        <p class="text-muted">Retrouvez l'historique de vos leçons et supports de cours</p>
+<div class="container-fluid py-4 px-md-4 sp-root">
+    <div class="sp-page-header">
+        <p class="sp-page-eyebrow">Historique</p>
+        <h1 class="sp-page-title">Cours précédents</h1>
+        <p class="sp-page-sub">Retrouvez l'historique de vos leçons et supports de cours</p>
     </div>
 
-    <div class="row">
-        <div class="col-12">
-            <div class="calendar-container">
-                <div id='calendar'></div>
-            </div>
-        </div>
+    <div class="sp-calendar-wrap">
+        <div id="calendar"></div>
     </div>
 </div>
 
-@section Scripts{
-    <script src='~/lib/calendar/main.js'></script>
-    <script src='~/lib/calendar/locales/fr-ch.js'></script>
+@section Scripts {
+    <script src="~/lib/calendar/main.js"></script>
+    <script src="~/lib/calendar/locales/fr-ch.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            var calendarEl = document.getElementById('calendar');
-
-            var calendar = new FullCalendar.Calendar(calendarEl, {
+            var calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
                 weekends: false,
                 eventDisplay: 'block',
                 headerToolbar: {
@@ -132,24 +77,19 @@
                     right: 'dayGridDay,dayGridWeek,dayGridMonth'
                 },
                 initialView: 'dayGridWeek',
-                navLinks: true, 
-                editable: false, // On désactive l'édition pour l'historique
-                dayMaxEvents: true, 
+                navLinks: true,
+                editable: false,
+                dayMaxEvents: true,
                 locale: 'fr-ch',
                 height: 'auto',
                 displayEventTime: false,
-                eventSources: [
-                    {
-                        url: '@ViewData["URLClientMVC"]api/calendar?userId=@ViewData["USERID"]',
-                        color: '#4e73df',
-                        textColor: '#ffffff'
-                    }
-                ],
-                validRange: {
-                   end: new Date() // Empêche de naviguer dans le futur pour l'historique
-                }
+                eventSources: [{
+                    url: '@ViewData["URLClientMVC"]api/calendar?userId=@ViewData["USERID"]',
+                    color: '#1a1a2e',
+                    textColor: '#ffffff'
+                }],
+                validRange: { end: new Date() }
             });
-
             calendar.render();
         });
     </script>

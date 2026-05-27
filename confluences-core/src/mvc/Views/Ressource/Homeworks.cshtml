@@ -1,107 +1,52 @@
-﻿@model IEnumerable<mvc.Models.HomeworkV2s>
+@model IEnumerable<mvc.Models.HomeworkV2s>
 
 @{
     ViewData["Title"] = "Ressources";
 }
 
 <style>
-    :root {
-        --bg-gradient: linear-gradient(135deg, #f0f4ff 0%, #f1fff5 50%, #ffffff 100%);
-        --primary-modern: #4e73df;
-        --border-soft: rgba(0, 0, 0, 0.06);
-        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-    }
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+    .hw-root { font-family: 'DM Sans', sans-serif; }
+    .hw-card { background: #fff; border-radius: 20px; border: 1px solid #f1f3f9; box-shadow: 0 4px 24px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 2rem; }
+    .hw-topbar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid #f1f3f9; gap: 12px; flex-wrap: wrap; }
+    .hw-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; margin: 0 0 4px; }
+    .hw-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .hw-subtitle { font-size: 13px; color: #aaa; margin: 4px 0 0; }
 
-    body, .bgImage {
-        background: var(--bg-gradient) !important;
-        background-attachment: fixed !important;
-        font-family: 'Inter', 'Segoe UI', sans-serif;
-        color: #2e3d49;
-    }
-
-    /* Header Glassmorphism */
-    .header-glass {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        border-radius: 20px;
-        padding: 1.5rem 2rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
-        margin-bottom: 2rem;
-    }
-
-    /* Admin Card Container */
-    .admin-card {
-        background: #ffffff;
-        border-radius: 24px;
-        border: 1px solid var(--border-soft);
-        box-shadow: var(--card-shadow);
-        overflow: hidden;
-        padding: 1.5rem;
-    }
-
-    /* DataTables Overrides */
-    .custom-table thead th {
-        background-color: #f8f9fc;
-        color: #858796;
-        font-weight: 700;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        letter-spacing: 0.05em;
-        padding: 1.2rem 1.5rem;
-        border: none;
-    }
-
-    .custom-table tbody td {
-        padding: 1.2rem 1.5rem;
-        vertical-align: middle;
-        border-top: 1px solid #f1f3f9;
-        font-size: 0.9rem;
-    }
-
-    /* Ressource Type Badges */
-    .res-badge {
-        font-size: 0.7rem;
-        font-weight: 800;
-        padding: 0.3rem 0.6rem;
-        border-radius: 8px;
-        text-transform: uppercase;
-    }
-    .badge-h { background: #e0e7ff; color: #4338ca; } /* Devoir */
-    .badge-t { background: #fef3c7; color: #92400e; } /* Théorie */
-    .badge-e { background: #dcfce7; color: #166534; } /* Exercice */
-
-    /* Action Links Styling */
-    .action-link {
-        font-weight: 600;
-        text-decoration: none !important;
-        transition: 0.2s;
-        margin-right: 10px;
-    }
-    .view-link { color: var(--primary-modern); }
+    /* DataTables overrides */
+    .hw-card .dataTables_wrapper { padding: 1rem 1.5rem 1.5rem; }
+    .hw-card .dataTables_filter input { background: #f8f9fc; border: 1px solid #eef0f7; border-radius: 10px; padding: 6px 12px; font-size: 13px; font-family: 'DM Sans', sans-serif; color: #1a1a2e; outline: none; margin-left: 8px; }
+    .hw-card .dataTables_filter input:focus { border-color: #c0c8e8; }
+    .hw-card .dataTables_length select { background: #f8f9fc; border: 1px solid #eef0f7; border-radius: 8px; padding: 4px 8px; font-size: 13px; font-family: 'DM Sans', sans-serif; color: #1a1a2e; }
+    .hw-table { width: 100%; border-collapse: collapse; }
+    .hw-table thead th { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #aaa; padding: 10px 1rem; border-bottom: 1px solid #f1f3f9; text-align: left; background: #f8f9fc; }
+    .hw-table tbody tr { border-bottom: 1px solid #f1f3f9; transition: background 0.1s; }
+    .hw-table tbody tr:hover { background: #fafbfe; }
+    .hw-table tbody td { padding: 12px 1rem; font-size: 13px; color: #1a1a2e; vertical-align: middle; }
+    .badge-h { background: #e0e7ff; color: #4338ca; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
+    .badge-t { background: #fef3c7; color: #92400e; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
+    .badge-e { background: #dcfce7; color: #166534; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; }
+    .action-link { font-weight: 600; text-decoration: none; transition: opacity 0.15s; margin-right: 8px; font-size: 12px; }
+    .view-link { color: #4e73df; }
     .dup-link { color: #1cc88a; }
-    .action-link:hover { opacity: 0.7; transform: translateY(-1px); }
-
-    /* Custom Search Input */
-    .dataTables_filter input {
-        border-radius: 10px;
-        border: 1px solid #d1d3e2;
-        padding: 5px 15px;
-        margin-left: 10px;
-    }
+    .action-link:hover { opacity: 0.7; }
+    .hw-card .dataTables_info { font-size: 12px; color: #aaa; }
+    .hw-card .paginate_button { border-radius: 8px !important; font-size: 12px !important; }
 </style>
 
-<div class="container-fluid py-4 px-md-5">
+<div class="container-fluid py-4 px-md-4 hw-root">
+    <div class="hw-card">
 
-    <div class="header-glass mt-3">
-        <h1 class="h3 font-weight-bold mb-1">🗂️ @ViewData["Title"]</h1>
-        <p class="text-muted small mb-0">Accès centralisé à toutes les ressources pédagogiques (Archives et Serveur)</p>
-    </div>
+        <div class="hw-topbar">
+            <div>
+                <p class="hw-eyebrow">Pédagogie</p>
+                <h1 class="hw-title">Ressources</h1>
+                <p class="hw-subtitle">Accès centralisé à toutes les ressources pédagogiques (Archives et Serveur)</p>
+            </div>
+        </div>
 
-    <div class="admin-card">
         <div class="table-responsive">
-            <table id="datatables" class="table custom-table mb-0" style="width:100%">
+            <table id="datatables" class="hw-table" style="width:100%">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -110,7 +55,7 @@
                         <th>Titre de la ressource</th>
                         <th>Type</th>
                         <th>Formateur</th>
-                        <th class="text-right">Actions</th>
+                        <th style="text-align:right;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -118,6 +63,7 @@
                 </tbody>
             </table>
         </div>
+
     </div>
 </div>
 
@@ -150,19 +96,19 @@
                 "columnDefs": [
                     { "targets": [0], "visible": false },
                     {
-                        "targets": 2, 
+                        "targets": 2,
                         "render": function (data) {
                             return '<span class="text-muted font-weight-bold"><i class="far fa-calendar-alt mr-1"></i>' + moment(data).format('YYYY-MM-DD') + '</span>';
                         }
                     },
                     {
-                        "targets": 3, 
+                        "targets": 3,
                         "render": function (data, type, row) {
                             var prefix = "/Homeworkv2s";
                             if (row['ressourceType'] == 'T') prefix = "/Theories";
                             else if (row['ressourceType'] == 'E') prefix = "/Exercices";
                             else if (row['ressourceType'] == 'EA') prefix = "/ExercicesAlones";
-                            
+
                             return '<a class="action-link view-link" href="' + prefix + '/Details/' + row['id'] + '">' + data + '</a>';
                         }
                     },
@@ -173,12 +119,12 @@
                         }
                     },
                     {
-                        "targets": 6, 
+                        "targets": 6,
                         "className": "text-right",
                         "render": function (data, type, row) {
                             var prefix = "/Homeworkv2s";
                             var canDuplicate = true;
-                            
+
                             if (row['ressourceType'] == 'T') prefix = "/Theories";
                             else if (row['ressourceType'] == 'E') prefix = "/Exercices";
                             else if (row['ressourceType'] == 'EA') prefix = "/ExercicesAlones";

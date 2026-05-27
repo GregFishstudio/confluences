@@ -1,106 +1,120 @@
-﻿@model mvc.Models.Homework
+@model mvc.Models.Homework
 
 @{
-    ViewData["Title"] = "Modifier";
+    ViewData["Title"] = "Modifier le devoir";
 }
 
-<br />
-<br />
-<br />
-<br />
-<body data-parallax="true" class="bgImage">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header card-header-primary card-header-icon">
-                        <div class="card-icon">
-                            <h4 class="card-title">@ViewData["Title"]</h4>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="toolbar">
-                            <!--        Here you can write extra buttons/actions for the toolbar              -->
-                        </div>
-                        <div>
-                            <h4>Devoir</h4>
-                            <hr />
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <form asp-action="Edit">
-                                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                                        <input type="hidden" asp-for="HomeworkId" />
-                                        <div class="form-group">
-                                            <label asp-for="HomeworkDate" class="control-label"></label>
-                                            <input asp-for="HomeworkDate" type="text" class="form-control datetimepicker" value="@Model.HomeworkDate.ToString("yyyy-MM-dd")" />
-                                            <span asp-validation-for="HomeworkDate" class="text-danger"></span>
-                                        </div>
-                                        <div class="form-group">
-                                            <label asp-for="ClassName" class="control-label"></label>
-                                            <input asp-for="ClassName" class="form-control" />
-                                            <span asp-validation-for="ClassName" class="text-danger"></span>
-                                        </div>
-                                        <div class="form-group">
-                                            <label asp-for="ClassLink" class="control-label"></label>
-                                            <input asp-for="ClassLink" class="form-control" />
-                                            <span asp-validation-for="ClassLink" class="text-danger"></span>
-                                        </div>
-                                        <div class="form-group">
-                                            <label asp-for="ExerciceName" class="control-label"></label>
-                                            <input asp-for="ExerciceName" class="form-control" />
-                                            <span asp-validation-for="ExerciceName" class="text-danger"></span>
-                                        </div>
-                                        <div class="form-group">
-                                            <label asp-for="ExerciceLink" class="control-label"></label>
-                                            <input asp-for="ExerciceLink" class="form-control" />
-                                            <span asp-validation-for="ExerciceLink" class="text-danger"></span>
-                                        </div>
-                                        <div class="form-group">
-                                            <label asp-for="HomeworkTypeId" class="control-label"></label>
-                                            <select asp-for="HomeworkTypeId" class="form-control" asp-items="ViewBag.HomeworkTypeId"></select>
-                                            <span asp-validation-for="HomeworkTypeId" class="text-danger"></span>
-                                        </div>
-                                        <div class="form-group">
-                                            <label asp-for="SessionId" class="control-label"></label>
-                                            <select asp-for="SessionId" class="form-control" asp-items="ViewBag.SessionId"></select>
-                                            <span asp-validation-for="SessionId" class="text-danger"></span>
-                                        </div>
-                                        <div class="form-group">
-                                            <label asp-for="TeacherId" class="control-label"></label>
-                                            <select asp-for="TeacherId" class="form-control" asp-items="ViewBag.TeacherId"></select>
-                                            <span asp-validation-for="TeacherId" class="text-danger"></span>
-                                        </div>
-                                        <div class="form-check">
-                                            <label class="form-check-label">
-                                                <input class="form-check-input" type="checkbox" asp-for="IsHomeworkAdditionnal">
-                                                @Html.DisplayNameFor(model => model.IsHomeworkAdditionnal)
-                                                <span class="form-check-sign">
-                                                    <span class="check"></span>
-                                                </span>
-                                            </label>
-                                        </div>
-                                        <div class="form-group">
-                                            <input type="submit" value="Sauvegarder" class="btn btn-success" />
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <a asp-action="Index">Retourner à la liste de devoirs</a>
-                        </div>
-                    </div>
-                    <!-- end content-->
-                </div>
-                <!--  end card  -->
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+    .hw-root { font-family: 'DM Sans', sans-serif; }
+    .hw-card { background: #fff; border-radius: 20px; border: 1px solid #f1f3f9; box-shadow: 0 4px 24px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 2rem; }
+    .hw-topbar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid #f1f3f9; gap: 12px; flex-wrap: wrap; }
+    .hw-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; margin: 0 0 4px; }
+    .hw-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .hw-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #6c757d; text-decoration: none; border: 1px solid #eef0f7; border-radius: 10px; padding: 7px 14px; transition: all 0.15s; }
+    .hw-back:hover { background: #f8f9fc; color: #1a1a2e; text-decoration: none; }
+    .hw-form-body { padding: 2rem 1.5rem; }
+    .hw-field { margin-bottom: 1.25rem; }
+    .hw-label { display: block; font-size: 12px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: #aaa; margin-bottom: 6px; }
+    .hw-input { width: 100%; background: #f8f9fc; border: 1px solid #eef0f7; border-radius: 10px; padding: 9px 14px; font-size: 13px; color: #1a1a2e; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.15s, background 0.15s; }
+    .hw-input:focus { border-color: #c0c8e8; background: #fff; box-shadow: 0 0 0 3px rgba(78,115,223,0.08); }
+    .hw-select { width: 100%; background: #f8f9fc; border: 1px solid #eef0f7; border-radius: 10px; padding: 9px 14px; font-size: 13px; color: #1a1a2e; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.15s, background 0.15s; appearance: none; -webkit-appearance: none; }
+    .hw-select:focus { border-color: #c0c8e8; background: #fff; box-shadow: 0 0 0 3px rgba(78,115,223,0.08); }
+    .hw-select-wrap { position: relative; }
+    .hw-select-wrap::after { content: '\f078'; font-family: 'Font Awesome 5 Free'; font-weight: 900; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #aaa; pointer-events: none; }
+    .hw-validation { font-size: 12px; color: #A32D2D; margin-top: 4px; }
+    .hw-checkbox-field { display: flex; align-items: center; gap: 10px; background: #f8f9fc; border: 1px solid #eef0f7; border-radius: 10px; padding: 10px 14px; margin-bottom: 1.25rem; }
+    .hw-checkbox-field input[type="checkbox"] { width: 16px; height: 16px; accent-color: #1a1a2e; cursor: pointer; }
+    .hw-checkbox-field label { font-size: 13px; color: #1a1a2e; margin: 0; cursor: pointer; }
+    .hw-btn-save { display: inline-flex; align-items: center; gap: 6px; background: #1a1a2e; color: #fff; border: none; border-radius: 10px; padding: 9px 20px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.15s; }
+    .hw-btn-save:hover { opacity: 0.8; }
+</style>
+
+<div class="container-fluid py-4 px-md-4 hw-root">
+    <div class="hw-card" style="max-width:600px;">
+
+        <div class="hw-topbar">
+            <div>
+                <p class="hw-eyebrow">Devoirs</p>
+                <h1 class="hw-title">Modifier le devoir</h1>
             </div>
-            <!-- end col-md-12 -->
+            <a asp-action="Index" class="hw-back">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
         </div>
+
+        <form asp-action="Edit" class="hw-form-body">
+            <div asp-validation-summary="ModelOnly" class="hw-validation" style="margin-bottom:1rem;"></div>
+            <input type="hidden" asp-for="HomeworkId" />
+
+            <div class="hw-field">
+                <label asp-for="HomeworkDate" class="hw-label"></label>
+                <input asp-for="HomeworkDate" type="text" class="hw-input datetimepicker" value="@Model.HomeworkDate.ToString("yyyy-MM-dd")" />
+                <span asp-validation-for="HomeworkDate" class="hw-validation"></span>
+            </div>
+
+            <div class="hw-field">
+                <label asp-for="ClassName" class="hw-label"></label>
+                <input asp-for="ClassName" class="hw-input" />
+                <span asp-validation-for="ClassName" class="hw-validation"></span>
+            </div>
+
+            <div class="hw-field">
+                <label asp-for="ClassLink" class="hw-label"></label>
+                <input asp-for="ClassLink" class="hw-input" placeholder="https://..." />
+                <span asp-validation-for="ClassLink" class="hw-validation"></span>
+            </div>
+
+            <div class="hw-field">
+                <label asp-for="ExerciceName" class="hw-label"></label>
+                <input asp-for="ExerciceName" class="hw-input" />
+                <span asp-validation-for="ExerciceName" class="hw-validation"></span>
+            </div>
+
+            <div class="hw-field">
+                <label asp-for="ExerciceLink" class="hw-label"></label>
+                <input asp-for="ExerciceLink" class="hw-input" placeholder="https://..." />
+                <span asp-validation-for="ExerciceLink" class="hw-validation"></span>
+            </div>
+
+            <div class="hw-field">
+                <label asp-for="HomeworkTypeId" class="hw-label"></label>
+                <div class="hw-select-wrap">
+                    <select asp-for="HomeworkTypeId" class="hw-select" asp-items="ViewBag.HomeworkTypeId"></select>
+                </div>
+                <span asp-validation-for="HomeworkTypeId" class="hw-validation"></span>
+            </div>
+
+            <div class="hw-field">
+                <label asp-for="SessionId" class="hw-label"></label>
+                <div class="hw-select-wrap">
+                    <select asp-for="SessionId" class="hw-select" asp-items="ViewBag.SessionId"></select>
+                </div>
+                <span asp-validation-for="SessionId" class="hw-validation"></span>
+            </div>
+
+            <div class="hw-field">
+                <label asp-for="TeacherId" class="hw-label"></label>
+                <div class="hw-select-wrap">
+                    <select asp-for="TeacherId" class="hw-select" asp-items="ViewBag.TeacherId"></select>
+                </div>
+                <span asp-validation-for="TeacherId" class="hw-validation"></span>
+            </div>
+
+            <div class="hw-checkbox-field">
+                <input type="checkbox" asp-for="IsHomeworkAdditionnal" id="IsHomeworkAdditionnal" />
+                <label for="IsHomeworkAdditionnal">@Html.DisplayNameFor(model => model.IsHomeworkAdditionnal)</label>
+            </div>
+
+            <button type="submit" class="hw-btn-save">
+                <i class="fas fa-save"></i> Sauvegarder
+            </button>
+        </form>
+
     </div>
-</body>
+</div>
 
 @section Scripts {
-
     <script>
         $('.datetimepicker').datetimepicker({
             locale: 'fr',

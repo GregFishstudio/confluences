@@ -1,12 +1,12 @@
-﻿@model mvc.Models.JitsiConfiguration
+@model mvc.Models.JitsiConfiguration
 
-<br />
-<br />
-<br />
-<br />
-<div id="meet">
-    
-</div>
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap');
+    body { font-family: 'DM Sans', sans-serif; margin: 0; padding: 0; background: #0f0f1a; }
+    #meet { width: 100%; height: 100vh; }
+</style>
+
+<div id="meet"></div>
 
 @section Scripts {
     <script>
@@ -158,7 +158,7 @@
                 this.stopMeeting();
                 window.location.href = localStorage.getItem("lastWindowUsed");
             });
-            
+
         });
 
         window.addEventListener('beforeunload', function (event) {

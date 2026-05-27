@@ -1,125 +1,126 @@
 ﻿@model mvc.Models.HomeworkV2s
 
 @{
-    //ViewData["Title"] = Model.HomeworkType.HomeworkTypeName + " : " + Model.HomeworkV2name + " du " + Model.HomeworkV2date.ToString("yyyy-MM-dd");
     ViewData["Title"] = "Devoir";
 }
 
-<h1>Details</h1>
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+    .hw-root { font-family: 'DM Sans', sans-serif; }
+    .hw-card { background: #fff; border-radius: 20px; border: 1px solid #f1f3f9; box-shadow: 0 4px 24px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 2rem; }
+    .hw-topbar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #f1f3f9; gap: 12px; flex-wrap: wrap; }
+    .hw-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; margin: 0 0 4px; }
+    .hw-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .hw-subtitle { font-size: 13px; color: #6c757d; margin: 4px 0 0; }
+    .hw-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #6c757d; text-decoration: none; border: 1px solid #eef0f7; border-radius: 10px; padding: 7px 14px; transition: all 0.15s; white-space: nowrap; }
+    .hw-back:hover { background: #f8f9fc; color: #1a1a2e; text-decoration: none; }
+    .hw-body { padding: 1.5rem; }
+    .hw-section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: #aaa; margin: 0 0 12px; }
+    .hw-theories { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem; }
+    .hw-theory-row { background: #f8f9fc; border: 1px solid #eef0f7; border-radius: 12px; padding: 14px 16px; display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+    .hw-theory-name { display: inline-flex; align-items: center; gap: 6px; background: #1a1a2e; color: #fff; border-radius: 8px; padding: 5px 12px; font-size: 13px; font-weight: 500; text-decoration: none; white-space: nowrap; transition: opacity 0.15s; }
+    .hw-theory-name:hover { opacity: 0.8; color: #fff; text-decoration: none; }
+    .hw-exercices { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; flex: 1; }
+    .hw-ex-btn { display: inline-flex; align-items: center; background: #E6F1FB; color: #0C447C; border-radius: 8px; padding: 5px 12px; font-size: 12px; font-weight: 500; text-decoration: none; transition: all 0.15s; }
+    .hw-ex-btn:hover { background: #0C447C; color: #fff; text-decoration: none; }
+    .hw-add-link { font-size: 12px; color: #3B6D11; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px; transition: background 0.15s; }
+    .hw-add-link:hover { background: #EAF3DE; text-decoration: none; color: #3B6D11; }
+    .hw-alone-row { background: #f8f9fc; border: 1px solid #eef0f7; border-radius: 12px; padding: 14px 16px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 1rem; }
+    .hw-footer-actions { display: flex; gap: 10px; flex-wrap: wrap; padding-top: 1rem; border-top: 1px solid #f1f3f9; margin-top: 1rem; }
+</style>
 
+<div class="container-fluid py-4 px-md-4 hw-root">
+    <div class="hw-card">
 
-@*<div>
-        <a asp-action="Edit" asp-route-id="@Model.HomeworkV2id">Edit</a> |
-        <a asp-action="Index">Back to List</a>
-    </div>*@
+        <div class="hw-topbar">
+            <div>
+                <p class="hw-eyebrow">@Model.HomeworkType.HomeworkTypeName</p>
+                <h1 class="hw-title">@Model.HomeworkV2name</h1>
+                <p class="hw-subtitle">@Model.HomeworkV2date.ToString("dd MMM yyyy")</p>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                @if ((bool)ViewData["IsTeacher"])
+                {
+                    <a asp-action="Edit" asp-route-id="@Model.HomeworkV2id" class="hw-back">
+                        <i class="fas fa-pen"></i> Modifier
+                    </a>
+                    <a asp-controller="Homeworkv2s" asp-action="Index" asp-route-id="@Model.SessionId" class="hw-back">
+                        <i class="fas fa-arrow-left"></i> Retour à la liste
+                    </a>
+                }
+                else
+                {
+                    <a href="javascript:history.back()" class="hw-back">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                }
+            </div>
+        </div>
 
-<br />
-<br />
-<br />
-<br />
-<body data-parallax="true" class="bgImage">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header card-header-primary card-header-icon">
-                        <div class="card-icon">
-                            <h4 class="card-title">@Model.HomeworkType.HomeworkTypeName: @Model.HomeworkV2name</h4>
-                        </div>
-                    </div>
-                    <div class="m-3">
-                        <div class="toolbar">
-                            <!--        Here you can write extra buttons/actions for the toolbar              -->
-                        </div>
-                        @*<h4>Devoir</h4>
-                            <hr />*@
+        <div class="hw-body">
 
-                        <table class="table">
-                            @*<thead class="thead-light">
-                                    <tr>
-                                        <th style="color:black !important;">Cours</th>
-                                        <th style="color:black !important;">Exercice(s) à faire </th>
-                                    </tr>
-                                </thead>*@
-                            <tbody>
-                                @if (Model.Theories.Count() > 0)
+            @if (Model.Theories.Any())
+            {
+                <p class="hw-section-title">Cours &amp; exercices</p>
+                <div class="hw-theories">
+                    @{int cpt = 1;}
+                    @foreach (Theory theory in Model.Theories)
+                    {
+                        <div class="hw-theory-row">
+                            <a class="hw-theory-name" asp-controller="Theories" asp-action="Details" asp-route-id="@theory.TheoryId">
+                                <i class="fas fa-book-open" style="font-size:11px;"></i>
+                                @theory.TheoryName
+                            </a>
+                            <div class="hw-exercices">
+                                @if (theory.Exercices.Any())
                                 {
-                                    int cpt = 1;
-
-                                    @foreach (Theory theory in Model.Theories)
+                                    int exCpt = 1;
+                                    @foreach (Exercice exercice in theory.Exercices)
                                     {
-                                        <tr>
-                                            <td class="p-0 pt-2 pb-2">
-                                                <a class="btn btn-info p-1" asp-controller="Theories" asp-action="Details" asp-route-id="@theory.TheoryId">@theory.TheoryName</a>
-                                            </td>
-                                            <td class="p-0 pt-2 pb-2">
-                                                @if (theory.Exercices.Count() > 0)
-                                                {
-                                                    cpt = 1;
-                                                    @foreach (Exercice exercice in theory.Exercices)
-                                                    {
-                                                        <a class="btn btn-info p-1"
-                                                           asp-controller="Exercices"
-                                                           asp-action="Details"
-                                                           asp-route-id="@exercice.ExerciceId"
-                                                           style="background-color:#008fa1">
-                                                            Ex. @cpt
-                                                        </a>
-                                                        cpt++;
-                                                    }
-                                                }
-                                                @if ((bool)ViewData["IsTeacher"])
-                                                {
-                                                    <a class="text-success" asp-controller="Exercices" asp-action="Create" asp-route-theoryId="@theory.TheoryId">Ajouter un ex.</a>
-                                                }
-                                            </td>
-                                        </tr>
+                                        <a class="hw-ex-btn" asp-controller="Exercices" asp-action="Details" asp-route-id="@exercice.ExerciceId">
+                                            Ex. @exCpt
+                                        </a>
+                                        exCpt++;
                                     }
                                 }
-                                <tr>
-                                    <td class="p-0 pt-2 pb-2"></td>
-                                    <td class="p-0 pt-2 pb-2">
-                                        @if (Model.ExercicesAlones.Count() > 0)
-                                        {
-                                            int cpt = 1;
-
-                                            @foreach (ExercicesAlone exercice in Model.ExercicesAlones)
-                                            {
-                                                <a class="btn btn-info p-1" asp-controller="ExercicesAlones" asp-action="Details" asp-route-id="@exercice.ExerciceId" style="background-color:#008fa1">@exercice.ExerciceName</a>
-                                                cpt++;
-                                            }
-                                        }
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        <div>
-                            @if ((bool)ViewData["IsTeacher"])
-                            {
-                                <p>
-                                    <a class="text-success" asp-controller="Theories" asp-action="Create" asp-route-homeworkId="@Model.HomeworkV2id">Ajouter un cours</a>
-                                    <a class="text-success" asp-controller="ExercicesAlones" asp-action="Create" asp-route-homeworkId="@Model.HomeworkV2id">Ajouter un ex. seul</a>
-                                </p>
-                            }
+                                @if ((bool)ViewData["IsTeacher"])
+                                {
+                                    <a class="hw-add-link" asp-controller="Exercices" asp-action="Create" asp-route-theoryId="@theory.TheoryId">
+                                        <i class="fas fa-plus" style="font-size:10px;"></i> Ajouter un ex.
+                                    </a>
+                                }
+                            </div>
                         </div>
-
-                        <div>
-                            @if ((bool)ViewData["IsTeacher"])
-                            {
-                                <a asp-controller="Homeworkv2s" asp-action="Index" asp-route-id="@Model.SessionId">Revenir à la liste des devoirs</a>
-                            }
-                            else
-                            {
-                                <a href="javascript:history.back()">Revenir à la page précédente</a>
-                            }
-                        </div>
-                    </div>
-                    <!-- end content-->
+                        cpt++;
+                    }
                 </div>
-                <!--  end card  -->
-            </div>
-            <!-- end col-md-12 -->
+            }
+
+            @if (Model.ExercicesAlones.Any())
+            {
+                <p class="hw-section-title">Exercices seuls</p>
+                <div class="hw-alone-row">
+                    @foreach (ExercicesAlone exercice in Model.ExercicesAlones)
+                    {
+                        <a class="hw-ex-btn" asp-controller="ExercicesAlones" asp-action="Details" asp-route-id="@exercice.ExerciceId">
+                            @exercice.ExerciceName
+                        </a>
+                    }
+                </div>
+            }
+
+            @if ((bool)ViewData["IsTeacher"])
+            {
+                <div class="hw-footer-actions">
+                    <a class="hw-add-link" asp-controller="Theories" asp-action="Create" asp-route-homeworkId="@Model.HomeworkV2id">
+                        <i class="fas fa-plus" style="font-size:10px;"></i> Ajouter un cours
+                    </a>
+                    <a class="hw-add-link" asp-controller="ExercicesAlones" asp-action="Create" asp-route-homeworkId="@Model.HomeworkV2id">
+                        <i class="fas fa-plus" style="font-size:10px;"></i> Ajouter un ex. seul
+                    </a>
+                </div>
+            }
+
         </div>
     </div>
-</body>
+</div>

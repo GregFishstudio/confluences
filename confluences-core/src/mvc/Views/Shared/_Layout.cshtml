@@ -5,245 +5,267 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>@ViewData["Title"] - Confluences</title>
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/22.2.5/fluent.css" />
+    <link href="~/css/datatable/jquery.dataTables.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/app-modern.css" />
 
     <style>
         :root {
-            --sidebar-width: 260px;
-            --topbar-height: 70px;
-            --primary-color: #4e73df;
-            --bg-light: #f8f9fc;
+            --sidebar-width: 240px;
+            --topbar-height: 60px;
+            --sidebar-bg: #0d1b3e;
+            --sidebar-hover: rgba(255,255,255,0.05);
+            --sidebar-active: rgba(0,180,176,0.12);
+            --accent: #00B4B0;
         }
+
+        *, *::before, *::after { box-sizing: border-box; }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-light);
+            font-family: 'DM Sans', sans-serif;
+            background: #f4f6fb;
             overflow-x: hidden;
+            margin: 0;
         }
 
-        
+        /* ── SIDEBAR ── */
         #sidebar {
             width: var(--sidebar-width);
             height: 100vh;
             position: fixed;
-            top: 0;
-            left: 0;
+            top: 0; left: 0;
             z-index: 1000;
-            background: #1a1c23;
-            color: #fff;
-            transition: all 0.3s;
-            overflow-y: auto;
+            background: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            transition: left 0.3s;
+            overflow: hidden;
         }
 
-        /* --- SIDEBAR HEADER --- */
-        .sidebar-header {
-            padding: 20px; /* Large espace vertical pour aérer le logo */
-            text-align: center;
-            background: rgba(0, 0, 0, 1);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            min-height:100px;
-            display: flex; /* Utilisation de flexbox pour centrer */
-            justify-content: left;
-            align-items: center;
+        .sidebar-logo-wrap {
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            flex-shrink: 0;
+        }
+        .sidebar-logo {
+            width: 100%; height: 44px;
+            object-fit: contain; object-position: left center;
         }
 
-        .sidebar-logo { 
-               width: 260px;
-    height: auto;
-    transform: scale(4);
-    transform-origin: center;
-    margin-left:50px;
+        .sidebar-scroll {
+            flex: 1; overflow-y: auto;
+            padding: 8px 0 16px;
+            scrollbar-width: none;
         }
+        .sidebar-scroll::-webkit-scrollbar { display: none; }
 
-        .sidebar-logo-bg {
-    width: 260px;
-    height: 80px;
-    background: url('/img/confluences_blanc.png') no-repeat center;
-    background-size: contain;
+        .sidebar-section-item {
+    padding: 16px 20px 6px;
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.1em; color: rgba(255,255,255,0.3);
+    font-weight: 500; list-style: none;
 }
 
-        /* Ajustement du menu pour qu'il ne colle pas au logo */
-        .sidebar-menu {
-            margin-top: 10px;
-            list-style: none;
-            padding: 0;
-        }
-
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
         .sidebar-menu li a {
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            color: rgba(255,255,255,0.7);
-            text-decoration: none;
-            transition: 0.2s;
-            font-size: 0.9rem;
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 20px;
+            color: rgba(255,255,255,0.6); text-decoration: none;
+            font-size: 13px; font-weight: 400;
+            transition: all 0.15s; position: relative;
         }
-
-        .sidebar-menu li a:hover, .sidebar-menu li.active a {
-            color: #fff;
-            background: rgba(255,255,255,0.1);
+        .sidebar-menu li a:hover { color: #fff; background: var(--sidebar-hover); text-decoration: none; }
+        .sidebar-menu li.active a { color: #fff; background: var(--sidebar-active); }
+        .sidebar-menu li.active a::before {
+            content: ''; position: absolute;
+            left: 0; top: 0; bottom: 0; width: 3px;
+            background: var(--accent); border-radius: 0 2px 2px 0;
         }
+        .sidebar-menu .material-icons { font-size: 18px; flex-shrink: 0; }
 
-        .sidebar-menu .material-icons { margin-right: 15px; font-size: 20px; }
-
-        .sidebar-section {
-            padding: 20px 20px 10px;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: rgba(255,255,255,0.4);
-            font-weight: 700;
+        .sidebar-bottom {
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding: 8px 0; flex-shrink: 0;
         }
+        .sidebar-bottom a {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 20px;
+            color: rgba(255,255,255,0.4); text-decoration: none;
+            font-size: 13px; transition: all 0.15s;
+        }
+        .sidebar-bottom a:hover { color: #ff6b6b; background: rgba(255,107,107,0.08); text-decoration: none; }
+        .sidebar-bottom .material-icons { font-size: 18px; }
 
-        /* --- CONTENU --- */
+        /* ── PAGE ── */
         .page-container {
-            margin-left: var(--sidebar-width); /* Sidebar visible sur PC */
+            margin-left: var(--sidebar-width);
             min-height: 100vh;
-            transition: all 0.3s;
+            display: flex; flex-direction: column;
+            transition: margin-left 0.3s;
         }
 
+        /* ── TOPBAR ── */
         .topbar {
             height: var(--topbar-height);
             background: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 25px;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 900;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 24px;
+            border-bottom: 1px solid #f1f3f9;
+            position: sticky; top: 0; z-index: 900; flex-shrink: 0;
         }
-
         .menu-toggle {
-            display: none; /* Caché sur PC */
-            background: none;
-            border: none;
-            cursor: pointer;
+            display: none; background: none; border: none;
+            cursor: pointer; padding: 4px; color: #1a1a2e;
+        }
+        .topbar-title {
+            font-family: 'Lora', serif; font-size: 16px;
+            font-weight: 600; color: #1a1a2e;
+        }
+        .topbar-user { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #6c757d; }
+        .topbar-user strong { color: #1a1a2e; font-weight: 500; }
+        .topbar-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: #f0f2f5; display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 500; color: #6c757d; border: 1px solid #eef0f7;
         }
 
-        .content {
-            padding: 25px;
-            width: 100%;
-        }
+        .content { flex: 1; padding: 0; }
 
-        /* --- RESPONSIVE : MOBILE & TABLETTE --- */
+        .sidebar-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.4); z-index: 999;
+        }
+        .sidebar-overlay.active { display: block; }
+
         @@media (max-width: 992px) {
-            #sidebar {
-                left: calc(-1 * var(--sidebar-width)); /* Caché par défaut sur mobile */
-            }
-            #sidebar.sidebar-open {
-                left: 0;
-            }
-            .page-container {
-                margin-left: 0; /* Prend tout l'écran sur mobile */
-            }
-            .menu-toggle {
-                display: block; /* Hamburger visible sur mobile */
-            }
+            #sidebar { left: calc(-1 * var(--sidebar-width)); }
+            #sidebar.sidebar-open { left: 0; }
+            .page-container { margin-left: 0; }
+            .menu-toggle { display: flex; align-items: center; justify-content: center; }
         }
     </style>
-
-    <link rel="stylesheet" href="~/css/app-modern.css" />
-    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/22.2.5/fluent.css" />
-    <link href="~/css/datatable/jquery.dataTables.min.css" rel="stylesheet" />
 </head>
 
-<body class="bgImage">
+<body>
 
 @{
     bool isTeacher = User.HasClaim("role", "Teacher");
-    bool isStudent = User.HasClaim("role", "Student") || isTeacher;
-    bool showAll = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Production";
+    bool isStudent = User.Identity.IsAuthenticated && !isTeacher;
 }
 
+<!-- DEBUG : isTeacher=@isTeacher | isStudent=@isStudent | claims=@string.Join(", ", User.Claims.Select(c => c.Type + "=" + c.Value)) -->
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
 <nav id="sidebar">
-    <div class="sidebar-header">
-        <img src="~/img/confluences_blanc.png" class="sidebar-logo" alt="Logo" />
+    <div class="sidebar-logo-wrap">
+        <img src="~/img/confluences_blanc.png" class="sidebar-logo" alt="Confluences" />
     </div>
 
+    <div class="sidebar-scroll">
     <ul class="sidebar-menu">
+
         <li>
             <a asp-controller="Home" asp-action="Index">
-                <span class="material-icons">home</span> <span>Accueil</span>
+                <span class="material-icons">home</span> Accueil
             </a>
         </li>
 
         @if (isTeacher)
         {
-            <li class="sidebar-section">Administration</li>
-            <li><a asp-controller="Appointments" asp-action="Index">
-                <span class="material-icons">event</span> <span>Rendez-vous</span>
-            </a></li>
-            <li><a asp-controller="SchoolClassRooms" asp-action="Index">
-                <span class="material-icons">class</span> <span>Classes</span>
-            </a></li>
-            <li><a asp-controller="AspNetUsers" asp-action="Index">
-                <span class="material-icons">group</span> <span>Utilisateurs</span>
-            </a></li>
-            <li><a asp-controller="Ressource" asp-action="Homeworks">
-                <span class="material-icons">folder</span> <span>Ressources</span>
-            </a></li>
+            <li class="sidebar-section-item">Administration</li>
+            <li>
+                <a asp-controller="Appointments" asp-action="Index">
+                    <span class="material-icons">event</span> Rendez-vous
+                </a>
+            </li>
+            <li>
+                <a asp-controller="SchoolClassRooms" asp-action="Index">
+                    <span class="material-icons">class</span> Classes
+                </a>
+            </li>
+            <li>
+                <a asp-controller="AspNetUsers" asp-action="Index">
+                    <span class="material-icons">group</span> Utilisateurs
+                </a>
+            </li>
+            <li>
+                <a asp-controller="Ressource" asp-action="Homeworks">
+                    <span class="material-icons">folder</span> Ressources
+                </a>
+            </li>
         }
 
         @if (isStudent && !isTeacher)
         {
-            <li class="sidebar-section">Espace élève</li>
-            <li><a asp-controller="StudentPage" asp-action="Index">
-                <span class="material-icons">person</span> <span>Ma page</span>
-            </a></li>
-            <li><a asp-controller="StudentPage" asp-action="MyAppointments">
-                <span class="material-icons">schedule</span> <span>Mes RDV</span>
-            </a></li>
-            <li><a asp-controller="StudentPage" asp-action="PreviousLessons">
-                <span class="material-icons">history</span> <span>Leçons</span>
-            </a></li>
-            <li><a asp-controller="StudentPage" asp-action="Help">
-                <span class="material-icons">help</span> <span>Aide</span>
-            </a></li>
+            <li class="sidebar-section-item">Mon espace</li>
+            <li>
+                <a asp-controller="StudentPage" asp-action="Index">
+                    <span class="material-icons">person</span> Ma page
+                </a>
+            </li>
+            <li>
+                <a asp-controller="StudentPage" asp-action="MyAppointments">
+                    <span class="material-icons">schedule</span> Mes rendez-vous
+                </a>
+            </li>
+            <li>
+                <a asp-controller="StudentPage" asp-action="PreviousLessons">
+                    <span class="material-icons">history</span> Cours précédents
+                </a>
+            </li>
+            <li>
+                <a asp-controller="StudentPage" asp-action="Help">
+                    <span class="material-icons">help_outline</span> Aide
+                </a>
+            </li>
         }
 
-        <li style="margin-top: 50px;">
-            @if (User.Identity.IsAuthenticated) {
-                <a asp-controller="Account" asp-action="Logout" class="text-danger">
-                    <span class="material-icons">logout</span> <span>Déconnexion</span>
-                </a>
-            } else {
-                <a asp-controller="Account" asp-action="SignIn">
-                    <span class="material-icons">login</span> <span>Se connecter</span>
-                </a>
-            }
-        </li>
     </ul>
+</div>
+
+    <div class="sidebar-bottom">
+        @if (User.Identity.IsAuthenticated)
+        {
+            <a asp-controller="Account" asp-action="Logout">
+                <span class="material-icons">logout</span> Déconnexion
+            </a>
+        }
+        else
+        {
+            <a asp-controller="Account" asp-action="SignIn">
+                <span class="material-icons">login</span> Se connecter
+            </a>
+        }
+    </div>
 </nav>
 
 <div class="page-container">
 
     <header class="topbar">
-        <button class="menu-toggle" onclick="toggleSidebar()">
+        <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Menu">
             <span class="material-icons">menu</span>
         </button>
 
-        <div class="topbar-title font-weight-bold text-dark">@ViewData["Title"]</div>
+        <div class="topbar-title">@ViewData["Title"]</div>
 
-        <div class="topbar-user d-flex align-items-center">
+        <div class="topbar-user">
             @if (User.Identity.IsAuthenticated)
             {
-                <span class="text-muted small mr-2 d-none d-sm-inline">Connecté en tant que</span>
-                <span class="font-weight-bold mr-2">@User.Identity.Name</span>
-                <span class="material-icons text-primary">account_circle</span>
+                <span class="d-none d-sm-inline">@User.Identity.Name</span>
+                <div class="topbar-avatar">
+                    @(User.Identity.Name?.Length > 0 ? User.Identity.Name[0].ToString().ToUpper() : "U")
+                </div>
             }
         </div>
     </header>
 
     <main class="content">
-        <div class="container-fluid">
-            @RenderBody()
-        </div>
+        @RenderBody()
     </main>
 
 </div>
@@ -259,17 +281,13 @@
 
 <script>
     function toggleSidebar() {
-        document.getElementById("sidebar").classList.toggle("sidebar-open");
+        document.getElementById('sidebar').classList.toggle('sidebar-open');
+        document.getElementById('sidebar-overlay').classList.toggle('active');
     }
-
-    // Fermer la sidebar quand on clique ailleurs sur mobile
-    $(document).ready(function() {
-        $('.content').on('click', function() {
-            if ($(window).width() <= 992) {
-                $('#sidebar').removeClass('sidebar-open');
-            }
-        });
-    });
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('sidebar-open');
+        document.getElementById('sidebar-overlay').classList.remove('active');
+    }
 </script>
 
 <ejs-scripts></ejs-scripts>

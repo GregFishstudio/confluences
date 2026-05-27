@@ -245,11 +245,21 @@ async function handleLogin() {
     const data = await response.json()
     console.log('✅ Token reçu:', data)
 
+    // Récupérer le profil complet (email, name...) depuis le userinfo endpoint
+    let userInfo = {}
+    try {
+      const uiRes = await fetch(`${authority}/connect/userinfo`, {
+        headers: { Authorization: `Bearer ${data.access_token}` }
+      })
+      if (uiRes.ok) userInfo = await uiRes.json()
+      console.log('✅ UserInfo reçu:', userInfo)
+    } catch (e) { console.warn('UserInfo non disponible:', e) }
+
     const user = {
       access_token: data.access_token,
       refresh_token: data.refresh_token,
       expires_at: Date.now() + data.expires_in * 1000,
-      profile: { role: 'Teacher' }
+      profile: { role: 'Teacher', email: userInfo.email || '', name: userInfo.name || '' }
     }
 
     localStorage.setItem('user', JSON.stringify(user))

@@ -1,54 +1,94 @@
-﻿@model mvc.Models.HomeworkV2students
+@model mvc.Models.HomeworkV2students
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Détails du devoir étudiant";
 }
 
-<h1>Details</h1>
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+    .hw-root { font-family: 'DM Sans', sans-serif; }
+    .hw-card { background: #fff; border-radius: 20px; border: 1px solid #f1f3f9; box-shadow: 0 4px 24px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 2rem; }
+    .hw-topbar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid #f1f3f9; gap: 12px; flex-wrap: wrap; }
+    .hw-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; margin: 0 0 4px; }
+    .hw-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .hw-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #6c757d; text-decoration: none; border: 1px solid #eef0f7; border-radius: 10px; padding: 7px 14px; transition: all 0.15s; }
+    .hw-back:hover { background: #f8f9fc; color: #1a1a2e; text-decoration: none; }
+    .hw-body { padding: 1.5rem; }
+    .hw-dl { display: grid; grid-template-columns: 200px 1fr; gap: 0; margin-bottom: 1.5rem; }
+    .hw-dt { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #aaa; padding: 12px 0; border-bottom: 1px solid #f1f3f9; display: flex; align-items: center; }
+    .hw-dd { font-size: 13px; color: #1a1a2e; padding: 12px 0; border-bottom: 1px solid #f1f3f9; margin: 0; word-break: break-all; }
+    .hw-btn-edit { display: inline-flex; align-items: center; gap: 6px; background: #1a1a2e; color: #fff; border-radius: 10px; padding: 9px 18px; font-size: 13px; font-weight: 500; text-decoration: none; transition: opacity 0.15s; }
+    .hw-btn-edit:hover { opacity: 0.8; color: #fff; text-decoration: none; }
+    .file-link { display: inline-flex; align-items: center; gap: 5px; color: #4e73df; font-size: 13px; text-decoration: none; }
+    .file-link:hover { text-decoration: underline; }
+    .commentary-box { background: #f8f9fc; border: 1px solid #eef0f7; border-radius: 10px; padding: 12px 14px; font-size: 13px; color: #1a1a2e; line-height: 1.5; white-space: pre-wrap; }
+</style>
 
-<div>
-    <h4>HomeworkV2students</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.HomeworkStudentDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.HomeworkStudentDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.HomeworkFile)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.HomeworkFile)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.HomeworkFileTeacher)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.HomeworkFileTeacher)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.HomeworkCommentaryTeacher)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.HomeworkCommentaryTeacher)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Exercice)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Exercice.TeacherId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Student)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Student.Id)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.HomeworkV2studentId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+<div class="container-fluid py-4 px-md-4 hw-root">
+    <div class="hw-card" style="max-width:600px;">
+
+        <div class="hw-topbar">
+            <div>
+                <p class="hw-eyebrow">Devoirs</p>
+                <h1 class="hw-title">Détails du devoir étudiant</h1>
+            </div>
+            <a asp-action="Index" class="hw-back">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+
+        <div class="hw-body">
+            <div class="hw-dl">
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.HomeworkStudentDate)</span>
+                <span class="hw-dd">@Html.DisplayFor(model => model.HomeworkStudentDate)</span>
+
+                <span class="hw-dt">Étudiant</span>
+                <span class="hw-dd" style="font-weight:500;">@Html.DisplayFor(model => model.Student.Firstname) @Html.DisplayFor(model => model.Student.LastName)</span>
+
+                <span class="hw-dt">Exercice</span>
+                <span class="hw-dd">@Html.DisplayFor(model => model.Exercice.ExerciceName)</span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.HomeworkFile)</span>
+                <span class="hw-dd">
+                    @if (!string.IsNullOrEmpty(Model.HomeworkFile))
+                    {
+                        <a href="@Model.HomeworkFile" target="_blank" class="file-link"><i class="fas fa-file-alt"></i> Voir le fichier</a>
+                    }
+                    else
+                    {
+                        <span style="color:#aaa;">—</span>
+                    }
+                </span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.HomeworkFileTeacher)</span>
+                <span class="hw-dd">
+                    @if (!string.IsNullOrEmpty(Model.HomeworkFileTeacher))
+                    {
+                        <a href="@Model.HomeworkFileTeacher" target="_blank" class="file-link"><i class="fas fa-chalkboard-teacher"></i> Voir la correction</a>
+                    }
+                    else
+                    {
+                        <span style="color:#aaa;">—</span>
+                    }
+                </span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.HomeworkCommentaryTeacher)</span>
+                <span class="hw-dd">
+                    @if (!string.IsNullOrEmpty(Model.HomeworkCommentaryTeacher))
+                    {
+                        <div class="commentary-box">@Model.HomeworkCommentaryTeacher</div>
+                    }
+                    else
+                    {
+                        <span style="color:#aaa;">—</span>
+                    }
+                </span>
+            </div>
+
+            <a asp-action="Edit" asp-route-id="@Model.HomeworkV2studentId" class="hw-btn-edit">
+                <i class="fas fa-pen"></i> Modifier
+            </a>
+        </div>
+
+    </div>
 </div>

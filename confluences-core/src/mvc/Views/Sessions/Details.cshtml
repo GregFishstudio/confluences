@@ -1,62 +1,63 @@
-﻿@model mvc.Models.Session
+@model mvc.Models.Session
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Détails de la session";
 }
 
-<br />
-<br />
-<br />
-<br />
-<body data-parallax="true" class="bgImage">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header card-header-primary card-header-icon">
-                        <div class="card-icon">
-                            <h4 class="card-title">@ViewData["Title"]</h4>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="toolbar">
-                            <!--        Here you can write extra buttons/actions for the toolbar              -->
-                        </div>
-                        <div>
-                            <h4>Session</h4>
-                            <hr />
-                            <dl class="row">
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.DateStart)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.DateStart)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.DateEnd)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.DateEnd)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.SchoolClassRoom)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.SchoolClassRoom.SchoolClassRoomName)
-                                </dd>
-                            </dl>
-                        </div>
-                        <div>
-                            <a asp-action="Edit" asp-route-id="@Model.SessionId">Modifier</a> |
-                            <a asp-action="Index">Retourner à la liste de sessions</a> |
-                            <a asp-controller="SchoolClassRooms" asp-action="Details" asp-route-id="@Model.SchoolClassRoomId">Retourner à la classe</a>
-                        </div>
-                    </div>
-                    <!-- end content-->
-                </div>
-                <!--  end card  -->
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+    .hw-root { font-family: 'DM Sans', sans-serif; }
+    .hw-card { background: #fff; border-radius: 20px; border: 1px solid #f1f3f9; box-shadow: 0 4px 24px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 2rem; }
+    .hw-topbar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid #f1f3f9; gap: 12px; flex-wrap: wrap; }
+    .hw-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; margin: 0 0 4px; }
+    .hw-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .hw-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #6c757d; text-decoration: none; border: 1px solid #eef0f7; border-radius: 10px; padding: 7px 14px; transition: all 0.15s; }
+    .hw-back:hover { background: #f8f9fc; color: #1a1a2e; text-decoration: none; }
+    .hw-body { padding: 1.5rem; }
+    .hw-dl { display: grid; grid-template-columns: 160px 1fr; gap: 0; margin-bottom: 1.5rem; }
+    .hw-dt { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #aaa; padding: 10px 0; border-bottom: 1px solid #f1f3f9; display: flex; align-items: center; }
+    .hw-dd { font-size: 13px; color: #1a1a2e; padding: 10px 0; border-bottom: 1px solid #f1f3f9; margin: 0; }
+    .hw-links { display: flex; gap: 10px; flex-wrap: wrap; }
+    .hw-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #6c757d; text-decoration: none; border: 1px solid #eef0f7; border-radius: 10px; padding: 7px 14px; transition: all 0.15s; }
+    .hw-link:hover { background: #f8f9fc; color: #1a1a2e; text-decoration: none; }
+    .hw-link.primary { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+    .hw-link.primary:hover { opacity: 0.8; color: #fff; }
+</style>
+
+<div class="container-fluid py-4 px-md-4 hw-root">
+    <div class="hw-card" style="max-width:560px;">
+
+        <div class="hw-topbar">
+            <div>
+                <p class="hw-eyebrow">Sessions</p>
+                <h1 class="hw-title">Détails de la session</h1>
             </div>
-            <!-- end col-md-12 -->
+            <a asp-action="Index" class="hw-back">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
         </div>
+
+        <div class="hw-body">
+            <div class="hw-dl">
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.DateStart)</span>
+                <span class="hw-dd">@Html.DisplayFor(model => model.DateStart)</span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.DateEnd)</span>
+                <span class="hw-dd">@Html.DisplayFor(model => model.DateEnd)</span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.SchoolClassRoom)</span>
+                <span class="hw-dd">@Html.DisplayFor(model => model.SchoolClassRoom.SchoolClassRoomName)</span>
+            </div>
+
+            <div class="hw-links">
+                <a asp-action="Edit" asp-route-id="@Model.SessionId" class="hw-link primary">
+                    <i class="fas fa-pen"></i> Modifier
+                </a>
+                <a asp-controller="SchoolClassRooms" asp-action="Details" asp-route-id="@Model.SchoolClassRoomId" class="hw-link">
+                    <i class="fas fa-university"></i> Retourner à la classe
+                </a>
+            </div>
+        </div>
+
     </div>
-</body>
+</div>

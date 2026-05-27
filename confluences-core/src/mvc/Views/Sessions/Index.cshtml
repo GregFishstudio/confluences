@@ -1,155 +1,132 @@
-﻿@model IEnumerable<mvc.Models.Session>
+@model IEnumerable<mvc.Models.Session>
 
 @{
-    ViewData["Title"] = "Gestion des Sessions";
+    ViewData["Title"] = "Sessions";
 }
 
 <style>
-    :root {
-        --primary-color: #4e73df;
-        --card-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-    }
-
-    body.bgImage {
-        background-color: #f8f9fc;
-        background-image: none !important;
-    }
-
-    .admin-card {
-        background: #fff;
-        border: none;
-        border-radius: 0.75rem;
-        box-shadow: var(--card-shadow);
-        overflow: hidden;
-    }
-
-    .card-header-actions {
-        padding: 1.5rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #e3e6f0;
-    }
-
-    .date-badge {
-        font-weight: 600;
-        color: #5a5c69;
-        background: #eaecf4;
-        padding: 0.4rem 0.8rem;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        display: inline-block;
-    }
-
-    .class-link {
-        font-weight: 700;
-        color: var(--primary-color);
-        text-decoration: none;
-    }
-
-    .class-link:hover {
-        text-decoration: underline;
-    }
-
-    .btn-action {
-        width: 35px;
-        height: 35px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 0.5rem;
-        transition: 0.2s;
-    }
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+    .hw-root { 
+    font-family: 'DM Sans', sans-serif; 
+    /* Dégradé linéaire du blanc vers un gris perle très léger */
+    background: linear-gradient(135deg, #ffffff 0%, #f4f7fb 100%);
+    min-height: 100vh; /* S'assure que le fond couvre toute la hauteur */
+}
+    .hw-card { background: #fff; border-radius: 20px; border: 1px solid #f1f3f9; box-shadow: 0 4px 24px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 2rem; }
+    .hw-topbar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #f1f3f9; gap: 12px; flex-wrap: wrap; }
+    .hw-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; margin: 0 0 4px; }
+    .hw-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .hw-btn-add { display: inline-flex; align-items: center; gap: 6px; background: #1a1a2e; color: #fff; border: none; border-radius: 10px; padding: 9px 18px; font-size: 13px; font-weight: 500; text-decoration: none; transition: opacity 0.15s; }
+    .hw-btn-add:hover { opacity: 0.8; color: #fff; text-decoration: none; }
+    .hw-toolbar { display: flex; align-items: center; gap: 8px; padding: 12px 1.5rem; border-bottom: 1px solid #f1f3f9; }
+    .hw-search-wrap { position: relative; flex: 1; min-width: 180px; }
+    .hw-search-wrap .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #aaa; }
+    .hw-search { width: 100%; background: #f8f9fc; border: 1px solid #eef0f7; border-radius: 10px; padding: 7px 12px 7px 32px; font-size: 13px; color: #1a1a2e; font-family: 'DM Sans', sans-serif; outline: none; }
+    .hw-search:focus { border-color: #c0c8e8; background: #fff; }
+    .hw-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .hw-table th { text-align: left; padding: 10px 1.5rem; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #aaa; border-bottom: 1px solid #f1f3f9; white-space: nowrap; }
+    .hw-table td { padding: 13px 1.5rem; border-bottom: 1px solid #f1f3f9; vertical-align: middle; color: #1a1a2e; }
+    .hw-table tbody tr:last-child td { border-bottom: none; }
+    .hw-table tbody tr { transition: background 0.1s; }
+    .hw-table tbody tr:hover { background: #fafbff; }
+    .class-link { font-weight: 500; color: #1a1a2e; text-decoration: none; }
+    .class-link:hover { text-decoration: underline; }
+    .date-tag { display: inline-block; background: #f8f9fc; border: 1px solid #eef0f7; border-radius: 8px; padding: 3px 10px; font-size: 12px; font-weight: 500; color: #1a1a2e; }
+    .actions-cell { display: flex; justify-content: flex-end; gap: 4px; }
+    .act-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid #eef0f7; background: #fff; display: inline-flex; align-items: center; justify-content: center; color: #6c757d; transition: all 0.15s; text-decoration: none; font-size: 13px; }
+    .act-btn:hover { background: #f8f9fc; color: #1a1a2e; border-color: #c0c8e8; text-decoration: none; }
+    .act-btn.del:hover { background: #FCEBEB; color: #A32D2D; border-color: #F09595; }
+    .hw-footer { padding: 12px 1.5rem; border-top: 1px solid #f1f3f9; font-size: 12px; color: #aaa; }
+    
 </style>
 
-<div class="container-fluid dashboard-container mt-4 px-4">
-    <div class="admin-card">
-        <div class="card-header-actions">
-            <div>
-                <h2 class="font-weight-bold text-dark mb-1">@ViewData["Title"]</h2>
-                <p class="text-muted mb-0">Planification et suivi des sessions de cours</p>
-            </div>
+<div class="container-fluid py-4 px-md-4 hw-root">
+    <div class="hw-card">
 
-            <a class="btn btn-success btn-icon-split shadow-sm" asp-action="Create">
-                <span class="icon text-white-50">
-                    <i class="fas fa-calendar-plus"></i>
-                </span>
-                <span class="text">Nouvelle session</span>
+        <div class="hw-topbar">
+            <div>
+                <p class="hw-eyebrow">Administration</p>
+                <h1 class="hw-title">Sessions</h1>
+            </div>
+            <a asp-action="Create" class="hw-btn-add">
+                <i class="fas fa-plus"></i> Nouvelle session
             </a>
         </div>
 
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table id="datatables" class="table custom-table" width="100%">
-                    <thead>
-                        <tr>
-                            <th>Classe / Salle</th>
-                            <th>Date de début</th>
-                            <th>Date de fin</th>
-                            <th class="text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td class="pl-4">
-                                    <a class="class-link" asp-controller="SchoolClassRooms" asp-action="Details" asp-route-id="@item.SchoolClassRoomId">
-                                        <i class="fas fa-university mr-2"></i>
-                                        @Html.DisplayFor(modelItem => item.SchoolClassRoom.SchoolClassRoomName)
-                                    </a>
-                                </td>
-                                <td>
-                                    <span class="date-badge">
-                                        <i class="far fa-calendar-alt mr-1 text-primary"></i>
-                                        @item.DateStart.ToString("dd MMM yyyy")
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="date-badge">
-                                        <i class="far fa-calendar-check mr-1 text-success"></i>
-                                        @item.DateEnd.ToString("dd MMM yyyy")
-                                    </span>
-                                </td>
-                                <td class="text-right pr-4">
-                                    <a asp-action="Details" asp-route-id="@item.SessionId" class="btn btn-light btn-action mr-1" title="Détails">
-                                        <i class="fas fa-eye text-info"></i>
-                                    </a>
-                                    <a asp-action="Edit" asp-route-id="@item.SessionId" class="btn btn-light btn-action mr-1" title="Modifier">
-                                        <i class="fas fa-pen text-primary"></i>
-                                    </a>
-                                    <a asp-action="Delete" asp-route-id="@item.SessionId" class="btn btn-light btn-action text-danger" title="Supprimer">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+        <div class="hw-toolbar">
+            <div class="hw-search-wrap">
+                <i class="fas fa-search search-icon"></i>
+                <input class="hw-search" type="search" id="hw-search" placeholder="Rechercher..." />
             </div>
         </div>
+
+        <div class="table-responsive">
+            <table class="hw-table">
+                <thead>
+                    <tr>
+                        <th>Classe / Salle</th>
+                        <th>Date de début</th>
+                        <th>Date de fin</th>
+                        <th style="text-align:right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="hw-body">
+                    @foreach (var item in Model)
+                    {
+                        <tr data-search="@item.SchoolClassRoom?.SchoolClassRoomName @item.DateStart.Year">
+                            <td>
+                                <a class="class-link" asp-controller="SchoolClassRooms" asp-action="Details" asp-route-id="@item.SchoolClassRoomId">
+                                    <i class="fas fa-university" style="font-size:11px; color:#aaa; margin-right:6px;"></i>
+                                    @Html.DisplayFor(modelItem => item.SchoolClassRoom.SchoolClassRoomName)
+                                </a>
+                            </td>
+                            <td>
+                                <span class="date-tag">
+                                    <i class="far fa-calendar-alt" style="font-size:10px; color:#aaa; margin-right:4px;"></i>
+                                    @item.DateStart.ToString("dd MMM yyyy")
+                                </span>
+                            </td>
+                            <td>
+                                <span class="date-tag">
+                                    <i class="far fa-calendar-check" style="font-size:10px; color:#aaa; margin-right:4px;"></i>
+                                    @item.DateEnd.ToString("dd MMM yyyy")
+                                </span>
+                            </td>
+                            <td>
+                                <div class="actions-cell">
+                                    <a asp-action="Details" asp-route-id="@item.SessionId" class="act-btn" title="Détails"><i class="fas fa-eye"></i></a>
+                                    <a asp-action="Edit" asp-route-id="@item.SessionId" class="act-btn" title="Modifier"><i class="fas fa-pen"></i></a>
+                                    <a asp-action="Delete" asp-route-id="@item.SessionId" class="act-btn del" title="Supprimer"><i class="fas fa-trash"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="hw-footer" id="hw-count"></div>
     </div>
 </div>
 
 @section Scripts {
-    <script>
-        $(document).ready(function () {
-            $('#datatables').DataTable({
-                "pagingType": "simple_numbers",
-                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "Tout"]],
-                responsive: true,
-                language: {
-                    "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/French.json",
-                    searchPlaceholder: "Rechercher une session..."
-                },
-                "order": [[1, "desc"]], // Trie par date de début par défaut
-                "columnDefs": [
-                    { "orderable": false, "targets": 3 }
-                ],
-                "dom": "<'row px-4 pt-4'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
-                       "<'row'<'col-sm-12'tr>>" +
-                       "<'row px-4 pb-3'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>"
+<script>
+    (function () {
+        var rows = Array.from(document.querySelectorAll('#hw-body tr'));
+        var searchInput = document.getElementById('hw-search');
+        var countEl = document.getElementById('hw-count');
+        function update() {
+            var q = searchInput.value.toLowerCase();
+            var n = 0;
+            rows.forEach(function (r) {
+                var show = !q || r.dataset.search.toLowerCase().includes(q);
+                r.style.display = show ? '' : 'none';
+                if (show) n++;
             });
-        });
-    </script>
+            countEl.textContent = n + ' session' + (n > 1 ? 's' : '') + ' affichée' + (n > 1 ? 's' : '');
+        }
+        searchInput.addEventListener('input', update);
+        update();
+    })();
+</script>
 }

@@ -1,112 +1,110 @@
-﻿@model mvc.Models.Appointment
+@model mvc.Models.Appointment
 
 @{
-    ViewData["Title"] = "Rendez-vous";
+    ViewData["Title"] = "Détails du rendez-vous";
 }
 
-<br />
-<br />
-<br />
-<br />
-<body data-parallax="true" class="bgImage">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header card-header-primary card-header-icon">
-                        <div class="card-icon">
-                            <h4 class="card-title">@ViewData["Title"]</h4>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="toolbar">
-                            <!--        Here you can write extra buttons/actions for the toolbar              -->
-                        </div>
-                        <div>
-                            <dl class="row">
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.AppointmentName)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Html.DisplayFor(model => model.AppointmentName)
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.DateStart)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Model.DateStart.ToString("yyyy-MM-dd HH:mm")
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.DateEnd)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Model.DateEnd.ToString("yyyy-MM-dd HH:mm")
-                                </dd>
-                                <dt class="col-sm-2">
-                                    @Html.DisplayNameFor(model => model.Teacher)
-                                </dt>
-                                <dd class="col-sm-10">
-                                    @Model.Teacher.Firstname @Model.Teacher.LastName
-                                </dd>
-                                @if (Model.IsWeekly)
-                                {
-                                    var st1 = "Tous les ";
-                                    var st2 = "s";
-                                    <dt class="col-sm-2">
-                                        @st1
-                                        @Model.DateStart.ToString("dddd")@st2
-                                    </dt>
-                                    <dd class="col-sm-10">
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+    .hw-root { font-family: 'DM Sans', sans-serif; }
+    .hw-card { background: #fff; border-radius: 20px; border: 1px solid #f1f3f9; box-shadow: 0 4px 24px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 2rem; }
+    .hw-topbar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid #f1f3f9; gap: 12px; flex-wrap: wrap; }
+    .hw-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; margin: 0 0 4px; }
+    .hw-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .hw-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #6c757d; text-decoration: none; border: 1px solid #eef0f7; border-radius: 10px; padding: 7px 14px; transition: all 0.15s; }
+    .hw-back:hover { background: #f8f9fc; color: #1a1a2e; text-decoration: none; }
+    .hw-body { padding: 1.5rem; }
+    .hw-dl { display: grid; grid-template-columns: 160px 1fr; gap: 0; margin-bottom: 1.5rem; }
+    .hw-dt { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #aaa; padding: 10px 0; border-bottom: 1px solid #f1f3f9; display: flex; align-items: center; }
+    .hw-dd { font-size: 13px; color: #1a1a2e; padding: 10px 0; border-bottom: 1px solid #f1f3f9; margin: 0; }
+    .weekly-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 8px; font-size: 11px; font-weight: 500; background: #ebf8ff; color: #3182ce; border: 1px solid #bee3f8; }
+    .hw-section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #aaa; margin: 0 0 12px; }
+    .participant-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f3f9; }
+    .participant-row:last-child { border-bottom: none; }
+    .participant-info { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #1a1a2e; }
+    .avatar { width: 28px; height: 28px; border-radius: 50%; background: #f0f2f5; border: 1px solid #eef0f7; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; color: #6c757d; flex-shrink: 0; }
+    .del-link { font-size: 12px; color: #A32D2D; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+    .del-link:hover { text-decoration: underline; color: #A32D2D; }
+    .hw-empty { font-size: 13px; color: #aaa; padding: 12px 0; }
+    .hw-links { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 1.5rem; }
+    .hw-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #6c757d; text-decoration: none; border: 1px solid #eef0f7; border-radius: 10px; padding: 7px 14px; transition: all 0.15s; }
+    .hw-link:hover { background: #f8f9fc; color: #1a1a2e; text-decoration: none; }
+    .hw-link.primary { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+    .hw-link.primary:hover { opacity: 0.8; color: #fff; }
+    .hw-link.add { background: #f8f9fc; color: #1a1a2e; border-color: #eef0f7; }
+    .hw-divider { border: none; border-top: 1px solid #f1f3f9; margin: 1.5rem 0; }
+</style>
 
-                                    </dd>
-                                }
+<div class="container-fluid py-4 px-md-4 hw-root">
+    <div class="hw-card" style="max-width:640px;">
 
-                            </dl>
-                        </div>
-                        <div>
-                            <a asp-action="Edit" asp-route-id="@Model.AppointmentId">Modifier</a>
-                        </div>
-                        <hr />
-                        <div>
-                            @if (Model.AppointmentStudents.Count() > 0)
-                            {
-                                <div class="row">
-                                    <div class="col-md-2 font-weight-bold">
-                                        Participant-e-s
-                                    </div>
-                                    <div class="col-md-10">
-                                        <dl class="row">
-                                            @foreach (AppointmentStudent student in Model.AppointmentStudents)
-                                            {
-                                                <dd class="col-sm-2">
-                                                    @student.Student.Firstname @student.Student.LastName
-                                                </dd>
-                                                <dd class="col-sm-10">
-                                                    <a class="text-danger" asp-controller="AppointmentStudents" asp-action="Delete" asp-route-id="@student.AppointmentStudentId">Supprimer</a>
-                                                </dd>
-                                            }
-                                        </dl>
-                                    </div>
-                                </div>
-
-                            }
-                            else
-                            {
-                                <h4>Il n'y a pas de participant-e-s pour ce rendez-vous</h4>
-                            }
-                            <div>
-                                <a asp-controller="AppointmentStudents" asp-action="Create" asp-route-id="@Model.AppointmentId">Ajouter un-e participant-e</a>
-                            </div>
-                            <div class="mt-4">
-                                <a class="btn btn-primary" asp-action="Index">Retouner à la liste de rdv</a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- end content-->
-                </div>
-                <!--  end card  -->
+        <div class="hw-topbar">
+            <div>
+                <p class="hw-eyebrow">Rendez-vous</p>
+                <h1 class="hw-title">@Model.AppointmentName</h1>
             </div>
-            <!-- end col-md-12 -->
+            <a asp-action="Index" class="hw-back">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
         </div>
+
+        <div class="hw-body">
+            <div class="hw-dl">
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.DateStart)</span>
+                <span class="hw-dd">@Model.DateStart.ToString("yyyy-MM-dd HH:mm")</span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.DateEnd)</span>
+                <span class="hw-dd">@Model.DateEnd.ToString("yyyy-MM-dd HH:mm")</span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.Teacher)</span>
+                <span class="hw-dd">@Model.Teacher.Firstname @Model.Teacher.LastName</span>
+
+                @if (Model.IsWeekly)
+                {
+                    <span class="hw-dt">Récurrence</span>
+                    <span class="hw-dd">
+                        <span class="weekly-badge"><i class="fas fa-sync-alt"></i> Tous les @Model.DateStart.ToString("dddd")s</span>
+                    </span>
+                }
+            </div>
+
+            <hr class="hw-divider" />
+
+            <p class="hw-section-title">Participant-e-s</p>
+
+            @if (Model.AppointmentStudents.Count() > 0)
+            {
+                <div>
+                    @foreach (var student in Model.AppointmentStudents)
+                    {
+                        <div class="participant-row">
+                            <div class="participant-info">
+                                <div class="avatar">
+                                    @(student.Student?.Firstname?.Length > 0 ? student.Student.Firstname[0].ToString() : "")@(student.Student?.LastName?.Length > 0 ? student.Student.LastName[0].ToString() : "")
+                                </div>
+                                <span>@student.Student.Firstname @student.Student.LastName</span>
+                            </div>
+                            <a class="del-link" asp-controller="AppointmentStudents" asp-action="Delete" asp-route-id="@student.AppointmentStudentId">
+                                <i class="fas fa-times"></i> Retirer
+                            </a>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="hw-empty">Aucun-e participant-e pour ce rendez-vous.</p>
+            }
+
+            <div class="hw-links">
+                <a asp-action="Edit" asp-route-id="@Model.AppointmentId" class="hw-link primary">
+                    <i class="fas fa-pen"></i> Modifier
+                </a>
+                <a asp-controller="AppointmentStudents" asp-action="Create" asp-route-id="@Model.AppointmentId" class="hw-link add">
+                    <i class="fas fa-user-plus"></i> Ajouter un-e participant-e
+                </a>
+            </div>
+        </div>
+
     </div>
-</body>
+</div>

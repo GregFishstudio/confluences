@@ -1,65 +1,135 @@
-﻿@model IEnumerable<mvc.Models.HomeworkV2studentExerciceAlones>
+@model IEnumerable<mvc.Models.HomeworkV2studentExerciceAlones>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Devoirs étudiants (exercices seuls)";
 }
 
-<h1>Index</h1>
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+    .hw-root { font-family: 'DM Sans', sans-serif; }
+    .hw-card { background: #fff; border-radius: 20px; border: 1px solid #f1f3f9; box-shadow: 0 4px 24px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 2rem; }
+    .hw-topbar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid #f1f3f9; gap: 12px; flex-wrap: wrap; }
+    .hw-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; margin: 0 0 4px; }
+    .hw-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .hw-btn-new { display: inline-flex; align-items: center; gap: 6px; background: #1a1a2e; color: #fff; border-radius: 10px; padding: 9px 18px; font-size: 13px; font-weight: 500; text-decoration: none; transition: opacity 0.15s; white-space: nowrap; }
+    .hw-btn-new:hover { opacity: 0.8; color: #fff; text-decoration: none; }
+    .hw-toolbar { display: flex; align-items: center; gap: 10px; padding: 1rem 1.5rem; border-bottom: 1px solid #f1f3f9; }
+    .hw-search { flex: 1; max-width: 320px; background: #f8f9fc; border: 1px solid #eef0f7; border-radius: 10px; padding: 8px 14px; font-size: 13px; color: #1a1a2e; font-family: 'DM Sans', sans-serif; outline: none; }
+    .hw-search:focus { border-color: #c0c8e8; background: #fff; }
+    .hw-table { width: 100%; border-collapse: collapse; }
+    .hw-table thead th { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #aaa; padding: 10px 1.5rem; border-bottom: 1px solid #f1f3f9; text-align: left; background: #f8f9fc; }
+    .hw-table tbody tr { border-bottom: 1px solid #f1f3f9; transition: background 0.1s; }
+    .hw-table tbody tr:hover { background: #fafbfe; }
+    .hw-table tbody td { padding: 13px 1.5rem; font-size: 13px; color: #1a1a2e; vertical-align: middle; }
+    .date-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #6c757d; }
+    .file-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; background: #f0fdf4; color: #166534; border-radius: 6px; padding: 3px 8px; }
+    .file-pill-teacher { background: #eff6ff; color: #1d4ed8; }
+    .hw-actions { display: flex; gap: 5px; justify-content: flex-end; }
+    .hw-action-btn { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; background: #f8f9fc; color: #555; border: 1px solid #eef0f7; text-decoration: none; font-size: 12px; transition: all 0.15s; }
+    .hw-action-btn:hover { background: #1a1a2e; color: #fff; border-color: #1a1a2e; text-decoration: none; }
+    .hw-action-btn.danger:hover { background: #A32D2D; border-color: #A32D2D; color: #fff; }
+    .hw-footer { padding: 10px 1.5rem; font-size: 12px; color: #aaa; border-top: 1px solid #f1f3f9; }
+</style>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.HomeworkStudentDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.HomeworkFile)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.HomeworkFileTeacher)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.HomeworkCommentaryTeacher)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Exercice)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Student)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.HomeworkStudentDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.HomeworkFile)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.HomeworkFileTeacher)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.HomeworkCommentaryTeacher)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Exercice.TeacherId)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Student.Id)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.HomeworkV2studentId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.HomeworkV2studentId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.HomeworkV2studentId">Delete</a>
-            </td>
-        </tr>
+<div class="container-fluid py-4 px-md-4 hw-root">
+    <div class="hw-card">
+
+        <div class="hw-topbar">
+            <div>
+                <p class="hw-eyebrow">Devoirs</p>
+                <h1 class="hw-title">Devoirs étudiants — exercices seuls</h1>
+            </div>
+            <a asp-action="Create" class="hw-btn-new">
+                <i class="fas fa-plus"></i> Ajouter
+            </a>
+        </div>
+
+        <div class="hw-toolbar">
+            <input type="text" id="hwSearch" class="hw-search" placeholder="Rechercher...">
+        </div>
+
+        <div class="table-responsive">
+            <table class="hw-table">
+                <thead>
+                    <tr>
+                        <th>@Html.DisplayNameFor(model => model.HomeworkStudentDate)</th>
+                        <th>Étudiant</th>
+                        <th>Exercice</th>
+                        <th>Fichier étudiant</th>
+                        <th>Fichier professeur</th>
+                        <th style="text-align:right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="hwTableBody">
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="date-chip">
+                                    <i class="far fa-calendar-alt"></i>
+                                    @item.HomeworkStudentDate.ToString("dd MMM yyyy")
+                                </span>
+                            </td>
+                            <td style="font-weight:500;">@Html.DisplayFor(modelItem => item.Student.Firstname) @Html.DisplayFor(modelItem => item.Student.LastName)</td>
+                            <td style="color:#555;">@Html.DisplayFor(modelItem => item.Exercice.ExerciceName)</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.HomeworkFile))
+                                {
+                                    <span class="file-pill"><i class="fas fa-file-alt"></i> Rendu</span>
+                                }
+                                else
+                                {
+                                    <span style="color:#aaa; font-size:12px;">—</span>
+                                }
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.HomeworkFileTeacher))
+                                {
+                                    <span class="file-pill file-pill-teacher"><i class="fas fa-chalkboard-teacher"></i> Correction</span>
+                                }
+                                else
+                                {
+                                    <span style="color:#aaa; font-size:12px;">—</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="hw-actions">
+                                    <a asp-action="Details" asp-route-id="@item.HomeworkV2studentId" class="hw-action-btn" title="Détails"><i class="fas fa-eye"></i></a>
+                                    <a asp-action="Edit" asp-route-id="@item.HomeworkV2studentId" class="hw-action-btn" title="Modifier"><i class="fas fa-pen"></i></a>
+                                    <a asp-action="Delete" asp-route-id="@item.HomeworkV2studentId" class="hw-action-btn danger" title="Supprimer"><i class="fas fa-trash"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="hw-footer" id="hwFooter"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var input = document.getElementById('hwSearch');
+            var tbody = document.getElementById('hwTableBody');
+            var footer = document.getElementById('hwFooter');
+            var total = tbody.rows.length;
+
+            function update() {
+                var q = input.value.toLowerCase();
+                var visible = 0;
+                for (var i = 0; i < tbody.rows.length; i++) {
+                    var match = tbody.rows[i].textContent.toLowerCase().indexOf(q) >= 0;
+                    tbody.rows[i].style.display = match ? '' : 'none';
+                    if (match) visible++;
+                }
+                footer.textContent = q ? (visible + ' résultat' + (visible !== 1 ? 's' : '') + ' sur ' + total) : (total + ' entrée' + (total !== 1 ? 's' : ''));
+            }
+
+            input.addEventListener('input', update);
+            update();
+        })();
+    </script>
 }
-    </tbody>
-</table>

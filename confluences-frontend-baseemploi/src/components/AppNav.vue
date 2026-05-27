@@ -11,7 +11,13 @@
     <div class="logo-container">
       <img :src="currentLogo" alt="Logo" class="logo-img"/>
     </div>
-    
+
+    <div v-if="loggedIn" class="px-4 pb-3 text-center">
+      <span class="text-body-2 font-weight-bold" style="color: #1976D2;">
+        Bonjour : {{ authStore.user?.profile?.given_name || authStore.user?.profile?.name || '—' }}
+      </span>
+    </div>
+
     <v-list density="comfortable" nav class="px-4">
       <v-list-subheader class="text-uppercase font-weight-bold text-caption">Menu Participants</v-list-subheader>
 
@@ -65,7 +71,9 @@
 
     <template #append>
       <div class="pa-4 bottom-actions">
-      
+        <div v-if="loggedIn && authStore.user?.profile?.email" class="text-caption mb-2 px-1" style="opacity:0.75; word-break:break-all;">
+          Connecté·e : {{ authStore.user.profile.email }}
+        </div>
 
         <v-btn
           block
@@ -127,6 +135,9 @@
 
   <template #append>
     <div class="pa-4">
+      <div v-if="loggedIn && authStore.user?.profile?.email" class="text-caption mb-2 px-1" style="opacity:0.75; word-break:break-all;">
+        Connecté·e : {{ authStore.user.profile.email }}
+      </div>
       <v-btn
         block
         :color="loggedIn ? 'error' : 'primary'"
@@ -187,8 +198,25 @@ const toggleTheme = () => {
   theme.name.value = darkTheme.value ? 'light' : 'dark'
 }
 
-onMounted(() => {
+onMounted(async () => {
   authStore.restoreSession()
+  const token = localStorage.getItem('access_token')
+  if (token && !authStore.user?.profile?.preferred_username) {
+    try {
+      const authority = import.meta.env.VITE_AUTHORITY_URL || 'http://localhost:5000'
+      const res = await fetch(authority + '/connect/userinfo', {
+        headers: { Authorization: 'Bearer ' + token }
+      })
+      if (res.ok) {
+        const info = await res.json()
+        console.log('[AppNav] userinfo reçu:', info)
+        const stored = JSON.parse(localStorage.getItem('user') || '{}')
+        const updated = { ...stored, profile: { ...(stored.profile || {}), preferred_username: info.preferred_username || '', given_name: info.given_name || '', name: info.name || '' } }
+        localStorage.setItem('user', JSON.stringify(updated))
+        authStore.$patch({ user: updated })
+      }
+    } catch (e) { console.warn('[AppNav] userinfo indisponible:', e) }
+  }
 })
 
 // Liens de Navigation Internes

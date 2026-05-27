@@ -1,6 +1,18 @@
-﻿@{
-    ViewData["Title"] = "Privacy Policy";
+@{
+    ViewData["Title"] = "Politique de confidentialité";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+    .hw-root { font-family: 'DM Sans', sans-serif; }
+    .hw-card { background: #fff; border-radius: 20px; border: 1px solid #f1f3f9; box-shadow: 0 4px 24px rgba(0,0,0,0.04); padding: 2rem; margin-bottom: 2rem; }
+    .hw-title { font-family: 'Lora', serif; font-size: 28px; font-weight: 600; color: #1a1a2e; margin: 0 0 1rem; }
+    .hw-text { font-size: 14px; color: #6c757d; line-height: 1.7; }
+</style>
+
+<div class="container-fluid py-4 px-md-4 hw-root">
+    <div class="hw-card" style="max-width:720px;">
+        <h1 class="hw-title">@ViewData["Title"]</h1>
+        <p class="hw-text">Cette page détaille la politique de confidentialité du site.</p>
+    </div>
+</div>

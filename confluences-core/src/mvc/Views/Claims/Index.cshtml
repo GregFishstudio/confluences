@@ -1,27 +1,47 @@
-﻿
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Claims & Propriétés";
 }
 
 @using Microsoft.AspNetCore.Authentication
 
-<h1>Claims</h1>
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+    .hw-root { font-family: 'DM Sans', sans-serif; }
+    .hw-card { background: #fff; border-radius: 20px; border: 1px solid #f1f3f9; box-shadow: 0 4px 24px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 2rem; }
+    .hw-topbar { padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid #f1f3f9; }
+    .hw-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; margin: 0 0 4px; }
+    .hw-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .hw-section { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: #aaa; padding: 12px 1.5rem; border-bottom: 1px solid #f1f3f9; background: #f8f9fc; }
+    .hw-dl { display: grid; grid-template-columns: 280px 1fr; gap: 0; }
+    .hw-dt { font-size: 11px; font-weight: 500; color: #aaa; padding: 10px 1.5rem; border-bottom: 1px solid #f1f3f9; display: flex; align-items: center; word-break: break-all; }
+    .hw-dd { font-size: 12px; color: #1a1a2e; padding: 10px 1.5rem; border-bottom: 1px solid #f1f3f9; margin: 0; word-break: break-all; font-family: monospace; }
+</style>
 
-<dl>
-    @foreach (var claim in User.Claims)
-    {
-        <dt>@claim.Type</dt>
-        <dd>@claim.Value</dd>
-    }
-</dl>
+<div class="container-fluid py-4 px-md-4 hw-root">
+    <div class="hw-card">
 
-<h2>Properties</h2>
+        <div class="hw-topbar">
+            <p class="hw-eyebrow">Débogage</p>
+            <h1 class="hw-title">Claims & Propriétés</h1>
+        </div>
 
-<dl>
-    @foreach (var prop in (await Context.AuthenticateAsync()).Properties.Items)
-    {
-        <dt>@prop.Key</dt>
-        <dd>@prop.Value</dd>
-    }
-</dl>
+        <div class="hw-section">Claims</div>
+        <div class="hw-dl">
+            @foreach (var claim in User.Claims)
+            {
+                <span class="hw-dt">@claim.Type</span>
+                <span class="hw-dd">@claim.Value</span>
+            }
+        </div>
 
+        <div class="hw-section" style="margin-top:0;">Propriétés</div>
+        <div class="hw-dl">
+            @foreach (var prop in (await Context.AuthenticateAsync()).Properties.Items)
+            {
+                <span class="hw-dt">@prop.Key</span>
+                <span class="hw-dd">@prop.Value</span>
+            }
+        </div>
+
+    </div>
+</div>

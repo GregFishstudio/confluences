@@ -122,6 +122,10 @@ namespace Api
                     options.RequireHttpsMetadata = false;
                     options.Audience = "api1";
 
+options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    {
+        ValidateIssuer = false 
+    };
                     // 🔥 Empêche le JWT de casser les preflight OPTIONS
                     options.Events = new JwtBearerEvents
                     {

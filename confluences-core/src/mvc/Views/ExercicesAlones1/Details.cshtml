@@ -1,72 +1,108 @@
-﻿@model mvc.Models.ExercicesAlone
+@model mvc.Models.ExercicesAlone
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Détails de l'exercice";
 }
 
-<h1>Details</h1>
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+    .hw-root { font-family: 'DM Sans', sans-serif; }
+    .hw-card { background: #fff; border-radius: 20px; border: 1px solid #f1f3f9; box-shadow: 0 4px 24px rgba(0,0,0,0.04); overflow: hidden; margin-bottom: 2rem; }
+    .hw-topbar { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid #f1f3f9; gap: 12px; flex-wrap: wrap; }
+    .hw-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #aaa; margin: 0 0 4px; }
+    .hw-title { font-family: 'Lora', serif; font-size: 22px; font-weight: 600; color: #1a1a2e; margin: 0; }
+    .hw-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #6c757d; text-decoration: none; border: 1px solid #eef0f7; border-radius: 10px; padding: 7px 14px; transition: all 0.15s; }
+    .hw-back:hover { background: #f8f9fc; color: #1a1a2e; text-decoration: none; }
+    .hw-body { padding: 1.5rem; }
+    .hw-dl { display: grid; grid-template-columns: 180px 1fr; gap: 0; margin-bottom: 1.5rem; }
+    .hw-dt { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #aaa; padding: 10px 0; border-bottom: 1px solid #f1f3f9; display: flex; align-items: center; }
+    .hw-dd { font-size: 13px; color: #1a1a2e; padding: 10px 0; border-bottom: 1px solid #f1f3f9; margin: 0; }
+    .hw-badge { display: inline-block; padding: 3px 9px; border-radius: 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+    .hw-badge-add { background: #fff5f5; color: #c53030; }
+    .hw-badge-std { background: #f7fafc; color: #4a5568; }
+    .hw-links { display: flex; gap: 10px; flex-wrap: wrap; }
+    .hw-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #6c757d; text-decoration: none; border: 1px solid #eef0f7; border-radius: 10px; padding: 7px 14px; transition: all 0.15s; }
+    .hw-link:hover { background: #f8f9fc; color: #1a1a2e; text-decoration: none; }
+    .hw-link.primary { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+    .hw-link.primary:hover { opacity: 0.8; color: #fff; }
+</style>
 
-<div>
-    <h4>ExercicesAlone</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ExerciceDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ExerciceDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ExerciceName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ExerciceName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ExerciceLink)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ExerciceLink)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AudioLink)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AudioLink)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CorrectionDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CorrectionDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CorrectionLink)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CorrectionLink)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsHomeworkAdditionnal)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsHomeworkAdditionnal)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.HomeworkV2)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.HomeworkV2.HomeworkV2name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Teacher)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Teacher.Id)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.ExerciceId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+<div class="container-fluid py-4 px-md-4 hw-root">
+    <div class="hw-card" style="max-width:560px;">
+
+        <div class="hw-topbar">
+            <div>
+                <p class="hw-eyebrow">Exercices en Autonomie</p>
+                <h1 class="hw-title">Détails de l'exercice</h1>
+            </div>
+            <a asp-action="Index" class="hw-back">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+
+        <div class="hw-body">
+            <div class="hw-dl">
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.ExerciceDate)</span>
+                <span class="hw-dd">@Html.DisplayFor(model => model.ExerciceDate)</span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.ExerciceName)</span>
+                <span class="hw-dd">@Html.DisplayFor(model => model.ExerciceName)</span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.ExerciceLink)</span>
+                <span class="hw-dd">
+                    @if (!string.IsNullOrEmpty(Model.ExerciceLink))
+                    {
+                        <a href="@Model.ExerciceLink" target="_blank" style="color:#3182ce;">@Model.ExerciceLink</a>
+                    }
+                </span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.AudioLink)</span>
+                <span class="hw-dd">
+                    @if (!string.IsNullOrEmpty(Model.AudioLink))
+                    {
+                        <a href="@Model.AudioLink" target="_blank" style="color:#805ad5;">@Model.AudioLink</a>
+                    }
+                </span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.CorrectionDate)</span>
+                <span class="hw-dd">@Html.DisplayFor(model => model.CorrectionDate)</span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.CorrectionLink)</span>
+                <span class="hw-dd">
+                    @if (!string.IsNullOrEmpty(Model.CorrectionLink))
+                    {
+                        <a href="@Model.CorrectionLink" target="_blank" style="color:#38a169;">@Model.CorrectionLink</a>
+                    }
+                </span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.IsHomeworkAdditionnal)</span>
+                <span class="hw-dd">
+                    @if (Model.IsHomeworkAdditionnal)
+                    {
+                        <span class="hw-badge hw-badge-add">Additionnel</span>
+                    }
+                    else
+                    {
+                        <span class="hw-badge hw-badge-std">Standard</span>
+                    }
+                </span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.HomeworkV2)</span>
+                <span class="hw-dd">@Html.DisplayFor(model => model.HomeworkV2.HomeworkV2name)</span>
+
+                <span class="hw-dt">@Html.DisplayNameFor(model => model.Teacher)</span>
+                <span class="hw-dd">@Html.DisplayFor(model => model.Teacher.Id)</span>
+            </div>
+
+            <div class="hw-links">
+                <a asp-action="Edit" asp-route-id="@Model.ExerciceId" class="hw-link primary">
+                    <i class="fas fa-pen"></i> Modifier
+                </a>
+                <a asp-action="Index" class="hw-link">
+                    Retour à la liste
+                </a>
+            </div>
+        </div>
+
+    </div>
 </div>

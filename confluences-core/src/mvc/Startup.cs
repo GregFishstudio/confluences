@@ -105,6 +105,14 @@ namespace mvc
                     options.NonceCookie.SecurePolicy = CookieSecurePolicy.None;
 
                     // Chemin de callback du MVC
+                    options.Events = new OpenIdConnectEvents
+{
+    OnRedirectToIdentityProvider = ctx =>
+    {
+        ctx.ProtocolMessage.RedirectUri = Configuration["URLClientMVC"] + "signin-oidc";
+        return Task.CompletedTask;
+    }
+};
                     options.CallbackPath = "/signin-oidc";
                 });
 

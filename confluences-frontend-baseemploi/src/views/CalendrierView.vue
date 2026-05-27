@@ -187,7 +187,7 @@
               color="amber-darken-3"
               :first-day-of-week="1"
               class="elevation-0 mb-3"
-              @update:modelValue="saveFeries"
+              @update:modelValue="onFeriesChange"
             />
             <div class="d-flex flex-wrap gap-1">
               <v-chip
@@ -304,7 +304,7 @@ const snackbar         = ref({ visible: false, text: '', color: 'success' })
 let   _localCounter    = 0
 let   saveStatusTimer  = null
 
-const tabLabels      = { fi_a1: 'F&I A1', fi_a2: 'F&I A2', telecours: 'Télécours' }
+const tabLabels       = { fi_a1: 'F&I A1', fi_a2: 'F&I A2', telecours: 'Télécours' }
 const sessionTabLabel = computed(() => tabLabels[sessionTab.value] || '')
 
 // ─── Computed ─────────────────────────────────────────────────────────────────
@@ -336,11 +336,20 @@ function toast(text, color = 'success') {
   snackbar.value = { visible: true, text, color }
 }
 
-function authHeaders() {
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+// ─── Normalisation des dates fériés ───────────────────────────────────────────
+// Vuetify peut retourner des objets Date, des strings ISO avec timezone, ou YYYY-MM-DD.
+// On normalise toujours en YYYY-MM-DD pour éviter les décalages de timezone.
+function normalizeFerieDate(d) {
+  if (!d) return null
+  if (typeof d === 'string') return d.substring(0, 10)
+  // Objet Date : utiliser les composantes locales pour éviter le décalage UTC
+  if (d instanceof Date) {
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${y}-${m}-${day}`
   }
+  return moment(d).format('YYYY-MM-DD')
 }
 
 // ─── API Load ─────────────────────────────────────────────────────────────────
@@ -359,6 +368,7 @@ async function loadJoursFeries() {
     const res = await apiFetch(`${API_BASE}/api/calendrier/feries`)
     if (res?.ok) {
       const data = await res.json()
+      // Normalise à la lecture aussi pour être cohérent
       joursFeries.value = data.map(f => f.date.substring(0, 10))
     }
   } catch (e) { console.error('loadJoursFeries:', e) }
@@ -436,13 +446,23 @@ async function saveSessions() {
   }
 }
 
-// ─── Fériés — auto-save ───────────────────────────────────────────────────────
+// ─── Fériés ───────────────────────────────────────────────────────────────────
+
+// Handler appelé par @update:modelValue du v-date-picker
+// Vuetify peut envoyer des objets Date ou des strings avec timezone → on normalise
+function onFeriesChange(newVal) {
+  joursFeries.value = (newVal || []).map(normalizeFerieDate).filter(Boolean)
+  saveFeries()
+}
+
 async function saveFeries() {
   showSaveStatus('saving')
   try {
+    // S'assure que toutes les dates sont au format YYYY-MM-DD avant envoi
+    const normalized = joursFeries.value.map(normalizeFerieDate).filter(Boolean)
     const res = await apiFetch(`${API_BASE}/api/calendrier/feries`, {
       method: 'PUT',
-      body: JSON.stringify(joursFeries.value),
+      body: JSON.stringify(normalized),
     })
     if (res?.ok) { showSaveStatus('saved'); toast('Jours fériés enregistrés ✓') }
     else         { showSaveStatus('error'); toast('Erreur lors de l\'enregistrement', 'error') }

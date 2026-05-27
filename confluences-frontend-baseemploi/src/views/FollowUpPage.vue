@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="pa-4 follow-up-sheet">
+  <v-container fluid class="pa-2 pa-md-4 follow-up-sheet">
 
     <v-card class="mb-4 elevation-2" rounded="lg">
       <v-card-text class="pa-4">
@@ -9,6 +9,7 @@
           </v-btn>
           <div class="text-center">
             <div class="text-h6 font-weight-bold text-primary">{{ currentPeriodLabel }}</div>
+              <div class="text-caption text-grey">{{ periodDateLabel }}</div>  <!-- Ajouter cette ligne -->
           </div>
           <v-btn icon @click="nextQuarter" :disabled="isCurrentQuarter || isLoading">
             <v-icon>mdi-chevron-right</v-icon>
@@ -30,7 +31,7 @@
 
     <v-card class="elevation-4" rounded="lg" :loading="isLoading">
       <v-row align="center" class="px-2">
-        <v-col cols="12" md="6" class="pa-6">
+        <v-col cols="12" md="6" class="pa-3 pa-md-6">
           <v-text-field
             v-model="search"
             append-icon="mdi-magnify"
@@ -42,7 +43,89 @@
       </v-row>
       <v-divider></v-divider>
 
-      <v-card-text class="pa-0">
+      <!-- ── Vue MOBILE : cartes ── -->
+      <v-card-text class="pa-2 d-md-none">
+        <div v-if="!isLoading && finalFilteredUsers.length === 0" class="text-center pa-8 text-grey">
+          <v-icon size="large" color="grey-lighten-1">mdi-account-search-outline</v-icon>
+          <div class="mt-2">Aucun participant trouvé.</div>
+        </div>
+        <v-card
+          v-for="user in finalFilteredUsers" :key="'m'+user.id"
+          class="mb-4 elevation-2" rounded="xl"
+        >
+          <!-- En-tête participant -->
+          <div class="d-flex align-center px-4 pt-4 pb-3 gap-3">
+            <v-avatar color="primary" size="38">
+              <span class="text-white font-weight-bold text-body-2">
+                {{ (user.nom||'A').charAt(0) }}{{ (user.prenom||'A').charAt(0) }}
+              </span>
+            </v-avatar>
+            <div class="flex-grow-1 text-truncate-parent">
+              <div class="font-weight-bold text-body-2">{{ user.nom }} {{ user.prenom }}</div>
+              <div class="text-caption text-grey text-uppercase">{{ user.userName }}</div>
+              <v-chip size="x-small" variant="tonal" class="mt-1">
+                {{ getUserSessionInfo(user) || user.mesureType }}
+              </v-chip>
+            </div>
+            <div class="text-right flex-shrink-0 ml-2">
+              <div class="text-caption text-grey">Mesure</div>
+              <div class="text-caption font-weight-bold text-primary" style="max-width:80px">
+                {{ user.courseDetails.isUnknown ? '—' : user.courseDetails.mainInfo }}
+              </div>
+            </div>
+          </div>
+
+          <v-divider />
+
+          <!-- Niveaux -->
+          <div class="d-flex gap-3 px-4 py-3">
+            <div class="flex-grow-1">
+              <div class="text-caption text-grey mb-1 font-weight-bold">Oral</div>
+              <v-select
+                :key="`${user.id}-oral-${currentPeriod.key}`"
+                :model-value="user.oralLevel || ''"
+                :items="levels" density="compact" variant="outlined" hide-details
+                @update:model-value="(val) => saveLevel(user.id, 'oralLevel', val)"
+                placeholder="-"
+              />
+            </div>
+            <div class="flex-grow-1">
+              <div class="text-caption text-grey mb-1 font-weight-bold">Écrit</div>
+              <v-select
+                :key="`${user.id}-written-${currentPeriod.key}`"
+                :model-value="user.writtenLevel || ''"
+                :items="levels" density="compact" variant="outlined" hide-details
+                @update:model-value="(val) => saveLevel(user.id, 'writtenLevel', val)"
+                placeholder="-"
+              />
+            </div>
+          </div>
+
+          <v-divider />
+
+          <!-- Actions -->
+          <div class="d-flex gap-3 px-4 py-3">
+            <v-btn color="primary" variant="tonal" size="small" rounded="lg"
+              prepend-icon="mdi-file-document-edit-outline"
+              class="flex-grow-1 text-none" @click="openBilanModal(user)">
+              Bilan
+            </v-btn>
+            <v-btn color="secondary" variant="tonal" size="small" rounded="lg"
+              prepend-icon="mdi-file-chart-outline"
+              class="flex-grow-1 text-none" @click="downloadPdf('bilan', user)">
+              PDF
+            </v-btn>
+            <v-btn color="secondary" variant="tonal" size="small" rounded="lg"
+              prepend-icon="mdi-certificate-outline"
+              class="flex-grow-1 text-none" @click="downloadPdf('attestation', user)">
+              Attest.
+            </v-btn>
+          </div>
+        </v-card>
+      </v-card-text>
+
+      <!-- ── Vue DESKTOP : tableau ── -->
+      <v-card-text class="pa-0 d-none d-md-block">
         <div class="table-container">
           <table class="follow-up-table">
             <thead>
@@ -74,10 +157,11 @@
 
                 <td class="sticky-col name-col">
                   <div class="user-info">
-                    <div class="name">{{ user.nom }} {{ user.prenom }}</div>
+                    <div class="name">{{ user.prenom }} {{ user.nom }}</div>
                     <div class="trigramme">{{ user.userName }}</div>
-                    <div class="text-caption font-weight-bold text-medium-emphasis">{{ user.niveau }}</div>
-                    <div class="text-caption font-weight-bold text-primary">{{ getUserSessionInfo(user) }} ({{ currentYear }})</div>
+                    <div class="text-caption font-weight-bold" style="color:#1565C0">
+                      {{ getUserSessionInfo(user) }}
+                    </div>
                   </div>
                 </td>
 
@@ -247,6 +331,15 @@ const tabOptions = [
   //{ label: 'Archives',  value: 'archives' },
 ]
 
+// Mapping formateur → onglet prioritaire à l'ouverture (clé = preferred_username en minuscules)
+const FORMATEUR_GROUPS = {
+  'myriam':        'telecours',
+  'mls':           'fi_a2',
+  'sac':           'fi_a2',
+  'cs':            'fi_a1',
+  'mec':           'fi_a1',
+}
+
 const levels = ['A1.1','A1.2','A2.1','A2.2','B1.1','B1.2','B2.1','B2.2','C1.1','C1.2']
 
 const activities = [
@@ -273,10 +366,38 @@ const currentPeriodLabel = computed(() =>
   `Session ${currentQuarter.value} — ${currentYear.value}`
 )
 
+// FollowUp.vue — remplacer les computed liés aux dates
+
+const calendrier = ref({ sessions: [], feries: [], vacances: [] })
+
+const loadCalendrier = async () => {
+  const res = await fetch(`${API_BASE}/api/calendrier`, {
+    headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
+  })
+  if (res.ok) calendrier.value = await res.json()
+}
+
+// Session courante = la première session dont le nom commence par "S{quarter}-{year}"
+const currentSession = computed(() => {
+  const prefix = `S${currentQuarter.value}-${currentYear.value}`
+  return calendrier.value.sessions.find(s =>
+    (s.name || '').startsWith(prefix)
+  ) || null
+})
+
+// Identique à Accompanying.vue
 const periodDateLabel = computed(() => {
-  const start = moment(currentSessionDates.value.start).locale('fr').format('DD MMM')
-  const end   = moment(currentSessionDates.value.end).locale('fr').format('DD MMM YYYY')
-  return `${start} - ${end}`
+  if (currentSession.value?.startDate) {
+    const s = moment(currentSession.value.startDate)
+    const e = currentSession.value.endDate ? moment(currentSession.value.endDate) : null
+    if (!e) return `À partir du ${s.locale('fr').format('DD MMM YYYY')}`
+    return `${s.locale('fr').format('DD MMM')} – ${e.locale('fr').format('DD MMM YYYY')}`
+  }
+  // Fallback
+  const monthNames = ['janvier','février','mars','avril','mai','juin',
+                      'juillet','août','septembre','octobre','novembre','décembre']
+  const startMonth = (currentQuarter.value - 1) * 3
+  return `${monthNames[startMonth]} – ${monthNames[startMonth + 2]} ${currentYear.value}`
 })
 
 const isCurrentQuarter = computed(() => {
@@ -514,7 +635,15 @@ const saveLevel = async (userId, field, newLevel) => {
 
 const downloadPdf = async (type, user) => {
   const endpoint = type === 'bilan' ? 'bilan-session' : 'attestation-session'
-  const url = `${API_BASE}/api/documents/${endpoint}/${user.id}?year=${currentYear.value}&trimestre=${currentQuarter.value}&mesure=${encodeURIComponent(user.mesureType)}`
+  const sess = currentSession.value
+  const params = new URLSearchParams({
+    year:     currentYear.value,
+    trimestre: currentQuarter.value,
+    mesure:   user.mesureType || '',
+  })
+  if (sess?.startDate) params.set('startDate', sess.startDate.substring(0, 10))
+  if (sess?.endDate)   params.set('endDate',   sess.endDate.substring(0, 10))
+  const url = `${API_BASE}/api/documents/${endpoint}/${user.id}?${params}`
   try {
     isLoading.value = true
     const res = await fetch(url, { headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` } })
@@ -561,8 +690,19 @@ onMounted(async () => {
   } catch (e) {
     console.error('Erreur chargement users:', e)
   }
+
+  // Auto-sélectionner l'onglet du groupe selon le formateur connecté
+  const storedUser   = JSON.parse(localStorage.getItem('user') || '{}')
+  const prefUsername = (storedUser.profile?.preferred_username || '').toLowerCase()
+  const defaultGroup = FORMATEUR_GROUPS[prefUsername]
+  if (defaultGroup) {
+    const idx = tabOptions.findIndex(t => t.value === defaultGroup)
+    if (idx >= 0) activeTab.value = idx
+  }
+
   loadAllSessionLinks()
   fetchDataForPeriod()
+  loadCalendrier()
 })
 </script>
 
@@ -576,8 +716,8 @@ onMounted(async () => {
 .activity-col { background: #fdfdfd; position: sticky; top: 0; z-index: 4; font-weight: 600; }
 .saisie-col { min-width: 100px; }
 .synthesis-col { min-width: 110px; background: #f9f9f9; }
-.user-info { padding: 4px 8px; }
-.user-info .name { font-weight: 700; color: #1a1a1a; }
-.user-info .trigramme { font-size: 0.72rem; color: #999; text-transform: uppercase; }
+.user-info .name { font-weight: bold; color: #2c3e50; }
+.user-info .trigramme { font-size: 0.75rem; color: #999; text-transform: uppercase; }
 .centered-input :deep(input) { text-align: center; font-weight: bold; font-size: 0.9rem; }
+.text-truncate-parent { min-width: 0; overflow: hidden; }
 </style>
