@@ -19,7 +19,7 @@
     </v-card>
 
     <v-card class="mb-4 elevation-1" rounded="lg">
-      <v-tabs v-model="activeTab" class="px-4" color="primary">
+      <v-tabs v-model="activeTab" class="px-4" color="primary" @update:modelValue="onTabChange">
         <v-tab v-for="tab in tabOptions" :key="tab.value">
           {{ tab.label }}
           <v-chip size="x-small" class="ml-2" color="primary" variant="outlined">
@@ -317,8 +317,7 @@ const isLoading            = ref(false)
 const bilanModalVisible    = ref(false)
 const selectedUser         = ref(null)
 const periodLevelsMap      = ref({})
-const currentYear          = ref(moment().year())
-const currentQuarter       = ref(Math.floor(moment().month() / 3) + 1)
+const navSessionIndex      = ref(0)
 const joursFeries          = ref([])
 const periodesVacances     = ref([])
 
@@ -351,15 +350,22 @@ const users = computed(() => store.state.user?.users || [])
 
 // ─── Computed période ─────────────────────────────────────────────────────────
 const currentSessionDates = computed(() => {
-  const startMonth = (currentQuarter.value - 1) * 3
-  const start = moment([currentYear.value, startMonth, 1]).startOf('month')
-  const end   = moment([currentYear.value, startMonth + 2, 1]).endOf('month')
-  return {
-    start:    start.toDate(),
-    end:      end.toDate(),
-    startKey: start.format('YYYY-MM-DD'),
-    endKey:   end.format('YYYY-MM-DD'),
+  if (currentSession.value?.startDate) {
+    const start = moment(currentSession.value.startDate).startOf('day')
+    const end   = currentSession.value.endDate
+      ? moment(currentSession.value.endDate).endOf('day')
+      : start.clone().add(3, 'months').endOf('month')
+    return {
+      start:    start.toDate(),
+      end:      end.toDate(),
+      startKey: start.format('YYYY-MM-DD'),
+      endKey:   end.format('YYYY-MM-DD'),
+    }
   }
+  // Fallback si aucune session dans le calendrier
+  const start = moment().startOf('month')
+  const end   = moment().endOf('month')
+  return { start: start.toDate(), end: end.toDate(), startKey: start.format('YYYY-MM-DD'), endKey: end.format('YYYY-MM-DD') }
 })
 
 const currentPeriodLabel = computed(() =>
@@ -377,13 +383,29 @@ const loadCalendrier = async () => {
   if (res.ok) calendrier.value = await res.json()
 }
 
-// Session courante = la première session dont le nom commence par "S{quarter}-{year}"
-const currentSession = computed(() => {
-  const prefix = `S${currentQuarter.value}-${currentYear.value}`
-  return calendrier.value.sessions.find(s =>
-    (s.name || '').startsWith(prefix)
-  ) || null
+// ─── Sessions du groupe actif triées par date de début ────────────────────────
+const activeGroupSessions = computed(() => {
+  const groupValue = tabOptions[activeTab.value].value
+  return calendrier.value.sessions
+    .filter(s => {
+      const t = (s.type || '').toLowerCase()
+      if (!s.startDate) return false
+      if (groupValue === 'telecours') return t === 'telecours'
+      if (groupValue === 'fi_a1')    return t === 'fi_a1'
+      if (groupValue === 'fi_a2')    return t === 'fi_a2'
+      return false
+    })
+    .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
 })
+
+const currentSession = computed(() =>
+  activeGroupSessions.value[navSessionIndex.value] || null
+)
+
+const currentYear    = computed(() =>
+  currentSession.value?.startDate ? moment(currentSession.value.startDate).year() : moment().year()
+)
+const currentQuarter = computed(() => navSessionIndex.value + 1)
 
 // Identique à Accompanying.vue
 const periodDateLabel = computed(() => {
@@ -400,11 +422,9 @@ const periodDateLabel = computed(() => {
   return `${monthNames[startMonth]} – ${monthNames[startMonth + 2]} ${currentYear.value}`
 })
 
-const isCurrentQuarter = computed(() => {
-  const today = moment()
-  return currentQuarter.value === Math.floor(today.month() / 3) + 1 &&
-         currentYear.value === today.year()
-})
+const isCurrentQuarter = computed(() =>
+  navSessionIndex.value >= activeGroupSessions.value.length - 1
+)
 
 const currentPeriod = computed(() => ({
   year:    currentYear.value,
@@ -661,17 +681,26 @@ const downloadPdf = async (type, user) => {
   } catch (e) { alert('Erreur PDF') } finally { isLoading.value = false }
 }
 
+function initSessionIndex() {
+  const today    = moment()
+  const sessions = activeGroupSessions.value
+  if (sessions.length === 0) { navSessionIndex.value = 0; return }
+  const idx = sessions.findIndex(s =>
+    s.startDate && s.endDate &&
+    today.isBetween(moment(s.startDate), moment(s.endDate), 'day', '[]')
+  )
+  navSessionIndex.value = idx >= 0 ? idx : sessions.length - 1
+}
+
 const previousQuarter = () => {
-  currentQuarter.value--
-  if (currentQuarter.value < 1) { currentQuarter.value = 4; currentYear.value-- }
-  fetchDataForPeriod()
+  if (navSessionIndex.value > 0) { navSessionIndex.value--; fetchDataForPeriod() }
 }
 
 const nextQuarter = () => {
-  currentQuarter.value++
-  if (currentQuarter.value > 4) { currentQuarter.value = 1; currentYear.value++ }
-  fetchDataForPeriod()
+  if (navSessionIndex.value < activeGroupSessions.value.length - 1) { navSessionIndex.value++; fetchDataForPeriod() }
 }
+
+const onTabChange = () => { initSessionIndex(); fetchDataForPeriod() }
 
 const openBilanModal = (user) => {
   selectedUser.value = { ...user, mesureType: user.mesureType }
@@ -685,11 +714,7 @@ onMounted(async () => {
   joursFeries.value      = JSON.parse(localStorage.getItem('joursFeries')      || '[]')
   periodesVacances.value = JSON.parse(localStorage.getItem('periodesVacances') || '[]')
 
-  try {
-    await store.dispatch('user/fetchUsers', true)
-  } catch (e) {
-    console.error('Erreur chargement users:', e)
-  }
+  try { await store.dispatch('user/fetchUsers', true) } catch (e) { console.error('Erreur chargement users:', e) }
 
   // Auto-sélectionner l'onglet du groupe selon le formateur connecté
   const storedUser   = JSON.parse(localStorage.getItem('user') || '{}')
@@ -700,9 +725,9 @@ onMounted(async () => {
     if (idx >= 0) activeTab.value = idx
   }
 
-  loadAllSessionLinks()
+  await Promise.all([loadAllSessionLinks(), loadCalendrier()])
+  initSessionIndex()
   fetchDataForPeriod()
-  loadCalendrier()
 })
 </script>
 

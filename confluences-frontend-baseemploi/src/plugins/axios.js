@@ -18,8 +18,11 @@ api.interceptors.response.use(
   error => {
     if (error.response?.status === 401) {
       console.warn('🔒 Session expirée — redirection login')
+      localStorage.removeItem('user')
       localStorage.removeItem('access_token')
-      window.location.href = '/login'
+      localStorage.removeItem('refresh_token')
+      localStorage.removeItem('expires_at')
+      window.location.href = '/login?reason=session_expired'
     }
     return Promise.reject(error)
   }

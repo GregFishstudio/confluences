@@ -224,7 +224,7 @@
     </v-card>
 
     <!-- ════════ Modal éditeur de dates ════════ -->
-    <v-dialog v-model="editorDialog" max-width="680px"> <v-card v-if="editingCell" rounded="lg">
+    <v-dialog v-model="editorDialog" max-width="760px"> <v-card v-if="editingCell" rounded="lg">
         <v-card-title
           class="py-3 px-4 d-flex align-center gap-2"
           :class="editingCell.column.type === 'acco' ? 'bg-acco-header' : 'bg-atelier-header'"

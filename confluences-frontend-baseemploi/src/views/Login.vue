@@ -94,6 +94,15 @@
             </div>
           </button>
 
+          <!-- Message session expirée -->
+          <div v-if="sessionExpired" class="session-expired-message">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 1.66667C5.39763 1.66667 1.66667 5.39763 1.66667 10C1.66667 14.6024 5.39763 18.3333 10 18.3333C14.6024 18.3333 18.3333 14.6024 18.3333 10C18.3333 5.39763 14.6024 1.66667 10 1.66667Z" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M10 5.83333V10L12.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span>Votre session a expiré. Veuillez vous reconnecter.</span>
+          </div>
+
           <!-- Message d'erreur -->
           <div v-if="error" class="error-message">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -162,6 +171,7 @@ const router = useRouter()
 const route = useRoute()
 const loading = ref(false)
 const error = ref('')
+const sessionExpired = ref(route.query.reason === 'session_expired')
 
 // 🔧 Configuration OIDC CENTRALISÉE et COHÉRENTE
 const getOidcConfig = () => {
@@ -535,6 +545,19 @@ async function handleLogin() {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+.session-expired-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 12px;
+  color: #92400e;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .error-message {

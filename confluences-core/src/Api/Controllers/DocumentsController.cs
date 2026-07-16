@@ -188,7 +188,9 @@ namespace Api.Controllers
             [FromQuery] string endDate    = null,   // date fin session du calendrier
             [FromQuery] string sessionName = null)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _db.Users
+                .Include(u => u.Gender)
+                .FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null) return NotFound("Utilisateur introuvable.");
 
             if (!trimestre.StartsWith("T")) trimestre = $"T{trimestre}";
@@ -201,6 +203,14 @@ namespace Api.Controllers
             if (report == null)
                 return NotFound($"Aucun bilan trouvé pour {trimestre}/{year}.");
 
+            // Niveaux spécifiques à la période (StagiaireNiveaux), avec fallback sur ApplicationUser
+            if (!int.TryParse(trimestre.Replace("T", ""), out int quarterNum)) quarterNum = 1;
+            var niveauPeriode = await _db.StagiaireNiveaux
+                .AsNoTracking()
+                .FirstOrDefaultAsync(n => n.StagiaireId == userId && n.Annee == year && n.Trimestre == quarterNum);
+            string oralLevel    = niveauPeriode?.OralLevel    ?? user.OralLevel;
+            string writtenLevel = niveauPeriode?.WrittenLevel ?? user.WrittenLevel;
+
             var (periodStart, periodEnd) = ResolveSessionDates(startDate, endDate, year, trimestre);
             var activitiesSummary = await BuildActivitiesSummary(userId, periodStart, periodEnd);
 
@@ -208,8 +218,8 @@ namespace Api.Controllers
                 user,
                 report.EvaluationText,
                 report.FollowUpActions,
-                user.OralLevel,
-                user.WrittenLevel,
+                oralLevel,
+                writtenLevel,
                 report.GlobalRate,
                 year,
                 trimestre,
@@ -253,11 +263,29 @@ namespace Api.Controllers
 
             if (user == null) return NotFound("Stagiaire introuvable.");
 
-            string courseName = DetermineCourseName(mesure,
-                user.SessionStudents
+            // Cherche la session sur la période, sinon prend la plus récente (même logique que UsersController)
+            var matchedSession = user.SessionStudents
+                .Select(ss => ss.Session)
+                .FirstOrDefault(s => s.DateStart <= periodEnd && s.DateEnd >= periodStart)
+                ?? user.SessionStudents
+                    .OrderByDescending(ss => ss.Session.DateStart)
                     .Select(ss => ss.Session)
-                    .FirstOrDefault(s => s.DateStart <= periodEnd && s.DateEnd >= periodStart)
-                    ?.SchoolClassRoom?.SchoolClassRoomName);
+                    .FirstOrDefault();
+
+            string classRoomName = matchedSession?.SchoolClassRoom?.SchoolClassRoomName ?? "";
+
+            string courseName = DetermineCourseName(mesure, classRoomName);
+
+            // Le niveau sur l'attestation vient de la formation, pas du niveau oral/écrit personnel.
+            // Priorité : classRoomName (= "niveau" affiché dans l'app, ex: "Télécours-A2"),
+            //            puis mesure (paramètre frontend), puis OralLevel en dernier recours.
+            string niveauAttestation = "";
+            foreach (var src in new[] { classRoomName, mesure ?? "", user.OralLevel ?? "" })
+            {
+                if (string.IsNullOrWhiteSpace(src)) continue;
+                var lm = System.Text.RegularExpressions.Regex.Match(src, @"[A-Za-z]\d");
+                if (lm.Success) { niveauAttestation = lm.Value.ToUpper(); break; }
+            }
 
             var report = await _db.SessionReports.FirstOrDefaultAsync(r =>
                 r.StagiaireId == userId &&
@@ -283,7 +311,8 @@ namespace Api.Controllers
                 })
                 .ToList();
 
-            // Calculer le vrai taux de participation (fériés et vacances exclus du dénominateur)
+            // Calcul du taux identique à l'attestation de présence :
+            // dénominateur = targetDays (fixe par type/session) − fériés réels de la période
             var rawPresences = await _db.Presences
                 .AsNoTracking()
                 .Where(p => p.StagiaireId == userId && p.Date >= periodStart && p.Date <= periodEnd)
@@ -301,23 +330,39 @@ namespace Api.Controllers
             bool IsVacanceSession(DateTime d) =>
                 vacancesSession.Any(v => d >= v.StartDate.Date && d <= v.EndDate.Date);
 
-            double absScore = 0, totalDays = 0;
+            bool isTeleCoursCalc = courseName.Contains("Télécours", StringComparison.OrdinalIgnoreCase)
+                                || courseName.Contains("TéléCours", StringComparison.OrdinalIgnoreCase);
+            string sessionTypeCalc = isTeleCoursCalc ? "tele" : "fi";
+            int targetDaysCalc = CalculerJoursCibles(sessionTypeCalc, 3); // 3 = trimestre complet
+
+            double absScore = 0;
+            int feriesCount = 0;
             for (var d = periodStart; d <= periodEnd; d = d.AddDays(1))
             {
                 if (d.DayOfWeek == DayOfWeek.Saturday || d.DayOfWeek == DayOfWeek.Sunday) continue;
-                if (feriesSession.Contains(d.Date) || IsVacanceSession(d.Date)) continue;
-                totalDays++;
+
+                if (feriesSession.Contains(d.Date))
+                {
+                    // TéléCours : pas de cours le mercredi ni le vendredi
+                    if (!(isTeleCoursCalc && (d.DayOfWeek == DayOfWeek.Wednesday
+                                          || d.DayOfWeek == DayOfWeek.Friday)))
+                        feriesCount++;
+                    continue;
+                }
+                if (IsVacanceSession(d.Date)) continue;
+
                 string st = rawPresences.TryGetValue(d.Date, out var sv)
                     ? (string.IsNullOrWhiteSpace(sv) ? "p" : sv.Trim().ToLower()) : "p";
                 if (st == "a" || st == "e") absScore += 1;
                 else if (st == "r")         absScore += 0.5;
             }
-            double tauxParticipation = totalDays > 0
-                ? Math.Min(100.0, Math.Floor((totalDays - absScore) / totalDays * 100.0))
-                : 100.0;
+            int    totalAffiche      = Math.Max(1, targetDaysCalc - feriesCount);
+            double presentsExact     = Math.Max(0.0, totalAffiche - absScore);
+            double tauxParticipation = Math.Min(100.0,
+                Math.Ceiling(presentsExact / totalAffiche * 100.0 - 0.5));
 
             var doc = new AttestationSessionDocument(
-                user, courseName, user.OralLevel, user.WrittenLevel,
+                user, courseName, niveauAttestation, user.WrittenLevel,
                 ateliersSuivis, tauxParticipation, year, trimestre,
                 GetLogoBytes(), GetSignatureBytes(), periodStart, periodEnd);
 

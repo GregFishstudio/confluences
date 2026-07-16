@@ -105,105 +105,131 @@ namespace Api.Documents
             int parenIdx = displayCourseName.IndexOf(" (Niveau", StringComparison.OrdinalIgnoreCase);
             if (parenIdx > 0) displayCourseName = displayCourseName.Substring(0, parenIdx);
 
-            string heures = isTeleCours ? "9 heures par semaine en télé-enseignement" : "15 heures par semaine";
-            string niveau = !string.IsNullOrWhiteSpace(_oralLevel) ? _oralLevel : "—";
+            string heures = isTeleCours ? "9 heures par semaine de cours en ligne" : "15 heures par semaine";
+            string niveau = !string.IsNullOrWhiteSpace(_oralLevel) ? ExtractBaseLevel(_oralLevel) : "—";
 
-            container.PaddingTop(40).Column(col =>
+            container.PaddingTop(25).Column(col =>
             {
-                col.Spacing(20);
+                col.Spacing(14);
 
                 // ── Titre ────────────────────────────────────────────────────────
-                col.Item().AlignCenter().Text("Attestation").FontSize(28).Bold();
+                col.Item().AlignCenter().Text("Attestation").FontSize(26).Bold();
 
                 // ── L'association atteste que ─────────────────────────────────────
                 col.Item().AlignCenter().Text(t =>
                 {
-                    t.Span("L'association ").FontSize(14);
-                    t.Span("CONFLUENCES ").FontSize(15).ExtraBold();
-                    t.Span("atteste que").FontSize(14);
+                    t.Span("L'association ").FontSize(13);
+                    t.Span("Confluences ").FontSize(14);
+                    t.Span("atteste que").FontSize(13);
                 });
 
                 // ── Nom du/de la participant·e ────────────────────────────────────
-                col.Item().AlignCenter().PaddingVertical(10)
-                    .Text($"{_stagiaire.Firstname} {_stagiaire.LastName}")
-                    .FontSize(35).ExtraBold();
+                col.Item().PaddingVertical(8).Text(t =>
+                {
+                    t.AlignCenter();
+                    t.Span($"{_stagiaire.Firstname} {_stagiaire.LastName}").FontSize(24).ExtraBold();
+                });
 
-                // ── Formation + heures sur la même ligne ─────────────────────────
+                // ── Formation (nom) ───────────────────────────────────────────────
                 col.Item().AlignCenter().Text(t =>
                 {
-                    t.Span("a suivi la formation ").FontSize(14);
-                    t.Span($"« {displayCourseName} »").FontSize(14).ExtraBold();
-                    t.Span($" ({heures})").FontSize(12).Italic();
+                    t.AlignCenter();
+                    t.Span("a suivi la formation ").FontSize(13);
+                    t.Span($"« {displayCourseName} »").FontSize(13).ExtraBold();
+                });
+
+                // ── Heures sur une ligne séparée ──────────────────────────────────
+                col.Item().AlignCenter().Text(t =>
+                {
+                    t.AlignCenter();
+                    t.Span($"({heures})").FontSize(11).Italic();
                 });
 
                 // ── Liste des matières fixes ──────────────────────────────────────
                 col.Item().PaddingLeft(60).Column(list =>
                 {
                     list.Spacing(6);
-                    list.Item().Text($"•   Français de niveau {niveau}").FontSize(13).Bold();
+                    list.Item().Text($"•   Français de niveau {niveau}").FontSize(12).Bold();
                     if (isTeleCours)
                     {
-                        list.Item().Text("•   Compétences numériques de base").FontSize(13).Bold();
+                        list.Item().Text("•   Compétences numériques de base").FontSize(12).Bold();
                     }
                     else
                     {
-                        list.Item().Text("•   Informatique et bureautique").FontSize(13).Bold();
-                        list.Item().Text("•   Aide à la recherche d'emploi").FontSize(13).Bold();
+                        list.Item().Text("•   Informatique et bureautique").FontSize(12).Bold();
+                        list.Item().Text("•   Aide à la recherche d'emploi").FontSize(12).Bold();
                     }
                 });
 
                 // ── Accompagnements et ateliers (F&I uniquement) ──────────────────
                 if (!isTeleCours)
                 {
-                    col.Item().PaddingTop(4).AlignCenter()
-                        .Text("A aussi bénéficié d'accompagnements et d'ateliers facultatifs :")
-                        .FontSize(12).Bold();
+                    // Fusion des activités avec le même label (ex: "Français" en acco ET atelier)
+                    var allActivities = _rawActivities
+                        .Select(a =>
+                        {
+                            var parts = a.Split('|');
+                            int count = parts.Length > 2 && int.TryParse(parts[2], out var c) ? c : 0;
+                            return (
+                                label: parts[0],
+                                type:  parts.Length > 1 ? parts[1].ToLower() : "atelier",
+                                count: count
+                            );
+                        })
+                        .GroupBy(a => a.label)
+                        .Select(g => (
+                            label: g.Key,
+                            type:  g.OrderByDescending(x => x.count).First().type,
+                            count: g.Sum(x => x.count)
+                        ))
+                        .OrderBy(a => a.type == "acco" ? 0 : 1)
+                        .ThenBy(a => a.label)
+                        .ToList();
 
-                    if (_rawActivities.Any())
+                    bool hasAttended = allActivities.Any(a => a.count > 0);
+
+                    if (hasAttended)
                     {
-                        var activities = _rawActivities
-                            .Select(a =>
-                            {
-                                var parts = a.Split('|');
-                                int count = parts.Length > 2 && int.TryParse(parts[2], out var c) ? c : 0;
-                                return (
-                                    label: parts[0],
-                                    type:  parts.Length > 1 ? parts[1].ToLower() : "atelier",
-                                    count: count
-                                );
-                            })
-                            .Where(a => a.count >= 1)
-                            .OrderBy(a => a.type == "acco" ? 0 : 1)
-                            .ThenBy(a => a.label)
-                            .ToList();
+                        col.Item().AlignCenter()
+                            .Text("A aussi bénéficié d'accompagnements et d'ateliers facultatifs :")
+                            .FontSize(11).Bold();
+                    }
+                    else
+                    {
+                        col.Item().AlignCenter()
+                            .Text("n'a pas suivi les accompagnements ni les ateliers facultatifs suivants.")
+                            .FontSize(11);
+                    }
 
-                        byte[] tagPng = GenerateTagCloudPng(activities);
-                        col.Item().PaddingHorizontal(10).PaddingTop(6).Image(tagPng).FitWidth();
+                    if (allActivities.Any())
+                    {
+                        byte[] tagPng = GenerateTagCloudPng(allActivities);
+                        col.Item().PaddingHorizontal(10).PaddingTop(4).Image(tagPng).FitWidth();
                     }
                 }
 
                 // ── Dates + taux ──────────────────────────────────────────────────
-                col.Item().PaddingTop(20).AlignCenter().Column(c =>
+                col.Item().PaddingTop(14).AlignCenter().Column(c =>
                 {
                     c.Item().AlignCenter()
                         .Text($"du {FormatDayFr(_startDate)} au {FormatDayFr(_endDate, withYear: true)}")
-                        .FontSize(13);
+                        .FontSize(12);
                     c.Item().AlignCenter()
                         .Text($"(taux de participation : {_tauxParticipation:F0} %)")
-                        .FontSize(13);
+                        .FontSize(12);
                 });
 
                 // ── Signature ─────────────────────────────────────────────────────
-                col.Item().PaddingTop(30).Row(row =>
+                col.Item().PaddingTop(22).Row(row =>
                 {
                     row.RelativeItem().PaddingLeft(20)
                         .Text($"Lausanne, le {FormatDayFr(_endDate, withYear: true)}");
                     row.RelativeItem().AlignRight().PaddingRight(20).Column(sig =>
                     {
                         if (_signatureBytes != null && _signatureBytes.Length > 0)
-                            sig.Item().AlignCenter().PaddingBottom(5).Height(70).Image(_signatureBytes).FitHeight();
-                        sig.Item().AlignCenter().Text("Caroline Sanmartin").Bold().FontSize(12);
-                        sig.Item().AlignCenter().Text("Responsable de la formation").FontSize(10);
+                            sig.Item().AlignCenter().PaddingBottom(5).Height(60).Image(_signatureBytes).FitHeight();
+                        sig.Item().AlignCenter().Text("Caroline Sanmartin").Bold().FontSize(11);
+                        sig.Item().AlignCenter().Text("Responsable de la formation").FontSize(9);
                     });
                 });
             });
@@ -219,81 +245,153 @@ namespace Api.Documents
                 : $"{day} {month}";
         }
 
+        // Retourne "A1" ou "A2" à partir de "A1.1", "A1.2", "A2.1", etc.
+        private static string ExtractBaseLevel(string level)
+        {
+            var m = System.Text.RegularExpressions.Regex.Match(level.Trim(), @"[A-Za-z]\d");
+            return m.Success ? m.Value.ToUpper() : level;
+        }
+
         // ── Nuage de mots (tag cloud SkiaSharp) ───────────────────────────────────
         private static byte[] GenerateTagCloudPng(List<(string label, string type, int count)> activities)
         {
             const int SCALE = 3;
-            const int contentWidthPt = 410;
+            const int contentWidthPt = 450;
             const int W = contentWidthPt * SCALE;
 
-            float fontSize    =  8f * SCALE;   // réduit : était 12
-            float padX        =  8f * SCALE;
-            float padY        =  4f * SCALE;
-            float chipSpacing =  6f * SCALE;
-            float rowSpacing  =  7f * SCALE;
-            float margin      =  6f * SCALE;
-            float radius      =  4f * SCALE;
+            float padX        = 10f * SCALE;
+            float padY        =  6f * SCALE;
+            float chipSpacing =  8f * SCALE;
+            float rowSpacing  = 10f * SCALE;
+            float margin      =  8f * SCALE;
+            float radius      = 10f * SCALE;
 
-            var accoFill     = SKColor.Parse("#D8F3F0");
-            var accoBorder   = SKColor.Parse("#2CA6A4");
-            var accoAttended = SKColor.Parse("#2CA6A4");   // fond plein si participé
-            var atFill       = SKColor.Parse("#DDEEFF");
-            var atBorder     = SKColor.Parse("#4A90E2");
-            var atAttended   = SKColor.Parse("#4A90E2");
-            var textLight    = SKColor.Parse("#1A2E44");
-            var textWhite    = SKColors.White;
+            // Palette vive pour les activités suivies
+            var palette = new[]
+            {
+                SKColor.Parse("#E84393"),  // rose
+                SKColor.Parse("#00A99D"),  // turquoise
+                SKColor.Parse("#F7941D"),  // orange
+                SKColor.Parse("#662D91"),  // violet
+                SKColor.Parse("#29ABE2"),  // bleu ciel
+                SKColor.Parse("#8DC63F"),  // vert
+                SKColor.Parse("#ED1C24"),  // rouge
+                SKColor.Parse("#006837"),  // vert foncé
+            };
+            // Couleur unique ultra-pastel pour les activités non suivies
+            var notAttFill   = SKColor.Parse("#E0F4EE");   // #85C6A9 dilué à ~15%
+            var notAttBorder = SKColor.Parse("#85C6A9");   // couleur logo d'origine
+            var notAttText   = SKColor.Parse("#2E6B53");   // vert foncé lisible
 
-            using var measurePaint = new SKPaint { TextSize = fontSize, IsAntialias = true };
-
-            float chipH = fontSize + padY * 2;
-            float x = margin, y = margin;
-            float maxY = margin + chipH;
-
-            var chips = new List<(string text, string type, int count, SKRect rect)>();
+            // Calcul des dimensions de chaque puce
+            int paletteIdx = 0;
+            var items = new List<(string text, SKColor fill, SKColor border, SKColor textColor, float fontSize, float w, float h)>();
 
             foreach (var (label, type, count) in activities)
             {
-                string text = count > 0 ? $"{label}  ×{count}" : label;
-                float tw = measurePaint.MeasureText(text);
-                float cw = tw + padX * 2;
+                bool attended = count > 0;
+                // Taille proportionnelle au nombre de participations
+                float ptSize = attended
+                    ? Math.Min(Math.Max(8.5f + count * 1.2f, 8.5f), 15f)
+                    : 7f;
+                float fontSize = ptSize * SCALE;
 
-                if (x + cw > W - margin)
+                string text = attended ? $"{label}  {count}" : label;
+
+                SKColor fill, border, textColor;
+                if (attended)
                 {
-                    x  = margin;
-                    y += chipH + rowSpacing;
+                    fill      = palette[paletteIdx++ % palette.Length];
+                    border    = fill;
+                    textColor = SKColors.White;
+                }
+                else
+                {
+                    fill      = notAttFill;
+                    border    = notAttBorder;
+                    textColor = notAttText;
                 }
 
-                chips.Add((text, type, count, new SKRect(x, y, x + cw, y + chipH)));
-                x   += cw + chipSpacing;
-                maxY = Math.Max(maxY, y + chipH + margin);
+                float tw, ch;
+                using (var mp = new SKPaint { TextSize = fontSize, IsAntialias = true })
+                    tw = mp.MeasureText(text);
+                float cw = tw + padX * 2;
+                ch = fontSize + padY * 2;
+
+                items.Add((text, fill, border, textColor, fontSize, cw, ch));
             }
 
-            int H = (int)maxY;
-            if (H < 1) H = (int)(chipH + 2 * margin);
+            // Disposition en rangées, chaque rangée centrée
+            var rows = new List<List<int>>();
+            var currentRow = new List<int> { 0 };
+            float rowWidth = items.Count > 0 ? items[0].w : 0;
 
+            for (int i = 1; i < items.Count; i++)
+            {
+                float needed = rowWidth + chipSpacing + items[i].w;
+                if (needed > W - 2 * margin)
+                {
+                    rows.Add(currentRow);
+                    currentRow = new List<int> { i };
+                    rowWidth   = items[i].w;
+                }
+                else
+                {
+                    currentRow.Add(i);
+                    rowWidth += chipSpacing + items[i].w;
+                }
+            }
+            if (currentRow.Count > 0) rows.Add(currentRow);
+
+            // Hauteur totale
+            float totalH = margin;
+            foreach (var row in rows)
+            {
+                float rh = 0;
+                foreach (int i in row) rh = Math.Max(rh, items[i].h);
+                totalH += rh + rowSpacing;
+            }
+            totalH += margin;
+
+            int H = Math.Max((int)totalH, 1);
             using var surface = SKSurface.Create(
                 new SKImageInfo(W, H, SKColorType.Rgba8888, SKAlphaType.Premul));
             var canvas = surface.Canvas;
             canvas.Clear(SKColors.White);
 
-            foreach (var (text, type, count, rect) in chips)
+            float y = margin;
+            foreach (var row in rows)
             {
-                bool attended  = count > 0;
-                var  fillColor = attended
-                    ? (type == "acco" ? accoAttended : atAttended)
-                    : (type == "acco" ? accoFill     : atFill);
-                var borderColor = type == "acco" ? accoBorder : atBorder;
-                var textColor   = attended ? textWhite : textLight;
+                float rowH = 0;
+                float totalW = 0;
+                foreach (int i in row)
+                {
+                    rowH   = Math.Max(rowH, items[i].h);
+                    totalW += items[i].w;
+                }
+                totalW += (row.Count - 1) * chipSpacing;
 
-                var rr = new SKRoundRect(rect, radius);
-                using var fp = new SKPaint { Color = fillColor,   Style = SKPaintStyle.Fill,   IsAntialias = true };
-                using var bp = new SKPaint { Color = borderColor, Style = SKPaintStyle.Stroke, StrokeWidth = 1f * SCALE, IsAntialias = true };
-                canvas.DrawRoundRect(rr, fp);
-                canvas.DrawRoundRect(rr, bp);
+                float x = (W - totalW) / 2f;
 
-                using var tp = new SKPaint
-                    { Color = textColor, TextSize = fontSize, IsAntialias = true, TextAlign = SKTextAlign.Center };
-                canvas.DrawText(text, rect.MidX, rect.Top + padY + fontSize * 0.82f, tp);
+                foreach (int idx in row)
+                {
+                    var (text, fill, border, textColor, fontSize, cw, ch) = items[idx];
+                    float chipTop = y + (rowH - ch) / 2f;
+                    var rect = new SKRect(x, chipTop, x + cw, chipTop + ch);
+                    var rr   = new SKRoundRect(rect, radius);
+
+                    using var fp = new SKPaint { Color = fill,   Style = SKPaintStyle.Fill,   IsAntialias = true };
+                    using var bp = new SKPaint { Color = border, Style = SKPaintStyle.Stroke, StrokeWidth = 1.5f * SCALE, IsAntialias = true };
+                    canvas.DrawRoundRect(rr, fp);
+                    canvas.DrawRoundRect(rr, bp);
+
+                    using var tp = new SKPaint
+                        { Color = textColor, TextSize = fontSize, IsAntialias = true, TextAlign = SKTextAlign.Center };
+                    canvas.DrawText(text, rect.MidX, rect.Top + (ch - fontSize) / 2f + fontSize * 0.82f, tp);
+
+                    x += cw + chipSpacing;
+                }
+                y += rowH + rowSpacing;
             }
 
             using var img  = surface.Snapshot();

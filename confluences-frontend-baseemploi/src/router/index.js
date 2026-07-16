@@ -584,8 +584,16 @@ router.beforeEach((to, from, next) => {
   }
 
   if (to.matched.some(r => r.meta.requiresAuth)) {
-    if (!token) {
-      return next({ name: 'Login', query: { returnUrl: to.fullPath } });
+    const isExpired = user?.expires_at && Date.now() > user.expires_at;
+
+    if (!token || isExpired) {
+      if (isExpired) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('expires_at');
+      }
+      return next({ name: 'Login', query: { returnUrl: to.fullPath, ...(isExpired && { reason: 'session_expired' }) } });
     }
 
     if (!isTeacher()) {

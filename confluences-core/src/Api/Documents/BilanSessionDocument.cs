@@ -27,6 +27,8 @@ namespace Api.Documents
         private readonly DateTime                  _startDate;
         private readonly DateTime                  _endDate;
         private readonly List<ActivitySummaryItem> _activities;
+        private readonly string                    _oralLevel;
+        private readonly string                    _writtenLevel;
 
         private bool IsTelecours =>
             _courseName.ToLower().Contains("télécours") ||
@@ -59,6 +61,8 @@ namespace Api.Documents
             _stagiaire                  = stagiaire;
             _evaluationText             = evaluationText;
             _followUpActions            = followUpActions;
+            _oralLevel                  = oralLevel;
+            _writtenLevel               = writtenLevel;
             _globalRate                 = globalRate;
             _year                       = year;
             _quarter                    = quarter;
@@ -117,20 +121,61 @@ namespace Api.Documents
             });
         }
 
+        // ── Taille du corps selon densité du contenu ──────────────────────────
+        // < 500 chars → 11.5 pt   < 1100 chars → 11 pt   sinon → 10 pt
+        private float ComputeBodySize()
+        {
+            int total = (_evaluationText?.Length             ?? 0)
+                      + (_followUpActions?.Length            ?? 0)
+                      + (_socialInsertionText?.Length        ?? 0)
+                      + (_digitalSkillsText?.Length          ?? 0)
+                      + (_individualAccompanyingText?.Length ?? 0)
+                      + (_homeVisitsText?.Length             ?? 0)
+                      + _activities.Count * 60;
+
+            if (total < 500)  return 11.5f;
+            if (total < 1100) return 11f;
+            return 10f;
+        }
+
         // ── Contenu ────────────────────────────────────────────────────────────
         private void RenderContent(IContainer container)
         {
+            float bodySize = ComputeBodySize();
+
             container.PaddingTop(20).Column(col =>
             {
                 col.Spacing(14);
 
-                // Titre
-                col.Item().AlignCenter().Text(t =>
+                // Titre — ligne 1 : formation + niveau, ligne 2 : dates
                 {
-                    t.Span("Bilan de mesure ").FontSize(14).FontColor(AccentColor);
-                    t.Span(_courseName).FontSize(14).Bold().FontColor(AccentColor);
-                    t.Span($" ({_startDate:dd.MM} – {_endDate:dd.MM.yyyy})").FontSize(13).FontColor(AccentColor);
-                });
+                    string baseName   = _courseName;
+                    string levelLabel = "";
+                    int pIdx = _courseName.IndexOf(" (Niveau", StringComparison.OrdinalIgnoreCase);
+                    if (pIdx > 0)
+                    {
+                        baseName = _courseName.Substring(0, pIdx);
+                        var lm = System.Text.RegularExpressions.Regex.Match(
+                            _courseName.Substring(pIdx), @"[A-Za-z]\d");
+                        if (lm.Success) levelLabel = $" - Niveau {lm.Value.ToUpper()}";
+                    }
+                    else if (!string.IsNullOrWhiteSpace(_stagiaire.OralLevel))
+                    {
+                        var lm = System.Text.RegularExpressions.Regex.Match(
+                            _stagiaire.OralLevel, @"[A-Za-z]\d");
+                        if (lm.Success) levelLabel = $" - Niveau {lm.Value.ToUpper()}";
+                    }
+
+                    col.Item().AlignCenter().Text(t =>
+                    {
+                        t.AlignCenter();
+                        t.Span("Bilan de mesure ").FontSize(14).FontColor(AccentColor);
+                        t.Span(baseName + levelLabel).FontSize(14).Bold().FontColor(AccentColor);
+                    });
+                    col.Item().AlignCenter()
+                        .Text($"{_startDate:dd.MM} – {_endDate:dd.MM.yyyy}")
+                        .FontSize(12).FontColor(AccentColor);
+                }
 
                 // Participant
                 col.Item().PaddingTop(6).Text(t =>
@@ -141,37 +186,36 @@ namespace Api.Documents
 
                 // 1. Évaluation linguistique
                 col.Item().Element(c =>
-                    RenderSection(c, "Cours de français", _evaluationText));
+                    RenderSection(c, "Cours de français", _evaluationText, bodySize));
 
                 // 2. Blocs spécifiques
                 if (IsTelecours)
                 {
                     if (!string.IsNullOrWhiteSpace(_homeVisitsText))
-                        col.Item().Element(c => RenderSection(c, "Visites à domicile", _homeVisitsText));
+                        col.Item().Element(c => RenderSection(c, "Visites à domicile", _homeVisitsText, bodySize));
 
                     if (!string.IsNullOrWhiteSpace(_followUpActions))
-                        col.Item().Element(c => RenderSection(c, "Insertion sociale", _followUpActions));
+                        col.Item().Element(c => RenderSection(c, "Insertion sociale", _followUpActions, bodySize));
                 }
                 else
                 {
                     if (!string.IsNullOrWhiteSpace(_socialInsertionText))
-                        col.Item().Element(c => RenderSection(c, "Insertion socio-professionnelle", _socialInsertionText));
+                        col.Item().Element(c => RenderSection(c, "Insertion socio-professionnelle", _socialInsertionText, bodySize));
 
                     if (!string.IsNullOrWhiteSpace(_digitalSkillsText))
-                        col.Item().Element(c => RenderSection(c, "Utilisation de l'informatique", _digitalSkillsText));
+                        col.Item().Element(c => RenderSection(c, "Utilisation de l'informatique", _digitalSkillsText, bodySize));
 
-                    // Accompagnement individualisé — texte simple
-                    col.Item().Element(c => RenderAccompanyingSection(c));
+                    col.Item().Element(c => RenderAccompanyingSection(c, bodySize));
 
                     if (!string.IsNullOrWhiteSpace(_followUpActions))
-                        col.Item().Element(c => RenderSection(c, "Perspectives et objectifs", _followUpActions));
+                        col.Item().Element(c => RenderSection(c, "Perspectives et objectifs", _followUpActions, bodySize));
                 }
 
-                // 3. Niveau actuel — ne dupliquer que si oral ≠ écrit
+                // 3. Niveau actuel
                 col.Item().PaddingTop(8).Text(t =>
                 {
-                    var oral  = _stagiaire.OralLevel    ?? "—";
-                    var ecrit = _stagiaire.WrittenLevel  ?? "—";
+                    var oral  = _oralLevel    ?? _stagiaire.OralLevel   ?? "—";
+                    var ecrit = _writtenLevel ?? _stagiaire.WrittenLevel ?? "—";
                     t.Span("Niveau actuel : ").FontSize(11).FontColor(Colors.Grey.Darken2);
                     if (oral == ecrit)
                     {
@@ -189,7 +233,8 @@ namespace Api.Documents
         }
 
         // ── Section texte générique ────────────────────────────────────────────
-        private void RenderSection(IContainer container, string title, string content)
+        private void RenderSection(IContainer container, string title, string content,
+                                   float bodySize = 10f)
         {
             container.Column(col =>
             {
@@ -198,7 +243,7 @@ namespace Api.Documents
 
                 col.Item()
                     .Text(string.IsNullOrWhiteSpace(content) ? "Non renseigné" : content)
-                    .FontSize(10).LineHeight(1.25f).Justify();
+                    .FontSize(bodySize).LineHeight(1.25f).Justify();
 
                 col.Item().PaddingVertical(5)
                     .LineHorizontal(0.5f).LineColor(Colors.Grey.Lighten2);
@@ -206,20 +251,14 @@ namespace Api.Documents
         }
 
         // ── Section accompagnement individualisé — texte simple ────────────────
-        // Format :
-        //   5 appuis (français oral, écrit, administratif).
-        //   2 ateliers de français (français).
-        //   [notes complémentaires libres si renseignées]
-        private void RenderAccompanyingSection(IContainer container)
+        private void RenderAccompanyingSection(IContainer container, float bodySize = 10f)
         {
             container.Column(col =>
             {
-                // Titre de section
                 col.Item().PaddingBottom(4)
                     .Text("Accompagnement individualisé")
                     .FontSize(12).FontColor(AccentColor).Italic();
 
-                // Construire les lignes de texte depuis la liste d'activités
                 var lines = BuildAccompanyingLines();
 
                 if (lines.Any())
@@ -227,26 +266,23 @@ namespace Api.Documents
                     col.Item().Column(inner =>
                     {
                         foreach (var line in lines)
-                        {
-                            inner.Item()
-                                .Text(line)
-                                .FontSize(10).LineHeight(1.3f);
-                        }
+                            inner.Item().Text(line).FontSize(bodySize).LineHeight(1.3f);
                     });
                 }
                 else if (string.IsNullOrWhiteSpace(_individualAccompanyingText))
                 {
+                    string civilite = _stagiaire.Gender?.GenderName?.StartsWith("F", StringComparison.OrdinalIgnoreCase) == true
+                        ? "Madame" : "Monsieur";
                     col.Item()
-                        .Text("Non renseigné")
-                        .FontSize(10).FontColor(Colors.Grey.Medium).Italic();
+                        .Text($"{civilite} n'a suivi aucun accompagnement ni atelier facultatif.")
+                        .FontSize(bodySize).LineHeight(1.3f);
                 }
 
-                // Notes complémentaires libres (sous les lignes auto)
                 if (!string.IsNullOrWhiteSpace(_individualAccompanyingText))
                 {
                     col.Item().PaddingTop(lines.Any() ? 4 : 0)
                         .Text(_individualAccompanyingText)
-                        .FontSize(10).LineHeight(1.25f).Justify();
+                        .FontSize(bodySize).LineHeight(1.25f).Justify();
                 }
 
                 col.Item().PaddingVertical(5)

@@ -306,46 +306,30 @@ namespace Api.Documents
                         string valStr = isPP
                             ? $"{retards} fois"
                             : FormatJours(count);
-                        row.RelativeItem().Row(r =>
+                        row.AutoItem().PaddingRight(12).Row(r =>
                         {
                             r.ConstantItem(11).Height(11).AlignMiddle().Background(pdfColor);
                             r.ConstantItem(5);
-                            r.RelativeItem().AlignMiddle().Text(t =>
+                            r.AutoItem().AlignMiddle().Text(t =>
                             {
-                                t.Span($"{label} : ").FontSize(8.5f);
-                                t.Span(valStr).Bold().FontSize(8.5f);
+                                t.Span($"{label} : ").FontSize(8f);
+                                t.Span(valStr).Bold().FontSize(8f);
                             });
                         });
                     }
 
-                    if (visites > 0 || feries > 0)
-                    {
-                        if (visites > 0)
-                            row.RelativeItem().Row(r =>
+                    // Fériés uniquement — Visite à dom. est déjà dans les slices ci-dessus
+                    if (feries > 0)
+                        row.AutoItem().Row(r =>
+                        {
+                            r.ConstantItem(11).Height(11).AlignMiddle().Background(ColFerie);
+                            r.ConstantItem(5);
+                            r.AutoItem().AlignMiddle().Text(t =>
                             {
-                                r.ConstantItem(11).Height(11).AlignMiddle()
-                                    .Background(isTelecours ? ColVisite : ColVacances);
-                                r.ConstantItem(5);
-                                r.RelativeItem().AlignMiddle().Text(t =>
-                                {
-                                    string vLabel = isTelecours ? "Visite à dom. : " : "Vacances : ";
-                                    t.Span(vLabel).FontSize(8.5f).FontColor(MediumGrey);
-                                    t.Span($"{visites} j").Bold().FontSize(8.5f).FontColor(MediumGrey);
-                                });
+                                t.Span("Fériés : ").FontSize(8f).FontColor(MediumGrey);
+                                t.Span($"{feries} j").Bold().FontSize(8f).FontColor(MediumGrey);
                             });
-
-                        if (feries > 0)
-                            row.RelativeItem().Row(r =>
-                            {
-                                r.ConstantItem(11).Height(11).AlignMiddle().Background(ColFerie);
-                                r.ConstantItem(5);
-                                r.RelativeItem().AlignMiddle().Text(t =>
-                                {
-                                    t.Span($"Fériés : ").FontSize(8.5f).FontColor(MediumGrey);
-                                    t.Span($"{feries} j").Bold().FontSize(8.5f).FontColor(MediumGrey);
-                                });
-                            });
-                    }
+                        });
                 });
 
                 // ── Note de calcul ─────────────────────────────────────────────
@@ -373,8 +357,8 @@ namespace Api.Documents
             List<(string label, double count, SKColor color)> slices,
             int total)
         {
-            const int W = 560, H = 380;
-            const float cx = 265f, cy = 190f;
+            const int W = 640, H = 380;
+            const float cx = 310f, cy = 190f;
             const float r  = 130f;
 
             using var surface = SKSurface.Create(
