@@ -162,12 +162,54 @@ namespace IdentityServerAspNetIdentity.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
 
+                    b.Property<bool?>("ActiviteProfSuisse")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ActiviteProfSuisseCommentaire")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Adresse")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("AnneeArriveeSuisse")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("AssistantSocialEmail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Autre")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AutresLangues")
+                        .HasColumnType("text");
+
+                    b.Property<string>("BeneficiaireDe")
+                        .HasColumnType("text");
+
+                    b.Property<bool?>("BesoinsSouhaitsBenevolat")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("BesoinsSouhaitsBenevoletCommentaire")
+                        .HasColumnType("text");
+
+                    b.Property<string>("BesoinsSouhaitsFrancais")
+                        .HasColumnType("text");
+
+                    b.Property<bool?>("BesoinsSouhaitsStages")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("BesoinsSouhaitsStagesCommentaire")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("Birthday")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text");
+
+                    b.Property<bool>("ContratMaori")
+                        .HasColumnType("boolean");
 
                     b.Property<int?>("CurrentSessionNumber")
                         .HasColumnType("integer");
@@ -178,12 +220,18 @@ namespace IdentityServerAspNetIdentity.Migrations
                     b.Property<DateTime?>("DateDebutParticipation")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<string>("DomaineEtudeTitreObtenu")
+                        .HasColumnType("text");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("EtatCivil")
+                        .HasColumnType("text");
 
                     b.Property<string>("Firstname")
                         .IsRequired()
@@ -211,6 +259,15 @@ namespace IdentityServerAspNetIdentity.Migrations
                     b.Property<string>("Nationality")
                         .HasColumnType("text");
 
+                    b.Property<string>("NiveauDebutContrat")
+                        .HasColumnType("text");
+
+                    b.Property<string>("NiveauFinContrat")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("NombreEnfants")
+                        .HasColumnType("integer");
+
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -220,6 +277,15 @@ namespace IdentityServerAspNetIdentity.Migrations
                         .HasColumnType("character varying(256)");
 
                     b.Property<string>("OralLevel")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ParcoursDepuisArriveeSuisse")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ParcoursFormationSuisse")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ParcoursProfessionnel")
                         .HasColumnType("text");
 
                     b.Property<string>("PasswordHash")
@@ -233,6 +299,24 @@ namespace IdentityServerAspNetIdentity.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("PlusHautesEtudes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PlusHautesEtudesCommentaire")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ProfilUpdatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("ProfilUpdatedByName")
+                        .HasColumnType("text");
+
+                    b.Property<bool?>("RechercheLogement")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("RechercheLogementCommentaire")
+                        .HasColumnType("text");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
@@ -702,6 +786,48 @@ namespace IdentityServerAspNetIdentity.Migrations
                     b.ToTable("ExercicesAlone");
                 });
 
+            modelBuilder.Entity("Confluences.Domain.Entities.FieldChangeHistory", b =>
+                {
+                    b.Property<int>("FieldChangeHistoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("FieldChangeHistoryId"));
+
+                    b.Property<DateTime>("ChangedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("ChangedByUserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("EntityId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
+                    b.Property<string>("FieldName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("NewValue")
+                        .HasColumnType("text");
+
+                    b.Property<string>("OldValue")
+                        .HasColumnType("text");
+
+                    b.HasKey("FieldChangeHistoryId");
+
+                    b.HasIndex("ChangedByUserId");
+
+                    b.ToTable("FieldChangeHistories");
+                });
+
             modelBuilder.Entity("Confluences.Domain.Entities.Gender", b =>
                 {
                     b.Property<short>("GenderId")
@@ -967,6 +1093,241 @@ namespace IdentityServerAspNetIdentity.Migrations
                     b.ToTable("LastContacts");
                 });
 
+            modelBuilder.Entity("Confluences.Domain.Entities.Marrainage", b =>
+                {
+                    b.Property<int>("MarrainageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MarrainageId"));
+
+                    b.Property<bool>("Actif")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("Age")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("CharteSignee")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Commune")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("Date")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime?>("DateNaissance")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("text");
+
+                    b.Property<string>("EmailFilleul")
+                        .HasColumnType("text");
+
+                    b.Property<string>("EtatCivil")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ExtraitCasier")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FilleulNom")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Nom")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Numero")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ParticipantId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PeriodeDemande")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Prenom")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Profession")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RaisonInactivite")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RelanceNotes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RemarqueParrain")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Statut")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Suivi")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TelephoneFilleul")
+                        .HasColumnType("text");
+
+                    b.HasKey("MarrainageId");
+
+                    b.HasIndex("ParticipantId");
+
+                    b.ToTable("Marrainages");
+                });
+
+            modelBuilder.Entity("Confluences.Domain.Entities.MarrainageAnswer", b =>
+                {
+                    b.Property<int>("MarrainageAnswerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MarrainageAnswerId"));
+
+                    b.Property<int>("MarrainageId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MarrainageQuestionId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("text");
+
+                    b.HasKey("MarrainageAnswerId");
+
+                    b.HasIndex("MarrainageId");
+
+                    b.HasIndex("MarrainageQuestionId");
+
+                    b.ToTable("MarrainageAnswers");
+                });
+
+            modelBuilder.Entity("Confluences.Domain.Entities.MarrainageComment", b =>
+                {
+                    b.Property<int>("MarrainageCommentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MarrainageCommentId"));
+
+                    b.Property<string>("AuthorId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("MarrainageId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("MarrainageCommentId");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("MarrainageId");
+
+                    b.ToTable("MarrainageComments");
+                });
+
+            modelBuilder.Entity("Confluences.Domain.Entities.MarrainageFile", b =>
+                {
+                    b.Property<int>("MarrainageFileId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MarrainageFileId"));
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("Data")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FileType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("MarrainageId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("MarrainageFileId");
+
+                    b.HasIndex("MarrainageId");
+
+                    b.ToTable("MarrainageFiles");
+                });
+
+            modelBuilder.Entity("Confluences.Domain.Entities.MarrainageParticipant", b =>
+                {
+                    b.Property<int>("MarrainageId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ParticipantId")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("Actif")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("DateDebut")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime?>("DateFin")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("RaisonInactivite")
+                        .HasColumnType("text");
+
+                    b.HasKey("MarrainageId", "ParticipantId");
+
+                    b.HasIndex("ParticipantId");
+
+                    b.ToTable("MarrainageParticipants");
+                });
+
+            modelBuilder.Entity("Confluences.Domain.Entities.MarrainageQuestion", b =>
+                {
+                    b.Property<int>("MarrainageQuestionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MarrainageQuestionId"));
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Options")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("Required")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("MarrainageQuestionId");
+
+                    b.ToTable("MarrainageQuestions");
+                });
+
             modelBuilder.Entity("Confluences.Domain.Entities.MatrixColumn", b =>
                 {
                     b.Property<int>("Id")
@@ -993,6 +1354,40 @@ namespace IdentityServerAspNetIdentity.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("MatrixColumns");
+                });
+
+            modelBuilder.Entity("Confluences.Domain.Entities.ParticipantFile", b =>
+                {
+                    b.Property<int>("ParticipantFileId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ParticipantFileId"));
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("Data")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FileType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("StudentId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("ParticipantFileId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("ParticipantFiles");
                 });
 
             modelBuilder.Entity("Confluences.Domain.Entities.PeriodeVacance", b =>
@@ -1261,6 +1656,12 @@ namespace IdentityServerAspNetIdentity.Migrations
 
                     b.Property<string>("StudentId")
                         .HasColumnType("text");
+
+                    b.Property<double?>("TauxParticipation")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTime?>("TauxParticipationCalculeLe")
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("SessionId", "StudentId");
 
@@ -2029,6 +2430,15 @@ namespace IdentityServerAspNetIdentity.Migrations
                     b.Navigation("Teacher");
                 });
 
+            modelBuilder.Entity("Confluences.Domain.Entities.FieldChangeHistory", b =>
+                {
+                    b.HasOne("Confluences.Domain.Entities.ApplicationUser", "ChangedByUser")
+                        .WithMany()
+                        .HasForeignKey("ChangedByUserId");
+
+                    b.Navigation("ChangedByUser");
+                });
+
             modelBuilder.Entity("Confluences.Domain.Entities.HomeworkV2", b =>
                 {
                     b.HasOne("Confluences.Domain.Entities.HomeworkType", "HomeworkType")
@@ -2118,6 +2528,92 @@ namespace IdentityServerAspNetIdentity.Migrations
                         .IsRequired();
 
                     b.Navigation("Entreprise");
+                });
+
+            modelBuilder.Entity("Confluences.Domain.Entities.Marrainage", b =>
+                {
+                    b.HasOne("Confluences.Domain.Entities.ApplicationUser", "Participant")
+                        .WithMany("Marrainages")
+                        .HasForeignKey("ParticipantId");
+
+                    b.Navigation("Participant");
+                });
+
+            modelBuilder.Entity("Confluences.Domain.Entities.MarrainageAnswer", b =>
+                {
+                    b.HasOne("Confluences.Domain.Entities.Marrainage", "Marrainage")
+                        .WithMany("Answers")
+                        .HasForeignKey("MarrainageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Confluences.Domain.Entities.MarrainageQuestion", "Question")
+                        .WithMany("Answers")
+                        .HasForeignKey("MarrainageQuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Marrainage");
+
+                    b.Navigation("Question");
+                });
+
+            modelBuilder.Entity("Confluences.Domain.Entities.MarrainageComment", b =>
+                {
+                    b.HasOne("Confluences.Domain.Entities.ApplicationUser", "Author")
+                        .WithMany("MarrainageComments")
+                        .HasForeignKey("AuthorId");
+
+                    b.HasOne("Confluences.Domain.Entities.Marrainage", "Marrainage")
+                        .WithMany("Comments")
+                        .HasForeignKey("MarrainageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Marrainage");
+                });
+
+            modelBuilder.Entity("Confluences.Domain.Entities.MarrainageFile", b =>
+                {
+                    b.HasOne("Confluences.Domain.Entities.Marrainage", "Marrainage")
+                        .WithMany("Files")
+                        .HasForeignKey("MarrainageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Marrainage");
+                });
+
+            modelBuilder.Entity("Confluences.Domain.Entities.MarrainageParticipant", b =>
+                {
+                    b.HasOne("Confluences.Domain.Entities.Marrainage", "Marrainage")
+                        .WithMany("ParticipantLinks")
+                        .HasForeignKey("MarrainageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Confluences.Domain.Entities.ApplicationUser", "Participant")
+                        .WithMany("MarrainageParticipants")
+                        .HasForeignKey("ParticipantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Marrainage");
+
+                    b.Navigation("Participant");
+                });
+
+            modelBuilder.Entity("Confluences.Domain.Entities.ParticipantFile", b =>
+                {
+                    b.HasOne("Confluences.Domain.Entities.ApplicationUser", "Student")
+                        .WithMany("ParticipantFiles")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("Confluences.Domain.Entities.Presence", b =>
@@ -2351,6 +2847,14 @@ namespace IdentityServerAspNetIdentity.Migrations
 
                     b.Navigation("Logins");
 
+                    b.Navigation("MarrainageComments");
+
+                    b.Navigation("MarrainageParticipants");
+
+                    b.Navigation("Marrainages");
+
+                    b.Navigation("ParticipantFiles");
+
                     b.Navigation("SessionStudents");
 
                     b.Navigation("SessionTeachers");
@@ -2401,6 +2905,22 @@ namespace IdentityServerAspNetIdentity.Migrations
                     b.Navigation("ExercicesAlones");
 
                     b.Navigation("Theories");
+                });
+
+            modelBuilder.Entity("Confluences.Domain.Entities.Marrainage", b =>
+                {
+                    b.Navigation("Answers");
+
+                    b.Navigation("Comments");
+
+                    b.Navigation("Files");
+
+                    b.Navigation("ParticipantLinks");
+                });
+
+            modelBuilder.Entity("Confluences.Domain.Entities.MarrainageQuestion", b =>
+                {
+                    b.Navigation("Answers");
                 });
 
             modelBuilder.Entity("Confluences.Domain.Entities.SchoolClassRoom", b =>

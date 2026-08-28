@@ -85,7 +85,7 @@
               </span>
             </v-avatar>
             <div class="flex-grow-1">
-              <div class="font-weight-bold">{{ user.prenom }} {{ user.nom }}</div>
+              <div class="font-weight-bold participant-name-link" @click="openParticipantPage(user)">{{ user.prenom }} {{ user.nom }}</div>
               <div class="text-caption text-grey text-uppercase">{{ user.userName }}</div>
               <v-chip size="x-small" color="primary" variant="tonal" class="mt-1">
                 {{ getUserSessionInfo(user) }}
@@ -169,7 +169,7 @@
               <tr v-for="user in filteredUsers" :key="user.id" class="table-row">
                 <td class="sticky-col name-col">
                   <div class="user-info">
-                    <div class="name">{{ user.prenom }} {{ user.nom }}</div>
+                    <div class="name participant-name-link" @click="openParticipantPage(user)">{{ user.prenom }} {{ user.nom }}</div>
                     <div class="trigramme">{{ user.userName }}</div>
                     <div class="text-caption font-weight-bold text-medium-emphasis">{{ user.niveau }}</div>
                     <div class="text-caption font-weight-bold text-primary">{{ getUserSessionInfo(user) }}</div>
@@ -409,6 +409,11 @@ import API_BASE, {apiFetch} from '@/services/api'
 moment.locale('fr')
 const store  = useStore()
 const router = useRouter()
+
+function openParticipantPage(user) {
+  const resolved = router.resolve({ name: 'Participant-Detail', params: { id: user.id } })
+  window.open(resolved.href, '_blank')
+}
 
 // ─── Auth fetch avec logout auto ──────────────────────────────────────────────
 async function authFetch(url, options = {}) {
@@ -836,6 +841,8 @@ onMounted(async () => {
 
 .user-info { padding: 4px 8px; }
 .user-info .name { font-weight: 700; color: #1a1a1a; }
+.participant-name-link { cursor: pointer; }
+.participant-name-link:hover { text-decoration: underline; color: #1976D2; }
 .user-info .trigramme { font-size: 0.72rem; color: #999; text-transform: uppercase; }
 
 /* ── Mobile activity chips ── */

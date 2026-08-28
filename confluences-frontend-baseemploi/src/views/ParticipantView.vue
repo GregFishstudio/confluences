@@ -4,8 +4,8 @@
     <!-- ─── Header ─────────────────────────────────────────────────────────── -->
     <div class="d-flex align-center justify-space-between mb-6">
       <div>
-        <div class="text-h5 font-weight-bold">Participants</div>
-        <div class="text-caption text-grey">{{ filteredUsers.length }} participant·e·s affiché·e·s</div>
+        <div class="text-h5 font-weight-bold">Liste des participant·e·s</div>
+        <div class="text-caption text-grey">{{ sortedUsers.length }} participant·e·s affiché·e·s</div>
       </div>
     </div>
 
@@ -57,6 +57,17 @@
               variant="outlined" density="compact" hide-details
             />
           </v-col>
+          <v-col cols="6" md="2">
+            <v-select
+              v-model="sortMode"
+              :items="[
+                { title: 'Nom de famille (A → Z)', value: 'nom' },
+                { title: 'Plus récent·e·s d\'abord', value: 'recent' },
+              ]"
+              label="Trier par"
+              variant="outlined" density="compact" hide-details
+            />
+          </v-col>
         </v-row>
       </v-card-text>
     </v-card>
@@ -65,20 +76,20 @@
     <v-card class="elevation-2" rounded="lg" :loading="isLoading">
       <v-data-table
         :headers="headers"
-        :items="filteredUsers"
+        :items="sortedUsers"
         :items-per-page="25"
         hover
         @click:row="(_, { item }) => openDetail(item)"
         class="participants-table"
       >
-        <!-- Nom complet -->
-        <template #item.fullName="{ item }">
+        <!-- Prénom -->
+        <template #item.prenom="{ item }">
           <div class="d-flex align-center py-2">
             <v-avatar size="36" :color="avatarColor(item)" class="mr-3">
               <span class="text-caption font-weight-bold text-white">{{ getInitials(item) }}</span>
             </v-avatar>
             <div>
-              <div class="font-weight-bold">{{ item.prenom }} {{ item.nom }}</div>
+              <div class="font-weight-bold">{{ item.prenom }}</div>
               <div class="text-caption text-grey">{{ item.userName }}</div>
             </div>
           </div>
@@ -105,7 +116,7 @@
         </template>
 
         <!-- Session -->
-        <template #item.session="{ item }">
+        <template #item.currentSessionYear="{ item }">
           <div class="text-caption">
             <v-chip v-if="isActif(item)" size="small" color="success" label variant="tonal">
               S{{ item.currentSessionNumber }} — {{ item.currentSessionYear }}
@@ -115,7 +126,7 @@
         </template>
 
         <!-- Nationalité -->
-        <template #item.nationalite="{ item }">
+        <template #item.nationality="{ item }">
           <div class="text-caption">{{ item.nationality || '—' }}</div>
         </template>
 
@@ -128,190 +139,16 @@
       </v-data-table>
     </v-card>
 
-    <!-- ─── Drawer détail ───────────────────────────────────────────────────── -->
-    <v-navigation-drawer v-model="detailDrawer" location="right" width="500" temporary>
-      <template v-if="selectedUser">
-
-        <!-- Header drawer -->
-        <div class="pa-5 bg-primary">
-          <div class="d-flex align-center justify-space-between mb-3">
-            <v-btn icon variant="text" color="white" @click="detailDrawer = false">
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
-            <v-btn icon variant="text" color="white" @click="copyContact">
-              <v-icon>mdi-content-copy</v-icon>
-            </v-btn>
-          </div>
-          <div class="d-flex align-center">
-            <v-avatar size="56" color="white" class="mr-4">
-              <span class="text-h6 font-weight-bold" :style="{ color: avatarColor(selectedUser) }">
-                {{ getInitials(selectedUser) }}
-              </span>
-            </v-avatar>
-            <div>
-              <div class="text-h6 font-weight-bold text-white">
-                {{ selectedUser.prenom }} {{ selectedUser.nom }}
-              </div>
-              <div class="text-caption text-white opacity-80">{{ selectedUser.userName }}</div>
-              <v-chip v-if="isActif(selectedUser)" size="x-small" color="white" variant="outlined" class="mt-1">
-                S{{ selectedUser.currentSessionNumber }} — {{ selectedUser.currentSessionYear }}
-              </v-chip>
-              <v-chip v-else size="x-small" color="white" variant="outlined" class="mt-1 opacity-60">
-                Hors session
-              </v-chip>
-            </div>
-          </div>
-        </div>
-
-        <v-list class="pa-0">
-
-          <!-- ── Infos personnelles ── -->
-          <v-list-subheader class="bg-grey-lighten-4 font-weight-bold text-uppercase text-caption px-5">
-            Informations personnelles
-          </v-list-subheader>
-          <div class="pa-4">
-            <v-row dense>
-              <v-col cols="6">
-                <div class="text-caption text-grey mb-1">Email</div>
-                <div class="text-body-2">{{ selectedUser.email || '—' }}</div>
-              </v-col>
-              <v-col cols="6">
-                <div class="text-caption text-grey mb-1">Téléphone</div>
-                <div class="text-body-2">{{ selectedUser.phoneNumber || '—' }}</div>
-              </v-col>
-              <v-col cols="6" class="mt-3">
-                <div class="text-caption text-grey mb-1">Date de naissance</div>
-                <div class="text-body-2">{{ formatDate(selectedUser.birthday) }}</div>
-              </v-col>
-              <v-col cols="6" class="mt-3">
-                <div class="text-caption text-grey mb-1">Nationalité</div>
-                <div class="text-body-2">{{ selectedUser.nationality || '—' }}</div>
-              </v-col>
-              <v-col cols="6" class="mt-3">
-                <div class="text-caption text-grey mb-1">Langue</div>
-                <div class="text-body-2">{{ selectedUser.language || '—' }}</div>
-              </v-col>
-              <v-col cols="6" class="mt-3">
-                <div class="text-caption text-grey mb-1">Début participation</div>
-                <div class="text-body-2">{{ formatDate(selectedUser.dateDebutParticipation) }}</div>
-              </v-col>
-              <v-col cols="12" class="mt-3">
-                <div class="text-caption text-grey mb-1">Affiliation</div>
-                <div class="text-body-2">{{ selectedUser.typeAffiliation?.name || '—' }}</div>
-              </v-col>
-            </v-row>
-          </div>
-
-          <v-divider />
-
-          <!-- ── Mesure ── -->
-          <v-list-subheader class="bg-grey-lighten-4 font-weight-bold text-uppercase text-caption px-5">
-            Mesure
-          </v-list-subheader>
-          <div class="pa-4">
-            <v-chip
-              v-if="selectedUser.niveau && selectedUser.niveau !== 'N/A'"
-              size="small" :color="niveauColor(selectedUser.niveau)" label
-            >
-              {{ selectedUser.niveau }}
-            </v-chip>
-            <span v-else class="text-caption text-grey">—</span>
-          </div>
-
-          <v-divider />
-
-          <!-- ── Niveaux oral/écrit session en cours ── -->
-          <v-list-subheader class="bg-grey-lighten-4 font-weight-bold text-uppercase text-caption px-5">
-            Niveaux — session en cours
-          </v-list-subheader>
-          <div class="pa-4">
-            <div v-if="getCurrentNiveau(selectedUser)">
-              <v-row dense>
-                <v-col cols="6">
-                  <div class="text-caption text-grey mb-1">Niveau oral</div>
-                  <v-chip size="small" color="green" label>
-                    {{ getCurrentNiveau(selectedUser)?.oralLevel || '—' }}
-                  </v-chip>
-                </v-col>
-                <v-col cols="6">
-                  <div class="text-caption text-grey mb-1">Niveau écrit</div>
-                  <v-chip size="small" color="blue" label>
-                    {{ getCurrentNiveau(selectedUser)?.writtenLevel || '—' }}
-                  </v-chip>
-                </v-col>
-              </v-row>
-            </div>
-            <div v-else class="text-caption text-grey">Aucun niveau enregistré pour la session en cours.</div>
-          </div>
-
-          <v-divider />
-
-          <!-- ── Historique sessions ── -->
-          <v-list-subheader class="bg-grey-lighten-4 font-weight-bold text-uppercase text-caption px-5">
-            Historique des sessions
-          </v-list-subheader>
-          <div class="pa-4">
-            <div v-if="userSessionLinks.length === 0" class="text-caption text-grey">
-              Aucune session trouvée.
-            </div>
-            <v-timeline density="compact" side="end" v-else>
-              <v-timeline-item
-                v-for="link in userSessionLinks"
-                :key="link.id"
-                size="x-small"
-                dot-color="primary"
-              >
-                <div class="text-body-2 font-weight-bold">
-                  Session {{ link.session?.sessionNumberId || link.Session?.SessionNumberId }}
-                  — {{ getSessionYear(link) }}
-                </div>
-                <div class="text-caption text-grey">
-                  {{ formatDate(link.session?.dateStart || link.Session?.DateStart) }}
-                  → {{ formatDate(link.session?.dateEnd || link.Session?.DateEnd) }}
-                </div>
-                <div class="mt-1" v-if="getNiveauForSession(link)">
-                  <v-chip size="x-small" color="green" label class="mr-1">
-                    O: {{ getNiveauForSession(link)?.oralLevel || '—' }}
-                  </v-chip>
-                  <v-chip size="x-small" color="blue" label>
-                    É: {{ getNiveauForSession(link)?.writtenLevel || '—' }}
-                  </v-chip>
-                </div>
-              </v-timeline-item>
-            </v-timeline>
-          </div>
-
-          <v-divider />
-
-          <!-- ── Stages ── -->
-          <v-list-subheader class="bg-grey-lighten-4 font-weight-bold text-uppercase text-caption px-5">
-            Stages associés
-          </v-list-subheader>
-          <div class="pa-4">
-            <div v-if="!userStages.length" class="text-caption text-grey">Aucun stage.</div>
-            <div v-for="stage in userStages" :key="stage.id" class="mb-2">
-              <div class="text-body-2 font-weight-bold">
-                {{ stage.entreprise?.nom || 'Stage' }}
-              </div>
-              <div class="text-caption text-grey">
-                {{ formatDate(stage.dateDebut) }}
-                <span v-if="stage.dateFin"> → {{ formatDate(stage.dateFin) }}</span>
-              </div>
-            </div>
-          </div>
-
-        </v-list>
-      </template>
-    </v-navigation-drawer>
-
   </v-container>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import moment from 'moment/min/moment-with-locales'
-import API_BASE, { apiFetch } from '@/services/api'
+
+const router = useRouter()
 
 moment.locale('fr')
 const store = useStore()
@@ -323,23 +160,20 @@ const filterNiveau        = ref(null)
 const filterSessionNumber = ref(null)
 const filterYear          = ref(null)
 const filterActif         = ref('all')
-const detailDrawer        = ref(false)
-const selectedUser        = ref(null)
-const allSessionLinks     = ref([])
-const allStages           = ref([])
-const allNiveaux          = ref([])
+const sortMode            = ref('nom')
 
 // ─── Store ────────────────────────────────────────────────────────────────────
 const users = computed(() => store.state.user?.users || [])
 
 // ─── Headers ─────────────────────────────────────────────────────────────────
 const headers = [
-  { title: 'Participant·e', key: 'fullName',    sortable: true  },
-  { title: 'Contact',       key: 'contact',     sortable: false },
-  { title: 'Mesure',        key: 'niveau',      sortable: false },
-  { title: 'Session',       key: 'session',     sortable: true  },
-  { title: 'Nationalité',   key: 'nationalite', sortable: true  },
-  { title: '',              key: 'actions',     sortable: false },
+  { title: 'Prénom',        key: 'prenom',             sortable: true  },
+  { title: 'Nom',           key: 'nom',                sortable: true  },
+  { title: 'Contact',       key: 'contact',            sortable: false },
+  { title: 'Mesure',        key: 'niveau',             sortable: true  },
+  { title: 'Session',       key: 'currentSessionYear', sortable: true  },
+  { title: 'Nationalité',   key: 'nationality',        sortable: true  },
+  { title: '',              key: 'actions',            sortable: false },
 ]
 
 // ─── Options filtres ──────────────────────────────────────────────────────────
@@ -360,34 +194,6 @@ const yearOptions = computed(() => {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const isActif = (user) =>
   !!user.currentSessionNumber && !!user.currentSessionYear
-
-const getCurrentNiveau = (user) => {
-  if (!isActif(user)) return null
-  return allNiveaux.value.find(n =>
-    n.stagiaireId === user.id &&
-    n.annee       === user.currentSessionYear &&
-    n.trimestre   === user.currentSessionNumber
-  ) || null
-}
-
-const getNiveauForSession = (link) => {
-  const s      = link.session || link.Session
-  const year   = s ? new Date(s.dateStart || s.DateStart).getFullYear() : null
-  const num    = s?.sessionNumberId || s?.SessionNumberId
-  const userId = link.studentId || link.StudentId
-  if (!year || !num) return null
-  return allNiveaux.value.find(n =>
-    n.stagiaireId === userId &&
-    n.annee       === year &&
-    n.trimestre   === num
-  ) || null
-}
-
-const getSessionYear = (link) => {
-  const s = link.session || link.Session
-  if (!s) return '—'
-  return new Date(s.dateStart || s.DateStart).getFullYear()
-}
 
 // ─── Filtrage ─────────────────────────────────────────────────────────────────
 const filteredUsers = computed(() => {
@@ -426,29 +232,12 @@ const filteredUsers = computed(() => {
   return list
 })
 
-// ─── Détail ───────────────────────────────────────────────────────────────────
-const userSessionLinks = computed(() => {
-  if (!selectedUser.value) return []
-  return allSessionLinks.value
-    .filter(l =>
-      String(l.studentId || l.StudentId).toLowerCase() ===
-      String(selectedUser.value.id).toLowerCase()
-    )
-    .sort((a, b) => {
-      const aY = new Date(a.session?.dateStart || a.Session?.DateStart || 0).getFullYear()
-      const bY = new Date(b.session?.dateStart || b.Session?.DateStart || 0).getFullYear()
-      const aN = a.session?.sessionNumberId || a.Session?.SessionNumberId || 0
-      const bN = b.session?.sessionNumberId || b.Session?.SessionNumberId || 0
-      return bY - aY || bN - aN
-    })
-})
-
-const userStages = computed(() => {
-  if (!selectedUser.value) return []
-  return allStages.value.filter(s =>
-    String(s.stagiaireId || '').toLowerCase() ===
-    String(selectedUser.value.id).toLowerCase()
-  )
+const sortedUsers = computed(() => {
+  const list = [...filteredUsers.value]
+  if (sortMode.value === 'recent') {
+    return list.sort((a, b) => new Date(b.dateDebutParticipation || 0) - new Date(a.dateDebutParticipation || 0))
+  }
+  return list.sort((a, b) => (a.nom || '').localeCompare(b.nom || '', 'fr'))
 })
 
 // ─── Helpers UI ───────────────────────────────────────────────────────────────
@@ -473,50 +262,13 @@ const niveauColor = (niveau) => {
 }
 
 const openDetail = (user) => {
-  selectedUser.value = user
-  detailDrawer.value = true
-}
-
-const copyContact = () => {
-  if (!selectedUser.value) return
-  const u = selectedUser.value
-  const text = `${u.prenom} ${u.nom}\n${u.email || ''}\n${u.phoneNumber || ''}`
-  navigator.clipboard.writeText(text)
-}
-
-// ─── API ──────────────────────────────────────────────────────────────────────
-const loadSessionLinks = async () => {
-  try {
-    const res = await fetch(`${API_BASE}/api/SessionStudents`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
-    })
-    if (res.ok) allSessionLinks.value = await res.json()
-  } catch (e) { console.error(e) }
-}
-
-const loadStages = async () => {
-  try {
-    const res = await fetch(`${API_BASE}/api/stages`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
-    })
-    if (res.ok) allStages.value = await res.json()
-  } catch (e) { console.error(e) }
-}
-
-const loadNiveaux = async () => {
-  try {
-    const res = await fetch(`${API_BASE}/api/StagiaireNiveaux`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
-    })
-    if (res.ok) allNiveaux.value = await res.json()
-  } catch (e) { console.error(e) }
+  router.push({ name: 'Participant-Detail', params: { id: user.id } })
 }
 
 onMounted(async () => {
   isLoading.value = true
   try {
     await store.dispatch('user/fetchUsers')
-    await Promise.all([loadSessionLinks(), loadStages(), loadNiveaux()])
   } catch (e) {
     console.error(e)
   } finally {

@@ -335,11 +335,20 @@ namespace Api.Controllers
             string sessionTypeCalc = isTeleCoursCalc ? "tele" : "fi";
             int targetDaysCalc = CalculerJoursCibles(sessionTypeCalc, 3); // 3 = trimestre complet
 
+            // Un·e stagiaire arrivé·e en cours de période ne compte pas comme "présent·e"
+            // par défaut sur les jours précédant son inscription (même logique que l'attestation de présence).
+            var participationStartCalc = user.DateDebutParticipation.HasValue && user.DateDebutParticipation.Value.Date > periodStart
+                ? user.DateDebutParticipation.Value.Date
+                : periodStart;
+
             double absScore = 0;
             int feriesCount = 0;
+            int nonInscritCount = 0;
             for (var d = periodStart; d <= periodEnd; d = d.AddDays(1))
             {
                 if (d.DayOfWeek == DayOfWeek.Saturday || d.DayOfWeek == DayOfWeek.Sunday) continue;
+
+                if (d.Date < participationStartCalc) { nonInscritCount++; continue; }
 
                 if (feriesSession.Contains(d.Date))
                 {
@@ -356,7 +365,7 @@ namespace Api.Controllers
                 if (st == "a" || st == "e") absScore += 1;
                 else if (st == "r")         absScore += 0.5;
             }
-            int    totalAffiche      = Math.Max(1, targetDaysCalc - feriesCount);
+            int    totalAffiche      = Math.Max(1, targetDaysCalc - feriesCount - nonInscritCount);
             double presentsExact     = Math.Max(0.0, totalAffiche - absScore);
             double tauxParticipation = Math.Min(100.0,
                 Math.Ceiling(presentsExact / totalAffiche * 100.0 - 0.5));
@@ -455,6 +464,12 @@ namespace Api.Controllers
             bool IsVacance(DateTime d) =>
                 periodesVacances.Any(v => d >= v.StartDate.Date && d <= v.EndDate.Date);
 
+            // Un·e stagiaire arrivé·e en cours de période ne doit pas être compté·e
+            // "présent·e" par défaut sur les jours précédant son inscription.
+            var participationStart = user.DateDebutParticipation.HasValue && user.DateDebutParticipation.Value.Date > periodStart
+                ? user.DateDebutParticipation.Value.Date
+                : periodStart;
+
             var fullPresences = new List<AttendanceEntryDto>();
             for (var date = periodStart; date <= periodEnd; date = date.AddDays(1))
             {
@@ -462,7 +477,8 @@ namespace Api.Controllers
                     continue;
 
                 string status;
-                if (joursFeries.Contains(date.Date))   status = "f";
+                if (date.Date < participationStart)    status = "n"; // pas encore inscrit·e
+                else if (joursFeries.Contains(date.Date)) status = "f";
                 else if (IsVacance(date.Date))         status = "v";
                 else status = existingPresences.TryGetValue(date.Date, out var s)
                         ? (string.IsNullOrWhiteSpace(s) ? "p" : s.Trim().ToLower())

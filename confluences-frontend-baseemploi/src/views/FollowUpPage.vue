@@ -61,7 +61,7 @@
               </span>
             </v-avatar>
             <div class="flex-grow-1 text-truncate-parent">
-              <div class="font-weight-bold text-body-2">{{ user.nom }} {{ user.prenom }}</div>
+              <div class="font-weight-bold text-body-2 participant-name-link" @click="openParticipantPage(user)">{{ user.nom }} {{ user.prenom }}</div>
               <div class="text-caption text-grey text-uppercase">{{ user.userName }}</div>
               <v-chip size="x-small" variant="tonal" class="mt-1">
                 {{ getUserSessionInfo(user) || user.mesureType }}
@@ -157,7 +157,7 @@
 
                 <td class="sticky-col name-col">
                   <div class="user-info">
-                    <div class="name">{{ user.prenom }} {{ user.nom }}</div>
+                    <div class="name participant-name-link" @click="openParticipantPage(user)">{{ user.prenom }} {{ user.nom }}</div>
                     <div class="trigramme">{{ user.userName }}</div>
                     <div class="text-caption font-weight-bold" style="color:#1565C0">
                       {{ getUserSessionInfo(user) }}
@@ -302,6 +302,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import moment from 'moment/min/moment-with-locales'
 import BilanEditModal from '../components/BilanEditModal.vue'
 import API_BASE, { apiFetch } from '@/services/api'
@@ -309,6 +310,12 @@ import API_BASE, { apiFetch } from '@/services/api'
 moment.locale('fr')
 
 const store = useStore()
+const router = useRouter()
+
+function openParticipantPage(user) {
+  const resolved = router.resolve({ name: 'Participant-Detail', params: { id: user.id } })
+  window.open(resolved.href, '_blank')
+}
 
 // ─── State ────────────────────────────────────────────────────────────────────
 const search               = ref('')
@@ -742,6 +749,8 @@ onMounted(async () => {
 .saisie-col { min-width: 100px; }
 .synthesis-col { min-width: 110px; background: #f9f9f9; }
 .user-info .name { font-weight: bold; color: #2c3e50; }
+.participant-name-link { cursor: pointer; }
+.participant-name-link:hover { text-decoration: underline; color: #1976D2; }
 .user-info .trigramme { font-size: 0.75rem; color: #999; text-transform: uppercase; }
 .centered-input :deep(input) { text-align: center; font-weight: bold; font-size: 0.9rem; }
 .text-truncate-parent { min-width: 0; overflow: hidden; }

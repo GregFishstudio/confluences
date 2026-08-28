@@ -1,15 +1,40 @@
 <template>
   <v-container class="stage-edit-container">
-    <v-row>
+    <v-row align="center" class="mb-2" no-gutters>
+      <v-col cols="auto">
+        <v-btn
+          icon="mdi-arrow-left"
+          variant="text"
+          @click="router.go(-1)"
+          aria-label="Retour"
+        />
+      </v-col>
       <v-col>
-        <h1 class="text-h4 mb-4">Expérience professionnelle</h1>
+        <div class="d-flex align-center flex-wrap ga-3">
+          <h1 class="text-h4">Expérience professionnelle</h1>
+          <v-chip
+            v-if="localStage.typeAnnonce?.libelle"
+            size="small"
+            :color="isAnnonce ? 'red' : 'grey-lighten-3'"
+            :text-color="isAnnonce ? 'white' : 'grey-darken-3'"
+            :class="{ 'font-weight-bold': isAnnonce }"
+          >
+            {{ localStage.typeAnnonce.libelle }}
+          </v-chip>
+        </div>
+        <p class="text-body-2 text-medium-emphasis mb-0">
+          Les champs marqués d'un <strong>*</strong> sont obligatoires.
+        </p>
       </v-col>
     </v-row>
 
     <v-form ref="formStage" v-model="valid" lazy-validation>
-      
+
       <v-card class="pa-4 mb-4 elevation-2 rounded-lg">
-        <v-card-title class="text-subtitle-1 font-weight-bold">Détails du Stage</v-card-title>
+        <v-card-title class="text-subtitle-1 font-weight-bold d-flex align-center">
+          <v-icon start color="primary">mdi-information-outline</v-icon>
+          Détails du Stage
+        </v-card-title>
         <v-card-text>
           <v-row>
             <v-col cols="12" md="4">
@@ -18,7 +43,7 @@
                 :items="typeIntershipActivitiesList"
                 item-title="nom"
                 item-value="typeIntershipActivityId"
-                label="Type d'activité"
+                label="Type d'activité *"
                 :rules="requiredRule"
                 variant="outlined"
                 density="compact"
@@ -44,7 +69,7 @@
                 :items="typeStagesList"
                 item-title="nom"
                 item-value="typeStageId"
-                label="Taux d'occupation"
+                label="Taux d'occupation *"
                 :rules="requiredRule"
                 variant="outlined"
                 density="compact"
@@ -58,7 +83,7 @@
                 :items="usersList"
                 item-title="nom"
                 item-value="id"
-                label="Créateur-trice"
+                label="Créateur-trice *"
                 :rules="requiredRule"
                 variant="outlined"
                 density="compact"
@@ -84,7 +109,10 @@
       </v-card>
 
       <v-card class="pa-4 mb-4 elevation-2 rounded-lg">
-        <v-card-title class="text-subtitle-1 font-weight-bold">Rôles et Organisation</v-card-title>
+        <v-card-title class="text-subtitle-1 font-weight-bold d-flex align-center">
+          <v-icon start color="primary">mdi-account-group-outline</v-icon>
+          Rôles et Organisation
+        </v-card-title>
         <v-card-text>
           <v-row>
             <v-col cols="12" md="4">
@@ -93,7 +121,7 @@
                 :items="typeMetiersList"
                 item-title="libelle"
                 item-value="typeMetierId"
-                label="Métier"
+                label="Métier *"
                 :rules="requiredRule"
                 variant="outlined"
                 density="compact"
@@ -121,7 +149,7 @@
                 :items="usersList"
                 item-title="nom"
                 item-value="id"
-                label="Stagiaire"
+                label="Stagiaire *"
                 :rules="requiredRule"
                 variant="outlined"
                 density="compact"
@@ -132,13 +160,16 @@
         </v-card-text>
       </v-card>
       
-      <v-card class="pa-4 mb-4 elevation-2 rounded-lg">
-        <v-card-title class="text-subtitle-1 font-weight-bold">Période et Conditions</v-card-title>
-        <v-card-text>
+      <v-card class="pa-6 mb-4 elevation-2 rounded-lg">
+        <v-card-title class="text-subtitle-1 font-weight-bold d-flex align-center pl-0">
+          <v-icon start color="primary">mdi-calendar-clock-outline</v-icon>
+          Période et Conditions
+        </v-card-title>
+        <v-card-text class="pb-0">
           <v-row>
             <v-col cols="12" md="4">
               <v-row>
-                <v-col cols="12" sm="6" class="py-0">
+                <v-col cols="12" sm="6">
                   <v-text-field
                     v-model="localStage.debut"
                     label="Début"
@@ -159,7 +190,7 @@
                   </v-dialog>
                 </v-col>
 
-                <v-col cols="12" sm="6" class="py-0">
+                <v-col cols="12" sm="6">
                   <v-text-field
                     v-model="localStage.fin"
                     label="Fin"
@@ -181,7 +212,7 @@
                   </v-dialog>
                 </v-col>
               </v-row>
-              
+
               <v-autocomplete
                 v-model="localStage.sessionId"
                 :items="sessionsList"
@@ -191,15 +222,15 @@
                 clearable
                 variant="outlined"
                 density="compact"
-                class="mt-4"
+                class="mt-6 mb-6"
                 hide-details="auto"
               />
-              
-              <v-row class="mt-4">
-                <v-col cols="6" class="py-0">
+
+              <v-row>
+                <v-col cols="6">
                   <v-checkbox v-model="localStage.repas" label="Repas" density="compact" hide-details />
                 </v-col>
-                <v-col cols="6" class="py-0">
+                <v-col cols="6">
                   <v-checkbox v-model="localStage.trajets" label="Trajets" density="compact" hide-details />
                 </v-col>
               </v-row>
@@ -247,14 +278,14 @@
                 </v-col>
               </v-row>
 
-              <v-row class="mt-4">
-                <v-col cols="12" sm="4" class="py-0">
+              <v-row class="mt-9">
+                <v-col cols="12" sm="4">
                   <v-checkbox v-model="localStage.attestation" label="Attestation requise" density="compact" hide-details />
                 </v-col>
-                <v-col cols="12" sm="4" class="py-0">
+                <v-col cols="12" sm="4">
                   <v-checkbox v-model="localStage.rapport" label="Rapport de stage" density="compact" hide-details />
                 </v-col>
-                <v-col cols="12" sm="4" class="py-0">
+                <v-col cols="12" sm="4">
                   <v-checkbox v-model="localStage.hasContract" label="Contrat signé" density="compact" hide-details />
                 </v-col>
               </v-row>
@@ -264,7 +295,10 @@
       </v-card>
 
       <v-card class="pa-4 mb-4 elevation-2 rounded-lg">
-        <v-card-title class="text-subtitle-1 font-weight-bold">Notes et Suivi</v-card-title>
+        <v-card-title class="text-subtitle-1 font-weight-bold d-flex align-center">
+          <v-icon start color="primary">mdi-note-text-outline</v-icon>
+          Notes et Suivi
+        </v-card-title>
         <v-card-text>
           <v-row>
             <v-col cols="12" md="6">
@@ -315,45 +349,42 @@
       </v-row>
 
       <div class="action-container action-bar-fixed">
-        <v-row class="fill-height ma-0">
-          <v-col class="d-flex justify-end align-center py-2">
-            
-            <v-btn
-              class="ma-2"
-              color="secondary"
-              variant="flat"
-              min-width="150"
-              @click="downloadBilan(localStage.stageId)"
-              prepend-icon="mdi-file-pdf-box"
-            >
-              Générer Bilan
-            </v-btn>
+        <div class="action-bar-inner">
+          <v-btn
+            class="ma-1"
+            color="secondary"
+            variant="flat"
+            min-width="130"
+            @click="downloadBilan(localStage.stageId)"
+            prepend-icon="mdi-file-pdf-box"
+          >
+            Générer Bilan
+          </v-btn>
 
-            <v-btn
-              class="ma-2"
-              color="primary"
-              variant="flat"
-              min-width="150"
-              @click="submit"
-              prepend-icon="mdi-content-save-outline"
-            >
-              Sauvegarder
-            </v-btn>
+          <v-btn
+            class="ma-1"
+            color="primary"
+            variant="flat"
+            min-width="130"
+            @click="submit"
+            prepend-icon="mdi-content-save-outline"
+          >
+            Sauvegarder
+          </v-btn>
 
-            <DeleteStage :stage="localStage" class="ma-2" />
+          <DeleteStage :stage="localStage" class="ma-1" />
 
-            <v-btn
-              class="ma-2"
-              color="grey-darken-1"
-              variant="outlined"
-              min-width="150"
-              @click="router.go(-1)"
-              prepend-icon="mdi-close"
-            >
-              Annuler
-            </v-btn>
-          </v-col>
-        </v-row>
+          <v-btn
+            class="ma-1"
+            color="grey-darken-1"
+            variant="outlined"
+            min-width="130"
+            @click="router.go(-1)"
+            prepend-icon="mdi-close"
+          >
+            Annuler
+          </v-btn>
+        </div>
       </div>
     </v-form>
   </v-container>
@@ -414,6 +445,8 @@ const typeMetiersList = computed(() => store.state.typeMetier?.typeMetiers || []
 const typeIntershipActivitiesList = computed(() => store.state.typeIntershipActivity?.typeIntershipActivities || [])
 const usersList = computed(() => store.state.user?.users || [])
 const sessionsList = computed(() => store.state.session?.sessions || [])
+
+const isAnnonce = computed(() => localStage.value.typeAnnonce?.libelle === 'Annoncé')
 
 /* Watcher pour copier les props vers le state local */
 watch(() => props.stage, (newVal) => {
@@ -496,12 +529,20 @@ async function submit() {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 64px; 
-  background: white;
-  border-top: 1px solid #e0e0e0;
+  min-height: 64px;
+  background: rgb(var(--v-theme-surface));
+  border-top: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
   z-index: 1000;
-  padding: 0 40px;
+  padding: 8px 16px;
+}
+
+.action-bar-inner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  width: 100%;
 }
 
 /* Fix pour les ombres des champs, si nécessaire */

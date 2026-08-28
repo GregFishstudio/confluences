@@ -36,6 +36,7 @@ namespace Api.Controllers
             return await _context.SessionStudents
                 .AsNoTracking()
                 .Include(s => s.Session)
+                    .ThenInclude(s => s.SchoolClassRoom)
                 .Include(s => s.Student)
                 .Where(s => s.Session != null)
                 .Where(s => !year.HasValue    || (s.Session.DateStart >= startOfYear && s.Session.DateStart <= endOfYear))
@@ -60,6 +61,92 @@ namespace Api.Controllers
             }
 
             return sessionStudent;
+        }
+
+        // POST: api/SessionStudents/5/abc-123/taux
+        // Recalcule (et met en cache) le taux de participation pour cette session/participant-e,
+        // à partir des présences enregistrées. Ne recalcule pas si déjà fait il y a moins d'une
+        // heure (sauf ?force=true), pour éviter de ré-agréger les présences à chaque affichage.
+        //
+        // Les dates de "Session" ne correspondent pas aux vraies dates de cours (données
+        // historiques incohérentes) : la vraie période vient de "SessionFormation" (le
+        // calendrier utilisé par le registre de présence). On reproduit ici exactement la
+        // logique de correspondance d'AttendanceRegister.vue (findSessionLink/matchesGroup) :
+        // le type de classe (télécours/F&I A1/F&I A2) déduit du nom de la classe, puis la
+        // Nième SessionFormation de ce type (toutes années confondues, triées par date de
+        // début), où N = SessionNumberId — seulement si l'année de cette Nième entrée
+        // correspond bien à l'année de la Session. Si aucune correspondance fiable n'est
+        // trouvée, on renvoie un taux nul plutôt qu'un chiffre potentiellement faux.
+        [HttpPost("{sessionId}/{studentId}/taux")]
+        public async Task<ActionResult<SessionStudent>> RecalculerTaux(int sessionId, string studentId, [FromQuery] bool force = false)
+        {
+            var sessionStudent = await _context.SessionStudents
+                .Include(s => s.Session)
+                    .ThenInclude(s => s!.SchoolClassRoom)
+                .SingleOrDefaultAsync(s => s.SessionId == sessionId && s.StudentId == studentId);
+
+            if (sessionStudent == null || sessionStudent.Session == null) return NotFound();
+
+            var isFresh = sessionStudent.TauxParticipationCalculeLe.HasValue
+                && (DateTime.UtcNow - sessionStudent.TauxParticipationCalculeLe.Value) < TimeSpan.FromHours(1);
+
+            if (!force && isFresh) return sessionStudent;
+
+            var period = await ResolveSessionFormationPeriod(sessionStudent.Session);
+
+            if (period == null)
+            {
+                sessionStudent.TauxParticipation = null;
+                sessionStudent.TauxParticipationCalculeLe = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+                return sessionStudent;
+            }
+
+            var presences = await _context.Presences
+                .Where(p => p.StagiaireId == studentId
+                    && p.Date >= period.Value.Start
+                    && p.Date <= period.Value.End)
+                .Select(p => p.Statut)
+                .ToListAsync();
+
+            // p/r comptent comme présence (retard reste une présence), a/e comme absence,
+            // s (stage) est hors mesure de la participation en classe.
+            var present = presences.Count(s => s == "p" || s == "r");
+            var absent = presences.Count(s => s == "a" || s == "e");
+            var total = present + absent;
+
+            sessionStudent.TauxParticipation = total > 0 ? Math.Round(100.0 * present / total, 1) : (double?)null;
+            sessionStudent.TauxParticipationCalculeLe = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return sessionStudent;
+        }
+
+        private async Task<(DateTime Start, DateTime End)?> ResolveSessionFormationPeriod(Session session)
+        {
+            var className = session.SchoolClassRoom?.SchoolClassRoomName?.ToLower() ?? "";
+            string type;
+            if (className.Contains("tele") || className.Contains("télé")) type = "telecours";
+            else if (className.Contains("a1")) type = "fi_a1";
+            else if (className.Contains("a2")) type = "fi_a2";
+            else return null;
+
+            var quarter = session.SessionNumberId;
+            if (quarter <= 0) return null;
+
+            var sameTypeOrdered = await _context.SessionFormations
+                .Where(sf => sf.Type.ToLower() == type)
+                .OrderBy(sf => sf.StartDate)
+                .ToListAsync();
+
+            var index = quarter - 1;
+            if (index < 0 || index >= sameTypeOrdered.Count) return null;
+
+            var candidate = sameTypeOrdered[index];
+            if (candidate.StartDate.Year != session.DateStart.Year) return null;
+
+            return (candidate.StartDate, candidate.EndDate);
         }
 
         // POST: api/SessionStudents

@@ -70,6 +70,14 @@ namespace Confluences.Persistence
         public virtual DbSet<Ressource> Ressources => Set<Ressource>();
         public DbSet<MatrixColumn> MatrixColumns { get; set; }
         public virtual DbSet<StagiaireNiveau> StagiaireNiveaux { get; set; } = null!;
+        public virtual DbSet<ParticipantFile> ParticipantFiles => Set<ParticipantFile>();
+        public virtual DbSet<Marrainage> Marrainages => Set<Marrainage>();
+        public virtual DbSet<MarrainageComment> MarrainageComments => Set<MarrainageComment>();
+        public virtual DbSet<MarrainageFile> MarrainageFiles => Set<MarrainageFile>();
+        public virtual DbSet<MarrainageParticipant> MarrainageParticipants => Set<MarrainageParticipant>();
+        public virtual DbSet<MarrainageQuestion> MarrainageQuestions => Set<MarrainageQuestion>();
+        public virtual DbSet<MarrainageAnswer> MarrainageAnswers => Set<MarrainageAnswer>();
+        public virtual DbSet<FieldChangeHistory> FieldChangeHistories => Set<FieldChangeHistory>();
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -136,6 +144,7 @@ namespace Confluences.Persistence
             // --- RELATIONS TABLES DE LIAISON ---
             builder.Entity<SessionTeacher>().HasKey(st => new { st.SessionId, st.TeacherId });
             builder.Entity<SessionStudent>().HasKey(st => new { st.SessionId, st.StudentId });
+            builder.Entity<MarrainageParticipant>().HasKey(mp => new { mp.MarrainageId, mp.ParticipantId });
             builder.Entity<EntrepriseMetier>().HasKey(st => new { st.EntrepriseId, st.TypeMetierId });
             builder.Entity<EntrepriseOffre>().HasKey(st => new { st.EntrepriseId, st.TypeOffreId });
             builder.Entity<EntrepriseDomaine>().HasKey(st => new { st.EntrepriseId, st.TypeDomaineId });

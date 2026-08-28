@@ -74,7 +74,7 @@ namespace Api.Documents
             _logo = logo ?? Array.Empty<byte>();
 
             _baseStyle = TextStyle.Default
-                .FontFamily("Arial").FontSize(10).FontColor(PrimaryColor);
+                .FontFamily("Arial").FontSize(11).FontColor(PrimaryColor);
         }
 
         public DocumentMetadata GetMetadata() => new DocumentMetadata
@@ -113,9 +113,9 @@ namespace Api.Documents
                             col.Item().Text("Confluences").FontSize(15).Bold().FontColor(AccentColor);
 
                         col.Item().PaddingTop(5)
-                            .Text("Association Confluences").FontSize(8.5f).SemiBold().FontColor(PrimaryColor);
-                        col.Item().Text("Chemin de Renens 52e · Lausanne").FontSize(8).FontColor(MediumGrey);
-                        col.Item().Text("www.confluences.ch").FontSize(8).FontColor(MediumGrey);
+                            .Text("Association Confluences").FontSize(9.5f).SemiBold().FontColor(PrimaryColor);
+                        col.Item().Text("Chemin de Renens 52e · Lausanne").FontSize(9).FontColor(MediumGrey);
+                        col.Item().Text("www.confluences.ch").FontSize(9).FontColor(MediumGrey);
                     });
 
                     // Droite : ATTESTATION DE PRÉSENCE
@@ -140,7 +140,7 @@ namespace Api.Documents
                 {
                     row.RelativeItem()
                         .Text($"Lausanne, le {_endDate.ToString("dd MMMM yyyy", _frenchCulture)}")
-                        .FontSize(9).FontColor(PrimaryColor);
+                        .FontSize(10).FontColor(PrimaryColor);
                 });
             });
         }
@@ -150,7 +150,7 @@ namespace Api.Documents
         {
             var id = _stagiaire.Id.ToString();
 
-            var filtered = _presences
+            var filteredAll = _presences
                 .Where(p =>
                     p.StagiaireId != null &&
                     p.StagiaireId.Equals(id, StringComparison.OrdinalIgnoreCase) &&
@@ -158,6 +158,11 @@ namespace Api.Documents
                     p.Date.Date <= _endDate)
                 .OrderBy(p => p.Date)
                 .ToList();
+
+            // "n" = jour précédant l'inscription du·de la stagiaire (DateDebutParticipation) :
+            // exclu des statistiques, mais compte pour réduire le nombre de jours cibles.
+            int nonInscrit = filteredAll.Count(p => N(p.Statut) == "n");
+            var filtered   = filteredAll.Where(p => N(p.Statut) != "n").ToList();
 
             bool isTelecours = _session.SessionType?.ToLower().Contains("tele") == true;
 
@@ -176,7 +181,7 @@ namespace Api.Documents
             int    targetDays   = _session.SessionTargetDays;
 
             int totalAffiche = targetDays > 0
-                ? Math.Max(1, targetDays - feries)
+                ? Math.Max(1, targetDays - feries - nonInscrit)
                 : (total - feries - visites);
 
             double presentsExact   = Math.Max(0.0, totalAffiche - absenceScore);
@@ -242,13 +247,13 @@ namespace Api.Documents
                             .BorderBottom(0.5f).BorderColor(Colors.White)
                             .Padding(7).PaddingLeft(10)
                             .Text(rowLabel)
-                            .SemiBold().FontSize(9).FontColor(Colors.White);
+                            .SemiBold().FontSize(10).FontColor(Colors.White);
 
                         table.Cell()
                             .BorderBottom(0.5f).BorderLeft(0.5f).BorderColor(Colors.Grey.Lighten2)
                             .Padding(7).PaddingLeft(10)
                             .Text(rowValue)
-                            .FontSize(9).FontColor(PrimaryColor);
+                            .FontSize(10).FontColor(PrimaryColor);
                     }
                 });
 
@@ -256,51 +261,58 @@ namespace Api.Documents
                 col.Item().Row(row =>
                 {
                     row.RelativeItem().Element(c => StatBox(c,
-                        $"{presentsAffiche}", "Présences",
+                        $"{presentsAffiche}", Plural(presentsAffiche, "Présence", "Présences"),
                         Color.FromHex("#E0F5F3"), AccentColor));
 
                     row.RelativeItem().Element(c => StatBox(c,
-                        $"{absents}", "Absent·e·s",
+                        $"{absents}", Plural(absents, "Absence", "Absences"),
                         Color.FromHex("#FDECEA"), Color.FromHex("#C0392B")));
 
                     row.RelativeItem().Element(c => StatBox(c,
-                        $"{excuses}", "Excusé·e·s",
+                        $"{excuses}", Plural(excuses, "Absence Excusée", "Absences Excusées"),
                         Color.FromHex("#FEF9E7"), Color.FromHex("#E67E22")));
 
                     row.RelativeItem().Element(c => StatBox(c,
-                        $"{retards}", "Part. partielle",
+                        $"{retards}", Plural(retards, "Participation partielle", "Participations partielles"),
                         Color.FromHex("#E8F4FC"), Color.FromHex("#1A6EA8")));
 
-                    row.RelativeItem().Element(c => StatBox(c,
-                        $"{sessionRate:F0}%", "Participation",
-                        Color.FromHex("#D6EAF8"), Color.FromHex("#1A5E8A")));
+                    if (stages > 0)
+                        row.RelativeItem().Element(c => StatBox(c,
+                            $"{stages}", Plural(stages, "Journée Stage", "Journées Stages"),
+                            Color.FromHex("#E5F7E0"), Color.FromHex("#3E8E41")));
                 });
 
                 // ── Titre de section ───────────────────────────────────────────
                 col.Item().PaddingTop(4)
                     .Text("Répartition des présences")
-                    .FontSize(12).Bold().FontColor(AccentColor);
+                    .FontSize(13).Bold().FontColor(AccentColor);
 
                 // ── Camembert + pourcentage ────────────────────────────────────
                 col.Item().Row(row =>
                 {
-                    row.ConstantItem(240).Height(200).Image(chartPng).FitArea();
+                    row.ConstantItem(300).Height(250).Image(chartPng).FitArea();
 
                     row.RelativeItem().AlignMiddle().PaddingLeft(12).Column(c =>
                     {
                         c.Item().AlignCenter()
                             .Text($"{sessionRate:F0}%")
-                            .FontSize(34).Bold().FontColor(Color.FromHex("#2C5F8A"));
+                            .FontSize(36).Bold().FontColor(Color.FromHex("#2C5F8A"));
                         c.Item().AlignCenter()
                             .Text("de participation")
-                            .FontSize(10).FontColor(MediumGrey);
+                            .FontSize(11).FontColor(MediumGrey);
                     });
                 });
 
                 // ── Légende ────────────────────────────────────────────────────
                 col.Item().Row(row =>
                 {
-                    foreach (var (label, _, count, _, pdfColor) in slices)
+                    // "Absent·e" et "Participation partielle" figurent déjà dans les boîtes
+                    // statistiques ci-dessus — inutile de les répéter dans la légende du camembert.
+                    var legendSlices = slices.Where(s =>
+                        s.label != "Présent·e" && s.label != "Excusé·e" &&
+                        s.label != "Absent·e" && s.label != "Participation partielle");
+
+                    foreach (var (label, _, count, _, pdfColor) in legendSlices)
                     {
                         bool isPP    = label == "Participation partielle";
                         string valStr = isPP
@@ -308,12 +320,12 @@ namespace Api.Documents
                             : FormatJours(count);
                         row.AutoItem().PaddingRight(12).Row(r =>
                         {
-                            r.ConstantItem(11).Height(11).AlignMiddle().Background(pdfColor);
+                            r.ConstantItem(12).Height(12).AlignMiddle().Background(pdfColor);
                             r.ConstantItem(5);
                             r.AutoItem().AlignMiddle().Text(t =>
                             {
-                                t.Span($"{label} : ").FontSize(8f);
-                                t.Span(valStr).Bold().FontSize(8f);
+                                t.Span($"{label} : ").FontSize(9f);
+                                t.Span(valStr).Bold().FontSize(9f);
                             });
                         });
                     }
@@ -322,22 +334,15 @@ namespace Api.Documents
                     if (feries > 0)
                         row.AutoItem().Row(r =>
                         {
-                            r.ConstantItem(11).Height(11).AlignMiddle().Background(ColFerie);
+                            r.ConstantItem(12).Height(12).AlignMiddle().Background(ColFerie);
                             r.ConstantItem(5);
                             r.AutoItem().AlignMiddle().Text(t =>
                             {
-                                t.Span("Fériés : ").FontSize(8f).FontColor(MediumGrey);
-                                t.Span($"{feries} j").Bold().FontSize(8f).FontColor(MediumGrey);
+                                t.Span("Fériés : ").FontSize(9f).FontColor(MediumGrey);
+                                t.Span($"{feries} j").Bold().FontSize(9f).FontColor(MediumGrey);
                             });
                         });
                 });
-
-                // ── Note de calcul ─────────────────────────────────────────────
-                col.Item().PaddingTop(6)
-                    .BorderTop(0.5f).BorderColor(Colors.Grey.Lighten2)
-                    .PaddingTop(6)
-                    .Text("Calcul : Présent·e = 1 jour  ·  Participation partielle = 0,5 jour d'absence  ·  Excusé·e = absence justifiée  ·  Fériés exclus.")
-                    .FontSize(7.5f).FontColor(MediumGrey).Italic();
             });
         }
 
@@ -347,8 +352,8 @@ namespace Api.Documents
         {
             container.Padding(1).Background(bgColor).Padding(10).AlignCenter().Column(c =>
             {
-                c.Item().AlignCenter().Text(value).FontSize(22).Bold().FontColor(valueColor);
-                c.Item().AlignCenter().Text(label).FontSize(9).FontColor(Color.FromHex("#4A4A4A"));
+                c.Item().AlignCenter().Text(value).FontSize(24).Bold().FontColor(valueColor);
+                c.Item().AlignCenter().Text(label).FontSize(10).FontColor(Color.FromHex("#4A4A4A"));
             });
         }
 
@@ -357,9 +362,9 @@ namespace Api.Documents
             List<(string label, double count, SKColor color)> slices,
             int total)
         {
-            const int W = 640, H = 380;
-            const float cx = 310f, cy = 190f;
-            const float r  = 130f;
+            const int W = 800, H = 475;
+            const float cx = 388f, cy = 238f;
+            const float r  = 163f;
 
             using var surface = SKSurface.Create(
                 new SKImageInfo(W, H, SKColorType.Rgba8888, SKAlphaType.Premul));
@@ -384,7 +389,9 @@ namespace Api.Documents
 
                 foreach (var (label, count, color) in slices)
                 {
-                    float sweep = (float)(count / grandTotal * 360.0);
+                    // SKPath.ArcTo dessine un arc invisible quand sweep == 360°
+                    // (le point de départ et d'arrivée coïncident) → on plafonne légèrement.
+                    float sweep = Math.Min(359.99f, (float)(count / grandTotal * 360.0));
                     var rect = new SKRect(cx - r, cy - r, cx + r, cy + r);
 
                     using var fill = new SKPaint
@@ -415,11 +422,11 @@ namespace Api.Documents
 
                     float p1x = cx + r * cosA;
                     float p1y = cy + r * sinA;
-                    float p2x = cx + (r + 28f) * cosA;
-                    float p2y = cy + (r + 28f) * sinA;
+                    float p2x = cx + (r + 35f) * cosA;
+                    float p2y = cy + (r + 35f) * sinA;
 
                     bool right = cosA >= 0;
-                    float p3x = right ? p2x + 26f : p2x - 26f;
+                    float p3x = right ? p2x + 33f : p2x - 33f;
                     float p3y = p2y;
 
                     using var line = new SKPaint
@@ -433,7 +440,7 @@ namespace Api.Documents
                     using var txt = new SKPaint
                     {
                         Color = new SKColor(50, 50, 50), IsAntialias = true,
-                        TextSize = 19f, TextAlign = right ? SKTextAlign.Left : SKTextAlign.Right
+                        TextSize = 26f, TextAlign = right ? SKTextAlign.Left : SKTextAlign.Right
                     };
                     canvas.DrawText(label, right ? p3x + 4f : p3x - 4f, p3y + 7f, txt);
                 }
@@ -457,5 +464,8 @@ namespace Api.Documents
 
         private static string N(string statut)
             => string.IsNullOrWhiteSpace(statut) ? "p" : statut.Trim().ToLower();
+
+        private static string Plural(double n, string singular, string plural)
+            => n <= 1 ? singular : plural;
     }
 }

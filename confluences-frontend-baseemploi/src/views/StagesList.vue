@@ -31,7 +31,7 @@
         class="stage-table"
         @click:row="selectRow"
         @update:items-per-page="updateNumberItems"
-        :options.sync="options"
+        v-model:page="page"
         mobile-breakpoint="0"
       >
         <template v-slot:top>
@@ -88,6 +88,17 @@
           </span>
         </template>
 
+        <template v-slot:item.typeAnnonce.libelle="{ item }">
+          <v-chip
+            small
+            :color="isAnnonce(item) ? 'red' : 'grey lighten-3'"
+            :text-color="isAnnonce(item) ? 'white' : 'grey darken-3'"
+            :class="{ 'font-weight-bold': isAnnonce(item) }"
+          >
+            {{ item.typeAnnonce.libelle }}
+          </v-chip>
+        </template>
+
         <template v-slot:item.documents="{ item }">
           <v-btn
             small
@@ -127,7 +138,7 @@ const router = useRouter();
 
 // --- État Réactif ---
 const search = ref('');
-const options = ref({}); 
+const page = ref(1);
 
 // --- Computed Properties ---
 const stage = computed(() => store.state.stage);
@@ -172,12 +183,12 @@ onBeforeMount(() => {
 
 // Hook de navigation de sortie (sauvegarde la page actuelle)
 onBeforeRouteLeave((routeTo, routeFrom, next) => {
-    store.dispatch('settings/setCurrentPageStage', { number: options.value.page });
+    store.dispatch('settings/setCurrentPageStage', { number: page.value });
     next();
 });
 
 // Initialisation (simule le 'created')
-options.value.page = store.state.settings.currentPageStage;
+page.value = store.state.settings.currentPageStage;
 
 // --- Méthodes ---
 const selectRow = (event, row) => {
@@ -196,7 +207,11 @@ const updateNumberItems = (event) => {
 };
 
 const updatePageSearch = () => {
-    options.value.page = 1;
+    page.value = 1;
+};
+
+const isAnnonce = (item) => {
+    return item.typeAnnonce && item.typeAnnonce.libelle === 'Annoncé';
 };
 
 const formatDate = (value) => {

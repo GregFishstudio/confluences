@@ -1,49 +1,55 @@
-<!--  
+<!--
   Projet: Gestion des stagiaires
   Migration Vue 3 + Vuetify 3
   Fichier : StageFileList.vue
 -->
 
 <template>
-  <v-card class="mx-auto" outlined>
-    <v-list>
-      <v-subheader>
-        Fichiers
-        <v-spacer></v-spacer>
-        <CreateStageFile :stageId="stage.stageId" />
-      </v-subheader>
+  <v-card class="pa-4 elevation-2 rounded-lg" outlined>
+    <div class="d-flex align-center mb-4">
+      <v-icon start color="primary">mdi-paperclip</v-icon>
+      <span class="text-subtitle-1 font-weight-bold">Fichiers</span>
+      <v-spacer></v-spacer>
+      <CreateStageFile :stageId="stage.stageId" />
+    </div>
 
-      <v-table v-if="stage.stageFiles.length > 0" class="mt-2">
-        <thead>
-          <tr>
-            <th class="text-left">Nom</th>
-            <th class="text-left">Actions</th>
-          </tr>
-        </thead>
+    <v-row v-if="stage.stageFiles.length > 0" dense>
+      <v-col
+        v-for="(item, i) in stage.stageFiles"
+        :key="i"
+        cols="12"
+        sm="6"
+        md="4"
+        lg="3"
+      >
+        <v-card
+          class="file-card d-flex align-center pa-3"
+          variant="outlined"
+          rounded="lg"
+          @click="downloadFile(item.stageFileId)"
+        >
+          <v-icon color="primary" size="28" class="mr-3">mdi-file-document-outline</v-icon>
 
-        <tbody>
-          <tr
-            v-for="(item, i) in stage.stageFiles"
-            :key="i"
-            @click="downloadFile(item.stageFileId)"
-            class="file-row"
+          <span class="text-body-2 file-name">{{ item.fileName }}</span>
+
+          <v-spacer></v-spacer>
+
+          <v-icon
+            color="red"
+            size="20"
+            style="cursor: pointer"
+            @click.stop="deleteStageFile(item.stageFileId)"
           >
-            <td>{{ item.fileName }}</td>
+            mdi-delete-outline
+          </v-icon>
+        </v-card>
+      </v-col>
+    </v-row>
 
-            <td @click.stop>
-              <v-icon
-                color="red"
-                class="mr-2"
-                style="cursor: pointer"
-                @click="deleteStageFile(item.stageFileId)"
-              >
-                mdi-delete
-              </v-icon>
-            </td>
-          </tr>
-        </tbody>
-      </v-table>
-    </v-list>
+    <div v-else class="pa-6 text-center">
+      <v-icon size="36" color="grey lighten-1" class="mb-2">mdi-folder-open-outline</v-icon>
+      <p class="text-body-2 text-medium-emphasis mb-0">Aucun fichier attaché à ce stage.</p>
+    </div>
   </v-card>
 </template>
 
@@ -114,11 +120,19 @@ export default {
 </script>
 
 <style scoped>
-.file-row {
+.file-card {
   cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.file-row:hover {
-  background: #f5f5f5;
+.file-card:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.file-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

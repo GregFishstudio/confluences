@@ -33,6 +33,7 @@ import * as typeJobSearchAssistanceOccurrence from '@/store/modules/typeJobSearc
 import * as jobSearchAssistance from '@/store/modules/jobSearchAssistance.js'
 import * as stageFile from '@/store/modules/stageFile.js'
 import * as session from '@/store/modules/session.js'
+import * as marrainage from '@/store/modules/marrainage.js'
 
 // --- Création du store ---
 const store = createStore({
@@ -66,6 +67,7 @@ const store = createStore({
     jobSearchAssistance,
     stageFile,
     session,
+    marrainage,
   },
 })
 

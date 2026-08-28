@@ -30,6 +30,60 @@ namespace Confluences.Domain.Entities
         public int? CurrentSessionNumber { get; set; }
         public int? CurrentSessionYear { get; set; }
 
+        // --- Fiche participant : informations générales (saisie manuelle) ---
+        public bool ContratMaori { get; set; }
+        public string? EtatCivil { get; set; }
+        public int? NombreEnfants { get; set; }
+        public string? Adresse { get; set; }
+        public string? BeneficiaireDe { get; set; }
+        public string? AssistantSocialEmail { get; set; }
+        public int? AnneeArriveeSuisse { get; set; }
+        public string? AutresLangues { get; set; }
+
+        // --- Fiche participant : champs libres formatrices ---
+        public string? ParcoursDepuisArriveeSuisse { get; set; }
+        public string? ParcoursFormationSuisse { get; set; }
+        public string? DomaineEtudeTitreObtenu { get; set; }
+        public string? ParcoursProfessionnel { get; set; }
+        public string? BesoinsSouhaitsFrancais { get; set; }
+        public string? Autre { get; set; }
+
+        public string? PlusHautesEtudes { get; set; }
+        public string? PlusHautesEtudesCommentaire { get; set; }
+
+        public bool? ActiviteProfSuisse { get; set; }
+        public string? ActiviteProfSuisseCommentaire { get; set; }
+
+        public bool? RechercheLogement { get; set; }
+        public string? RechercheLogementCommentaire { get; set; }
+
+        public bool? BesoinsSouhaitsStages { get; set; }
+        public string? BesoinsSouhaitsStagesCommentaire { get; set; }
+
+        public bool? BesoinsSouhaitsBenevolat { get; set; }
+        public string? BesoinsSouhaitsBenevoletCommentaire { get; set; }
+
+        // --- Fiche participant : fin de session ---
+        public string? NiveauDebutContrat { get; set; }
+        public string? NiveauFinContrat { get; set; }
+        public DateTime? ProfilUpdatedAt { get; set; }
+        // Nom "à plat" (pas de navigation FK vers soi-même) de la formatrice ayant fait la
+        // dernière modification du bloc "Suivi formatrices" — évite un self-join pour un simple
+        // affichage "mis à jour le ... par ...".
+        public string? ProfilUpdatedByName { get; set; }
+
+        [InverseProperty(nameof(ParticipantFile.Student))]
+        public virtual ICollection<ParticipantFile>? ParticipantFiles { get; set; }
+
+        [InverseProperty(nameof(Marrainage.Participant))]
+        public virtual ICollection<Marrainage>? Marrainages { get; set; }
+
+        [InverseProperty(nameof(MarrainageParticipant.Participant))]
+        public virtual ICollection<MarrainageParticipant>? MarrainageParticipants { get; set; }
+
+        [InverseProperty(nameof(MarrainageComment.Author))]
+        public virtual ICollection<MarrainageComment>? MarrainageComments { get; set; }
+
         public virtual ICollection<ApplicationUserClaim>? Claims { get; set; }
         public virtual ICollection<ApplicationUserLogin>? Logins { get; set; }
         public virtual ICollection<ApplicationUserToken>? Tokens { get; set; }

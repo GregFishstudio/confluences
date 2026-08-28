@@ -65,6 +65,52 @@ const routes = [
   },
   { path: '/calendrier', name: 'calendrier', component: () => import('@/views/CalendrierView.vue') },
   { path: '/participants', name: 'Participants', component: () => import('@/views/ParticipantView.vue') },
+  {
+    path: '/participants/:id',
+    name: 'Participant-Detail',
+    component: () => import('@/views/ParticipantDetailView.vue'),
+    meta: { requiresAuth: true },
+    props: true
+  },
+
+  // Marrainage
+  {
+    path: '/marrainages',
+    name: 'Marrainages',
+    component: () => import('@/views/MarrainagesList.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/marrainage/nouveau',
+    name: 'Marrainage-Nouveau',
+    component: () => import('@/views/MarrainageEdit.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/marrainage/modifier/:id',
+    name: 'Marrainage-Modifier',
+    component: () => import('@/views/MarrainageEdit.vue'),
+    meta: { requiresAuth: true },
+    props: true,
+    beforeEnter: (routeTo, routeFrom, next) => {
+      store.dispatch('marrainage/fetchMarrainage', routeTo.params.id)
+        .then(marrainage => {
+          if (marrainage == undefined) {
+            next({ name: '404', params: { resource: 'marrainage' } })
+          } else {
+            routeTo.params.marrainage = marrainage
+            next()
+          }
+        })
+        .catch(error => {
+          if (error.response && error.response.status == 404) {
+            next({ name: '404', params: { resource: 'marrainage' } })
+          } else {
+            next(routeFrom)
+          }
+        })
+    }
+  },
    {
     path: '/home',
     name: 'Home',

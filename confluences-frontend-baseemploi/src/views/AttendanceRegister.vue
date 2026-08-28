@@ -164,9 +164,9 @@
                 v-memo="[presenceCache, ratesByPart, user.id, currentPartIndex, navSessionIndex, selectedCells.size, selectionMode, activeCell]">
                 <td class="sticky-col name-col">
                   <div class="user-info">
-                    <div class="name">{{ user.nom }} {{ user.prenom }}</div>
+                    <div class="name participant-name-link" @click="openParticipantPage(user)">{{ user.nom }} {{ user.prenom }}</div>
                     <div class="trigramme">{{ user.userName || user.username }}</div>
-                    <div class="text-caption font-weight-bold text-medium-emphasis">{{ user.niveau }}</div>
+                    <div class="text-caption font-weight-bold text-medium-emphasis">{{ getNiveauForSession(user) }}</div>
                     <div class="text-caption font-weight-bold text-primary">{{ getUserSessionInfo(user) }}</div>
                     <div class="text-caption text-primary clickable-date" @click="openStartDateModal(user)">
                       <v-icon size="x-small" color="primary">mdi-calendar-start</v-icon>
@@ -711,7 +711,14 @@ function onTabChange() {
   selectionMode.value = false
   selectedCells.value = new Set()
   activeCell.value    = null
-  initializeNav()
+  // Conserve la session/partie affichée plutôt que de revenir à "aujourd'hui" :
+  // on ne fait que recaler l'index si le nouveau groupe a moins de sessions/parties.
+  const sessions = activeGroupSessions.value
+  if (!sessions.length) { navSessionIndex.value = 0; currentPartIndex.value = 0; fetchAttendancesForPeriod(); return }
+  navSessionIndex.value = Math.min(navSessionIndex.value, sessions.length - 1)
+  const parts = currentSessionParts.value
+  currentPartIndex.value = Math.min(currentPartIndex.value, Math.max(parts.length - 1, 0))
+  fetchAttendancesForPeriod()
 }
 
 function initializeNav() {
@@ -759,8 +766,8 @@ function isJourFerie(fd) { return periodDayMeta.value[fd]?.isFerie ?? false }
 function isVacance(fd)   { return periodDayMeta.value[fd]?.isVac   ?? false }
 
 // ─── Groupes / filtrage ───────────────────────────────────────────────────────
-function getUserSessionInfo(user) {
-  const link = allSessionLinks.value.find(l => {
+function findSessionLink(user) {
+  return allSessionLinks.value.find(l => {
     const uid = l.studentId || l.StudentId
     const s   = l.session || l.Session
     if (String(uid).toLowerCase() !== String(user.id).toLowerCase() || !s) return false
@@ -768,8 +775,23 @@ function getUserSessionInfo(user) {
     const n = s.sessionNumberId || s.SessionNumberId
     return Number(y) === currentYear.value && Number(n) === currentQuarter.value
   })
+}
+
+function getUserSessionInfo(user) {
+  const link = findSessionLink(user)
   const s = link?.session || link?.Session
   return s ? `Session ${s.sessionNumberId || s.SessionNumberId}` : ''
+}
+
+// Niveau (F&I A1/A2/Télécours) tel qu'il était PENDANT la session affichée,
+// et non le niveau courant du stagiaire (qui peut avoir changé depuis) —
+// on lit la classe (SchoolClassRoom) rattachée au lien de session correspondant.
+function getNiveauForSession(user) {
+  const link  = findSessionLink(user)
+  const s     = link?.session || link?.Session
+  const room  = s?.schoolClassRoom || s?.SchoolClassRoom
+  const name  = room?.schoolClassRoomName || room?.SchoolClassRoomName
+  return name || user.niveau || user.Niveau || ''
 }
 
 function matchesGroup(user, groupValue) {
@@ -786,7 +808,7 @@ function matchesGroup(user, groupValue) {
     return Number(y) === currentYear.value && Number(n) === currentQuarter.value
   })
   if (!hasActive) return false
-  const niveau      = (user.niveau || user.Niveau || '').toLowerCase().trim()
+  const niveau      = getNiveauForSession(user).toLowerCase().trim()
   const isTelecours = niveau.includes('tele') || niveau.includes('télé')
   if (groupValue === 'telecours') return isTelecours
   if (groupValue === 'fi_a1')    return !isTelecours && niveau.includes('a1')
@@ -1133,6 +1155,10 @@ function isBeforeParticipation(user, dateString) {
   const cell  = moment(dateString, 'ddd MMM DD YYYY', 'en').startOf('day')
   const start = moment(raw).startOf('day')
   return cell.isValid() && start.isValid() && cell.isBefore(start, 'day')
+}
+function openParticipantPage(user) {
+  const resolved = router.resolve({ name: 'Participant-Detail', params: { id: user.id } })
+  window.open(resolved.href, '_blank')
 }
 function openStartDateModal(user) {
   editingUser.value  = user
@@ -1492,6 +1518,8 @@ async function fetchAttendancesForPeriod() {
 .user-info .name      { font-weight: bold; color: #2c3e50; }
 .user-info .trigramme { font-size: 0.72rem; color: #999; text-transform: uppercase; }
 .clickable-date:hover { text-decoration: underline; background: rgba(0,0,0,0.04); border-radius: 4px; }
+.participant-name-link { cursor: pointer; }
+.participant-name-link:hover { text-decoration: underline; color: #1976D2; }
 .rate-inner { display: flex; flex-direction: column; align-items: center; }
 .merged-cell { font-size: 0.7rem !important; font-weight: 700 !important; letter-spacing: 0.03em; }
 .today-header { background: #FFF9C4 !important; }

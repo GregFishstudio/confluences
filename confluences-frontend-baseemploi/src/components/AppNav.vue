@@ -19,10 +19,10 @@
     </div>
 
     <v-list density="comfortable" nav class="px-4">
-      <v-list-subheader class="text-uppercase font-weight-bold text-caption">Menu Participants</v-list-subheader>
+      <v-list-subheader class="text-uppercase font-weight-bold text-caption">Menu Mesures</v-list-subheader>
 
       <v-list-item
-        v-for="link in internalLinks2"
+        v-for="link in mesuresLinks"
         :key="link.label"
         :to="{ name: link.routeName }"
         :prepend-icon="link.icon"
@@ -33,10 +33,10 @@
         variant="flat"
       />
 
-      <v-list-subheader class="text-uppercase font-weight-bold text-caption">Menu Stagiaire</v-list-subheader>
-      
+      <v-list-subheader class="text-uppercase font-weight-bold text-caption">Menu Participant-e-s</v-list-subheader>
+
       <v-list-item
-        v-for="link in internalLinks"
+        v-for="link in participantsLinks"
         :key="link.label"
         :to="{ name: link.routeName }"
         :prepend-icon="link.icon"
@@ -46,7 +46,36 @@
         class="mb-2 menu-item"
         variant="flat"
       />
+
+      <v-list-subheader class="text-uppercase font-weight-bold text-caption">Menu Insertion</v-list-subheader>
+
+      <v-list-item
+        v-for="link in insertionLinks"
+        :key="link.label"
+        :to="{ name: link.routeName }"
+        :prepend-icon="link.icon"
+        :title="link.label"
+        link
+        color="primary"
+        class="mb-2 menu-item"
+        variant="flat"
+      />
+
       <v-list-subheader class="text-uppercase font-weight-bold text-caption">Menu Marrainage</v-list-subheader>
+
+      <v-list-item
+        v-for="link in marrainageLinks"
+        :key="link.label"
+        :to="{ name: link.routeName }"
+        :prepend-icon="link.icon"
+        :title="link.label"
+        link
+        color="primary"
+        class="mb-2 menu-item"
+        variant="flat"
+      />
+
+      <v-list-subheader class="text-uppercase font-weight-bold text-caption">Menu Configuration</v-list-subheader>
 
       <v-list-group v-if="loggedIn" value="config">
         <template #activator="{ props }">
@@ -100,9 +129,9 @@
   </div>
 
   <v-list nav class="pa-4">
-    <v-list-subheader class="text-uppercase font-weight-bold text-caption">Menu Participants</v-list-subheader>
+    <v-list-subheader class="text-uppercase font-weight-bold text-caption">Menu Mesures</v-list-subheader>
     <v-list-item
-      v-for="link in internalLinks2"
+      v-for="link in mesuresLinks"
       :key="link.label"
       :to="{ name: link.routeName }"
       :prepend-icon="link.icon"
@@ -111,9 +140,9 @@
       @click="mobileDrawer = false"
     />
 
-    <v-list-subheader class="text-uppercase font-weight-bold text-caption mt-2">Menu Stagiaire</v-list-subheader>
+    <v-list-subheader class="text-uppercase font-weight-bold text-caption mt-2">Menu Participant-e-s</v-list-subheader>
     <v-list-item
-      v-for="link in internalLinks"
+      v-for="link in participantsLinks"
       :key="link.label"
       :to="{ name: link.routeName }"
       :prepend-icon="link.icon"
@@ -122,7 +151,29 @@
       @click="mobileDrawer = false"
     />
 
-    <v-list-subheader class="text-uppercase font-weight-bold text-caption mt-2">Configuration</v-list-subheader>
+    <v-list-subheader class="text-uppercase font-weight-bold text-caption mt-2">Menu Insertion</v-list-subheader>
+    <v-list-item
+      v-for="link in insertionLinks"
+      :key="link.label"
+      :to="{ name: link.routeName }"
+      :prepend-icon="link.icon"
+      :title="link.label"
+      color="primary"
+      @click="mobileDrawer = false"
+    />
+
+    <v-list-subheader class="text-uppercase font-weight-bold text-caption mt-2">Menu Marrainage</v-list-subheader>
+    <v-list-item
+      v-for="link in marrainageLinks"
+      :key="link.label"
+      :to="{ name: link.routeName }"
+      :prepend-icon="link.icon"
+      :title="link.label"
+      color="primary"
+      @click="mobileDrawer = false"
+    />
+
+    <v-list-subheader class="text-uppercase font-weight-bold text-caption mt-2">Menu Configuration</v-list-subheader>
     <v-list-item
       v-for="cLink in configurationLinks"
       :key="cLink.label"
@@ -219,24 +270,26 @@ onMounted(async () => {
   }
 })
 
-// Liens de Navigation Internes
-const internalLinks = [
-  { label: 'Entreprises', routeName: 'Entreprises', icon: 'mdi-office-building-outline', external: false },
-  { label: 'Expériences professionnelles', routeName: 'Stages', icon: 'mdi-briefcase-outline', external: false },
-  { label: 'Stages par stagiaire', routeName: 'Stagiaires', icon: 'mdi-account-hard-hat', external: false },
-  { label: 'Contacts', routeName: 'Contacts', icon: 'mdi-card-account-mail', external: false },
-  { label: 'ARE', routeName: 'JobSearchAssistances', icon: 'mdi-account-cash', external: false },
- 
-]
-
-const internalLinks2 = [
- 
+// Menu Mesures : cours suivis chez nous
+const mesuresLinks = [
   { label: 'Fiche de présence', routeName: 'AttendanceRegister', icon: 'mdi-calendar-check', external: false },
   { label: 'Accomp. & Ateliers', routeName: 'AteliersFollowUp', icon: 'mdi-progress-check', external: false },
   { label: 'Bilans & attestations', routeName: 'StagiairesFollowUp', icon: 'mdi-account-eye', external: false },
   { label: 'Calendrier de formation', routeName: 'calendrier', icon: 'mdi-calendar-edit',  external: false },
-  { label: 'Participants', routeName: 'Participants', icon: 'mdi-account',  external: false },
+]
 
+// Menu Participant-e-s : infos relatives aux participant·e·s
+const participantsLinks = [
+  { label: 'Liste des participant·e·s', routeName: 'Participants', icon: 'mdi-account',  external: false },
+  { label: 'Expériences professionnelles', routeName: 'Stages', icon: 'mdi-briefcase-outline', external: false },
+  { label: 'Stages par stagiaire', routeName: 'Stagiaires', icon: 'mdi-account-hard-hat', external: false },
+]
+
+// Menu Insertion : insertion socio-professionnelle
+const insertionLinks = [
+  { label: 'Entreprises', routeName: 'Entreprises', icon: 'mdi-office-building-outline', external: false },
+  { label: 'Contacts', routeName: 'Contacts', icon: 'mdi-card-account-mail', external: false },
+  { label: 'ARE', routeName: 'JobSearchAssistances', icon: 'mdi-account-cash', external: false },
 ]
 
 // Nouveau Lien de Navigation Externe
@@ -246,6 +299,11 @@ const externalLink = {
   icon: 'mdi-web', 
   external: true 
 }
+
+const marrainageLinks = [
+  { label: 'Liste des marrainages', routeName: 'Marrainages', icon: 'mdi-account-heart-outline', external: false },
+  { label: 'Nouveau marrainage', routeName: 'Marrainage-Nouveau', icon: 'mdi-account-plus-outline', external: false },
+]
 
 const configurationLinks = [
   { label: 'Affiliations', routeName: 'Affiliations' },
@@ -262,7 +320,7 @@ const configurationLinks = [
 ]
 
 // Affiche les liens internes + le lien externe si l'utilisateur est connecté
-const visibleLinks = computed(() => (loggedIn.value ? [...internalLinks, externalLink] : []))
+const visibleLinks = computed(() => (loggedIn.value ? [...insertionLinks, externalLink] : []))
 </script>
 
 <style scoped>
