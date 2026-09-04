@@ -1268,6 +1268,24 @@ namespace IdentityServerAspNetIdentity.Migrations
                     b.ToTable("MarrainageFiles");
                 });
 
+            modelBuilder.Entity("Confluences.Domain.Entities.MarrainageInactivityReason", b =>
+                {
+                    b.Property<int>("MarrainageInactivityReasonId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MarrainageInactivityReasonId"));
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("MarrainageInactivityReasonId");
+
+                    b.ToTable("MarrainageInactivityReasons");
+                });
+
             modelBuilder.Entity("Confluences.Domain.Entities.MarrainageParticipant", b =>
                 {
                     b.Property<int>("MarrainageId")

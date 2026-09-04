@@ -44,6 +44,7 @@ namespace IdentityServerAspNetIdentity
             });
 
             services.AddControllersWithViews();
+            services.AddRazorPages();
 
             //services.AddDbContext<ConfluencesDbContext>(options =>
             //    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
@@ -113,6 +114,7 @@ namespace IdentityServerAspNetIdentity
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapDefaultControllerRoute();
+                endpoints.MapRazorPages();
             });
         }
     }

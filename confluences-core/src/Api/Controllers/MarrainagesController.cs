@@ -115,6 +115,10 @@ namespace Api.Controllers
                     ApplyIfNotEmpty(v => match.RemarqueParrain = v, incoming.RemarqueParrain);
                     ApplyIfNotEmpty(v => match.Commune = v, incoming.Commune);
                     ApplyIfNotEmpty(v => match.Email = v, incoming.Email);
+                    ApplyIfNotEmpty(v => match.EtatCivil = v, incoming.EtatCivil);
+                    ApplyIfNotEmpty(v => match.Profession = v, incoming.Profession);
+                    if (incoming.DateNaissance.HasValue) match.DateNaissance = incoming.DateNaissance;
+                    if (incoming.Age.HasValue) match.Age = incoming.Age;
                     ApplyIfNotEmpty(v => match.PeriodeDemande = v, incoming.PeriodeDemande);
                     ApplyIfNotEmpty(v => match.FilleulNom = v, incoming.FilleulNom);
                     ApplyIfNotEmpty(v => match.TelephoneFilleul = v, incoming.TelephoneFilleul);

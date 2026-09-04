@@ -112,31 +112,46 @@ namespace Api.Controllers
         }
 
         // ── RÉSUMÉ DES ACTIVITÉS POUR LE BILAN ───────────────────────────────
-        // GET /api/accompanying/summary/{userId}?year=2026&quarter=1
-        // Retourne les activités (label, type, count) sur le trimestre calendaire.
+        // GET /api/accompanying/summary/{userId}?year=2026&quarter=1&startDate=&endDate=
+        // Retourne les activités (label, type, count) sur la période demandée.
+        // startDate/endDate (dates réelles de la session, ex. link.session.dateStart/dateEnd)
+        // sont prioritaires quand fournies ; sinon on retombe sur le trimestre calendaire, qui
+        // ne correspond en général PAS aux vraies dates d'une session (fallback grossier).
 
         [HttpGet("summary/{userId}")]
         public async Task<IActionResult> GetSummary(
             string userId,
             [FromQuery] int year,
-            [FromQuery] string quarter)
+            [FromQuery] string quarter,
+            [FromQuery] string startDate = null,
+            [FromQuery] string endDate = null)
         {
-            // Normaliser "T1" → 1
-            if (!quarter.StartsWith("T")) quarter = $"T{quarter}";
-            int q = int.TryParse(quarter.Replace("T", ""), out var n)
-                ? Math.Max(1, Math.Min(4, n))
-                : 1;
+            DateTime periodStart, periodEnd;
+            if (!string.IsNullOrEmpty(startDate) && !string.IsNullOrEmpty(endDate)
+                && DateTime.TryParse(startDate, out var s) && DateTime.TryParse(endDate, out var e))
+            {
+                periodStart = s.Date;
+                periodEnd   = e.Date;
+            }
+            else
+            {
+                // Normaliser "T1" → 1
+                if (!quarter.StartsWith("T")) quarter = $"T{quarter}";
+                int q = int.TryParse(quarter.Replace("T", ""), out var n)
+                    ? Math.Max(1, Math.Min(4, n))
+                    : 1;
 
-            // Dates du trimestre calendaire (fallback unique — pas de SessionFormation)
-            var startDate = new DateTime(year, (q - 1) * 3 + 1, 1);
-            var endDate   = startDate.AddMonths(3).AddDays(-1);
+                // Dates du trimestre calendaire (fallback grossier — pas de SessionFormation)
+                periodStart = new DateTime(year, (q - 1) * 3 + 1, 1);
+                periodEnd   = periodStart.AddMonths(3).AddDays(-1);
+            }
 
             // Agrégation des présences par activité
             var presences = await _context.AccompanyingPresences
                 .Where(ap =>
                     ap.UserId == userId &&
-                    ap.Date   >= startDate &&
-                    ap.Date   <= endDate)
+                    ap.Date   >= periodStart &&
+                    ap.Date   <= periodEnd)
                 .GroupBy(ap => ap.ActivityName)
                 .Select(g => new { ActivityKey = g.Key, Count = g.Count() })
                 .ToListAsync();

@@ -78,6 +78,7 @@ namespace Confluences.Persistence
         public virtual DbSet<MarrainageQuestion> MarrainageQuestions => Set<MarrainageQuestion>();
         public virtual DbSet<MarrainageAnswer> MarrainageAnswers => Set<MarrainageAnswer>();
         public virtual DbSet<FieldChangeHistory> FieldChangeHistories => Set<FieldChangeHistory>();
+        public virtual DbSet<MarrainageInactivityReason> MarrainageInactivityReasons => Set<MarrainageInactivityReason>();
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

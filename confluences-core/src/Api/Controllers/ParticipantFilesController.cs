@@ -1,3 +1,4 @@
+using Api.Utility;
 using Confluences.Domain.Entities;
 using Confluences.Persistence;
 using Microsoft.AspNetCore.Authorization;
@@ -39,6 +40,9 @@ namespace Api.Controllers
         [HttpPost]
         public async Task<ActionResult<ParticipantFile>> PostParticipantFile(IFormFile file, [FromForm] string studentId, [FromForm] string? category)
         {
+            if (!AllowedDocumentTypes.IsAllowed(file))
+                return BadRequest($"Format de fichier non accepté. Formats autorisés : {AllowedDocumentTypes.AllowedExtensionsLabel}");
+
             var participantFile = new ParticipantFile()
             {
                 FileName = file.FileName,
