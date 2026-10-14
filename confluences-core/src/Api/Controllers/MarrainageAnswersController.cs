@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -40,8 +42,14 @@ namespace Api.Controllers
             var existing = _context.MarrainageAnswers.Where(a => a.MarrainageId == dto.MarrainageId);
             _context.MarrainageAnswers.RemoveRange(existing);
 
+            if (!await _context.Marrainages.AnyAsync(m => m.MarrainageId == dto.MarrainageId)) return NotFound();
+
+            // Une réponse à une question supprimée entre-temps faisait échouer tout l'enregistrement
+            // (clé étrangère) : on l'ignore.
+            var questionIds = (await _context.MarrainageQuestions.Select(q => q.MarrainageQuestionId).ToListAsync()).ToHashSet();
+
             var answers = dto.Answers
-                .Where(a => !string.IsNullOrWhiteSpace(a.Value))
+                .Where(a => !string.IsNullOrWhiteSpace(a.Value) && questionIds.Contains(a.QuestionId))
                 .Select(a => new MarrainageAnswer
                 {
                     MarrainageId = dto.MarrainageId,
@@ -51,6 +59,18 @@ namespace Api.Controllers
                 .ToList();
 
             _context.MarrainageAnswers.AddRange(answers);
+
+            // Trace qui a rempli le questionnaire, et quand (affiché à côté des réponses).
+            var marrainage = await _context.Marrainages.FindAsync(dto.MarrainageId);
+            if (marrainage != null)
+            {
+                var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var author = authorId != null ? await _context.Users.FindAsync(authorId) : null;
+                marrainage.QuestionnaireSaisiPar = author != null ? $"{author.Firstname} {author.LastName}".Trim() : null;
+                marrainage.QuestionnaireSaisiLe = DateTime.UtcNow;
+                marrainage.UpdatedAt = DateTime.UtcNow;
+            }
+
             await _context.SaveChangesAsync();
 
             return answers;

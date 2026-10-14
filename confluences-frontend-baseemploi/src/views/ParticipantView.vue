@@ -144,6 +144,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { matchesSearch } from '@/utils/search'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import moment from 'moment/min/moment-with-locales'
@@ -218,15 +219,8 @@ const filteredUsers = computed(() => {
   }
 
   if (search.value) {
-    const s = search.value.toLowerCase()
     list = list.filter(u =>
-      (u.prenom      || '').toLowerCase().includes(s) ||
-      (u.nom         || '').toLowerCase().includes(s) ||
-      (u.email       || '').toLowerCase().includes(s) ||
-      (u.userName    || '').toLowerCase().includes(s) ||
-      (u.phoneNumber || '').toLowerCase().includes(s) ||
-      (u.nationality || '').toLowerCase().includes(s)
-    )
+      matchesSearch(search.value, u.prenom, u.nom, u.email, u.userName, u.phoneNumber, u.nationality))
   }
 
   return list

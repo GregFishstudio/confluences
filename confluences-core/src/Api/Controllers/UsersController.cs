@@ -53,6 +53,8 @@ public async Task<ActionResult<IEnumerable<object>>> GetUsers()
             nationality           = u.Nationality,
             language              = u.Language,
             dateDebutParticipation = u.DateDebutParticipation,
+            dateFinParticipation = u.DateFinParticipation,
+            raisonInterruptionMesure = u.RaisonInterruptionMesure,
             typeAffiliation       = u.TypeAffiliation == null ? null : new
             {
                 id   = u.TypeAffiliation.TypeAffiliationId,
@@ -87,7 +89,13 @@ public async Task<ActionResult<IEnumerable<object>>> GetUsers()
             if (user == null)
                 return NotFound();
 
+            // Une interruption a toujours une date et une raison.
+            if (dto.DateFinParticipation.HasValue && string.IsNullOrWhiteSpace(dto.RaisonInterruptionMesure))
+                return BadRequest("La raison de l'interruption est obligatoire.");
+
             user.DateDebutParticipation = dto.DateDebutParticipation;
+            user.DateFinParticipation = dto.DateFinParticipation;
+            user.RaisonInterruptionMesure = dto.RaisonInterruptionMesure;
 
             _context.Entry(user).State = EntityState.Modified;
 

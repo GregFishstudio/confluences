@@ -1,4 +1,5 @@
 using Api.Utility;
+using Api.ViewModel;
 using Confluences.Domain.Entities;
 using Confluences.Persistence;
 using Microsoft.AspNetCore.Authorization;
@@ -61,6 +62,25 @@ namespace Api.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetParticipantFile", new { id = participantFile.ParticipantFileId }, participantFile);
+        }
+
+        // PATCH: api/ParticipantFiles/5  { fileName: "CV 2026" }
+        // Renomme le document (intitulé affiché et nom du fichier téléchargé).
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> RenameParticipantFile(int id, [FromBody] RenameFileDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.FileName)) return BadRequest("Le nom du fichier est obligatoire.");
+
+            var participantFile = await _context.ParticipantFiles.FindAsync(id);
+            if (participantFile == null)
+            {
+                return NotFound();
+            }
+
+            participantFile.FileName = dto.Resolve(participantFile.FileName);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { participantFile.FileName });
         }
 
         // DELETE: api/ParticipantFiles/5

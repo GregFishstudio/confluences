@@ -40,6 +40,20 @@
             bg-color="white"
           />
         </v-col>
+        <v-col cols="12" md="6" class="pa-3 pa-md-6 d-flex justify-end ga-2 flex-wrap">
+          <v-btn
+            color="primary" variant="outlined" size="small" prepend-icon="mdi-download-multiple"
+            @click="downloadAllPdfs('bilan')"
+            :loading="!!downloadAllProgress" :disabled="!!downloadAllProgress || finalFilteredUsers.length === 0">
+            {{ downloadAllProgress ? `${downloadAllProgress.current}/${downloadAllProgress.total}` : 'Tous les bilans' }}
+          </v-btn>
+          <v-btn
+            color="primary" variant="outlined" size="small" prepend-icon="mdi-download-multiple"
+            @click="downloadAllPdfs('attestation')"
+            :loading="!!downloadAllProgress" :disabled="!!downloadAllProgress || finalFilteredUsers.length === 0">
+            {{ downloadAllProgress ? `${downloadAllProgress.current}/${downloadAllProgress.total}` : 'Toutes les attestations' }}
+          </v-btn>
+        </v-col>
       </v-row>
       <v-divider></v-divider>
 
@@ -50,7 +64,7 @@
           <div class="mt-2">Aucun participant trouvé.</div>
         </div>
         <v-card
-          v-for="user in finalFilteredUsers" :key="'m'+user.id"
+          v-for="user in finalFilteredUsers" :key="'m'+user.id" :data-user-id="user.id"
           class="mb-4 elevation-2" rounded="xl"
         >
           <!-- En-tête participant -->
@@ -153,7 +167,7 @@
             </thead>
 
             <tbody>
-              <tr v-for="user in finalFilteredUsers" :key="user.id">
+              <tr v-for="user in finalFilteredUsers" :key="user.id" :data-user-id="user.id">
 
                 <td class="sticky-col name-col">
                   <div class="user-info">
@@ -300,9 +314,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
+import { matchesSearch } from '@/utils/search'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import moment from 'moment/min/moment-with-locales'
 import BilanEditModal from '../components/BilanEditModal.vue'
 import API_BASE, { apiFetch } from '@/services/api'
@@ -311,6 +326,7 @@ moment.locale('fr')
 
 const store = useStore()
 const router = useRouter()
+const route = useRoute()
 
 function openParticipantPage(user) {
   const resolved = router.resolve({ name: 'Participant-Detail', params: { id: user.id } })
@@ -327,6 +343,7 @@ const periodLevelsMap      = ref({})
 const navSessionIndex      = ref(0)
 const joursFeries          = ref([])
 const periodesVacances     = ref([])
+const downloadAllProgress  = ref(null) // null | { current, total }
 
 const allSessionLinks      = ref([])
 
@@ -480,12 +497,7 @@ const finalFilteredUsers = computed(() => {
   result = result.filter(user => matchesGroup(user, filterValue))
 
   if (search.value) {
-    const s = search.value.toLowerCase()
-    result = result.filter(user =>
-      (user.nom     || '').toLowerCase().includes(s) ||
-      (user.prenom  || '').toLowerCase().includes(s) ||
-      (user.userName || '').toLowerCase().includes(s)
-    )
+    result = result.filter(user => matchesSearch(search.value, user.nom, user.prenom, user.userName))
   }
 result = result.sort((a, b) =>
     (a.nom || '').localeCompare((b.nom || ''), 'fr', { sensitivity: 'base' })
@@ -559,51 +571,53 @@ const computeRate = (user) => {
   }
 }
 
-const getCourseDetails = (user) => {
-  // Utilise le niveau normalisé qui vient du store (déjà extrait de la session la plus récente)
-  const niveau = user.niveau || ''
-  if (!niveau || niveau === 'N/A') return { mainInfo: '', subCourses: [], isUnknown: true }
-  return { mainInfo: niveau, subCourses: [], isUnknown: false }
-}
-
-const getUserSessionInfo = (user) => {
-  const activeLink = allSessionLinks.value.find(link => {
+// Retrouve le lien de session (SessionStudent) correspondant PRÉCISÉMENT à l'année/session
+// actuellement affichée — pas le niveau actuel/le plus récent du participant (`user.niveau`),
+// qui ne reflète que sa dernière classe et masquait les participant·e·s ayant changé de groupe
+// depuis (ex. passé·e·s d'A1 à A2) pour toutes leurs sessions passées dans l'ancien groupe.
+const resolveActiveLink = (user) => {
+  const userId = user.id
+  return allSessionLinks.value.find(link => {
     const linkUserId = link.studentId || link.StudentId
     const s = link.session || link.Session
-    if (String(linkUserId).toLowerCase() !== String(user.id).toLowerCase() || !s) return false
-    const year = new Date(s.dateStart || s.DateStart).getFullYear()
-    const num  = s.sessionNumberId || s.SessionNumberId
-    return Number(year) === Number(currentYear.value) &&
-           Number(num)  === Number(currentQuarter.value)
-  })
-  const s = activeLink?.session || activeLink?.Session
-  return s ? `Session ${s.sessionNumberId || s.SessionNumberId}` : ''
-}
-
-const matchesGroup = (user, groupValue) => {
-  const userId    = user.id
-  const userLinks = allSessionLinks.value.filter(link =>
-    String(link.studentId || link.StudentId).toLowerCase() === String(userId).toLowerCase()
-  )
-  if (userLinks.length === 0) return false
-
-  const hasActiveSession = userLinks.some(link => {
-    const s = link.session || link.Session
-    if (!s) return false
+    if (String(linkUserId).toLowerCase() !== String(userId).toLowerCase() || !s) return false
     const sessionYear   = new Date(s.dateStart || s.DateStart).getFullYear()
     const sessionNumber = s.sessionNumberId || s.SessionNumberId
     return Number(sessionYear) === Number(currentYear.value) &&
            Number(sessionNumber) === Number(currentQuarter.value)
   })
-  if (!hasActiveSession) return false
+}
 
-  // Niveau depuis le champ normalisé en camelCase par SET_USERS
-  const niveauUser  = (user.niveau || '').toLowerCase().trim()
-  const isTelecours = niveauUser.includes('tele') || niveauUser.includes('télé')
+const activeLinkClassName = (user) => {
+  const activeLink = resolveActiveLink(user)
+  const s = activeLink?.session || activeLink?.Session
+  const classRoom = s?.schoolClassRoom || s?.SchoolClassRoom
+  return classRoom?.schoolClassRoomName || classRoom?.SchoolClassRoomName || ''
+}
+
+const getCourseDetails = (user) => {
+  // Niveau/classe de LA SESSION consultée (pas forcément le niveau actuel du participant).
+  const niveau = activeLinkClassName(user) || user.niveau || ''
+  if (!niveau || niveau === 'N/A') return { mainInfo: '', subCourses: [], isUnknown: true }
+  return { mainInfo: niveau, subCourses: [], isUnknown: false }
+}
+
+const getUserSessionInfo = (user) => {
+  const activeLink = resolveActiveLink(user)
+  const s = activeLink?.session || activeLink?.Session
+  return s ? `Session ${s.sessionNumberId || s.SessionNumberId}` : ''
+}
+
+const matchesGroup = (user, groupValue) => {
+  const activeLink = resolveActiveLink(user)
+  if (!activeLink) return false
+
+  const className = activeLinkClassName(user).toLowerCase()
+  const isTelecours = className.includes('tele') || className.includes('télé')
 
   if (groupValue === 'telecours') return isTelecours
-  if (groupValue === 'fi_a1')    return !isTelecours && niveauUser.includes('a1')
-  if (groupValue === 'fi_a2')    return !isTelecours && niveauUser.includes('a2')
+  if (groupValue === 'fi_a1')    return !isTelecours && className.includes('a1')
+  if (groupValue === 'fi_a2')    return !isTelecours && className.includes('a2')
   if (groupValue === 'archives') return user.isArchived === true
   return false
 }
@@ -663,10 +677,13 @@ const saveLevel = async (userId, field, newLevel) => {
 const downloadPdf = async (type, user) => {
   const endpoint = type === 'bilan' ? 'bilan-session' : 'attestation-session'
   const sess = currentSession.value
+  // Le nom de classe réel de LA SESSION consultée (ex. "Télécours-A2"), pas la clé de groupe
+  // générique ('telecours') qui ne porte aucune info de niveau et faisait retomber le titre du
+  // bilan sur le niveau personnel du/de la participant·e.
   const params = new URLSearchParams({
     year:     currentYear.value,
     trimestre: currentQuarter.value,
-    mesure:   user.mesureType || '',
+    mesure:   user.courseDetails?.mainInfo || user.mesureType || '',
   })
   if (sess?.startDate) params.set('startDate', sess.startDate.substring(0, 10))
   if (sess?.endDate)   params.set('endDate',   sess.endDate.substring(0, 10))
@@ -688,6 +705,49 @@ const downloadPdf = async (type, user) => {
   } catch (e) { alert('Erreur PDF') } finally { isLoading.value = false }
 }
 
+// Télécharge, en une seule fois, le PDF (bilan ou attestation) de tous les participant·e·s
+// actuellement affiché·e·s pour la session en cours — un fichier séparé par personne.
+async function downloadAllPdfs(type) {
+  const endpoint = type === 'bilan' ? 'bilan-session' : 'attestation-session'
+  const sess = currentSession.value
+  const users = finalFilteredUsers.value
+  downloadAllProgress.value = { current: 0, total: users.length }
+
+  for (const user of users) {
+    try {
+      const params = new URLSearchParams({
+        year:      currentYear.value,
+        trimestre: currentQuarter.value,
+        mesure:    user.courseDetails?.mainInfo || user.mesureType || '',
+      })
+      if (sess?.startDate) params.set('startDate', sess.startDate.substring(0, 10))
+      if (sess?.endDate)   params.set('endDate',   sess.endDate.substring(0, 10))
+      const url = `${API_BASE}/api/documents/${endpoint}/${user.id}?${params}`
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` } })
+      if (res.ok) {
+        const blob    = await res.blob()
+        const blobUrl = window.URL.createObjectURL(blob)
+        const link    = document.createElement('a')
+        link.href     = blobUrl
+        link.download = `${type}-${user.nom}-${currentYear.value}-T${currentQuarter.value}.pdf`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(blobUrl)
+        await new Promise(r => setTimeout(r, 600))
+      } else if (res.status === 404 && type === 'bilan') {
+        console.warn(`[DownloadAll] Aucun bilan pour ${user.nom} — skip`)
+      } else {
+        console.error(`[DownloadAll] Erreur HTTP ${res.status} pour ${user.nom}`)
+      }
+    } catch (e) {
+      console.error(`[DownloadAll] Exception pour ${user.nom}:`, e)
+    }
+    downloadAllProgress.value.current++
+  }
+  downloadAllProgress.value = null
+}
+
 function initSessionIndex() {
   const today    = moment()
   const sessions = activeGroupSessions.value
@@ -707,7 +767,14 @@ const nextQuarter = () => {
   if (navSessionIndex.value < activeGroupSessions.value.length - 1) { navSessionIndex.value++; fetchDataForPeriod() }
 }
 
-const onTabChange = () => { initSessionIndex(); fetchDataForPeriod() }
+// Change de groupe SANS changer de session : conserve le même numéro de session (ex. reste
+// sur "Session 2" en passant d'A1 à A2) plutôt que de resauter sur la session en cours du jour.
+const onTabChange = () => {
+  const desiredSessionNumber = navSessionIndex.value + 1
+  const maxIndex = Math.max(0, activeGroupSessions.value.length - 1)
+  navSessionIndex.value = Math.min(Math.max(0, desiredSessionNumber - 1), maxIndex)
+  fetchDataForPeriod()
+}
 
 const openBilanModal = (user) => {
   selectedUser.value = { ...user, mesureType: user.mesureType }
@@ -717,28 +784,59 @@ const openBilanModal = (user) => {
 const handleBilanSaved = () => { bilanModalVisible.value = false; fetchDataForPeriod() }
 const getRateClass = (r) => r >= 80 ? 'text-success' : r >= 50 ? 'text-warning' : 'text-error'
 
+// Arrivée depuis la fiche participant (?studentId=&group=&quarter=) : sélectionne le bon
+// groupe/session puis fait défiler jusqu'à la ligne du/de la participant·e concerné·e.
+function applyDeepLinkFromQuery() {
+  const { studentId, group, quarter } = route.query
+  if (!studentId || !group || !quarter) return false
+
+  const idx = tabOptions.findIndex(t => t.value === group)
+  if (idx < 0) return false
+  activeTab.value = idx
+  navSessionIndex.value = Math.max(0, Number(quarter) - 1)
+  search.value = ''
+
+  nextTick(() => {
+    const el = document.querySelector(`[data-user-id="${studentId}"]`)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      el.classList.add('deep-link-highlight')
+      setTimeout(() => el.classList.remove('deep-link-highlight'), 3000)
+    }
+  })
+  return true
+}
+
 onMounted(async () => {
   joursFeries.value      = JSON.parse(localStorage.getItem('joursFeries')      || '[]')
   periodesVacances.value = JSON.parse(localStorage.getItem('periodesVacances') || '[]')
 
   try { await store.dispatch('user/fetchUsers', true) } catch (e) { console.error('Erreur chargement users:', e) }
 
-  // Auto-sélectionner l'onglet du groupe selon le formateur connecté
-  const storedUser   = JSON.parse(localStorage.getItem('user') || '{}')
-  const prefUsername = (storedUser.profile?.preferred_username || '').toLowerCase()
-  const defaultGroup = FORMATEUR_GROUPS[prefUsername]
-  if (defaultGroup) {
-    const idx = tabOptions.findIndex(t => t.value === defaultGroup)
-    if (idx >= 0) activeTab.value = idx
+  await Promise.all([loadAllSessionLinks(), loadCalendrier()])
+
+  if (!applyDeepLinkFromQuery()) {
+    // Auto-sélectionner l'onglet du groupe selon le formateur connecté
+    const storedUser   = JSON.parse(localStorage.getItem('user') || '{}')
+    const prefUsername = (storedUser.profile?.preferred_username || '').toLowerCase()
+    const defaultGroup = FORMATEUR_GROUPS[prefUsername]
+    if (defaultGroup) {
+      const idx = tabOptions.findIndex(t => t.value === defaultGroup)
+      if (idx >= 0) activeTab.value = idx
+    }
+    initSessionIndex()
   }
 
-  await Promise.all([loadAllSessionLinks(), loadCalendrier()])
-  initSessionIndex()
   fetchDataForPeriod()
 })
 </script>
 
 <style scoped>
+.deep-link-highlight { animation: deep-link-flash 1.5s ease-in-out 2; }
+@keyframes deep-link-flash {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: #FFF59D; }
+}
 .table-container { overflow-x: auto; max-height: 70vh; }
 .follow-up-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
 .follow-up-table th, .follow-up-table td { border: 1px solid #e0e0e0; padding: 10px 6px; text-align: center; vertical-align: middle; }

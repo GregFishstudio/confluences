@@ -111,13 +111,16 @@ function setColumnIndex(field, value) {
 }
 
 const mappedFields = [
-  { key: 'periodeDemande', label: 'Mois/année de demande' },
+  { key: 'periodeDemande', label: 'Date de demande' },
   { key: 'prenom', label: 'Prénom' },
   { key: 'nom', label: 'Nom' },
   { key: 'numero', label: 'Téléphone Parrain/Marraine' },
   { key: 'remarqueParrain', label: 'Remarque Parrain/Marraine' },
   { key: 'commune', label: 'Commune de domicile' },
   { key: 'email', label: 'Email' },
+  { key: 'dateNaissance', label: 'Date de naissance' },
+  { key: 'etatCivil', label: 'État civil' },
+  { key: 'profession', label: 'Profession' },
   { key: 'filleulNom', label: 'Filleul·e' },
   { key: 'telephoneFilleul', label: 'Téléphone Filleul·e' },
   { key: 'emailFilleul', label: 'Email Filleul·e' },
@@ -130,7 +133,7 @@ const mappedFields = [
 
 // Intitulés possibles (normalisés : minuscules, sans accents) pour chaque champ.
 const COLUMN_ALIASES = {
-  periodeDemande: ['mois/annee de demande', 'mois annee de demande', 'colonne 1 (mois/annee de demande)', 'colonne 1'],
+  periodeDemande: ['date de demande', 'mois/annee de demande', 'mois annee de demande', 'colonne 1 (mois/annee de demande)', 'colonne 1'],
   prenom: ['prenom'],
   nom: ['parrain/marraine', 'parrain marraine', 'nom'],
   numero: ['telephone parrain/marraine', 'telephone parrain marraine', 'numero'],
@@ -138,6 +141,11 @@ const COLUMN_ALIASES = {
   remarqueParrain: ['remarque parrain/marraine', 'remarque parrain marraine'],
   commune: ['commune de domicile', 'commune'],
   email: ['email', 'e-mail'],
+  // "age" : sur certains questionnaires, la colonne nommée "Age" contient en réalité une
+  // date de naissance (ex. "01.01.1998") plutôt qu'un nombre — on la traite comme telle.
+  dateNaissance: ['date de naissance', 'naissance', 'age'],
+  etatCivil: ['etat civil'],
+  profession: ['profession'],
   filleulNom: ['filleul.e', 'filleule', 'filleul'],
   telephoneFilleul: ['telephone filleul.e', 'telephone filleule', 'telephone filleul'],
   emailFilleul: ['email filleul.e', 'email filleule', 'email filleul'],
@@ -211,6 +219,20 @@ function findHeaderRow(raw) {
     }
   }
   return { headerRowIndex, bestMatchCount }
+}
+
+// Convertit une date au format suisse/européen (jj.mm.aaaa, jj/mm/aaaa, jj-mm-aaaa — avec ou
+// sans heure accolée, avec année sur 2 ou 4 chiffres) en ISO (aaaa-mm-jj). Renvoie null quand
+// la valeur ne ressemble à aucune date reconnue (ex: "48 ans") plutôt que de renvoyer le texte
+// brut : .NET rejetterait toute la ligne — et tout le lot importé — pour une seule valeur invalide.
+function normalizeDateToIso(val) {
+  if (!val) return null
+  const v = val.trim()
+  const m = v.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2}|\d{4})(?:\s+\d{1,2}:\d{2}(:\d{2})?)?$/)
+  if (!m) return null
+  const [, day, month, yearRaw] = m
+  const year = yearRaw.length === 2 ? `19${yearRaw}` : yearRaw
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
 }
 
 function truthy(val) {
@@ -305,6 +327,7 @@ const rows = computed(() => {
       entry.actif = hasActifColumn ? truthy(entry.actif) : true
       if (entry.numero) entry.numero = fixPhoneNumber(entry.numero)
       if (entry.telephoneFilleul) entry.telephoneFilleul = fixPhoneNumber(entry.telephoneFilleul)
+      if (entry.dateNaissance) entry.dateNaissance = normalizeDateToIso(entry.dateNaissance)
       // Si aucune colonne "Prénom" dédiée n'est fournie, on suppose que "Nom" contient
       // "Prénom Nom" en un seul texte et on sépare au premier espace (meilleur effort).
       if (!hasPrenomColumn) {

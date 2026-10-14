@@ -28,6 +28,8 @@ namespace Api.Controllers
             [FromQuery] string? participantId,
             [FromQuery] bool? actif)
         {
+            await PasserNouveauxEnAttente();
+
             var query = _context.Marrainages
                 .AsNoTracking()
                 .Include(m => m.Participant)
@@ -57,7 +59,64 @@ namespace Api.Controllers
                     (m.Participant != null && (m.Participant.Firstname.ToLower().Contains(s) || m.Participant.LastName.ToLower().Contains(s))));
             }
 
-            return await query.OrderBy(m => m.Nom).ThenBy(m => m.Prenom).ToListAsync();
+            var list = await query.OrderBy(m => m.Nom).ThenBy(m => m.Prenom).ToListAsync();
+
+            // Date du dernier commentaire de chaque fiche (suivi "Prendre des nouvelles").
+            var ids = list.Select(m => m.MarrainageId).ToList();
+            var derniers = await _context.MarrainageComments.AsNoTracking()
+                .Where(c => ids.Contains(c.MarrainageId))
+                .GroupBy(c => c.MarrainageId)
+                .Select(g => new { MarrainageId = g.Key, Date = g.Max(c => c.CreatedAt) })
+                .ToDictionaryAsync(x => x.MarrainageId, x => x.Date);
+            foreach (var m in list)
+                if (derniers.TryGetValue(m.MarrainageId, out var d)) m.DernierCommentaire = d;
+
+            return list;
+        }
+
+        // "Nouveau" reste un mois ; passé ce délai sans binôme constitué (aucune relation avec un·e
+        // participant·e), la marraine/le parrain passe automatiquement "En attente de binôme".
+        private async Task PasserNouveauxEnAttente()
+        {
+            var limite = System.DateTime.UtcNow.AddMonths(-1);
+            var aPasser = await _context.Marrainages
+                .Where(m => m.Statut == "nouveau" && m.CreatedAt != null && m.CreatedAt < limite
+                    && m.ParticipantId == null
+                    && !_context.MarrainageParticipants.Any(mp => mp.MarrainageId == m.MarrainageId))
+                .ToListAsync();
+            if (aPasser.Count == 0) return;
+            foreach (var m in aPasser) m.Statut = "en_attente";
+            await _context.SaveChangesAsync();
+        }
+
+        // GET: api/Marrainages/filleuls-en-attente
+        // Participant·e·s qui souhaitent un marrainage ("oui" ou "à vérifier" sur leur fiche) et
+        // n'ont aucune relation de marrainage active — pour le tableau "à trouver" par région.
+        [HttpGet("filleuls-en-attente")]
+        public async Task<ActionResult<IEnumerable<object>>> GetFilleulsEnAttente()
+        {
+            var users = await _context.Users.AsNoTracking()
+                .Where(u => u.BesoinsSouhaitsMarrainage == "oui" || u.BesoinsSouhaitsMarrainage == "a_verifier")
+                .Where(u => !_context.MarrainageParticipants.Any(mp => mp.ParticipantId == u.Id && mp.Actif))
+                .Select(u => new
+                {
+                    u.Id,
+                    u.Firstname,
+                    u.LastName,
+                    u.Adresse,
+                    besoin = u.BesoinsSouhaitsMarrainage,
+                    u.SouhaitGenreMarrainage,
+                    u.SouhaitAgeMarrainage,
+                    u.Disponibilites,
+                    // Classe de la session la plus récente (télécours / F&I A1 / A2).
+                    classe = u.SessionStudents!
+                        .OrderByDescending(ss => ss.Session!.DateStart)
+                        .Select(ss => ss.Session!.SchoolClassRoom!.SchoolClassRoomName)
+                        .FirstOrDefault(),
+                })
+                .ToListAsync();
+
+            return Ok(users);
         }
 
         // GET: api/Marrainages/5
@@ -70,13 +129,29 @@ namespace Api.Controllers
                     .ThenInclude(pl => pl.Participant)
                 .Include(m => m.Comments!.OrderByDescending(c => c.CreatedAt))
                     .ThenInclude(c => c.Author)
-                .Include(m => m.Files)
+                .AsNoTracking()
                 .SingleOrDefaultAsync(m => m.MarrainageId == id);
 
             if (marrainage == null)
             {
                 return NotFound();
             }
+
+            // Métadonnées des fichiers seulement : charger les octets (CV, extraits de casier…)
+            // alourdissait fortement la réponse et ralentissait, voire bloquait, l'ouverture de la
+            // fiche. Le contenu se télécharge à la demande via api/MarrainageFiles/{id}.
+            marrainage.Files = await _context.MarrainageFiles
+                .AsNoTracking()
+                .Where(f => f.MarrainageId == id)
+                .Select(f => new MarrainageFile
+                {
+                    MarrainageFileId = f.MarrainageFileId,
+                    FileName = f.FileName,
+                    FileType = f.FileType,
+                    Category = f.Category,
+                    MarrainageId = f.MarrainageId
+                })
+                .ToListAsync();
 
             return marrainage;
         }
@@ -85,6 +160,12 @@ namespace Api.Controllers
         [HttpPost]
         public async Task<ActionResult<Marrainage>> PostMarrainage(Marrainage marrainage)
         {
+            // Toute nouvelle inscription de marraine/parrain apparaît "Nouveau" dans la liste
+            // tant que les formatrices ne lui ont pas attribué un autre statut.
+            if (string.IsNullOrWhiteSpace(marrainage.Statut)) marrainage.Statut = "nouveau";
+            marrainage.CreatedAt = System.DateTime.UtcNow;
+            marrainage.UpdatedAt = marrainage.CreatedAt;
+
             _context.Marrainages.Add(marrainage);
             await _context.SaveChangesAsync();
 
@@ -133,6 +214,8 @@ namespace Api.Controllers
                 else
                 {
                     incoming.MarrainageId = 0;
+                    incoming.CreatedAt = System.DateTime.UtcNow;
+                    incoming.UpdatedAt = incoming.CreatedAt;
                     _context.Marrainages.Add(incoming);
                     result.Add(incoming);
                     if (!string.IsNullOrEmpty(key)) existingByNom[key] = incoming;
@@ -163,6 +246,7 @@ namespace Api.Controllers
                     DateDebut = dto.DateDebut ?? System.DateTime.Today,
                     Actif = true
                 });
+                marrainage.UpdatedAt = System.DateTime.UtcNow;
                 await _context.SaveChangesAsync();
             }
 
@@ -199,6 +283,8 @@ namespace Api.Controllers
             link.DateFin = dto.DateFin;
             link.Actif = dto.Actif;
             link.RaisonInactivite = dto.Actif ? null : dto.RaisonInactivite;
+            var parent = await _context.Marrainages.FindAsync(id);
+            if (parent != null) parent.UpdatedAt = System.DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
 
@@ -240,6 +326,7 @@ namespace Api.Controllers
             ApplyIfNotEmpty(v => keep.EtatCivil = v, duplicate.EtatCivil);
             ApplyIfNotEmpty(v => keep.Profession = v, duplicate.Profession);
             if (keep.Age == null) keep.Age = duplicate.Age;
+            if (keep.DateNaissance == null) keep.DateNaissance = duplicate.DateNaissance;
             ApplyIfNotEmpty(v => keep.PeriodeDemande = v, duplicate.PeriodeDemande);
             ApplyIfNotEmpty(v => keep.RemarqueParrain = v, duplicate.RemarqueParrain);
             ApplyIfNotEmpty(v => keep.FilleulNom = v, duplicate.FilleulNom);
@@ -331,6 +418,11 @@ namespace Api.Controllers
             }
 
             _context.Entry(marrainage).State = EntityState.Modified;
+            // Champs gérés par le serveur : jamais écrasés par le formulaire.
+            _context.Entry(marrainage).Property(m => m.CreatedAt).IsModified = false;
+            _context.Entry(marrainage).Property(m => m.QuestionnaireSaisiPar).IsModified = false;
+            _context.Entry(marrainage).Property(m => m.QuestionnaireSaisiLe).IsModified = false;
+            marrainage.UpdatedAt = System.DateTime.UtcNow;
 
             try
             {

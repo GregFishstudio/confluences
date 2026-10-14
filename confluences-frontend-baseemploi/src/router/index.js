@@ -64,6 +64,7 @@ const routes = [
     component: Login,
   },
   { path: '/calendrier', name: 'calendrier', component: () => import('@/views/CalendrierView.vue') },
+  { path: '/inscriptions', name: 'Inscriptions', component: () => import('@/views/InscriptionsView.vue'), meta: { requiresAuth: true } },
   { path: '/participants', name: 'Participants', component: () => import('@/views/ParticipantView.vue') },
   {
     path: '/participants/:id',

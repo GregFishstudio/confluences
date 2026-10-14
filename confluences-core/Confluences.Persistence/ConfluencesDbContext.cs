@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Confluences.Domain.Entities;
 using Confluences.Domain.Entities.Views;
@@ -79,6 +79,10 @@ namespace Confluences.Persistence
         public virtual DbSet<MarrainageAnswer> MarrainageAnswers => Set<MarrainageAnswer>();
         public virtual DbSet<FieldChangeHistory> FieldChangeHistories => Set<FieldChangeHistory>();
         public virtual DbSet<MarrainageInactivityReason> MarrainageInactivityReasons => Set<MarrainageInactivityReason>();
+        public virtual DbSet<AssistantSocial> AssistantsSociaux => Set<AssistantSocial>();
+        public virtual DbSet<Candidature> Candidatures => Set<Candidature>();
+        public virtual DbSet<CandidatureComment> CandidatureComments => Set<CandidatureComment>();
+        public virtual DbSet<ParticipantComment> ParticipantComments => Set<ParticipantComment>();
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -164,6 +168,15 @@ namespace Confluences.Persistence
             builder.Entity<TypeStage>(e => e.HasIndex(x => x.Nom).IsUnique());
 
             builder.Entity<Ressource>(e => e.HasNoKey());
+
+            // --- INSCRIPTIONS ---
+            builder.Entity<AssistantSocial>(e => e.HasIndex(x => x.Email).IsUnique());
+            builder.Entity<Candidature>(e =>
+            {
+                // Supprimer un·e AS ou un·e participant·e ne doit pas effacer l'historique des demandes.
+                e.HasOne(c => c.AssistantSocial).WithMany().HasForeignKey(c => c.AssistantSocialId).OnDelete(DeleteBehavior.SetNull);
+                e.HasOne(c => c.Participant).WithMany().HasForeignKey(c => c.ParticipantId).OnDelete(DeleteBehavior.SetNull);
+            });
         }
     }
 }

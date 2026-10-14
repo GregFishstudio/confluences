@@ -38,6 +38,13 @@ onMounted(async () => {
 
 
 <style>
+/* Empêche le geste "balayer vers la gauche/droite" du pavé tactile (ou un défilement horizontal
+   arrivé en butée) de déclencher la navigation précédente/suivante du navigateur, qui faisait
+   perdre les saisies non enregistrées (Chrome, Edge, Firefox). */
+html, body {
+  overscroll-behavior-x: none;
+}
+
 /*** TRANSITIONS ***/
 
 .slide-fade-enter {

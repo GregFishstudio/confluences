@@ -53,7 +53,14 @@
           <v-row dense>
             <v-col cols="6"><v-text-field v-model="form.prenom" label="Prénom" variant="outlined" density="compact" /></v-col>
             <v-col cols="6"><v-text-field v-model="form.nom" label="Nom" variant="outlined" density="compact" /></v-col>
-            <v-col cols="6"><v-text-field v-model="form.commune" label="Commune" variant="outlined" density="compact" /></v-col>
+            <v-col cols="3"><v-text-field v-model="form.commune" label="Commune" variant="outlined" density="compact" /></v-col>
+            <v-col cols="3">
+              <v-select
+                v-model="form.region" :items="REGIONS" label="Région" variant="outlined" density="compact" clearable
+                :placeholder="regionSuggeree || ''" persistent-placeholder
+                :hint="!form.region && regionSuggeree ? `Déduite de la commune : ${regionSuggeree}` : ''" persistent-hint
+              />
+            </v-col>
             <v-col cols="6"><v-text-field v-model="form.numero" label="Téléphone" variant="outlined" density="compact" /></v-col>
             <v-col cols="6"><v-text-field v-model="form.email" label="Email" variant="outlined" density="compact" /></v-col>
             <v-col cols="6"><v-text-field v-model="form.dateNaissance" type="date" label="Date de naissance" variant="outlined" density="compact" /></v-col>
@@ -67,21 +74,11 @@
             <v-col cols="6">
               <v-select
                 v-model="form.statut"
-                :items="[{ title: 'Aucun', value: null }, { title: 'En attente', value: 'en_attente' }, { title: 'À relancer', value: 'a_relancer' }]"
+                :items="[{ title: 'Aucun', value: null }, ...MARRAINAGE_STATUTS_FICHE]"
                 label="Statut"
                 variant="outlined" density="compact"
-              />
-            </v-col>
-
-            <v-col cols="6">
-              <v-switch v-model="form.actif" label="Actif (en tant que marraine/parrain)" :color="form.actif ? 'success' : 'error'" hide-details />
-            </v-col>
-            <v-col cols="6" v-if="!form.actif">
-              <v-select
-                v-model="form.raisonInactivite"
-                :items="raisonOptions"
-                label="Raison de l'inactivité"
-                variant="outlined" density="compact" clearable
+                :hint="hasActiveRelationNow ? 'Actif·ve dans une relation de marrainage (ci-dessous) : affiché « Actif·ve » dans la liste.' : ''"
+                persistent-hint
               />
             </v-col>
           </v-row>
@@ -97,7 +94,7 @@
           <v-card v-for="(rel, idx) in relations" :key="rel.participantId" variant="outlined" class="pa-3 mb-3">
             <div class="d-flex align-center justify-space-between mb-2">
               <div class="text-subtitle-2 font-weight-bold">Relation de marrainage/parrainage {{ idx + 1 }}</div>
-              <v-btn icon="mdi-close" size="x-small" variant="text" title="Retirer cette relation" @click="removeParticipant(rel.participantId)" />
+              <v-btn icon="mdi-close" size="x-small" variant="text" title="Supprimer cette relation (erreur de saisie)" @click="removeParticipant(rel.participantId)" />
             </div>
             <v-row dense>
               <v-col cols="6" md="3">
@@ -105,6 +102,12 @@
                   :model-value="rel.dateDebut"
                   @update:model-value="v => updateRelation(rel, { dateDebut: v })"
                   type="date" label="Date de démarrage" variant="outlined" density="compact"
+                />
+                <v-text-field
+                  v-if="!rel.actif"
+                  :model-value="rel.dateFin"
+                  @update:model-value="v => updateRelation(rel, { dateFin: v })"
+                  type="date" label="Date de fin" variant="outlined" density="compact"
                 />
               </v-col>
               <v-col cols="12" md="4">
@@ -124,18 +127,20 @@
               <v-col cols="6" md="3">
                 <v-switch
                   :model-value="rel.actif"
-                  @update:model-value="v => updateRelation(rel, { actif: v })"
+                  @update:model-value="v => updateRelation(rel, { actif: v, dateFin: v ? null : (rel.dateFin || new Date().toISOString().substring(0, 10)) })"
                   label="Actif" :color="rel.actif ? 'success' : 'error'" hide-details
                 />
               </v-col>
-              <v-col cols="6" md="9" v-if="!rel.actif">
+              <v-col cols="6" md="9" v-if="!rel.actif" class="d-flex align-center ga-1">
                 <v-select
                   :model-value="rel.raisonInactivite"
                   @update:model-value="v => updateRelation(rel, { raisonInactivite: v })"
                   :items="raisonOptions"
                   label="Raison de l'inactivité"
                   variant="outlined" density="compact" clearable hide-details
+                  class="flex-grow-1"
                 />
+                <InactivityReasonManager :reasons="inactivityReasons" @changed="loadInactivityReasons" />
               </v-col>
             </v-row>
           </v-card>
@@ -162,22 +167,7 @@
             </v-card>
           </v-dialog>
 
-          <v-text-field
-            v-model="form.filleulNom"
-            label="Nom du/de la filleul·e (si pas encore associé·e à un compte participant existant)"
-            variant="outlined" density="compact"
-            hint="Utile en attendant de créer/retrouver le compte participant correspondant."
-            persistent-hint
-            class="mb-4"
-          />
-
           <v-row dense>
-            <v-col cols="6" md="6">
-              <v-text-field v-model="form.telephoneFilleul" label="Téléphone Filleul·e" variant="outlined" density="compact" />
-            </v-col>
-            <v-col cols="6" md="6">
-              <v-text-field v-model="form.emailFilleul" label="Email Filleul·e" variant="outlined" density="compact" />
-            </v-col>
             <v-col cols="12">
               <v-textarea v-model="form.suivi" label="Suivi" variant="outlined" auto-grow rows="2" />
             </v-col>
@@ -194,7 +184,7 @@
           id-key="marrainageFileId"
           :extra-fields="{ marrainageId: form.marrainageId }"
           :category-options="['Convention', 'Charte']"
-          :exclude-categories="['Extrait de casier judiciaire']"
+          :exclude-categories="['Extrait de casier judiciaire', 'Documents personnels']"
           v-model="files"
         />
 
@@ -211,9 +201,30 @@
           />
         </v-card>
 
+        <v-card v-if="!isNew" class="pa-4 elevation-1 rounded-lg mt-4" variant="outlined">
+          <div class="text-subtitle-1 font-weight-bold mb-2">Documents personnels (CV, etc.)</div>
+          <FileAttachments
+            title=""
+            controller="MarrainageFiles"
+            id-key="marrainageFileId"
+            :extra-fields="{ marrainageId: form.marrainageId }"
+            fixed-category="Documents personnels"
+            filter-category="Documents personnels"
+            v-model="files"
+          />
+        </v-card>
+
         <v-card v-if="nonCoreQuestions.length" class="pa-4 elevation-1 rounded-lg mt-4" variant="outlined">
           <div class="d-flex align-center justify-space-between mb-4">
-            <div class="text-subtitle-1 font-weight-bold">Réponses au questionnaire</div>
+            <div>
+              <div class="text-subtitle-1 font-weight-bold">Réponses au questionnaire</div>
+              <div class="text-caption text-medium-emphasis">
+                <template v-if="form.questionnaireSaisiLe">
+                  Saisi le {{ formatDateTime(form.questionnaireSaisiLe) }}<span v-if="form.questionnaireSaisiPar"> par {{ form.questionnaireSaisiPar }}</span>
+                </template>
+                <template v-else>Date et auteur·e de saisie non connus (réponses antérieures au suivi).</template>
+              </div>
+            </div>
             <MarrainageQuestionManager @changed="loadQuestions" />
           </div>
           <div class="text-caption text-grey mb-3">
@@ -250,8 +261,15 @@ import FileAttachments from '@/components/FileAttachments.vue'
 import CommentThread from '@/components/CommentThread.vue'
 import MarrainageQuestionnaireForm from '@/components/MarrainageQuestionnaireForm.vue'
 import MarrainageQuestionManager from '@/components/MarrainageQuestionManager.vue'
+import InactivityReasonManager from '@/components/InactivityReasonManager.vue'
 import MarrainageQuestionService from '@/services/marrainageQuestionService.js'
 import MarrainageAnswerService from '@/services/marrainageAnswerService.js'
+import { apiFetch } from '@/services/api'
+import { MARRAINAGE_STATUTS_FICHE } from '@/utils/marrainageStatut'
+import { REGIONS, regionDeCommune } from '@/utils/regions'
+import { parseDateFr } from '@/utils/dates'
+import { normalizeSearch } from '@/utils/search'
+import moment from 'moment/min/moment-with-locales'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -279,25 +297,27 @@ const comments = ref([])
 // Une entrée par relation de marrainage/parrainage (une par participant·e lié·e),
 // avec ses propres dates et statut d'activité — indépendants du statut de la marraine elle-même.
 const relations = ref([])
+const hasActiveRelationNow = computed(() => relations.value.some(r => r.actif))
 const addParticipantDialog = ref(false)
 const newParticipantId = ref(null)
 const questions = ref([])
 const answers = ref({})
 
-const raisonOptions = [
-  'Contraintes familiales',
-  'En emploi',
-  'Déménagement',
-  'Fin de formation du/de la filleul·e',
-  'Manque de disponibilité',
-  'Autre'
-]
+// Raisons d'inactivité éditables par les formatrices (plus de liste figée dans le code).
+const inactivityReasons = ref([])
+const raisonOptions = computed(() => inactivityReasons.value.map(r => r.label))
+
+async function loadInactivityReasons() {
+  const res = await apiFetch(`${API_URL}/api/MarrainageInactivityReasons`)
+  if (res && res.ok) inactivityReasons.value = await res.json()
+}
 
 const form = ref({
   marrainageId: null,
   prenom: '',
   nom: '',
-  // `date` (ex-"date de démarrage" globale), `age`, `charteSignee` et `relanceNotes` ne sont
+  // `date` (ex-"date de démarrage" globale), `age`, `actif`/`raisonInactivite` (l'activité se
+  // suit désormais par relation, via le statut "Actif·ve"), `charteSignee` et `relanceNotes` ne sont
   // plus affichés dans le formulaire (remplacés par les champs par relation / dateNaissance /
   // documents) mais restent chargés et renvoyés tels quels : le PUT remplace l'entité entière,
   // les omettre effacerait silencieusement ces valeurs historiques en base.
@@ -311,6 +331,10 @@ const form = ref({
   profession: '',
   actif: true,
   statut: null,
+  region: null,
+  // Lecture seule (renseignés par l'API à l'enregistrement des réponses).
+  questionnaireSaisiPar: null,
+  questionnaireSaisiLe: null,
   raisonInactivite: null,
   participantId: null,
   periodeDemande: '',
@@ -346,6 +370,9 @@ function loadMarrainage(marrainage) {
     profession: marrainage.profession,
     actif: marrainage.actif,
     statut: marrainage.statut,
+    region: marrainage.region,
+    questionnaireSaisiPar: marrainage.questionnaireSaisiPar,
+    questionnaireSaisiLe: marrainage.questionnaireSaisiLe,
     raisonInactivite: marrainage.raisonInactivite,
     participantId: marrainage.participantId,
     periodeDemande: marrainage.periodeDemande ? marrainage.periodeDemande.substring(0, 10) : null,
@@ -432,7 +459,15 @@ async function addParticipant() {
   addParticipantDialog.value = false
 }
 
+// Supprimer efface la relation de l'historique du/de la participant·e : réservé aux erreurs de
+// saisie. Une relation qui s'arrête se désactive (switch "Actif"), avec sa date de fin.
 async function removeParticipant(participantId) {
+  const ok = window.confirm(
+    'Supprimer définitivement cette relation ?\n\n'
+    + "Elle disparaîtra aussi de l'historique des marrainages du/de la participant·e. "
+    + "Si le marrainage s'est arrêté, désactivez plutôt la relation (switch « Actif ») pour la garder dans l'historique."
+  )
+  if (!ok) return
   await axios.delete(`${API_URL}/api/Marrainages/${form.value.marrainageId}/participants/${participantId}`)
   relations.value = relations.value.filter(r => r.participantId !== participantId)
 }
@@ -519,10 +554,27 @@ async function createFromQuestionnaire() {
       numero: answerFor(telQuestion),
       email: answerFor(emailQuestion),
       commune: answerFor(communeQuestion),
-      age: ageValue ? Number(ageValue) : null,
-      dateNaissance: dateNaissanceValue || null,
+      // "45 ans" → 45 ; date tapée "03.03.1992" → 1992-03-03 (l'API refusait sinon toute la fiche).
+      age: parseInt(ageValue, 10) || null,
+      dateNaissance: parseDateFr(dateNaissanceValue) || null,
       etatCivil: answerFor(etatCivilQuestion),
       profession: answerFor(professionQuestion),
+    }
+
+    if (!payload.nom?.trim()) {
+      store.dispatch('notification/add', { type: 'error', message: 'Le nom est obligatoire pour créer la fiche.' })
+      return
+    }
+
+    // Évite les doublons : une fiche au même nom existe peut-être déjà (ex. création
+    // précédente qui avait affiché une erreur alors qu'elle avait abouti).
+    const existing = await findExistingMarrainage(payload.prenom, payload.nom)
+    if (existing && !window.confirm(
+      `Une fiche « ${existing.prenom} ${existing.nom} » existe déjà dans la liste.\n\n`
+      + 'OK : créer quand même une nouvelle fiche\nAnnuler : ouvrir la fiche existante'
+    )) {
+      router.push({ name: 'Marrainage-Modifier', params: { id: existing.marrainageId } })
+      return
     }
 
     const created = await store.dispatch('marrainage/createMarrainage', payload)
@@ -531,14 +583,30 @@ async function createFromQuestionnaire() {
       .filter(([, value]) => value !== undefined && value !== null && value !== '')
       .map(([questionId, value]) => ({ questionId: Number(questionId), value: String(value) }))
 
+    // La fiche existe désormais : même si l'enregistrement des réponses échoue, on l'ouvre
+    // (rester sur "Nouveau marrainage" poussait à recréer la fiche, d'où des doublons).
     if (answerList.length) {
-      await MarrainageAnswerService.saveAnswers(created.marrainageId, answerList)
+      try {
+        await MarrainageAnswerService.saveAnswers(created.marrainageId, answerList)
+      } catch (e) {
+        store.dispatch('notification/add', {
+          type: 'error',
+          message: "La fiche a bien été créée, mais les réponses au questionnaire n'ont pas pu être enregistrées : complétez-les sur la fiche.",
+        })
+      }
     }
 
     router.push({ name: 'Marrainage-Modifier', params: { id: created.marrainageId } })
   } finally {
     saving.value = false
   }
+}
+
+async function findExistingMarrainage(prenom, nom) {
+  const key = normalizeSearch(`${prenom || ''} ${nom || ''}`)
+  if (!key) return null
+  const list = await store.dispatch('marrainage/fetchMarrainages', {}) || []
+  return list.find(m => normalizeSearch(`${m.prenom || ''} ${m.nom || ''}`) === key) || null
 }
 
 async function saveAnswers() {
@@ -548,10 +616,19 @@ async function saveAnswers() {
       .filter(([, value]) => value !== undefined && value !== null && value !== '')
       .map(([questionId, value]) => ({ questionId: Number(questionId), value: String(value) }))
     await MarrainageAnswerService.saveAnswers(form.value.marrainageId, answerList)
+    // Date et auteur·e enregistrés par l'API.
+    const fresh = await store.dispatch('marrainage/fetchMarrainage', form.value.marrainageId)
+    if (fresh) {
+      form.value.questionnaireSaisiLe = fresh.questionnaireSaisiLe
+      form.value.questionnaireSaisiPar = fresh.questionnaireSaisiPar
+    }
   } finally {
     savingAnswers.value = false
   }
 }
+
+const regionSuggeree = computed(() => regionDeCommune(form.value.commune))
+const formatDateTime = (d) => d ? moment(d).format('DD.MM.YYYY') : ''
 
 async function loadAnswers(marrainageId) {
   const response = await MarrainageAnswerService.getAnswers(marrainageId)
@@ -583,6 +660,7 @@ async function initFromRoute() {
 
 onMounted(() => {
   store.dispatch('user/fetchUsers')
+  loadInactivityReasons()
   initFromRoute()
 })
 

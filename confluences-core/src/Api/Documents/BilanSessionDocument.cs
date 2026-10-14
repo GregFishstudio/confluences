@@ -19,6 +19,7 @@ namespace Api.Documents
         private readonly string                    _digitalSkillsText;
         private readonly string                    _individualAccompanyingText;
         private readonly string                    _homeVisitsText;
+        private readonly string                    _objectivesText;
         private readonly double                    _globalRate;
         private readonly int                       _year;
         private readonly string                    _quarter;
@@ -29,6 +30,7 @@ namespace Api.Documents
         private readonly List<ActivitySummaryItem> _activities;
         private readonly string                    _oralLevel;
         private readonly string                    _writtenLevel;
+        private readonly string                    _mesureLevel;
 
         private bool IsTelecours =>
             _courseName.ToLower().Contains("télécours") ||
@@ -56,8 +58,11 @@ namespace Api.Documents
             string                    digitalSkillsText          = "",
             string                    individualAccompanyingText = "",
             string                    homeVisitsText             = "",
-            List<ActivitySummaryItem> activities                 = null)
+            List<ActivitySummaryItem> activities                 = null,
+            string                    mesureLevel                = null,
+            string                    objectivesText             = "")
         {
+            _mesureLevel = mesureLevel;
             _stagiaire                  = stagiaire;
             _evaluationText             = evaluationText;
             _followUpActions            = followUpActions;
@@ -74,6 +79,7 @@ namespace Api.Documents
             _digitalSkillsText          = digitalSkillsText;
             _individualAccompanyingText = individualAccompanyingText;
             _homeVisitsText             = homeVisitsText;
+            _objectivesText             = objectivesText;
             _activities                 = activities ?? new List<ActivitySummaryItem>();
         }
 
@@ -131,6 +137,7 @@ namespace Api.Documents
                       + (_digitalSkillsText?.Length          ?? 0)
                       + (_individualAccompanyingText?.Length ?? 0)
                       + (_homeVisitsText?.Length             ?? 0)
+                      + (_objectivesText?.Length             ?? 0)
                       + _activities.Count * 60;
 
             if (total < 500)  return 11.5f;
@@ -149,20 +156,24 @@ namespace Api.Documents
 
                 // Titre — ligne 1 : formation + niveau, ligne 2 : dates
                 {
+                    // Le niveau affiché dans le titre est celui de la MESURE suivie (ex. Télécours
+                    // A2), pas le niveau personnel atteint par le/la participant·e — quelqu'un peut
+                    // très bien dépasser le niveau de sa mesure (ex. B1.1 en cours de Télécours A2)
+                    // sans que ça change l'intitulé du bilan.
                     string baseName   = _courseName;
                     string levelLabel = "";
                     int pIdx = _courseName.IndexOf(" (Niveau", StringComparison.OrdinalIgnoreCase);
-                    if (pIdx > 0)
+                    if (pIdx > 0) baseName = _courseName.Substring(0, pIdx);
+
+                    if (!string.IsNullOrWhiteSpace(_mesureLevel))
                     {
-                        baseName = _courseName.Substring(0, pIdx);
-                        var lm = System.Text.RegularExpressions.Regex.Match(
-                            _courseName.Substring(pIdx), @"[A-Za-z]\d");
+                        var lm = System.Text.RegularExpressions.Regex.Match(_mesureLevel, @"[A-Za-z]\d");
                         if (lm.Success) levelLabel = $" - Niveau {lm.Value.ToUpper()}";
                     }
-                    else if (!string.IsNullOrWhiteSpace(_stagiaire.OralLevel))
+                    else if (pIdx > 0)
                     {
                         var lm = System.Text.RegularExpressions.Regex.Match(
-                            _stagiaire.OralLevel, @"[A-Za-z]\d");
+                            _courseName.Substring(pIdx), @"[A-Za-z]\d");
                         if (lm.Success) levelLabel = $" - Niveau {lm.Value.ToUpper()}";
                     }
 
@@ -175,6 +186,18 @@ namespace Api.Documents
                     col.Item().AlignCenter()
                         .Text($"{_startDate:dd.MM} – {_endDate:dd.MM.yyyy}")
                         .FontSize(12).FontColor(AccentColor);
+
+                    if (_stagiaire.DateFinParticipation.HasValue)
+                    {
+                        var frenchCulture = new System.Globalization.CultureInfo("fr-FR");
+                        string interruptionDate = _stagiaire.DateFinParticipation.Value.ToString("dd MMMM yyyy", frenchCulture);
+                        string motif = string.IsNullOrWhiteSpace(_stagiaire.RaisonInterruptionMesure)
+                            ? ""
+                            : $" Motif : {_stagiaire.RaisonInterruptionMesure}.";
+                        col.Item().AlignCenter()
+                            .Text($"Mesure interrompue le {interruptionDate}.{motif}")
+                            .FontSize(11).Italic().FontColor(Colors.Red.Darken2);
+                    }
                 }
 
                 // Participant
@@ -196,6 +219,9 @@ namespace Api.Documents
 
                     if (!string.IsNullOrWhiteSpace(_followUpActions))
                         col.Item().Element(c => RenderSection(c, "Insertion sociale", _followUpActions, bodySize));
+
+                    if (!string.IsNullOrWhiteSpace(_objectivesText))
+                        col.Item().Element(c => RenderSection(c, "Objectifs", _objectivesText, bodySize));
                 }
                 else
                 {

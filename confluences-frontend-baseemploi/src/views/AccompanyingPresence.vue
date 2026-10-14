@@ -74,7 +74,7 @@
         </div>
 
         <v-card
-          v-for="user in filteredUsers" :key="'mob'+user.id"
+          v-for="user in filteredUsers" :key="'mob'+user.id" :data-user-id="user.id"
           class="mb-4 elevation-2" rounded="xl"
         >
           <!-- En-tête -->
@@ -166,7 +166,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="user in filteredUsers" :key="user.id" class="table-row">
+              <tr v-for="user in filteredUsers" :key="user.id" :data-user-id="user.id" class="table-row">
                 <td class="sticky-col name-col">
                   <div class="user-info">
                     <div class="name participant-name-link" @click="openParticipantPage(user)">{{ user.prenom }} {{ user.nom }}</div>
@@ -400,15 +400,17 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
+import { matchesSearch } from '@/utils/search'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import moment from 'moment/min/moment-with-locales'
 import API_BASE, {apiFetch} from '@/services/api'
 
 moment.locale('fr')
 const store  = useStore()
 const router = useRouter()
+const route = useRoute()
 
 function openParticipantPage(user) {
   const resolved = router.resolve({ name: 'Participant-Detail', params: { id: user.id } })
@@ -551,27 +553,33 @@ const isFuturePeriod = computed(() => {
 const allColumnsOrdered = computed(() => [...accompanyingCols.value, ...workshopCols.value])
 
 // ─── Filtrage ─────────────────────────────────────────────────────────────────
-const matchesGroup = (user, groupValue) => {
-  const userId    = user.id
-  const userLinks = allSessionLinks.value.filter(link =>
-    String(link.studentId || link.StudentId).toLowerCase() === String(userId).toLowerCase()
-  )
-  if (userLinks.length === 0) return false
-
-  const hasActiveSession = userLinks.some(link => {
+// Retrouve le lien de session (SessionStudent) correspondant PRÉCISÉMENT à l'année/session
+// actuellement affichée — pas le niveau actuel/le plus récent du participant (`user.niveau`),
+// qui ne reflète que sa dernière classe et masquait les participant·e·s ayant changé de groupe
+// depuis (ex. passé·e·s d'A1 à A2) pour toutes leurs sessions passées dans l'ancien groupe.
+const resolveActiveLink = (user) => {
+  const userId = user.id
+  return allSessionLinks.value.find(link => {
+    const linkUserId = link.studentId || link.StudentId
     const s = link.session || link.Session
-    if (!s) return false
+    if (String(linkUserId).toLowerCase() !== String(userId).toLowerCase() || !s) return false
     const sessionYear   = new Date(s.dateStart || s.DateStart).getFullYear()
     const sessionNumber = s.sessionNumberId || s.SessionNumberId
-    return Number(sessionYear)   === Number(currentYear.value) &&
+    return Number(sessionYear) === Number(currentYear.value) &&
            Number(sessionNumber) === Number(currentQuarter.value)
   })
-  if (!hasActiveSession) return false
+}
 
-  const niveauUser  = (user.niveau || '').toLowerCase().trim()
-  const isTelecours = niveauUser.includes('tele') || niveauUser.includes('télé')
-  if (groupValue === 'fi_a1') return !isTelecours && niveauUser.includes('a1')
-  if (groupValue === 'fi_a2') return !isTelecours && niveauUser.includes('a2')
+const matchesGroup = (user, groupValue) => {
+  const activeLink = resolveActiveLink(user)
+  if (!activeLink) return false
+
+  const s = activeLink.session || activeLink.Session
+  const classRoom = s?.schoolClassRoom || s?.SchoolClassRoom
+  const className = ((classRoom?.schoolClassRoomName || classRoom?.SchoolClassRoomName) || '').toLowerCase()
+  const isTelecours = className.includes('tele') || className.includes('télé')
+  if (groupValue === 'fi_a1') return !isTelecours && className.includes('a1')
+  if (groupValue === 'fi_a2') return !isTelecours && className.includes('a2')
   return false
 }
 
@@ -581,12 +589,7 @@ const filteredUsers = computed(() => {
   const groupValue = groups[activeTab.value].value
   let list = users.value.filter(u => matchesGroup(u, groupValue))
   if (search.value) {
-    const s = search.value.toLowerCase()
-    list = list.filter(u =>
-      (u.nom    || '').toLowerCase().includes(s) ||
-      (u.prenom || '').toLowerCase().includes(s) ||
-      (u.userName || '').toLowerCase().includes(s)
-    )
+    list = list.filter(u => matchesSearch(search.value, u.nom, u.prenom, u.userName))
   }
    list = list.sort((a, b) =>
     (a.nom || '').localeCompare((b.nom || ''), 'fr', { sensitivity: 'base' })
@@ -595,15 +598,7 @@ const filteredUsers = computed(() => {
 })
 
 const getUserSessionInfo = (user) => {
-  const activeLink = allSessionLinks.value.find(link => {
-    const linkUserId = link.studentId || link.StudentId
-    const s = link.session || link.Session
-    if (String(linkUserId).toLowerCase() !== String(user.id).toLowerCase() || !s) return false
-    const year = new Date(s.dateStart || s.DateStart).getFullYear()
-    const num  = s.sessionNumberId || s.SessionNumberId
-    return Number(year) === Number(currentYear.value) &&
-           Number(num)  === Number(currentQuarter.value)
-  })
+  const activeLink = resolveActiveLink(user)
   const s = activeLink?.session || activeLink?.Session
   return s ? `Session ${s.sessionNumberId || s.SessionNumberId}` : 'Aucune session'
 }
@@ -621,8 +616,11 @@ function initSessionIndex() {
   navSessionIndex.value = idx >= 0 ? idx : sessions.length - 1
 }
 
+// Change de groupe SANS changer de session : conserve le même numéro de session plutôt que de
+// resauter sur la session en cours du jour.
 function onTabChange() {
-  initSessionIndex()
+  const maxIndex = Math.max(0, activeGroupSessions.value.length - 1)
+  navSessionIndex.value = Math.min(navSessionIndex.value, maxIndex)
   loadMatrix()
 }
 
@@ -780,12 +778,35 @@ const copyToClipboard = () => {
   alert('Copié !')
 }
 
+// Arrivée depuis la fiche participant (?studentId=&group=&quarter=) : sélectionne le bon
+// groupe/session puis fait défiler jusqu'à la ligne du/de la participant·e concerné·e.
+function applyDeepLinkFromQuery() {
+  const { studentId, group, quarter } = route.query
+  if (!studentId || !group || !quarter) return false
+
+  const idx = groups.findIndex(g => g.value === group)
+  if (idx < 0) return false
+  activeTab.value = idx
+  navSessionIndex.value = Math.max(0, Number(quarter) - 1)
+  search.value = ''
+
+  nextTick(() => {
+    const el = document.querySelector(`[data-user-id="${studentId}"]`)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      el.classList.add('deep-link-highlight')
+      setTimeout(() => el.classList.remove('deep-link-highlight'), 3000)
+    }
+  })
+  return true
+}
+
 onMounted(async () => {
   isLoading.value = true
   try {
     await store.dispatch('user/fetchUsers')
     await Promise.all([loadAllSessionLinks(), loadCalendrier()])
-    initSessionIndex()
+    if (!applyDeepLinkFromQuery()) initSessionIndex()
     await loadColumns()
     await loadMatrix()
   } catch (e) {
@@ -797,6 +818,11 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.deep-link-highlight { animation: deep-link-flash 1.5s ease-in-out 2; }
+@keyframes deep-link-flash {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: #FFF59D; }
+}
 .table-container { overflow-x: auto; max-height: 70vh; }
 .matrix-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
 .matrix-table th, .matrix-table td { border: 1px solid #e8e8e8; padding: 10px 8px; text-align: center; }

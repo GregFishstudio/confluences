@@ -1,10 +1,13 @@
 # Build the Vue app
-FROM node:14.4.0-alpine as build-stage
+FROM node:20-alpine as build-stage
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY ./ .
-RUN npm run build
+# Les URLs (IdP, API) sont figées au build par Vite d'après .env.<mode> :
+# "production" pour baseemploi, "staging" pour test-baseemploi (docker build --build-arg BUILD_MODE=staging).
+ARG BUILD_MODE=production
+RUN npx vite build --mode ${BUILD_MODE}
 # Copy the built app in an NGINX contaier
 FROM nginx:1.25.3-alpine as production-stage
 RUN mkdir /app

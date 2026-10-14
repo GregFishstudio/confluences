@@ -131,6 +131,9 @@ namespace Api.Controllers
                 (nameof(ApplicationUser.RechercheLogementCommentaire), applicationUser.RechercheLogementCommentaire),
                 (nameof(ApplicationUser.BesoinsSouhaitsStagesCommentaire), applicationUser.BesoinsSouhaitsStagesCommentaire),
                 (nameof(ApplicationUser.BesoinsSouhaitsBenevoletCommentaire), applicationUser.BesoinsSouhaitsBenevoletCommentaire),
+                (nameof(ApplicationUser.BesoinsSouhaitsMarrainageCommentaire), applicationUser.BesoinsSouhaitsMarrainageCommentaire),
+                (nameof(ApplicationUser.BesoinsSouhaitsEmploiCommentaire), applicationUser.BesoinsSouhaitsEmploiCommentaire),
+                (nameof(ApplicationUser.BesoinsSouhaitsFormationCommentaire), applicationUser.BesoinsSouhaitsFormationCommentaire),
             };
 
             // --- Identité / contact de base ---
@@ -142,7 +145,24 @@ namespace Api.Controllers
             if (dto.Birthday.HasValue)  applicationUser.Birthday = dto.Birthday.Value;
             if (dto.GenderId.HasValue)  applicationUser.GenderId = dto.GenderId.Value;
 
-            applicationUser.ContratMaori = dto.ContratMaori;
+            // E-mail modifiable depuis la fiche (jusqu'ici seulement via la plateforme
+            // d'enseignement). Le nom d'utilisateur (identifiant de connexion) n'est pas touché.
+            var email = dto.Email?.Trim();
+            if (!string.IsNullOrEmpty(email) && email != applicationUser.Email)
+            {
+                var normalizedEmail = email.ToUpperInvariant();
+                var emailTaken = await _context.Users
+                    .AnyAsync(u => u.Id != id && u.NormalizedEmail == normalizedEmail);
+                if (emailTaken)
+                {
+                    return Conflict("Cette adresse e-mail est déjà utilisée par un autre compte.");
+                }
+                applicationUser.Email = email;
+                applicationUser.NormalizedEmail = normalizedEmail;
+            }
+
+            // ContratMaori : se coche uniquement sous Inscriptions (Participant·e·s d'une session) ;
+            // la fiche l'affiche en lecture seule, elle ne le modifie donc pas ici.
             applicationUser.EtatCivil = dto.EtatCivil;
             applicationUser.NombreEnfants = dto.NombreEnfants;
             applicationUser.Adresse = dto.Adresse;
@@ -160,12 +180,27 @@ namespace Api.Controllers
             applicationUser.PlusHautesEtudesCommentaire = dto.PlusHautesEtudesCommentaire;
             applicationUser.ActiviteProfSuisse = dto.ActiviteProfSuisse;
             applicationUser.ActiviteProfSuisseCommentaire = dto.ActiviteProfSuisseCommentaire;
-            applicationUser.RechercheLogement = dto.RechercheLogement;
+            applicationUser.RechercheLogement = TriState(dto.RechercheLogement);
             applicationUser.RechercheLogementCommentaire = dto.RechercheLogementCommentaire;
-            applicationUser.BesoinsSouhaitsStages = dto.BesoinsSouhaitsStages;
+            applicationUser.BesoinsSouhaitsStages = TriState(dto.BesoinsSouhaitsStages);
             applicationUser.BesoinsSouhaitsStagesCommentaire = dto.BesoinsSouhaitsStagesCommentaire;
-            applicationUser.BesoinsSouhaitsBenevolat = dto.BesoinsSouhaitsBenevolat;
+            applicationUser.BesoinsSouhaitsBenevolat = TriState(dto.BesoinsSouhaitsBenevolat);
             applicationUser.BesoinsSouhaitsBenevoletCommentaire = dto.BesoinsSouhaitsBenevoletCommentaire;
+            applicationUser.BesoinsSouhaitsMarrainage = TriState(dto.BesoinsSouhaitsMarrainage);
+            applicationUser.BesoinsSouhaitsMarrainageCommentaire = dto.BesoinsSouhaitsMarrainageCommentaire;
+            applicationUser.DateObtentionPermis = dto.DateObtentionPermis;
+            applicationUser.AnneeObtentionPermis = dto.DateObtentionPermis?.Year ?? dto.AnneeObtentionPermis;
+            applicationUser.ProjetProfessionnel = dto.ProjetProfessionnel;
+            applicationUser.BesoinsSouhaitsSport = TriState(dto.BesoinsSouhaitsSport);
+            applicationUser.Disponibilites = dto.Disponibilites;
+            applicationUser.SouhaitGenreMarrainage = dto.SouhaitGenreMarrainage;
+            applicationUser.SouhaitAgeMarrainage = dto.SouhaitAgeMarrainage;
+            applicationUser.TitresObtenus = dto.TitresObtenus;
+            applicationUser.ActiviteProfOrigine = dto.ActiviteProfOrigine;
+            applicationUser.BesoinsSouhaitsEmploi = TriState(dto.BesoinsSouhaitsEmploi);
+            applicationUser.BesoinsSouhaitsEmploiCommentaire = dto.BesoinsSouhaitsEmploiCommentaire;
+            applicationUser.BesoinsSouhaitsFormation = TriState(dto.BesoinsSouhaitsFormation);
+            applicationUser.BesoinsSouhaitsFormationCommentaire = dto.BesoinsSouhaitsFormationCommentaire;
             applicationUser.NiveauDebutContrat = dto.NiveauDebutContrat;
             applicationUser.NiveauFinContrat = dto.NiveauFinContrat;
             applicationUser.ProfilUpdatedAt = DateTime.UtcNow;
@@ -178,6 +213,9 @@ namespace Api.Controllers
                 (nameof(ApplicationUser.RechercheLogementCommentaire), applicationUser.RechercheLogementCommentaire),
                 (nameof(ApplicationUser.BesoinsSouhaitsStagesCommentaire), applicationUser.BesoinsSouhaitsStagesCommentaire),
                 (nameof(ApplicationUser.BesoinsSouhaitsBenevoletCommentaire), applicationUser.BesoinsSouhaitsBenevoletCommentaire),
+                (nameof(ApplicationUser.BesoinsSouhaitsMarrainageCommentaire), applicationUser.BesoinsSouhaitsMarrainageCommentaire),
+                (nameof(ApplicationUser.BesoinsSouhaitsEmploiCommentaire), applicationUser.BesoinsSouhaitsEmploiCommentaire),
+                (nameof(ApplicationUser.BesoinsSouhaitsFormationCommentaire), applicationUser.BesoinsSouhaitsFormationCommentaire),
             };
 
             var changedByUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -208,6 +246,10 @@ namespace Api.Controllers
             return NoContent();
         }
 
+        // Besoins / souhaits : "oui", "non" ou "a_verifier" (toute autre valeur = non renseigné).
+        private static string? TriState(string? value) =>
+            value is "oui" or "non" or "a_verifier" ? value : null;
+
         private bool ApplicationUserExists(string id)
         {
             return _context.Users.Any(e => e.Id == id);
@@ -219,6 +261,7 @@ namespace Api.Controllers
         // --- Identité / contact de base ---
         public string? Firstname { get; set; }
         public string? LastName { get; set; }
+        public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Nationality { get; set; }
         public string? Language { get; set; }
@@ -243,12 +286,27 @@ namespace Api.Controllers
         public string? PlusHautesEtudesCommentaire { get; set; }
         public bool? ActiviteProfSuisse { get; set; }
         public string? ActiviteProfSuisseCommentaire { get; set; }
-        public bool? RechercheLogement { get; set; }
+        public string? RechercheLogement { get; set; }
         public string? RechercheLogementCommentaire { get; set; }
-        public bool? BesoinsSouhaitsStages { get; set; }
+        public string? BesoinsSouhaitsStages { get; set; }
         public string? BesoinsSouhaitsStagesCommentaire { get; set; }
-        public bool? BesoinsSouhaitsBenevolat { get; set; }
+        public string? BesoinsSouhaitsBenevolat { get; set; }
         public string? BesoinsSouhaitsBenevoletCommentaire { get; set; }
+        public string? BesoinsSouhaitsMarrainage { get; set; }
+        public string? BesoinsSouhaitsMarrainageCommentaire { get; set; }
+        public DateTime? DateObtentionPermis { get; set; }
+        public int? AnneeObtentionPermis { get; set; }
+        public string? ProjetProfessionnel { get; set; }
+        public string? BesoinsSouhaitsSport { get; set; }
+        public string? Disponibilites { get; set; }
+        public string? SouhaitGenreMarrainage { get; set; }
+        public string? SouhaitAgeMarrainage { get; set; }
+        public string? TitresObtenus { get; set; }
+        public bool? ActiviteProfOrigine { get; set; }
+        public string? BesoinsSouhaitsEmploi { get; set; }
+        public string? BesoinsSouhaitsEmploiCommentaire { get; set; }
+        public string? BesoinsSouhaitsFormation { get; set; }
+        public string? BesoinsSouhaitsFormationCommentaire { get; set; }
         public string? NiveauDebutContrat { get; set; }
         public string? NiveauFinContrat { get; set; }
     }

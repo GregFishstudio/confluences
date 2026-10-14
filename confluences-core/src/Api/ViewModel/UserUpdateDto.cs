@@ -6,5 +6,7 @@ namespace Api.ViewModel
     {
         public string Id { get; set; }
         public DateTime? DateDebutParticipation { get; set; }
+        public DateTime? DateFinParticipation { get; set; }
+        public string? RaisonInterruptionMesure { get; set; }
     }
 }

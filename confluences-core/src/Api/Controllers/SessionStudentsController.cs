@@ -102,20 +102,64 @@ namespace Api.Controllers
                 return sessionStudent;
             }
 
-            var presences = await _context.Presences
-                .Where(p => p.StagiaireId == studentId
-                    && p.Date >= period.Value.Start
-                    && p.Date <= period.Value.End)
-                .Select(p => p.Statut)
-                .ToListAsync();
+            // Même règle que le registre de présence (AttendanceRegister.vue) : on parcourt les
+            // jours de cours de la session jusqu'à aujourd'hui (F&I : lun–ven ; télécours :
+            // lun/mar/jeu), hors jours fériés, vacances et jours avant le début / après
+            // l'interruption de la participation. Un jour sans saisie compte comme présent (c'est
+            // ce qu'affiche le registre) ; "a" et "e" comptent comme absence, "r" (retard) comme
+            // une demi-absence. Taux de présence = 100 − taux d'absence.
+            //
+            // L'ancien calcul ne comptait que les jours saisis dans le registre — or seules les
+            // absences y sont généralement saisies, d'où des taux très éloignés des présences.
+            var start = period.Value.Start.Date;
+            var end = period.Value.End.Date;
+            var scanEnd = DateTime.Today < end ? DateTime.Today : end;
 
-            // p/r comptent comme présence (retard reste une présence), a/e comme absence,
-            // s (stage) est hors mesure de la participation en classe.
-            var present = presences.Count(s => s == "p" || s == "r");
-            var absent = presences.Count(s => s == "a" || s == "e");
-            var total = present + absent;
+            var student = await _context.Users.AsNoTracking()
+                .Where(u => u.Id == studentId)
+                .Select(u => new { u.DateDebutParticipation, u.DateFinParticipation })
+                .SingleOrDefaultAsync();
 
-            sessionStudent.TauxParticipation = total > 0 ? Math.Round(100.0 * present / total, 1) : (double?)null;
+            var feries = (await _context.JoursFeries.AsNoTracking().Select(f => f.Date).ToListAsync())
+                .Select(d => d.Date).ToHashSet();
+            var vacances = (await _context.PeriodesVacances.AsNoTracking().Select(v => new { v.StartDate, v.EndDate }).ToListAsync())
+                .Select(v => (Start: v.StartDate.Date, End: v.EndDate.Date))
+                .Concat((await _context.SessionFormations.AsNoTracking()
+                        .Where(sf => sf.VacanceStart != null && sf.VacanceEnd != null)
+                        .Select(sf => new { sf.VacanceStart, sf.VacanceEnd }).ToListAsync())
+                    .Select(v => (Start: v.VacanceStart!.Value.Date, End: v.VacanceEnd!.Value.Date)))
+                .ToList();
+
+            var statutsParJour = (await _context.Presences.AsNoTracking()
+                    .Where(p => p.StagiaireId == studentId && p.Date >= start && p.Date < scanEnd.AddDays(1))
+                    .Select(p => new { p.Date, p.Statut })
+                    .ToListAsync())
+                .GroupBy(p => p.Date.Date)
+                .ToDictionary(g => g.Key, g => g.OrderByDescending(x => x.Date).First().Statut);
+
+            var isTelecours = period.Value.Type == "telecours";
+            int joursDeCours = 0;
+            double absences = 0;
+            for (var day = start; day <= scanEnd; day = day.AddDays(1))
+            {
+                var dow = day.DayOfWeek;
+                var jourDeCours = isTelecours
+                    ? dow == DayOfWeek.Monday || dow == DayOfWeek.Tuesday || dow == DayOfWeek.Thursday
+                    : dow != DayOfWeek.Saturday && dow != DayOfWeek.Sunday;
+                if (!jourDeCours) continue;
+                if (feries.Contains(day) || vacances.Any(v => day >= v.Start && day <= v.End)) continue;
+                if (student?.DateDebutParticipation != null && day < student.DateDebutParticipation.Value.Date) continue;
+                if (student?.DateFinParticipation != null && day > student.DateFinParticipation.Value.Date) continue;
+
+                joursDeCours++;
+                var statut = statutsParJour.TryGetValue(day, out var st) ? st : "p";
+                if (statut == "a" || statut == "e") absences += 1;
+                else if (statut == "r") absences += 0.5;
+            }
+
+            sessionStudent.TauxParticipation = joursDeCours > 0
+                ? Math.Round(100.0 - 100.0 * absences / joursDeCours, 1)
+                : (double?)null;
             sessionStudent.TauxParticipationCalculeLe = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
@@ -123,7 +167,7 @@ namespace Api.Controllers
             return sessionStudent;
         }
 
-        private async Task<(DateTime Start, DateTime End)?> ResolveSessionFormationPeriod(Session session)
+        private async Task<(DateTime Start, DateTime End, string Type)?> ResolveSessionFormationPeriod(Session session)
         {
             var className = session.SchoolClassRoom?.SchoolClassRoomName?.ToLower() ?? "";
             string type;
@@ -146,7 +190,7 @@ namespace Api.Controllers
             var candidate = sameTypeOrdered[index];
             if (candidate.StartDate.Year != session.DateStart.Year) return null;
 
-            return (candidate.StartDate, candidate.EndDate);
+            return (candidate.StartDate, candidate.EndDate, type);
         }
 
         // POST: api/SessionStudents

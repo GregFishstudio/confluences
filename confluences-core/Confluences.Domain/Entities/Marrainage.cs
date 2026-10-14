@@ -33,6 +33,25 @@ namespace Confluences.Domain.Entities
         public string? RelanceNotes { get; set; }
         public string? RaisonInactivite { get; set; }
 
+        // Région (Lausanne, Riviera, Moudon...) : déduite de la commune si vide, modifiable.
+        [StringLength(50)]
+        public string? Region { get; set; }
+
+        // Suivi : création (statut "Nouveau" pendant un mois) et dernière action sur la fiche
+        // (modification, relation, réponses, fichiers) — avec la date du dernier commentaire,
+        // sert à signaler "Prendre des nouvelles" après trois mois sans suivi.
+        public DateTime? CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+
+        // Questionnaire d'inscription : qui l'a saisi, et quand.
+        [StringLength(200)]
+        public string? QuestionnaireSaisiPar { get; set; }
+        public DateTime? QuestionnaireSaisiLe { get; set; }
+
+        // Date du dernier commentaire — calculée par l'API pour la liste, non stockée.
+        [NotMapped]
+        public DateTime? DernierCommentaire { get; set; }
+
         // Champ historique conservé pour compatibilité (un seul participant lié) ;
         // la relation multiple se fait maintenant via MarrainageParticipant.
         public string? ParticipantId { get; set; }

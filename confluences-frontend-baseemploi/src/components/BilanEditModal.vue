@@ -250,6 +250,24 @@
                 Ce texte sera automatiquement intégré en bas du document PDF final.
               </span>
             </div>
+
+            <!-- Objectifs — section distincte, propre à Télécours -->
+            <template v-if="isTelecours">
+              <v-divider class="my-4" />
+              <div class="d-flex align-center mb-2 gap-2">
+                <v-icon color="deep-purple">mdi-bullseye-arrow</v-icon>
+                <span class="text-subtitle-2 font-weight-bold text-deep-purple">Objectifs</span>
+              </div>
+              <v-textarea
+                v-model="objectivesText"
+                color="deep-purple"
+                variant="outlined"
+                rows="6"
+                placeholder="Indiquez les objectifs fixés pour la suite du parcours."
+                clearable
+                auto-grow
+              />
+            </template>
           </v-window-item>
 
         </v-window>
@@ -298,6 +316,7 @@ const socialInsertionText        = ref('')
 const digitalSkillsText          = ref('')
 const individualAccompanyingText = ref('')
 const homeVisitsText             = ref('')
+const objectivesText             = ref('')
 
 // Activités d'accompagnement (depuis la matrice)
 // Structure : [{ activityKey, label, type, count }]
@@ -370,6 +389,7 @@ const resetForm = () => {
   digitalSkillsText.value          = ''
   individualAccompanyingText.value = ''
   homeVisitsText.value             = ''
+  objectivesText.value             = ''
   accompanyingActivities.value     = []
 }
 
@@ -395,6 +415,7 @@ const fetchBilanData = async () => {
         digitalSkillsText.value          = data.digitalSkillsText           || ''
         individualAccompanyingText.value = data.individualAccompanyingText  || ''
         homeVisitsText.value             = data.homeVisitsText              || ''
+        objectivesText.value             = data.objectivesText              || ''
       }
     }
   } catch (e) {
@@ -449,6 +470,7 @@ const saveBilan = async () => {
     digitalSkillsText:           digitalSkillsText.value          || '',
     individualAccompanyingText:  individualAccompanyingText.value || '',
     homeVisitsText:              homeVisitsText.value             || '',
+    objectivesText:              objectivesText.value             || '',
     globalRate:                  parseFloat(props.stagiaireData?.globalRate || 0),
   }
 

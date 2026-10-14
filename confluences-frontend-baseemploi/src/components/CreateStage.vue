@@ -8,6 +8,8 @@
           v-bind="props"
           color="primary"
           class="elevation-2"
+          :size="buttonSize"
+          @click="prefill"
         >
           <v-icon left>mdi-plus</v-icon>
           Ajouter une expérience
@@ -30,7 +32,7 @@
             <v-autocomplete
               class="mb-4"
               v-model="stage.typeIntershipActivityId"
-              :items="typeIntershipActivity.value?.typeIntershipActivities ?? []"
+              :items="typeIntershipActivity?.typeIntershipActivities ?? []"
               item-title="nom"
               item-value="typeIntershipActivityId"
               label="Type d'activité"
@@ -42,7 +44,7 @@
             <v-autocomplete
               class="mb-4"
               v-model="stage.typeStageId"
-              :items="typeStage.value?.typeStages ?? []"
+              :items="typeStage?.typeStages ?? []"
               item-title="nom"
               item-value="typeStageId"
               label="Taux d'occupation"
@@ -55,7 +57,7 @@
             <v-autocomplete
               class="mb-4"
               v-model="stage.createurId"
-              :items="user.value?.users ?? []"
+              :items="user?.users ?? []"
               item-title="nom"
               item-value="id"
               label="Créateur·trice"
@@ -68,7 +70,7 @@
             <v-autocomplete
               class="mb-4"
               v-model="stage.typeAnnonceId"
-              :items="typeAnnonce.value?.typeAnnonces ?? []"
+              :items="typeAnnonce?.typeAnnonces ?? []"
               item-title="libelle"
               item-value="typeAnnonceId"
               label="Stage à annoncer"
@@ -81,7 +83,7 @@
             <v-autocomplete
               class="mb-4"
               v-model="stage.typeMetierId"
-              :items="typeMetier.value?.typeMetiers ?? []"
+              :items="typeMetier?.typeMetiers ?? []"
               item-title="libelle"
               item-value="typeMetierId"
               label="Métier"
@@ -94,7 +96,7 @@
             <v-autocomplete
               class="mb-4"
               v-model="stage.entrepriseId"
-              :items="entreprise.value?.entreprises ?? []"
+              :items="entreprise?.entreprises ?? []"
               item-title="nom"
               item-value="entrepriseId"
               label="Entreprise"
@@ -107,7 +109,7 @@
             <v-autocomplete
               class="mb-4"
               v-model="stage.stagiaireId"
-              :items="user.value?.users ?? []"
+              :items="user?.users ?? []"
               item-title="nom"
               item-value="id"
               label="Stagiaire"
@@ -162,7 +164,7 @@
             <v-autocomplete
               class="mb-4"
               v-model="stage.sessionId"
-              :items="session.value?.sessions ?? []"
+              :items="session?.sessions ?? []"
               item-title="description"
               item-value="sessionId"
               label="Session"
@@ -195,6 +197,12 @@
 import { ref, computed, onBeforeMount } from 'vue'
 import store from '@/store/index.js'
 import NProgress from 'nprogress'
+
+// stagiaireId : stagiaire pré-sélectionné·e quand le bouton est placé sur une fiche participant·e.
+const props = defineProps({
+  stagiaireId: { type: String, default: null },
+  buttonSize: { type: String, default: 'default' },
+})
 
 const dialog = ref(false)
 const validCreateStage = ref(true)
@@ -253,13 +261,19 @@ onBeforeMount(() => {
   store.dispatch('session/fetchSessions')
 })
 
-function submit() {
+function prefill() {
+  if (props.stagiaireId) stage.value.stagiaireId = props.stagiaireId
+}
+
+async function submit() {
   stage.value.nom =
     typeIntershipActivity.value?.typeIntershipActivities?.find(
       i => i.typeIntershipActivityId === stage.value.typeIntershipActivityId
     )?.nom || null
 
-  if (formCreateStage.value.validate()) {
+  // Vuetify 3 : validate() renvoie une promesse ({ valid }), pas un booléen.
+  const { valid } = await formCreateStage.value.validate()
+  if (valid) {
     NProgress.start()
 
     store

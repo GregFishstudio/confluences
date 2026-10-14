@@ -124,6 +124,7 @@ namespace Api.Controllers
             report.DigitalSkillsText          = request.DigitalSkillsText;
             report.IndividualAccompanyingText = request.IndividualAccompanyingText;
             report.HomeVisitsText             = request.HomeVisitsText;
+            report.ObjectivesText             = request.ObjectivesText;
 
             if (request.SelectedWorkshops != null)
                 report.WorkshopsJson = JsonSerializer.Serialize(request.SelectedWorkshops);
@@ -168,6 +169,7 @@ namespace Api.Controllers
                     r.DigitalSkillsText,
                     r.IndividualAccompanyingText,
                     r.HomeVisitsText,
+                    r.ObjectivesText,
                     r.WorkshopsJson,
                 })
                 .FirstOrDefaultAsync();
@@ -214,6 +216,17 @@ namespace Api.Controllers
             var (periodStart, periodEnd) = ResolveSessionDates(startDate, endDate, year, trimestre);
             var activitiesSummary = await BuildActivitiesSummary(userId, periodStart, periodEnd);
 
+            // Le niveau du titre vient de la mesure suivie (classe/mesure transmise par le
+            // frontend), pas du niveau personnel du/de la participant·e — voir commentaire dans
+            // GenerateAttestationSessionPdf pour la même logique appliquée aux attestations.
+            string mesureLevel = "";
+            foreach (var src in new[] { mesure ?? "", oralLevel ?? "" })
+            {
+                if (string.IsNullOrWhiteSpace(src)) continue;
+                var lm = System.Text.RegularExpressions.Regex.Match(src, @"[A-Za-z]\d");
+                if (lm.Success) { mesureLevel = lm.Value.ToUpper(); break; }
+            }
+
             var doc = new BilanSessionDocument(
                 user,
                 report.EvaluationText,
@@ -231,7 +244,9 @@ namespace Api.Controllers
                 report.DigitalSkillsText,
                 report.IndividualAccompanyingText,
                 report.HomeVisitsText,
-                activitiesSummary
+                activitiesSummary,
+                mesureLevel,
+                report.ObjectivesText
             );
 
             return File(doc.GeneratePdf(), "application/pdf",
@@ -311,64 +326,12 @@ namespace Api.Controllers
                 })
                 .ToList();
 
-            // Calcul du taux identique à l'attestation de présence :
-            // dénominateur = targetDays (fixe par type/session) − fériés réels de la période
-            var rawPresences = await _db.Presences
-                .AsNoTracking()
-                .Where(p => p.StagiaireId == userId && p.Date >= periodStart && p.Date <= periodEnd)
-                .ToDictionaryAsync(p => p.Date.Date, p => p.Statut);
-
-            var feriesSession = await _db.JoursFeries
-                .Where(f => f.Date >= periodStart && f.Date <= periodEnd)
-                .Select(f => f.Date.Date)
-                .ToListAsync();
-
-            var vacancesSession = await _db.PeriodesVacances
-                .Where(v => v.EndDate >= periodStart && v.StartDate <= periodEnd)
-                .ToListAsync();
-
-            bool IsVacanceSession(DateTime d) =>
-                vacancesSession.Any(v => d >= v.StartDate.Date && d <= v.EndDate.Date);
-
+            // Taux de participation : même calcul que la fiche de présence (qui fait référence),
+            // sur toute la session (= "part.3", cumulatif).
             bool isTeleCoursCalc = courseName.Contains("Télécours", StringComparison.OrdinalIgnoreCase)
                                 || courseName.Contains("TéléCours", StringComparison.OrdinalIgnoreCase);
-            string sessionTypeCalc = isTeleCoursCalc ? "tele" : "fi";
-            int targetDaysCalc = CalculerJoursCibles(sessionTypeCalc, 3); // 3 = trimestre complet
-
-            // Un·e stagiaire arrivé·e en cours de période ne compte pas comme "présent·e"
-            // par défaut sur les jours précédant son inscription (même logique que l'attestation de présence).
-            var participationStartCalc = user.DateDebutParticipation.HasValue && user.DateDebutParticipation.Value.Date > periodStart
-                ? user.DateDebutParticipation.Value.Date
-                : periodStart;
-
-            double absScore = 0;
-            int feriesCount = 0;
-            int nonInscritCount = 0;
-            for (var d = periodStart; d <= periodEnd; d = d.AddDays(1))
-            {
-                if (d.DayOfWeek == DayOfWeek.Saturday || d.DayOfWeek == DayOfWeek.Sunday) continue;
-
-                if (d.Date < participationStartCalc) { nonInscritCount++; continue; }
-
-                if (feriesSession.Contains(d.Date))
-                {
-                    // TéléCours : pas de cours le mercredi ni le vendredi
-                    if (!(isTeleCoursCalc && (d.DayOfWeek == DayOfWeek.Wednesday
-                                          || d.DayOfWeek == DayOfWeek.Friday)))
-                        feriesCount++;
-                    continue;
-                }
-                if (IsVacanceSession(d.Date)) continue;
-
-                string st = rawPresences.TryGetValue(d.Date, out var sv)
-                    ? (string.IsNullOrWhiteSpace(sv) ? "p" : sv.Trim().ToLower()) : "p";
-                if (st == "a" || st == "e") absScore += 1;
-                else if (st == "r")         absScore += 0.5;
-            }
-            int    totalAffiche      = Math.Max(1, targetDaysCalc - feriesCount - nonInscritCount);
-            double presentsExact     = Math.Max(0.0, totalAffiche - absScore);
-            double tauxParticipation = Math.Min(100.0,
-                Math.Ceiling(presentsExact / totalAffiche * 100.0 - 0.5));
+            int targetDaysCalc = CalculerJoursCibles(isTeleCoursCalc ? "tele" : "fi", 3); // 3 = session complète
+            double tauxParticipation = await CalculerTauxCommeFicheAsync(user, isTeleCoursCalc, periodStart, periodEnd, targetDaysCalc);
 
             var doc = new AttestationSessionDocument(
                 user, courseName, niveauAttestation, user.WrittenLevel,
@@ -457,29 +420,51 @@ namespace Api.Controllers
                 .Select(f => f.Date.Date)
                 .ToListAsync();
 
-            var periodesVacances = await _db.PeriodesVacances
-                .Where(v => v.EndDate >= periodStart && v.StartDate <= periodEnd)
-                .ToListAsync();
+            // Vacances : périodes du calendrier + vacances inter-sessions saisies sur les sessions,
+            // exactement comme la fiche de présence (vacancesRanges).
+            var periodesVacances = (await _db.PeriodesVacances
+                    .Where(v => v.EndDate >= periodStart && v.StartDate <= periodEnd)
+                    .Select(v => new { Start = v.StartDate, End = v.EndDate })
+                    .ToListAsync())
+                .Concat((await _db.SessionFormations
+                        .Where(s => s.VacanceStart != null && s.VacanceEnd != null
+                                 && s.VacanceEnd >= periodStart && s.VacanceStart <= periodEnd)
+                        .Select(s => new { Start = s.VacanceStart!.Value, End = s.VacanceEnd!.Value })
+                        .ToListAsync()))
+                .ToList();
 
             bool IsVacance(DateTime d) =>
-                periodesVacances.Any(v => d >= v.StartDate.Date && d <= v.EndDate.Date);
+                periodesVacances.Any(v => d >= v.Start.Date && d <= v.End.Date);
+
+            // Jours de cours : télécours lun/mar/jeu, F&I lun–ven — les autres jours ne comptent
+            // ni comme présence, ni comme absence, ni comme férié (même règle que la fiche de présence).
+            bool isTelecoursSession = (sessionType ?? "").ToLower().Contains("tele");
+            bool IsJourDeCours(DateTime d) => isTelecoursSession
+                ? d.DayOfWeek is DayOfWeek.Monday or DayOfWeek.Tuesday or DayOfWeek.Thursday
+                : d.DayOfWeek is not (DayOfWeek.Saturday or DayOfWeek.Sunday);
 
             // Un·e stagiaire arrivé·e en cours de période ne doit pas être compté·e
-            // "présent·e" par défaut sur les jours précédant son inscription.
+            // "présent·e" par défaut sur les jours précédant son inscription. Symétriquement, en
+            // cas d'interruption de la mesure, les jours après l'interruption sont traités pareil.
             var participationStart = user.DateDebutParticipation.HasValue && user.DateDebutParticipation.Value.Date > periodStart
                 ? user.DateDebutParticipation.Value.Date
                 : periodStart;
+            var participationEnd = user.DateFinParticipation.HasValue && user.DateFinParticipation.Value.Date < periodEnd
+                ? user.DateFinParticipation.Value.Date
+                : periodEnd;
 
             var fullPresences = new List<AttendanceEntryDto>();
             for (var date = periodStart; date <= periodEnd; date = date.AddDays(1))
             {
-                if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
+                if (!IsJourDeCours(date))
                     continue;
 
+                // Même ordre que la fiche de présence (référence) : fériés et vacances d'abord — ils
+                // réduisent les jours cibles même avant l'inscription —, puis jours hors inscription.
                 string status;
-                if (date.Date < participationStart)    status = "n"; // pas encore inscrit·e
-                else if (joursFeries.Contains(date.Date)) status = "f";
-                else if (IsVacance(date.Date))         status = "v";
+                if (joursFeries.Contains(date.Date))  status = "f";
+                else if (IsVacance(date.Date))        status = "vac"; // ≠ "v" (visite à domicile)
+                else if (date.Date < participationStart || date.Date > participationEnd) status = "n"; // hors période d'inscription
                 else status = existingPresences.TryGetValue(date.Date, out var s)
                         ? (string.IsNullOrWhiteSpace(s) ? "p" : s.Trim().ToLower())
                         : "p";
@@ -534,6 +519,59 @@ namespace Api.Controllers
                           { Label = c.Label, Type = c.Type, Count = p.Count })
                 .OrderBy(x => x.Type).ThenBy(x => x.Label)
                 .ToList();
+        }
+
+        // Taux de participation calculé exactement comme la colonne "part." de la fiche de présence
+        // (AttendanceRegister.vue, ratesByPart), qui fait référence :
+        //  - seuls les jours de cours comptent (télécours lun/mar/jeu, F&I lun–ven) ;
+        //  - fériés et vacances (calendrier + vacances inter-sessions) réduisent les jours cibles ;
+        //  - absences = A + E + ½ R, comptées seulement pendant l'inscription (les jours avant
+        //    l'inscription ou après une interruption ne sont ni des absences, ni déduits) ;
+        //  - taux = 100 − taux d'absence arrondi demi-bas (12.5 → 12).
+        private async Task<double> CalculerTauxCommeFicheAsync(
+            ApplicationUser user, bool isTelecours, DateTime start, DateTime end, int targetDays)
+        {
+            var presences = await _db.Presences.AsNoTracking()
+                .Where(p => p.StagiaireId == user.Id && p.Date >= start && p.Date <= end)
+                .ToDictionaryAsync(p => p.Date.Date, p => p.Statut);
+            var feries = (await _db.JoursFeries
+                    .Where(f => f.Date >= start && f.Date <= end)
+                    .Select(f => f.Date.Date)
+                    .ToListAsync())
+                .ToHashSet();
+            var vacances = (await _db.PeriodesVacances
+                    .Where(v => v.EndDate >= start && v.StartDate <= end)
+                    .Select(v => new { Start = v.StartDate, End = v.EndDate })
+                    .ToListAsync())
+                .Concat(await _db.SessionFormations
+                    .Where(s => s.VacanceStart != null && s.VacanceEnd != null && s.VacanceEnd >= start && s.VacanceStart <= end)
+                    .Select(s => new { Start = s.VacanceStart!.Value, End = s.VacanceEnd!.Value })
+                    .ToListAsync())
+                .ToList();
+
+            var debut = user.DateDebutParticipation?.Date;
+            var fin   = user.DateFinParticipation?.Date;
+
+            int deduits = 0;
+            double absences = 0;
+            for (var d = start.Date; d <= end.Date; d = d.AddDays(1))
+            {
+                bool jourDeCours = isTelecours
+                    ? d.DayOfWeek is DayOfWeek.Monday or DayOfWeek.Tuesday or DayOfWeek.Thursday
+                    : d.DayOfWeek is not (DayOfWeek.Saturday or DayOfWeek.Sunday);
+                if (!jourDeCours) continue;
+
+                if (feries.Contains(d) || vacances.Any(v => d >= v.Start.Date && d <= v.End.Date)) { deduits++; continue; }
+                if ((debut.HasValue && d < debut.Value) || (fin.HasValue && d > fin.Value)) continue;
+
+                var st = presences.TryGetValue(d, out var sv) && !string.IsNullOrWhiteSpace(sv) ? sv.Trim().ToLower() : "p";
+                if (st == "a" || st == "e") absences += 1;
+                else if (st == "r")         absences += 0.5;
+            }
+
+            int joursReels = Math.Max(1, targetDays - deduits);
+            double tauxAbsence = Math.Ceiling(absences / joursReels * 100.0 - 0.5);
+            return Math.Max(0.0, 100.0 - tauxAbsence);
         }
 
         private static int CalculerJoursCibles(string sessionType, int moisSession)
@@ -614,6 +652,7 @@ namespace Api.Controllers
         public string DigitalSkillsText          { get; set; }
         public string IndividualAccompanyingText { get; set; }
         public string HomeVisitsText             { get; set; }
+        public string ObjectivesText             { get; set; }
         public List<string> SelectedWorkshops    { get; set; }
     }
 

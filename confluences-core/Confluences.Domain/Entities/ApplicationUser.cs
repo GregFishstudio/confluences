@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -23,6 +23,11 @@ namespace Confluences.Domain.Entities
         public string? Language { get; set; }
         public string? Nationality { get; set; }
         public DateTime? DateDebutParticipation { get; set; }
+        // Date d'interruption de la mesure avant sa fin normale, si applicable — les jours après
+        // cette date ne comptent plus comme jours cibles dans les calculs de présence, comme les
+        // jours avant DateDebutParticipation.
+        public DateTime? DateFinParticipation { get; set; }
+        public string? RaisonInterruptionMesure { get; set; }
 
         public string? OralLevel { get; set; }
         public string? WrittenLevel { get; set; }
@@ -54,14 +59,41 @@ namespace Confluences.Domain.Entities
         public bool? ActiviteProfSuisse { get; set; }
         public string? ActiviteProfSuisseCommentaire { get; set; }
 
-        public bool? RechercheLogement { get; set; }
+        public string? RechercheLogement { get; set; }
         public string? RechercheLogementCommentaire { get; set; }
 
-        public bool? BesoinsSouhaitsStages { get; set; }
+        public string? BesoinsSouhaitsStages { get; set; }
         public string? BesoinsSouhaitsStagesCommentaire { get; set; }
 
-        public bool? BesoinsSouhaitsBenevolat { get; set; }
+        public string? BesoinsSouhaitsBenevolat { get; set; }
         public string? BesoinsSouhaitsBenevoletCommentaire { get; set; }
+
+        public string? BesoinsSouhaitsMarrainage { get; set; }
+        public string? BesoinsSouhaitsMarrainageCommentaire { get; set; }
+
+        // --- Suivi formatrices : rubriques ajoutées (parcours en Suisse / pays d'origine, besoins) ---
+        // Besoins / souhaits (logement, stages, bénévolat, marrainage, emploi, formation, sport) :
+        // "oui", "non" ou "a_verifier".
+        // Permis : l'année suffit ; la date exacte reste facultative.
+        public int? AnneeObtentionPermis { get; set; }
+        public DateTime? DateObtentionPermis { get; set; }
+        public string? ProjetProfessionnel { get; set; }
+        public string? BesoinsSouhaitsSport { get; set; }
+        public string? Disponibilites { get; set; }
+        // Souhaits pour le marrainage : "homme" / "femme" / "egal" ; "meme_age" / "plus_age" / "plus_jeune" / "egal".
+        [StringLength(20)]
+        public string? SouhaitGenreMarrainage { get; set; }
+        [StringLength(20)]
+        public string? SouhaitAgeMarrainage { get; set; }
+        public string? TitresObtenus { get; set; }
+
+        public bool? ActiviteProfOrigine { get; set; }
+
+        public string? BesoinsSouhaitsEmploi { get; set; }
+        public string? BesoinsSouhaitsEmploiCommentaire { get; set; }
+
+        public string? BesoinsSouhaitsFormation { get; set; }
+        public string? BesoinsSouhaitsFormationCommentaire { get; set; }
 
         // --- Fiche participant : fin de session ---
         public string? NiveauDebutContrat { get; set; }

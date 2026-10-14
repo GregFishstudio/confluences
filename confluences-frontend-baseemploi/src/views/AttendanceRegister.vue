@@ -37,6 +37,13 @@
           <v-chip x-small class="ml-2" color="primary" variant="outlined">{{ groupCount(g.value) }}</v-chip>
         </v-tab>
       </v-tabs>
+      <div v-if="activeGroupValue === 'telecours'" class="px-4 pb-2 d-flex justify-end">
+        <v-switch
+          v-model="showFullWeekTelecours"
+          label="Afficher toute la semaine (5 jours)"
+          color="primary" density="compact" hide-details
+        />
+      </div>
     </v-card>
 
     <!-- Tableau principal -->
@@ -123,8 +130,8 @@
                 <th class="sticky-col name-col">Participant·e</th>
                 <th v-for="pi in 3" :key="'ph1'+pi" class="part-rate-col sticky-col"
                   :class="{ 'last-part-col': pi === 3 }"
-                  :style="{ left: (200 + (pi-1)*48) + 'px' }">
-                  Abs.P{{ pi }}
+                  :style="{ left: (200 + (pi-1)*48) + 'px' }" :title="absHeaderTitle(pi)">
+                  <div>Abs.</div><div>{{ ['P1', 'P1+2', 'Total'][pi-1] }}</div>
                 </th>
                 <template v-for="(week,wi) in visibleWeekGroups" :key="'w'+wi">
                   <th class="week-sep-header" :colspan="week.days.length">Sem. {{ week.weekNum }}</th>
@@ -160,7 +167,7 @@
                 </td>
               </tr>
 
-              <tr v-for="user in filteredUsers" :key="user.id" class="table-row"
+              <tr v-for="user in filteredUsers" :key="user.id" class="table-row" :data-user-id="user.id"
                 v-memo="[presenceCache, ratesByPart, user.id, currentPartIndex, navSessionIndex, selectedCells.size, selectionMode, activeCell]">
                 <td class="sticky-col name-col">
                   <div class="user-info">
@@ -171,6 +178,14 @@
                     <div class="text-caption text-primary clickable-date" @click="openStartDateModal(user)">
                       <v-icon size="x-small" color="primary">mdi-calendar-start</v-icon>
                       {{ user.dateDebutParticipation ? formatDateFr(user.dateDebutParticipation) : 'Définir début' }}
+                    </div>
+                    <div
+                      class="text-caption clickable-date"
+                      :class="user.dateFinParticipation ? 'text-error' : 'text-grey'"
+                      @click="openInterruptionModal(user)"
+                    >
+                      <v-icon size="x-small" :color="user.dateFinParticipation ? 'error' : 'grey'">mdi-calendar-remove</v-icon>
+                      {{ user.dateFinParticipation ? `Interrompue le ${formatDateFr(user.dateFinParticipation)}` : 'Interruption de mesure' }}
                     </div>
                   </div>
                 </td>
@@ -395,13 +410,41 @@
       </v-card>
     </v-dialog>
 
+    <!-- ════════ Modal Interruption de mesure ════════ -->
+    <v-dialog v-model="interruptionModalVisible" max-width="420px">
+      <v-card rounded="lg">
+        <v-card-title class="headline bg-error text-white pa-4">Interruption de mesure</v-card-title>
+        <v-card-text class="pa-4">
+          <div class="text-caption text-grey mb-2">
+            Les jours après cette date ne compteront plus comme jours cibles dans les calculs de présence.
+          </div>
+          <v-date-picker v-model="newInterruptionDate" width="100%" locale="fr" :first-day-of-week="1" />
+          <v-text-field
+            v-model="newInterruptionReason"
+            label="Raison de l'interruption *"
+            variant="outlined" density="compact" class="mt-3" clearable
+            :rules="[v => !!(v && v.trim()) || 'La raison est obligatoire']"
+          />
+        </v-card-text>
+        <v-card-actions class="pa-4">
+          <v-btn v-if="editingUser?.dateFinParticipation" variant="text" color="error" @click="clearInterruption" :loading="isLoading">
+            Annuler l'interruption
+          </v-btn>
+          <v-spacer></v-spacer>
+          <v-btn variant="text" @click="interruptionModalVisible = false">Annuler</v-btn>
+          <v-btn color="primary" @click="saveInterruption" :loading="isLoading" :disabled="!newInterruptionDate || !newInterruptionReason?.trim()">Enregistrer</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </v-container>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+import { matchesSearch } from '@/utils/search'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import moment from 'moment/min/moment-with-locales'
 import API_BASE, { apiFetch } from '@/services/api'
 
@@ -409,6 +452,7 @@ moment.locale('fr')
 
 const store  = useStore()
 const router = useRouter()
+const route = useRoute()
 const users  = computed(() => store.state.user?.users || [])
 
 // ─── Auth fetch avec logout auto ──────────────────────────────────────────────
@@ -459,6 +503,9 @@ const statusPickerDay       = ref('')
 const startDateModalVisible = ref(false)
 const editingUser           = ref(null)
 const newStartDate          = ref(null)
+const interruptionModalVisible = ref(false)
+const newInterruptionDate      = ref(null)
+const newInterruptionReason    = ref('')
 const showAllSessions       = ref(false)
 
 // Téléchargement groupé
@@ -626,6 +673,16 @@ const currentPeriodRange = computed(() => {
   return e ? `${s.locale('fr').format('DD MMM')} – ${e.locale('fr').format('DD MMM YYYY')}` : `À partir du ${s.locale('fr').format('DD MMM YYYY')}`
 })
 
+// Télécours : cours uniquement lundi/mardi/jeudi — inutile d'afficher les colonnes mercredi/vendredi.
+// Permet d'afficher temporairement toute la semaine pour Télécours (au lieu de seulement
+// lun/mar/jeu), ex. pour repérer une éventuelle erreur de saisie sur un jour normalement masqué.
+const showFullWeekTelecours = ref(false)
+const schoolWeekdays = computed(() =>
+  activeGroupValue.value === 'telecours' && !showFullWeekTelecours.value
+    ? new Set([1, 2, 4])
+    : new Set([1, 2, 3, 4, 5])
+)
+
 const currentPeriodDays = computed(() => {
   const part = currentPart.value
   if (!part) return []
@@ -634,7 +691,7 @@ const currentPeriodDays = computed(() => {
   const days  = []
   let curr = start.clone()
   while (curr.isSameOrBefore(end, 'day')) {
-    if (curr.isoWeekday() < 6) {
+    if (schoolWeekdays.value.has(curr.isoWeekday())) {
       days.push({
         fullDate:  curr.clone().locale('en').format('ddd MMM DD YYYY'),
         date:      curr.format('D'),
@@ -821,12 +878,7 @@ const filteredUsers = computed(() => {
   const g = groups[activeTabIndex.value].value
   let list = users.value.filter(u => matchesGroup(u, g))
   if (search.value) {
-    const s = search.value.toLowerCase()
-    list = list.filter(u =>
-      (u.nom || '').toLowerCase().includes(s) ||
-      (u.prenom || '').toLowerCase().includes(s) ||
-      (u.userName || u.username || '').toLowerCase().includes(s)
-    )
+    list = list.filter(u => matchesSearch(search.value, u.nom, u.prenom, u.userName || u.username))
   }
   return list.sort((a, b) => (a.nom || '').localeCompare((b.nom || ''), 'fr', { sensitivity: 'base' }))
 })
@@ -1090,7 +1142,7 @@ const ratesByPart = computed(() => {
           const isVac   = !isFerie && vacancesRanges.value.some(([s, e]) => cur.isBetween(s, e, 'day', '[]'))
           if (isFerie || isVac) {
             deductDays++
-          } else if (!isBeforeParticipation(user, dk)) {
+          } else if (!isBeforeParticipation(user, dk) && !isAfterInterruption(user, dk)) {
             const st = presenceCache.value[`${user.id}__${dk}`] ?? user.presences?.[dk] ?? 'p'
             if (st === 'a') aCount++
             else if (st === 'e') eCount++
@@ -1124,7 +1176,7 @@ const ratesCache = computed(() => {
       if (cur.isoWeekday() < 6) {
         const dk   = cur.clone().locale('en').format('ddd MMM DD YYYY')
         const meta = periodDayMeta.value[dk]
-        if (!isBeforeParticipation(user, dk) && !meta?.isFerie && !meta?.isVac) {
+        if (!isBeforeParticipation(user, dk) && !isAfterInterruption(user, dk) && !meta?.isFerie && !meta?.isVac) {
           totalWorkingDays++
           const st = presenceCache.value[`${user.id}__${dk}`] ?? user.presences?.[dk] ?? 'p'
           if (st === 'a') aCount++
@@ -1173,9 +1225,16 @@ async function saveStartDate() {
   const userId = editingUser.value.id
   const date   = moment(newStartDate.value).format('YYYY-MM-DD')
   try {
+    // Envoie aussi l'interruption existante : ce PUT réécrit les 3 champs d'un coup, l'omettre
+    // effacerait silencieusement une interruption déjà enregistrée.
     const res = await authFetch(`${API_BASE}/api/Users/${userId}`, {
       method: 'PUT',
-      body:   JSON.stringify({ Id: userId, DateDebutParticipation: date }),
+      body:   JSON.stringify({
+        Id: userId,
+        DateDebutParticipation: date,
+        DateFinParticipation: editingUser.value.dateFinParticipation || null,
+        RaisonInterruptionMesure: editingUser.value.raisonInterruptionMesure || null,
+      }),
     })
     if (!res?.ok) { alert('Erreur serveur'); return }
     Object.assign(editingUser.value, { dateDebutParticipation: date })
@@ -1185,7 +1244,70 @@ async function saveStartDate() {
   } catch (e) { alert('Impossible de sauvegarder.') }
   finally { isLoading.value = false }
 }
+
+// ─── Interruption de mesure ─────────────────────────────────────────────────
+function isAfterInterruption(user, dateString) {
+  const raw = user.DateFinParticipation || user.dateFinParticipation
+  if (!raw || raw === 'undefined' || raw === 'null') return false
+  const cell = moment(dateString, 'ddd MMM DD YYYY', 'en').startOf('day')
+  const end  = moment(raw).startOf('day')
+  return cell.isValid() && end.isValid() && cell.isAfter(end, 'day')
+}
+function openInterruptionModal(user) {
+  editingUser.value = user
+  newInterruptionDate.value = user.dateFinParticipation
+    ? moment(user.dateFinParticipation).format('YYYY-MM-DD')
+    : moment().format('YYYY-MM-DD')
+  newInterruptionReason.value = user.raisonInterruptionMesure || ''
+  interruptionModalVisible.value = true
+}
+async function persistInterruption(dateFinParticipation, raisonInterruptionMesure) {
+  if (!editingUser.value) return
+  isLoading.value = true
+  const userId = editingUser.value.id
+  try {
+    const res = await authFetch(`${API_BASE}/api/Users/${userId}`, {
+      method: 'PUT',
+      body:   JSON.stringify({
+        Id: userId,
+        DateDebutParticipation: editingUser.value.dateDebutParticipation || null,
+        DateFinParticipation: dateFinParticipation,
+        RaisonInterruptionMesure: raisonInterruptionMesure,
+      }),
+    })
+    if (!res?.ok) { alert('Erreur serveur'); return }
+    Object.assign(editingUser.value, {
+      dateFinParticipation: dateFinParticipation,
+      raisonInterruptionMesure: raisonInterruptionMesure,
+    })
+    store.commit('user/UPDATE_USER', {
+      Id: userId,
+      DateFinParticipation: dateFinParticipation,
+      RaisonInterruptionMesure: raisonInterruptionMesure,
+    })
+    interruptionModalVisible.value = false
+    await fetchAttendancesForPeriod()
+  } catch (e) { alert('Impossible de sauvegarder.') }
+  finally { isLoading.value = false }
+}
+function saveInterruption() {
+  // Une interruption a toujours une date et une raison (même règle que la page Inscriptions).
+  if (!newInterruptionDate.value || !newInterruptionReason.value?.trim()) return
+  persistInterruption(moment(newInterruptionDate.value).format('YYYY-MM-DD'), newInterruptionReason.value.trim())
+}
+function clearInterruption() {
+  persistInterruption(null, null)
+}
+
 function formatDateFr(d) { return moment(d).locale('fr').format('DD/MM/YYYY') }
+
+// Les taux "Abs." sont cumulés depuis le début de la session (P1, puis P1+P2, puis toute la
+// session) — l'infobulle rappelle sur combien de semaines porte chaque colonne.
+function absHeaderTitle(pi) {
+  const weeks = currentSessionParts.value.slice(0, pi).reduce((n, p) => n + p.weekCount, 0)
+  const parts = ['partie 1', 'parties 1 et 2', 'toute la session'][pi - 1]
+  return `Absences cumulées depuis le début de la session — ${parts}${weeks ? ` (semaines 1 à ${weeks})` : ''}`
+}
 
 // Arrondi "demi-bas" : > x.5 → haut, ≤ x.5 → bas (ex: 2.5→2, 2.6→3)
 function roundHalfDown(x) { return Math.ceil(x - 0.5) }
@@ -1384,20 +1506,48 @@ async function downloadAllAttestations() {
 }
 
 // ─── Lifecycle ────────────────────────────────────────────────────────────────
+// Arrivée depuis la fiche participant (?studentId=&group=&quarter=) : sélectionne le bon
+// groupe/session puis fait défiler jusqu'à la ligne du/de la participant·e concerné·e.
+function applyDeepLinkFromQuery() {
+  const { studentId, group, quarter } = route.query
+  if (!studentId || !group || !quarter) return false
+
+  const idx = groups.findIndex(g => g.value === group)
+  if (idx < 0) return false
+  activeTabIndex.value = idx
+  navSessionIndex.value = Math.max(0, Number(quarter) - 1)
+  currentPartIndex.value = 0
+  search.value = ''
+
+  nextTick(() => {
+    const el = document.querySelector(`[data-user-id="${studentId}"]`)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      el.classList.add('deep-link-highlight')
+      setTimeout(() => el.classList.remove('deep-link-highlight'), 3000)
+    }
+  })
+  return true
+}
+
 onMounted(async () => {
   try { await store.dispatch('user/fetchUsers', true) } catch (e) { console.error(e) }
   await Promise.all([loadCalendrier(), loadAllSessionLinks()])
 
-  // FIX 6 : auto-sélectionner le groupe selon l'identifiant connecté
-  const storedUser    = JSON.parse(localStorage.getItem('user') || '{}')
-  const prefUsername  = (storedUser.profile?.preferred_username || '').toLowerCase()
-  const defaultGroup  = FORMATEUR_GROUPS[prefUsername]
-  if (defaultGroup) {
-    const idx = groups.findIndex(g => g.value === defaultGroup)
-    if (idx >= 0) activeTabIndex.value = idx
+  if (applyDeepLinkFromQuery()) {
+    fetchAttendancesForPeriod()
+  } else {
+    // FIX 6 : auto-sélectionner le groupe selon l'identifiant connecté
+    const storedUser    = JSON.parse(localStorage.getItem('user') || '{}')
+    const prefUsername  = (storedUser.profile?.preferred_username || '').toLowerCase()
+    const defaultGroup  = FORMATEUR_GROUPS[prefUsername]
+    if (defaultGroup) {
+      const idx = groups.findIndex(g => g.value === defaultGroup)
+      if (idx >= 0) activeTabIndex.value = idx
+    }
+    initializeNav()
   }
 
-  initializeNav()
   window.addEventListener('keyup', handleKeyDown)
 })
 onBeforeUnmount(() => {
@@ -1448,6 +1598,11 @@ async function fetchAttendancesForPeriod() {
 </script>
 
 <style scoped>
+.deep-link-highlight { animation: deep-link-flash 1.5s ease-in-out 2; }
+@keyframes deep-link-flash {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: #FFF59D; }
+}
 .table-container { overflow-x: auto; max-height: 72vh; }
 .presence-table  { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
 

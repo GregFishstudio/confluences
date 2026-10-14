@@ -28,6 +28,7 @@ namespace Confluences.Domain.Entities
 public string? DigitalSkillsText { get; set; }
 public string? IndividualAccompanyingText { get; set; }
 public string? HomeVisitsText { get; set; }
+public string? ObjectivesText { get; set; }
 
 
     // ============================

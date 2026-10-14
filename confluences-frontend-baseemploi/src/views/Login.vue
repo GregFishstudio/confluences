@@ -70,15 +70,11 @@
             </button>
           </div>
 
-          <!-- Options supplémentaires
+          <!-- Options supplémentaires -->
           <div class="form-options">
-            <label class="remember-me">
-              <input type="checkbox" v-model="rememberMe" />
-              <span class="checkmark"></span>
-              Se souvenir de moi
-            </label>
-            <a href="#" class="forgot-password">Mot de passe oublié ?</a>
-          </div> -->
+            <span></span>
+            <a :href="forgotPasswordUrl" target="_blank" rel="noopener" class="forgot-password">Mot de passe oublié ?</a>
+          </div>
 
           <!-- Bouton de connexion -->
           <button
@@ -172,6 +168,11 @@ const route = useRoute()
 const loading = ref(false)
 const error = ref('')
 const sessionExpired = ref(route.query.reason === 'session_expired')
+
+const forgotPasswordUrl = (() => {
+  const authority = import.meta.env.VITE_AUTHORITY_URL || 'http://localhost:5000'
+  return `${authority}/Identity/Account/ForgotPassword`
+})()
 
 // 🔧 Configuration OIDC CENTRALISÉE et COHÉRENTE
 const getOidcConfig = () => {

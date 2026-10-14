@@ -276,6 +276,7 @@ const mesuresLinks = [
   { label: 'Accomp. & Ateliers', routeName: 'AteliersFollowUp', icon: 'mdi-progress-check', external: false },
   { label: 'Bilans & attestations', routeName: 'StagiairesFollowUp', icon: 'mdi-account-eye', external: false },
   { label: 'Calendrier de formation', routeName: 'calendrier', icon: 'mdi-calendar-edit',  external: false },
+  { label: 'Inscriptions', routeName: 'Inscriptions', icon: 'mdi-account-multiple-plus-outline', external: false },
 ]
 
 // Menu Participant-e-s : infos relatives aux participant·e·s

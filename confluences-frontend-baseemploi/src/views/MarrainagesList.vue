@@ -48,60 +48,76 @@
 
     <v-card class="mb-4 elevation-1" rounded="lg">
       <v-card-text class="pa-4">
-        <v-row dense>
-          <v-col cols="12" md="6">
+        <v-row dense align="center">
+          <v-col cols="12" md="4">
             <v-text-field
               v-model="search"
               prepend-inner-icon="mdi-magnify"
               label="Rechercher (nom, prénom, commune, participant·e...)"
               variant="outlined" density="compact" clearable hide-details
-              @update:model-value="load"
+              @update:model-value="page = 1"
             />
           </v-col>
-          <v-col cols="6" md="3">
+          <v-col cols="6" md="2">
             <v-select
-              v-model="filterActif"
-              :items="[
-                { title: 'Tous', value: 'all' },
-                { title: 'Actifs', value: 'actif' },
-                { title: 'Inactifs', value: 'inactif' },
-              ]"
+              v-model="filterStatut"
+              :items="[{ title: 'Tous', value: 'all' }, { title: 'Prendre des nouvelles', value: 'nouvelles' }, ...MARRAINAGE_STATUTS, { title: 'Sans statut', value: 'none' }]"
               label="Statut"
               variant="outlined" density="compact" hide-details
-              @update:model-value="load"
+              @update:model-value="page = 1"
             />
           </v-col>
-          <v-col cols="6" md="3">
+          <v-col cols="6" md="2">
+            <v-select
+              v-model="filterRegion" :items="REGIONS" label="Région"
+              variant="outlined" density="compact" hide-details clearable
+              @update:model-value="page = 1"
+            />
+          </v-col>
+          <v-col cols="6" md="2">
             <v-select
               v-model="sortMode"
               :items="[
+                { title: 'À traiter en premier', value: 'suivi' },
                 { title: 'Nom (A → Z)', value: 'nom' },
-                { title: 'Date de démarrage (récent → ancien)', value: 'date' },
+                { title: 'Début du marrainage (récent → ancien)', value: 'date' },
+                { title: 'Région', value: 'region' },
               ]"
               label="Trier par"
               variant="outlined" density="compact" hide-details
             />
           </v-col>
+          <v-col cols="6" md="2" class="d-flex justify-end">
+            <v-btn-toggle v-model="viewMode" density="compact" variant="outlined" mandatory divided>
+              <v-btn value="liste" prepend-icon="mdi-format-list-bulleted" size="small">Liste</v-btn>
+              <v-btn value="regions" prepend-icon="mdi-map-outline" size="small">Régions</v-btn>
+            </v-btn-toggle>
+          </v-col>
         </v-row>
       </v-card-text>
     </v-card>
 
-    <v-card class="elevation-2" rounded="lg" :loading="isLoading">
+    <MarrainageRegionBoard v-if="viewMode === 'regions'" :marrainages="rawMarrainages" />
+
+    <v-card v-else class="elevation-2" rounded="lg" :loading="isLoading">
       <v-data-table
         :headers="headers"
         :items="sorted"
         :items-per-page="25"
         v-model:page="page"
         hover
+        :row-props="rowProps"
         @click:row="onRowClick"
         class="marrainages-table"
       >
         <template #item.nom="{ item }">
-          <div class="font-weight-bold">{{ item.nom }}</div>
-          <div class="text-caption text-grey">{{ item.email }}</div>
+          <router-link :to="detailRoute(item)" class="detail-link font-weight-bold">{{ item.nom }} {{ item.prenom }}</router-link>
+          <div v-if="item.numero" class="text-caption"><v-icon size="12" class="mr-1">mdi-phone-outline</v-icon>{{ item.numero }}</div>
+          <div v-if="item.email" class="text-caption text-grey"><v-icon size="12" class="mr-1">mdi-email-outline</v-icon>{{ item.email }}</div>
         </template>
-        <template #item.numero="{ item }">
-          {{ item.numero || '—' }}
+        <template #item.commune="{ item }">
+          <v-chip v-if="item.region" size="small" label variant="flat" :color="REGION_COLORS[item.region]" class="font-weight-bold mb-1">{{ item.region }}</v-chip>
+          <div class="text-body-2">{{ item.commune || '—' }}</div>
         </template>
         <template #item.participant="{ item }">
           <div v-if="linkedParticipants(item).length">
@@ -112,19 +128,27 @@
           <span v-else-if="item.filleulNom">{{ item.filleulNom }}</span>
           <span v-else class="text-grey text-caption">—</span>
         </template>
-        <template #item.actif="{ item }">
-          <v-chip size="small" :color="item.actif ? 'success' : 'error'" label :variant="item.actif ? 'tonal' : 'flat'">
-            {{ item.actif ? 'Actif' : 'Inactif' }}
-          </v-chip>
-        </template>
         <template #item.statut="{ item }">
-          <v-chip v-if="item.statut" size="small" color="orange" label variant="tonal">
-            {{ statutLabel(item.statut) }}
-          </v-chip>
-          <span v-else class="text-grey text-caption">—</span>
+          <div class="d-flex flex-column align-start ga-1">
+            <v-chip v-if="item.nouvelles" size="small" label color="red" variant="flat" prepend-icon="mdi-bell-ring-outline" :title="`Dernière action : ${formatDate(item.derniereActivite)}`">
+              Prendre des nouvelles
+            </v-chip>
+            <v-chip
+              v-if="item.statut"
+              size="small" label
+              :color="statutInfo(item.statut).color"
+              :variant="item.statut === 'en_attente' ? 'flat' : 'tonal'"
+            >
+              {{ statutInfo(item.statut).title }}
+            </v-chip>
+            <span v-else-if="!item.nouvelles" class="text-grey text-caption">—</span>
+          </div>
         </template>
         <template #item.date="{ item }">
           {{ formatDate(item.date) }}
+        </template>
+        <template #item.dateFin="{ item }">
+          {{ formatDate(item.dateFin) }}
         </template>
       </v-data-table>
     </v-card>
@@ -140,6 +164,13 @@ import MarrainageImportDialog from '@/components/MarrainageImportDialog.vue'
 import MarrainageQuestionnaireImportDialog from '@/components/MarrainageQuestionnaireImportDialog.vue'
 import MarrainageDuplicatesDialog from '@/components/MarrainageDuplicatesDialog.vue'
 import MarrainageFileBulkImport from '@/components/MarrainageFileBulkImport.vue'
+import MarrainageRegionBoard from '@/components/MarrainageRegionBoard.vue'
+import {
+  MARRAINAGE_STATUTS, statutInfo, effectiveStatut, dateDebutMarrainage, dateFinMarrainage,
+  prendreDesNouvelles, derniereActivite,
+} from '@/utils/marrainageStatut'
+import { REGIONS, REGION_COLORS, regionMarrainage } from '@/utils/regions'
+import { matchesSearch } from '@/utils/search'
 
 moment.locale('fr')
 const store = useStore()
@@ -148,8 +179,10 @@ const route = useRoute()
 
 const isLoading = ref(false)
 const search = ref('')
-const filterActif = ref('all')
-const sortMode = ref('nom')
+const filterStatut = ref('all')
+const sortMode = ref('suivi')
+const filterRegion = ref(null)
+const viewMode = ref('liste')
 const confirmClearDialog = ref(false)
 const showAdminTools = ref(false)
 const clearing = ref(false)
@@ -162,28 +195,67 @@ watch(page, (p) => {
 })
 
 const headers = [
-  { title: 'Prénom', key: 'prenom', sortable: true },
-  { title: 'Nom', key: 'nom', sortable: true },
-  { title: 'No de téléphone', key: 'numero', sortable: true },
-  { title: 'Commune', key: 'commune', sortable: true },
+  { title: 'Parrain / marraine', key: 'nom', sortable: true },
+  { title: 'Région · commune', key: 'commune', sortable: true, sort: (a, b) => (a || '').localeCompare(b || '', 'fr') },
   { title: 'Participant·e·s associé·e·s', key: 'participant', sortable: false },
-  { title: 'Statut', key: 'actif', sortable: true },
-  { title: 'En attente / à relancer', key: 'statut', sortable: true },
-  { title: 'Date de démarrage', key: 'date', sortable: true },
+  { title: 'Statut', key: 'statut', sortable: true, sort: (a, b) => statutRank(a) - statutRank(b) },
+  { title: 'Début du marrainage', key: 'date', sortable: true },
+  { title: 'Fin du marrainage', key: 'dateFin', sortable: true },
 ]
 
-const STATUT_LABELS = { en_attente: 'En attente', a_relancer: 'À relancer' }
-const statutLabel = (s) => STATUT_LABELS[s] || s
+const statutRank = (s) => { const i = MARRAINAGE_STATUTS.findIndex(x => x.value === s); return i < 0 ? 99 : i }
 
-const marrainages = computed(() => store.state.marrainage?.marrainages || [])
-const filtered = computed(() => marrainages.value)
+const rawMarrainages = computed(() => store.state.marrainage?.marrainages || [])
 
+// `statut` affiché = "Actif·ve" dès qu'une relation de marrainage est active (l'activité se
+// suit par relation), sinon le statut choisi sur la fiche. `date` / `dateFin` = début de la
+// relation la plus récente / fin de la dernière relation quand plus aucune n'est active.
+const marrainages = computed(() =>
+  rawMarrainages.value.map(m => ({
+    ...m,
+    statut: effectiveStatut(m),
+    date: dateDebutMarrainage(m),
+    dateFin: dateFinMarrainage(m),
+    region: regionMarrainage(m),
+    nouvelles: prendreDesNouvelles(m),
+    derniereActivite: derniereActivite(m),
+  }))
+)
+// Recherche tolérante faite ici plutôt que par l'API (qui exigeait l'orthographe exacte :
+// "Jean Marie" ne trouvait pas "Jean-Marie") : accents, tirets, ordre des mots, petite faute.
+const searchFields = (m) => [
+  m.nom, m.prenom, m.commune, m.region, m.email, m.numero, m.filleulNom,
+  ...linkedParticipants(m).map(p => `${p.firstname} ${p.lastName}`),
+]
+const filtered = computed(() => {
+  let list = marrainages.value
+  if (search.value) list = list.filter(m => matchesSearch(search.value, searchFields(m)))
+  if (filterRegion.value) list = list.filter(m => (m.region || 'Autres') === filterRegion.value)
+  if (filterStatut.value === 'all') return list
+  if (filterStatut.value === 'nouvelles') return list.filter(m => m.nouvelles)
+  if (filterStatut.value === 'none') return list.filter(m => !m.statut)
+  return list.filter(m => m.statut === filterStatut.value)
+})
+
+// Les marraines/parrains en attente de binôme et les nouveaux contacts ressortent en couleur ;
+// "Prendre des nouvelles" en rouge.
+const rowProps = ({ item }) => (
+  item.nouvelles ? { class: 'row-nouvelles' }
+    : item.statut === 'en_attente' ? { class: 'row-en-attente' }
+    : item.statut === 'nouveau' ? { class: 'row-nouveau' }
+    : {}
+)
+
+// Ordre par défaut "à traiter en premier" : prendre des nouvelles, puis nouveaux contacts et
+// binômes à former, puis le reste par nom.
+const priorite = (m) => m.nouvelles ? 0 : m.statut === 'nouveau' ? 1 : m.statut === 'en_attente' ? 2 : 3
+const byNom = (a, b) => (a.nom || '').localeCompare(b.nom || '', 'fr')
 const sorted = computed(() => {
   const list = [...filtered.value]
-  if (sortMode.value === 'date') {
-    return list.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
-  }
-  return list.sort((a, b) => (a.nom || '').localeCompare(b.nom || '', 'fr'))
+  if (sortMode.value === 'date') return list.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
+  if (sortMode.value === 'region') return list.sort((a, b) => (a.region || '~').localeCompare(b.region || '~', 'fr') || byNom(a, b))
+  if (sortMode.value === 'suivi') return list.sort((a, b) => priorite(a) - priorite(b) || byNom(a, b))
+  return list.sort(byNom)
 })
 
 const linkedParticipants = (item) => {
@@ -202,21 +274,19 @@ const formatDate = (d) => d ? moment(d).format('DD.MM.YYYY') : '—'
 
 const load = () => {
   isLoading.value = true
-  const params = {}
-  if (search.value) params.search = search.value
-  if (filterActif.value === 'actif') params.actif = true
-  if (filterActif.value === 'inactif') params.actif = false
-  store.dispatch('marrainage/fetchMarrainages', params).finally(() => { isLoading.value = false })
+  store.dispatch('marrainage/fetchMarrainages', {}).finally(() => { isLoading.value = false })
 }
+
+const detailRoute = (item) => ({ name: 'Marrainage-Modifier', params: { id: item.marrainageId } })
 
 const goToDetail = (item) => {
-  router.push({ name: 'Marrainage-Modifier', params: { id: item.marrainageId } })
+  router.push(detailRoute(item))
 }
 
-// Ignore le clic de ligne s'il vient d'un lien participant imbriqué (le stopPropagation
-// sur le lien ne suffit pas toujours, la ligne du tableau peut intercepter le clic avant).
+// Ignore le clic de ligne s'il vient d'un lien imbriqué (participant·e ou nom), qui gère
+// lui-même la navigation — sinon deux navigations partent en même temps et s'annulent.
 const onRowClick = (event, { item }) => {
-  if (event.target.closest('.participant-link')) return
+  if (event.target.closest('a')) return
   goToDetail(item)
 }
 
@@ -237,4 +307,13 @@ onMounted(load)
 .marrainages-table :deep(tbody tr) { cursor: pointer; }
 .marrainages-table :deep(tbody tr:hover) { background: #f5f5f5 !important; }
 .participant-link { color: #1976D2; text-decoration: underline; }
+.detail-link { color: inherit; text-decoration: none; }
+.detail-link:hover { text-decoration: underline; }
+.marrainages-table :deep(tbody tr.row-en-attente) { background: #FFF3E0; }
+.marrainages-table :deep(tbody tr.row-nouveau) { background: #E3F2FD; }
+.marrainages-table :deep(tbody tr.row-nouveau td:first-child) { box-shadow: inset 4px 0 0 #1E88E5; }
+.marrainages-table :deep(tbody tr.row-nouvelles) { background: #FFEBEE; }
+.marrainages-table :deep(tbody tr.row-nouvelles td:first-child) { box-shadow: inset 4px 0 0 #E53935; }
+.marrainages-table :deep(tbody tr.row-en-attente:hover) { background: #FFE0B2 !important; }
+.marrainages-table :deep(tbody tr.row-en-attente td:first-child) { box-shadow: inset 4px 0 0 #FB8C00; }
 </style>

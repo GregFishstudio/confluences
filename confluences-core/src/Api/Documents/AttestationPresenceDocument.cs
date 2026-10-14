@@ -159,9 +159,9 @@ namespace Api.Documents
                 .OrderBy(p => p.Date)
                 .ToList();
 
-            // "n" = jour précédant l'inscription du·de la stagiaire (DateDebutParticipation) :
-            // exclu des statistiques, mais compte pour réduire le nombre de jours cibles.
-            int nonInscrit = filteredAll.Count(p => N(p.Statut) == "n");
+            // "n" = jour hors inscription (avant DateDebutParticipation / après une interruption) :
+            // ni absence, ni déduit des jours cibles — même calcul que la fiche de présence, qui
+            // fait référence.
             var filtered   = filteredAll.Where(p => N(p.Statut) != "n").ToList();
 
             bool isTelecours = _session.SessionType?.ToLower().Contains("tele") == true;
@@ -171,39 +171,42 @@ namespace Api.Documents
             int retards  = filtered.Count(p => N(p.Statut) == "r");
             int stages   = filtered.Count(p => N(p.Statut) == "s");
             int visites  = filtered.Count(p => N(p.Statut) == "v"); // visite à domicile (télécours)
-            // Télécours : pas de cours le mercredi ni le vendredi → fériés ces jours-là exclus
-            int feries   = filtered.Count(p => N(p.Statut) == "f"
-                               && !(isTelecours && (p.Date.DayOfWeek == DayOfWeek.Wednesday
-                                                 || p.Date.DayOfWeek == DayOfWeek.Friday)));
+            // Seuls les jours de cours sont transmis (télécours : lun/mar/jeu) : fériés et vacances
+            // tombant un jour de cours réduisent les jours cibles, comme dans la fiche de présence.
+            int feries   = filtered.Count(p => N(p.Statut) == "f");
+            int vacances = filtered.Count(p => N(p.Statut) == "vac");
             int total    = filtered.Count;
 
             double absenceScore = absents + excuses + (retards * 0.5);
             int    targetDays   = _session.SessionTargetDays;
 
             int totalAffiche = targetDays > 0
-                ? Math.Max(1, targetDays - feries - nonInscrit)
-                : (total - feries - visites);
+                ? Math.Max(1, targetDays - feries - vacances)
+                : (total - feries - vacances - visites);
 
             double presentsExact   = Math.Max(0.0, totalAffiche - absenceScore);
-            int    presentsAffiche = (int)Math.Round(presentsExact);
 
-            // Arrondi demi-bas : > x.5 → haut, = x.5 → bas (ex: 97.5→97, 97.6→98)
+            // Taux de présence = 100 − taux d'absence arrondi comme dans la fiche de présence
+            // (arrondi demi-bas : 12.5→12, 12.6→13), pour que les deux chiffres correspondent toujours.
             double sessionRate = totalAffiche > 0
-                ? Math.Min(100.0, Math.Ceiling(presentsExact / totalAffiche * 100.0 - 0.5))
+                ? Math.Max(0.0, 100.0 - Math.Ceiling(absenceScore / totalAffiche * 100.0 - 0.5))
                 : 100.0;
 
-            // Pour le camembert, les visites à domicile (télécours) sont séparées des présences pures
+            // Les visites à domicile (télécours) sont une catégorie à part — ni une présence en
+            // classe, ni une absence — et ne doivent donc pas gonfler le carré "Présences" (elles
+            // ont leur propre carré et leur propre part de camembert, cohérents entre eux).
             double visitesSlice  = isTelecours ? visites : 0.0;
             double presentsSlice = Math.Max(0.0, presentsExact - visitesSlice);
+            int    presentsAffiche = (int)Math.Round(presentsSlice);
 
-            // label = texte long pour la légende ; pieLabel = texte court pour le camembert
+            // label = texte long pour la légende ; pieLabel = texte affiché directement sur le camembert
             var slices = new List<(string label, string pieLabel, double count, SKColor skColor, Color pdfColor)>
             {
-                ("Présent·e",              "Présent·e",  presentsSlice, SkPresent, ColPresent),
-                ("Visite à dom.",          "Visite",     visitesSlice,  SkVisite,  ColVisite),
-                ("Absent·e",               "Absent·e",   absents,       SkAbsent,  ColAbsent),
-                ("Excusé·e",               "Excusé·e",   excuses,       SkExcuse,  ColExcuse),
-                ("Participation partielle","Part. part.", retards * 0.5, SkRetard,  ColRetard),
+                ("Présent·e",              "Présent·e",        presentsSlice, SkPresent, ColPresent),
+                ("Visite à domicile",      "Visite à domicile", visitesSlice,  SkVisite,  ColVisite),
+                ("Absent·e non justifié·e", "Absent·e non justifié·e", absents, SkAbsent, ColAbsent),
+                ("Excusé·e",               "Excusé·e",         excuses,       SkExcuse,  ColExcuse),
+                ("Participation partielle","Part. part.",      retards * 0.5, SkRetard,  ColRetard),
             }.Where(s => s.count > 0).ToList();
 
             byte[] chartPng = GeneratePieChartPng(
@@ -236,6 +239,14 @@ namespace Api.Documents
                         ("Formation",      mesureLabel),
                         ("Période",        $"{startFmt} au {endFmt}"),
                     };
+                    if (_stagiaire.DateFinParticipation.HasValue)
+                    {
+                        string interruptionDate = _stagiaire.DateFinParticipation.Value.ToString("dd MMMM yyyy", _frenchCulture);
+                        string motif = string.IsNullOrWhiteSpace(_stagiaire.RaisonInterruptionMesure)
+                            ? ""
+                            : $" Motif : {_stagiaire.RaisonInterruptionMesure}.";
+                        infoRows.Add(("", $"Mesure interrompue le {interruptionDate}.{motif}"));
+                    }
                     if (!string.IsNullOrEmpty(_session.SessionName))
                         infoRows.Add(("Session",
                             $"{_session.SessionName} | Mois {_session.SessionMonth}/3"));
@@ -265,7 +276,7 @@ namespace Api.Documents
                         Color.FromHex("#E0F5F3"), AccentColor));
 
                     row.RelativeItem().Element(c => StatBox(c,
-                        $"{absents}", Plural(absents, "Absence", "Absences"),
+                        $"{absents}", Plural(absents, "Absence non justifiée", "Absences non justifiées"),
                         Color.FromHex("#FDECEA"), Color.FromHex("#C0392B")));
 
                     row.RelativeItem().Element(c => StatBox(c,
@@ -280,6 +291,11 @@ namespace Api.Documents
                         row.RelativeItem().Element(c => StatBox(c,
                             $"{stages}", Plural(stages, "Journée Stage", "Journées Stages"),
                             Color.FromHex("#E5F7E0"), Color.FromHex("#3E8E41")));
+
+                    if (isTelecours && visites > 0)
+                        row.RelativeItem().Element(c => StatBox(c,
+                            $"{visites}", Plural(visites, "Visite à domicile", "Visites à domicile"),
+                            Color.FromHex("#F3E5F5"), Color.FromHex("#7B1FA2")));
                 });
 
                 // ── Titre de section ───────────────────────────────────────────
@@ -310,7 +326,7 @@ namespace Api.Documents
                     // statistiques ci-dessus — inutile de les répéter dans la légende du camembert.
                     var legendSlices = slices.Where(s =>
                         s.label != "Présent·e" && s.label != "Excusé·e" &&
-                        s.label != "Absent·e" && s.label != "Participation partielle");
+                        s.label != "Absent·e non justifié·e" && s.label != "Participation partielle");
 
                     foreach (var (label, _, count, _, pdfColor) in legendSlices)
                     {
@@ -442,13 +458,45 @@ namespace Api.Documents
                         Color = new SKColor(50, 50, 50), IsAntialias = true,
                         TextSize = 26f, TextAlign = right ? SKTextAlign.Left : SKTextAlign.Right
                     };
-                    canvas.DrawText(label, right ? p3x + 4f : p3x - 4f, p3y + 7f, txt);
+
+                    // Libellés longs (ex. "Visite à domicile") : retour à la ligne plutôt que de
+                    // dépasser le bord du canevas.
+                    var lines = WrapLabel(label, txt, 150f);
+                    float lineHeight = txt.TextSize + 4f;
+                    float firstLineY = p3y + 7f - (lines.Count - 1) * lineHeight / 2f;
+                    for (int li = 0; li < lines.Count; li++)
+                        canvas.DrawText(lines[li], right ? p3x + 4f : p3x - 4f, firstLineY + li * lineHeight, txt);
                 }
             }
 
             using var img  = surface.Snapshot();
             using var data = img.Encode(SKEncodedImageFormat.Png, 100);
             return data.ToArray();
+        }
+
+        // Découpe un libellé trop large pour tenir sur une ligne en plusieurs lignes, en coupant
+        // sur les espaces (jamais au milieu d'un mot).
+        private static List<string> WrapLabel(string label, SKPaint paint, float maxWidth)
+        {
+            var words = (label ?? "").Split(' ');
+            if (words.Length <= 1 || paint.MeasureText(label) <= maxWidth)
+                return new List<string> { label };
+
+            var lines = new List<string>();
+            var current = words[0];
+            for (int i = 1; i < words.Length; i++)
+            {
+                var candidate = current + " " + words[i];
+                if (paint.MeasureText(candidate) <= maxWidth)
+                    current = candidate;
+                else
+                {
+                    lines.Add(current);
+                    current = words[i];
+                }
+            }
+            lines.Add(current);
+            return lines;
         }
 
         private static string FormatJours(double count)

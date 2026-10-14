@@ -1,4 +1,5 @@
 using Api.Utility;
+using Api.ViewModel;
 using Confluences.Domain.Entities;
 using Confluences.Persistence;
 using Microsoft.AspNetCore.Authorization;
@@ -76,10 +77,31 @@ namespace Api.Controllers
             }
 
             _context.MarrainageFiles.Add(marrainageFile);
+            var parent = await _context.Marrainages.FindAsync(marrainageId);
+            if (parent != null) parent.UpdatedAt = System.DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetMarrainageFile", new { id = marrainageFile.MarrainageFileId }, marrainageFile);
+        }
+
+        // PATCH: api/MarrainageFiles/5  { fileName: "CV 2026" }
+        // Renomme le document (intitulé affiché et nom du fichier téléchargé).
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> RenameMarrainageFile(int id, [FromBody] RenameFileDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.FileName)) return BadRequest("Le nom du fichier est obligatoire.");
+
+            var marrainageFile = await _context.MarrainageFiles.FindAsync(id);
+            if (marrainageFile == null)
+            {
+                return NotFound();
+            }
+
+            marrainageFile.FileName = dto.Resolve(marrainageFile.FileName);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { marrainageFile.FileName });
         }
 
         // DELETE: api/MarrainageFiles/5

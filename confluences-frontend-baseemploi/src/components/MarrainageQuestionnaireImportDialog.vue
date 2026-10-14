@@ -107,8 +107,11 @@ const CORE_FIELDS = [
   { value: 'core:numero', label: 'Téléphone' },
   { value: 'core:email', label: 'Email' },
   { value: 'core:commune', label: 'Commune' },
+  { value: 'core:dateNaissance', label: 'Date de naissance' },
+  { value: 'core:etatCivil', label: 'État civil' },
+  { value: 'core:profession', label: 'Profession' },
   { value: 'core:date', label: 'Date de démarrage' },
-  { value: 'core:periodeDemande', label: 'Mois/année de demande' },
+  { value: 'core:periodeDemande', label: 'Date de demande' },
 ]
 
 const targetOptions = computed(() => [
@@ -152,8 +155,13 @@ const CORE_ALIASES = {
   'core:numero': ['telephone', 'numero de telephone', 'no de telephone', 'tel'],
   'core:email': ['email', 'adresse e mail', 'e mail'],
   'core:commune': ['commune', 'commune de residence', 'commune de domicile'],
-  'core:date': ['date de demarrage', 'date'],
-  'core:periodeDemande': ['mois annee de demande', 'colonne 1'],
+  // "age" : sur certains questionnaires, la question nommée "Age" contient en réalité une
+  // date de naissance (ex. "01.01.1998") plutôt qu'un nombre — on la traite comme telle.
+  'core:dateNaissance': ['date de naissance', 'naissance', 'age'],
+  'core:etatCivil': ['etat civil'],
+  'core:profession': ['profession'],
+  'core:date': ['date de demarrage'],
+  'core:periodeDemande': ['date de demande', 'mois annee de demande', 'colonne 1'],
 }
 
 function autoMatchColumn(header) {
@@ -173,6 +181,21 @@ function autoMatchColumn(header) {
     return ql.length > 3 && (h.includes(ql) || ql.includes(h))
   })
   return partial ? `question:${partial.marrainageQuestionId}` : null
+}
+
+// Convertit une date au format suisse/européen (jj.mm.aaaa, jj/mm/aaaa, jj-mm-aaaa — avec ou
+// sans heure accolée, avec année sur 2 ou 4 chiffres) en ISO (aaaa-mm-jj). Renvoie null quand
+// la valeur ne ressemble à aucune date reconnue (ex: "48 ans") plutôt que de renvoyer le texte
+// brut : .NET rejetterait toute la ligne — et avant ce correctif, tout le lot importé — pour une
+// seule valeur invalide.
+function normalizeDateToIso(val) {
+  if (!val) return null
+  const v = val.trim()
+  const m = v.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2}|\d{4})(?:\s+\d{1,2}:\d{2}(:\d{2})?)?$/)
+  if (!m) return null
+  const [, day, month, yearRaw] = m
+  const year = yearRaw.length === 2 ? `19${yearRaw}` : yearRaw
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
 }
 
 function detectDelimiter(text) {
@@ -284,6 +307,9 @@ const rows = computed(() => {
         } else {
           core.nom = value
         }
+      } else if (target === 'core:dateNaissance' || target === 'core:date') {
+        const iso = normalizeDateToIso(value)
+        if (iso) core[target.slice(5)] = iso
       } else if (target.startsWith('core:')) {
         core[target.slice(5)] = value
       } else if (target.startsWith('question:')) {
@@ -298,7 +324,9 @@ const rows = computed(() => {
 async function confirmImport() {
   importing.value = true
   try {
-    const marrainagesPayload = rows.value.map(r => r.core)
+    // "nouveau" ne s'applique qu'aux inscriptions créées : l'import ne modifie pas le statut
+    // d'une marraine/d'un parrain déjà présent·e dans la liste.
+    const marrainagesPayload = rows.value.map(r => ({ statut: 'nouveau', ...r.core }))
     const created = await store.dispatch('marrainage/importMarrainages', marrainagesPayload)
 
     for (let i = 0; i < created.length; i++) {

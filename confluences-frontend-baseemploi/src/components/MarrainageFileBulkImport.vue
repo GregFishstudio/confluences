@@ -7,7 +7,7 @@
   <v-dialog v-model="dialog" max-width="800" @update:model-value="onOpen">
     <template #activator="{ props }">
       <v-btn v-bind="props" variant="outlined" prepend-icon="mdi-file-multiple-outline">
-        Importer des fichiers (PDF)
+        Importer des fichiers
       </v-btn>
     </template>
 
@@ -24,10 +24,10 @@
         />
         <v-file-input
           v-model="selectedFiles"
-          label="Fichiers PDF"
+          label="Fichiers (PDF, Word, Excel, image)"
           variant="outlined"
           multiple
-          accept="application/pdf"
+          :accept="ACCEPTED_DOC_ACCEPT"
           hide-details="auto"
           @update:model-value="matchFiles"
         />
@@ -68,6 +68,7 @@
 import { ref, computed } from 'vue'
 import { useStore } from 'vuex'
 import axios from 'axios'
+import { ACCEPTED_DOC_ACCEPT } from '@/utils/fileTypes'
 
 const API_URL = import.meta.env.VITE_API_URL
 

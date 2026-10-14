@@ -25,9 +25,12 @@ export const mutations = {
 }
 
 export const actions = {
-  fetchMarrainages({ commit, dispatch }, params) {
+  // `isLatest` (optionnel) : renvoie false si une requête plus récente a été lancée entre-temps,
+  // auquel cas cette réponse périmée n'écrase pas la liste.
+  fetchMarrainages({ commit, dispatch }, { isLatest, ...params } = {}) {
     return MarrainageService.getMarrainages(params)
       .then(response => {
+        if (isLatest && !isLatest()) return response.data
         commit('SET_MARRAINAGES', response.data)
         return response.data
       })
