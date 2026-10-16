@@ -27,6 +27,12 @@
 
         <!-- Form -->
         <v-card-text>
+          <v-alert v-if="listsError" type="warning" variant="tonal" density="compact" class="mb-4">
+            {{ listsError }}
+            <template #append>
+              <v-btn size="small" variant="flat" color="warning" :loading="loadingLists" @click="loadLists">Réessayer</v-btn>
+            </template>
+          </v-alert>
           <v-form ref="formCreateStage" v-model="validCreateStage">
 
             <v-autocomplete
@@ -39,6 +45,7 @@
               variant="outlined"
               density="comfortable"
               hide-details="auto"
+              :loading="loadingLists"
             />
 
             <v-autocomplete
@@ -52,6 +59,7 @@
               variant="outlined"
               density="comfortable"
               hide-details="auto"
+              :loading="loadingLists"
             />
 
             <v-autocomplete
@@ -65,6 +73,7 @@
               variant="outlined"
               density="comfortable"
               hide-details="auto"
+              :loading="loadingLists"
             />
 
             <v-autocomplete
@@ -77,6 +86,7 @@
               variant="outlined"
               density="comfortable"
               hide-details="auto"
+              :loading="loadingLists"
               clearable
             />
 
@@ -91,6 +101,7 @@
               variant="outlined"
               density="comfortable"
               hide-details="auto"
+              :loading="loadingLists"
             />
 
             <v-autocomplete
@@ -103,6 +114,7 @@
               variant="outlined"
               density="comfortable"
               hide-details="auto"
+              :loading="loadingLists"
               clearable
             />
 
@@ -117,6 +129,7 @@
               variant="outlined"
               density="comfortable"
               hide-details="auto"
+              :loading="loadingLists"
             />
 
             <!-- Début -->
@@ -171,6 +184,7 @@
               variant="outlined"
               density="comfortable"
               hide-details="auto"
+              :loading="loadingLists"
               clearable
             />
 
@@ -194,7 +208,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeMount } from 'vue'
+import { ref, computed, watch } from 'vue'
 import store from '@/store/index.js'
 import NProgress from 'nprogress'
 
@@ -251,15 +265,40 @@ const dateFinRules = [
     'La date de début doit être avant la fin'
 ]
 
-onBeforeMount(() => {
-  store.dispatch('entreprise/fetchEntreprises')
-  store.dispatch('typeStage/fetchTypeStages')
-  store.dispatch('typeAnnonce/fetchTypeAnnonces')
-  store.dispatch('typeMetier/fetchTypeMetiers')
-  store.dispatch('typeIntershipActivity/fetchTypeIntershipActivities')
-  store.dispatch('user/fetchUsers')
-  store.dispatch('session/fetchSessions')
-})
+// Listes de choix chargées à chaque ouverture du formulaire (et non une seule fois à l'affichage
+// de la page) : si ce premier chargement échouait ou partait trop tôt (ex. juste après la
+// connexion), toutes les listes restaient vides ("Aucune donnée disponible") jusqu'à un
+// rafraîchissement de la page.
+const loadingLists = ref(false)
+const listsError = ref('')
+
+async function loadLists() {
+  loadingLists.value = true
+  listsError.value = ''
+  try {
+    await Promise.allSettled([
+      store.dispatch('entreprise/fetchEntreprises'),
+      store.dispatch('typeStage/fetchTypeStages'),
+      store.dispatch('typeAnnonce/fetchTypeAnnonces'),
+      store.dispatch('typeMetier/fetchTypeMetiers'),
+      store.dispatch('typeIntershipActivity/fetchTypeIntershipActivities'),
+      store.dispatch('user/fetchUsers'),
+      store.dispatch('session/fetchSessions'),
+    ])
+    const vides = [
+      [typeStage.value?.typeStages, "taux d'occupation"],
+      [typeMetier.value?.typeMetiers, 'métiers'],
+      [user.value?.users, 'stagiaires / créateur·trice·s'],
+    ].filter(([list]) => !list?.length).map(([, label]) => label)
+    if (vides.length) {
+      listsError.value = `Certaines listes n'ont pas pu être chargées (${vides.join(', ')}). Cliquez sur « Réessayer » ; si cela persiste, reconnectez-vous.`
+    }
+  } finally {
+    loadingLists.value = false
+  }
+}
+
+watch(dialog, (open) => { if (open) loadLists() })
 
 function prefill() {
   if (props.stagiaireId) stage.value.stagiaireId = props.stagiaireId

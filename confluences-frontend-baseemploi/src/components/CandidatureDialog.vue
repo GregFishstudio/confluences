@@ -215,7 +215,7 @@ import { useStore } from 'vuex'
 import { useUnsavedGuard, confirmDiscard } from '@/composables/useUnsavedGuard'
 import {
   STATUTS_CANDIDATURE, MESURES, MANDANTS, CIVILITES,
-  asLabel, readApiError, sessionsDuGroupe, groupeCandidature,
+  asLabel, readApiError, sessionsDuGroupe, groupeCandidature, mesureDuStatut,
 } from '@/utils/inscriptionOptions'
 
 const props = defineProps({
@@ -324,6 +324,17 @@ function attemptClose() {
 }
 
 const toInputDate = (d) => d ? moment(d).format('YYYY-MM-DD') : null
+
+// "En attente A1/A2 F&I" ou "… Télécours" : la mesure suit le statut choisi.
+watch(() => form.value.statut, (statut) => {
+  const mesure = mesureDuStatut(statut)
+  if (mesure && form.value.mesureVisee !== mesure) form.value.mesureVisee = mesure
+})
+// …et inversement : changer de mesure garde le niveau de liste d'attente (A1 / A2).
+watch(() => form.value.mesureVisee, (mesure) => {
+  const niveau = (form.value.statut || '').match(/^En attente (A[12]) /)?.[1]
+  if (niveau && (mesure === 'F&I' || mesure === 'Télécours')) form.value.statut = `En attente ${niveau} ${mesure}`
+})
 
 watch(() => props.modelValue, async (open) => {
   if (!open) return

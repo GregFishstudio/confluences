@@ -4527,3 +4527,32 @@ BEGIN
 END $EF$;
 COMMIT;
 
+
+
+-- ── Candidatures : statuts "En attente A1/A2 F&I" / "En attente A1/A2 Télécours" ──
+START TRANSACTION;
+
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261016131542_StatutsEnAttente') THEN
+
+    UPDATE "Candidatures"
+    SET "Statut" = 'En attente ' || RIGHT(TRIM("Statut"), 2) || CASE WHEN "MesureVisee" = 'Télécours' THEN ' Télécours' ELSE ' F&I' END
+    WHERE TRIM("Statut") IN ('Sur liste d''attente A1', 'Sur liste d''attente A2');
+
+    UPDATE "Candidatures"
+    SET "MesureVisee" = 'F&I'
+    WHERE "Statut" IN ('En attente A1 F&I', 'En attente A2 F&I') AND "MesureVisee" IS NULL;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261016131542_StatutsEnAttente') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20261016131542_StatutsEnAttente', '6.0.9');
+    END IF;
+END $EF$;
+COMMIT;
+

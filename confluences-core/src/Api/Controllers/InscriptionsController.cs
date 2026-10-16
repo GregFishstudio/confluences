@@ -260,12 +260,12 @@ namespace Api.Controllers
             l.OrientationPreconisee == PassageA2 ? "fi_a2" : Groupe(l);
 
         // Groupe d'une candidature : Télécours, ou F&I A1 / A2 d'après le niveau du statut
-        // ("Sur liste d'attente A2" → F&I A2 ; F&I sans niveau précisé → F&I A1).
+        // ("En attente A2 F&I" → F&I A2 ; F&I sans niveau précisé → F&I A1).
         private static string GroupeCandidature(string? mesure, string? statut)
         {
             if (mesure == "Télécours") return "telecours";
             if (mesure == "F&I" || mesure == "A1" || mesure == "A2")
-                return mesure == "A2" || (statut ?? "").TrimEnd().EndsWith("A2") ? "fi_a2" : "fi_a1";
+                return mesure == "A2" || System.Text.RegularExpressions.Regex.IsMatch(statut ?? "", @"A2") ? "fi_a2" : "fi_a1";
             return "autre";
         }
 

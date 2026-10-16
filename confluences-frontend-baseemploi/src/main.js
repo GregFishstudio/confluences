@@ -36,6 +36,21 @@ axios.interceptors.request.use((config) => {
   return config
 })
 
+// Lecture qui échoue de façon passagère (réseau, serveur, jeton pas encore disponible juste
+// après la connexion) : une seconde tentative automatique, sinon les listes déroulantes des
+// anciens écrans restaient vides jusqu'à un rafraîchissement de la page.
+axios.interceptors.response.use(undefined, async (error) => {
+  const config = error?.config
+  const status = error?.response?.status
+  const transient = !error?.response || status >= 500 || status === 401
+  if (config && !config.__retried && (config.method || 'get').toLowerCase() === 'get' && transient) {
+    config.__retried = true
+    await new Promise(resolve => setTimeout(resolve, 800))
+    return axios(config)
+  }
+  return Promise.reject(error)
+})
+
 // --- Confirmation des enregistrements ---
 // Les pages récentes appellent l'API avec fetch (apiFetch/authFetch) sans rien afficher en cas
 // de succès : on confirme ici, en un seul endroit, chaque enregistrement réussi vers l'API.

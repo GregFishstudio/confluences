@@ -144,10 +144,10 @@
             </div>
 
             <div class="mt-2 d-flex ga-2">
-              <v-btn v-if="bilanAvailable[link.sessionId]" size="small" variant="tonal" color="primary" prepend-icon="mdi-file-pdf-box" :href="sessionDocUrl('bilan-session', link)" target="_blank">
+              <v-btn v-if="bilanAvailable[link.sessionId]" size="small" variant="tonal" color="primary" prepend-icon="mdi-file-pdf-box" @click="openProtected(sessionDocUrl('bilan-session', link))">
                 Bilan
               </v-btn>
-              <v-btn size="small" variant="tonal" color="primary" prepend-icon="mdi-file-pdf-box" :href="sessionDocUrl('attestation-session', link)" target="_blank">
+              <v-btn size="small" variant="tonal" color="primary" prepend-icon="mdi-file-pdf-box" @click="openProtected(sessionDocUrl('attestation-session', link))">
                 Attestation
               </v-btn>
             </div>
@@ -216,7 +216,7 @@
               <v-chip
                 v-for="f in conventionFiles[m.marrainageId]" :key="f.marrainageFileId"
                 size="x-small" variant="outlined" prepend-icon="mdi-file-check-outline"
-                :href="`${API_BASE}/api/MarrainageFiles/${f.marrainageFileId}`" target="_blank"
+                @click="openProtected(`${API_BASE}/api/MarrainageFiles/${f.marrainageFileId}`)"
               >
                 Convention signée
               </v-chip>
@@ -481,7 +481,7 @@
             <div class="d-flex flex-wrap ga-1">
               <v-chip
                 v-for="f in stage.files" :key="f.id" size="small" variant="outlined" prepend-icon="mdi-file-outline"
-                :href="`${API_BASE}/api/StageFiles/${f.id}`" target="_blank"
+                @click="openProtected(`${API_BASE}/api/StageFiles/${f.id}`)"
               >
                 {{ f.fileName }}
               </v-chip>
@@ -827,6 +827,23 @@ const sessionDocUrl = (kind, link) => {
   if (startDate) params.set('startDate', startDate)
   if (endDate) params.set('endDate', endDate)
   return `${API_BASE}/api/documents/${kind}/${user.value.id}?${params.toString()}`
+}
+
+// Documents protégés par la connexion : téléchargés avec le jeton puis ouverts dans un nouvel
+// onglet (un simple lien ne transmet pas le jeton et serait refusé par l'API).
+async function openProtected(url) {
+  const tab = window.open('', '_blank')
+  try {
+    const res = await apiFetch(url, { headers: { 'Content-Type': '' } })
+    if (!res?.ok) throw new Error(res ? `erreur ${res.status}` : 'session expirée')
+    const blobUrl = window.URL.createObjectURL(await res.blob())
+    if (tab) tab.location.href = blobUrl
+    else window.location.href = blobUrl
+    setTimeout(() => window.URL.revokeObjectURL(blobUrl), 60000)
+  } catch (e) {
+    if (tab) tab.close()
+    store.dispatch('notification/add', { type: 'error', message: `Document indisponible : ${e.message}` })
+  }
 }
 
 async function loadSessionExtras() {

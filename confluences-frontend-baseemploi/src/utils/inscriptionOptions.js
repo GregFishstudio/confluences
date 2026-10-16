@@ -29,8 +29,10 @@ export const STATUTS_CANDIDATURE = [
   'À évaluer',
   'AS à contacter',
   'Attente du retour AS',
-  "Sur liste d'attente A1",
-  "Sur liste d'attente A2",
+  'En attente A1 F&I',
+  'En attente A2 F&I',
+  'En attente A1 Télécours',
+  'En attente A2 Télécours',
   'Inscrit-e',
   'Retiré-e',
 ]
@@ -52,10 +54,16 @@ export const couleurMandant = (m) => ({ CSR: '#1565C0', CSIR: '#C2185B' }[m] || 
 export function groupeCandidature(mesure, statut) {
   if (mesure === 'Télécours') return 'telecours'
   if (mesure === 'F&I' || mesure === 'A1' || mesure === 'A2') {
-    return mesure === 'A2' || (statut || '').trim().endsWith('A2') ? 'fi_a2' : 'fi_a1'
+    return mesure === 'A2' || /A2/.test(statut || '') ? 'fi_a2' : 'fi_a1'
   }
   return null
 }
+
+// Mesure impliquée par un statut "En attente A1/A2 F&I/Télécours" (null pour les autres).
+export const mesureDuStatut = (statut) =>
+  /^En attente A[12] F&I$/.test(statut || '') ? 'F&I'
+    : /^En attente A[12] Télécours$/.test(statut || '') ? 'Télécours'
+    : null
 
 export const CIVILITES = ['Madame', 'Monsieur']
 
@@ -65,8 +73,11 @@ export const STATUT_CANDIDATURE_COULEURS = {
   'À évaluer': { color: '#EF6C00' },
   'AS à contacter': { color: '#D32F2F' },
   'Attente du retour AS': { color: '#FBC02D', ink: '#8D6E00' },
-  "Sur liste d'attente A1": { color: '#81C784', ink: '#2E7D32' },
-  "Sur liste d'attente A2": { color: '#1B5E20' },
+  // Listes d'attente : vert clair / foncé pour F&I, turquoise clair / foncé pour le télécours.
+  'En attente A1 F&I': { color: '#81C784', ink: '#2E7D32' },
+  'En attente A2 F&I': { color: '#1B5E20' },
+  'En attente A1 Télécours': { color: '#80CBC4', ink: '#00695C' },
+  'En attente A2 Télécours': { color: '#00695C' },
   'Inscrit-e': { color: '#1976D2' },
   'Retiré-e': { color: '#BDBDBD', ink: '#757575' },
 }
@@ -96,8 +107,8 @@ export async function readApiError(res, fallback = "Erreur lors de l'enregistrem
 // statutAttente : statut proposé pour un·e candidat·e créé·e depuis la vue d'une session.
 export const GROUPES = [
   { label: 'Télécours', value: 'telecours', mesure: 'Télécours', statutAttente: null },
-  { label: 'F&I A1', value: 'fi_a1', mesure: 'F&I', statutAttente: "Sur liste d'attente A1" },
-  { label: 'F&I A2', value: 'fi_a2', mesure: 'F&I', statutAttente: "Sur liste d'attente A2" },
+  { label: 'F&I A1', value: 'fi_a1', mesure: 'F&I', statutAttente: 'En attente A1 F&I' },
+  { label: 'F&I A2', value: 'fi_a2', mesure: 'F&I', statutAttente: 'En attente A2 F&I' },
 ]
 
 const MOIS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.']

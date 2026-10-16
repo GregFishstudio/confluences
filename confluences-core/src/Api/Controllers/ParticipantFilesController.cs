@@ -23,7 +23,8 @@ namespace Api.Controllers
         }
 
         // GET: api/ParticipantFiles/5
-        [AllowAnonymous]
+        // Téléchargement réservé aux personnes connectées (documents personnels : CV,
+        // conventions, extraits de casier...) — n'était accessible à tous que par son numéro.
         [HttpGet("{id}")]
         public async Task<ActionResult> GetParticipantFile(int id)
         {

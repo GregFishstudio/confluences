@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
@@ -17,6 +18,9 @@ using Api.Models.Dto.Attendance;
 
 namespace Api.Controllers
 {
+    // Bilans, attestations et fiches de présence : données personnelles, réservées aux
+    // formatrices connectées (le contrôleur était jusqu'ici accessible sans connexion).
+    [Authorize(Policy = "Teacher")]
     [Route("api/documents")]
     [ApiController]
     public class DocumentsController : ControllerBase
