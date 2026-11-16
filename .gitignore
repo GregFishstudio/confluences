@@ -1,0 +1,21 @@
+# Builds de déploiement (à générer, pas à versionner)
+confluences-core/publish_api/
+confluences-core/publish_mvc/
+confluences-core/publish_idp/
+*.zip
+
+# Sauvegardes
+BACKUP init/
+backup2/
+confluences-core/backup.sql
+*.bak
+
+# Données personnelles / documents de la cliente
+Liste marrainages*
+*.docx
+*.xlsx
+*.csv
+
+# Divers
+.DS_Store
+node_modules/
