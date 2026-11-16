@@ -20,6 +20,17 @@ namespace Api.Documents
         public DateTime SessionStartDate  { get; set; } = DateTime.MinValue;
         // Date de fin globale de la session (ex: 18 juin) — utilisée pour la signature
         public DateTime SessionEndDate    { get; set; } = DateTime.MinValue;
+        // Périodes de 4 semaines depuis le début de la session, jusqu'à celle de l'attestation
+        // (la dernière) : relevé principal + suivi cumulatif.
+        public List<PeriodeReleve> Periodes { get; set; } = new();
+    }
+
+    public class PeriodeReleve
+    {
+        public string   Label      { get; set; } = "";   // "Semaines 5 à 8"
+        public DateTime Start      { get; set; }
+        public DateTime End        { get; set; }
+        public int      TargetDays { get; set; }         // jours programmés de la période (20, 10, 12…)
     }
 
     public class AttestationPresenceDocument : IDocument
@@ -44,12 +55,14 @@ namespace Api.Documents
         private static readonly Color ColVacances = Color.FromHex("#95A5A6");
         private static readonly Color ColFerie    = Color.FromHex("#BDC3C7");
         private static readonly Color ColVisite   = Color.FromHex("#CE93D8");
+        private static readonly Color ColConge    = Color.FromHex("#8FA98F");
 
         private static readonly SKColor SkPresent = SKColor.Parse("#2CA6A4");
         private static readonly SKColor SkAbsent  = SKColor.Parse("#E07050");
         private static readonly SKColor SkExcuse  = SKColor.Parse("#B5C5D5");
         private static readonly SKColor SkRetard  = SKColor.Parse("#6BAED6");
         private static readonly SKColor SkVisite  = SKColor.Parse("#CE93D8");
+        private static readonly SKColor SkConge   = SKColor.Parse("#8FA98F");
 
         private readonly TextStyle _baseStyle;
 
@@ -145,84 +158,88 @@ namespace Api.Documents
             });
         }
 
+        // ── Statistiques d'une période ────────────────────────────────────────
+        // Mêmes règles que la fiche de présence : absences = A + E + ½ R ; fériés, vacances et
+        // congés autorisés (C) réduisent les jours retenus — un congé n'est jamais une absence ;
+        // "n" = jour hors inscription (ni absence, ni déduit).
+        private sealed class Stats
+        {
+            public int A, E, R, S, V, F, Vac, C, Total;
+            public int Target;
+            public double AbsScore => A + E + R * 0.5;
+            public int Retenus => Target > 0
+                ? Math.Max(1, Target - F - Vac - C)
+                : Math.Max(0, Total - F - Vac - C - V);
+            // Taux = 100 − taux d'absence arrondi demi-bas (12.5 → 12), comme la fiche de présence.
+            public double Rate => Retenus > 0
+                ? Math.Max(0.0, 100.0 - Math.Ceiling(AbsScore / Retenus * 100.0 - 0.5))
+                : 100.0;
+        }
+
+        private Stats ComputeStats(DateTime start, DateTime end, int target)
+        {
+            var id = _stagiaire.Id.ToString();
+            var days = _presences.Where(p =>
+                    p.StagiaireId != null &&
+                    p.StagiaireId.Equals(id, StringComparison.OrdinalIgnoreCase) &&
+                    p.Date.Date >= start && p.Date.Date <= end &&
+                    N(p.Statut) != "n")
+                .Select(p => N(p.Statut))
+                .ToList();
+            return new Stats
+            {
+                A = days.Count(s => s == "a"), E = days.Count(s => s == "e"), R = days.Count(s => s == "r"),
+                S = days.Count(s => s == "s"), V = days.Count(s => s == "v"), F = days.Count(s => s == "f"),
+                Vac = days.Count(s => s == "vac"), C = days.Count(s => s == "c"), Total = days.Count,
+                Target = target,
+            };
+        }
+
         // ── Contenu principal ─────────────────────────────────────────────────
         private void RenderContent(IContainer container)
         {
-            var id = _stagiaire.Id.ToString();
-
-            var filteredAll = _presences
-                .Where(p =>
-                    p.StagiaireId != null &&
-                    p.StagiaireId.Equals(id, StringComparison.OrdinalIgnoreCase) &&
-                    p.Date.Date >= _startDate &&
-                    p.Date.Date <= _endDate)
-                .OrderBy(p => p.Date)
-                .ToList();
-
-            // "n" = jour hors inscription (avant DateDebutParticipation / après une interruption) :
-            // ni absence, ni déduit des jours cibles — même calcul que la fiche de présence, qui
-            // fait référence.
-            var filtered   = filteredAll.Where(p => N(p.Statut) != "n").ToList();
-
             bool isTelecours = _session.SessionType?.ToLower().Contains("tele") == true;
 
-            int absents  = filtered.Count(p => N(p.Statut) == "a");
-            int excuses  = filtered.Count(p => N(p.Statut) == "e");
-            int retards  = filtered.Count(p => N(p.Statut) == "r");
-            int stages   = filtered.Count(p => N(p.Statut) == "s");
-            int visites  = filtered.Count(p => N(p.Statut) == "v"); // visite à domicile (télécours)
-            // Seuls les jours de cours sont transmis (télécours : lun/mar/jeu) : fériés et vacances
-            // tombant un jour de cours réduisent les jours cibles, comme dans la fiche de présence.
-            int feries   = filtered.Count(p => N(p.Statut) == "f");
-            int vacances = filtered.Count(p => N(p.Statut) == "vac");
-            int total    = filtered.Count;
+            // Périodes de la session jusqu'à celle de l'attestation ; la dernière est le relevé
+            // principal, toutes alimentent le suivi cumulatif.
+            var periodes = _session.Periodes?.Count > 0
+                ? _session.Periodes
+                : new List<PeriodeReleve> { new PeriodeReleve { Label = "Période", Start = _startDate, End = _endDate, TargetDays = _session.SessionTargetDays } };
+            var courante = periodes[^1];
+            var st = ComputeStats(courante.Start, courante.End, courante.TargetDays);
 
-            double absenceScore = absents + excuses + (retards * 0.5);
-            int    targetDays   = _session.SessionTargetDays;
-
-            int totalAffiche = targetDays > 0
-                ? Math.Max(1, targetDays - feries - vacances)
-                : (total - feries - vacances - visites);
-
-            double presentsExact   = Math.Max(0.0, totalAffiche - absenceScore);
-
-            // Taux de présence = 100 − taux d'absence arrondi comme dans la fiche de présence
-            // (arrondi demi-bas : 12.5→12, 12.6→13), pour que les deux chiffres correspondent toujours.
-            double sessionRate = totalAffiche > 0
-                ? Math.Max(0.0, 100.0 - Math.Ceiling(absenceScore / totalAffiche * 100.0 - 0.5))
-                : 100.0;
+            int retenus = st.Retenus;
+            double presentsExact = Math.Max(0.0, retenus - st.AbsScore);
+            double sessionRate = st.Rate;
 
             // Les visites à domicile (télécours) sont une catégorie à part — ni une présence en
-            // classe, ni une absence — et ne doivent donc pas gonfler le carré "Présences" (elles
-            // ont leur propre carré et leur propre part de camembert, cohérents entre eux).
-            double visitesSlice  = isTelecours ? visites : 0.0;
+            // classe, ni une absence. Les congés autorisés ont leur propre part : ils sont visibles,
+            // mais exclus des jours retenus.
+            double visitesSlice  = isTelecours ? st.V : 0.0;
             double presentsSlice = Math.Max(0.0, presentsExact - visitesSlice);
             int    presentsAffiche = (int)Math.Round(presentsSlice);
 
-            // label = texte long pour la légende ; pieLabel = texte affiché directement sur le camembert
             var slices = new List<(string label, string pieLabel, double count, SKColor skColor, Color pdfColor)>
             {
                 ("Présent·e",              "Présent·e",        presentsSlice, SkPresent, ColPresent),
                 ("Visite à domicile",      "Visite à domicile", visitesSlice,  SkVisite,  ColVisite),
-                ("Absent·e non justifié·e", "Absent·e non justifié·e", absents, SkAbsent, ColAbsent),
-                ("Excusé·e",               "Excusé·e",         excuses,       SkExcuse,  ColExcuse),
-                ("Participation partielle","Part. part.",      retards * 0.5, SkRetard,  ColRetard),
+                ("Absent·e non justifié·e", "Absent·e non justifié·e", st.A,  SkAbsent,  ColAbsent),
+                ("Excusé·e",               "Excusé·e",         st.E,          SkExcuse,  ColExcuse),
+                ("Participation partielle","Part. part.",      st.R * 0.5,    SkRetard,  ColRetard),
+                ("Congé autorisé",         "Congé autorisé",   st.C,          SkConge,   ColConge),
             }.Where(s => s.count > 0).ToList();
 
             byte[] chartPng = GeneratePieChartPng(
                 slices.Select(s => (s.pieLabel, s.count, s.skColor)).ToList(),
-                totalAffiche);
+                retenus + st.C);
 
-            string startFmt = _startDate.ToString("dd MMMM yyyy", _frenchCulture);
-            string endFmt   = _endDate.ToString("dd MMMM yyyy", _frenchCulture);
-
-            string mesureLabel    = isTelecours ? "Mesure Français Télécours" : "Français & Intégration";
-
-            string participantLabel = "Participant·e";
+            string startFmt = courante.Start.ToString("dd MMMM yyyy", _frenchCulture);
+            string endFmt   = courante.End.ToString("dd MMMM yyyy", _frenchCulture);
+            string mesureLabel = isTelecours ? "Mesure Français Télécours" : "Français & Intégration";
 
             container.Column(col =>
             {
-                col.Spacing(10);
+                col.Spacing(9);
 
                 // ── Tableau d'informations ─────────────────────────────────────
                 col.Item().Table(table =>
@@ -235,9 +252,9 @@ namespace Api.Documents
 
                     var infoRows = new List<(string, string)>
                     {
-                        (participantLabel, $"{_stagiaire.Firstname} {_stagiaire.LastName}"),
-                        ("Formation",      mesureLabel),
-                        ("Période",        $"{startFmt} au {endFmt}"),
+                        ("Participant·e", $"{_stagiaire.Firstname} {_stagiaire.LastName}"),
+                        ("Formation",     mesureLabel),
+                        ("Période",       $"{startFmt} au {endFmt}" + (periodes.Count > 1 || courante.Label != "Période" ? $" ({courante.Label.ToLower(_frenchCulture)})" : "")),
                     };
                     if (_stagiaire.DateFinParticipation.HasValue)
                     {
@@ -248,21 +265,20 @@ namespace Api.Documents
                         infoRows.Add(("", $"Mesure interrompue le {interruptionDate}.{motif}"));
                     }
                     if (!string.IsNullOrEmpty(_session.SessionName))
-                        infoRows.Add(("Session",
-                            $"{_session.SessionName} | Mois {_session.SessionMonth}/3"));
+                        infoRows.Add(("Session", $"{_session.SessionName} | Période {_session.SessionMonth}/3"));
 
                     foreach (var (rowLabel, rowValue) in infoRows)
                     {
                         table.Cell()
                             .Background(AccentColor)
                             .BorderBottom(0.5f).BorderColor(Colors.White)
-                            .Padding(7).PaddingLeft(10)
+                            .Padding(6).PaddingLeft(10)
                             .Text(rowLabel)
                             .SemiBold().FontSize(10).FontColor(Colors.White);
 
                         table.Cell()
                             .BorderBottom(0.5f).BorderLeft(0.5f).BorderColor(Colors.Grey.Lighten2)
-                            .Padding(7).PaddingLeft(10)
+                            .Padding(6).PaddingLeft(10)
                             .Text(rowValue)
                             .FontSize(10).FontColor(PrimaryColor);
                     }
@@ -271,95 +287,149 @@ namespace Api.Documents
                 // ── Boîtes statistiques ────────────────────────────────────────
                 col.Item().Row(row =>
                 {
+                    row.Spacing(4);
                     row.RelativeItem().Element(c => StatBox(c,
                         $"{presentsAffiche}", Plural(presentsAffiche, "Présence", "Présences"),
                         Color.FromHex("#E0F5F3"), AccentColor));
 
                     row.RelativeItem().Element(c => StatBox(c,
-                        $"{absents}", Plural(absents, "Absence non justifiée", "Absences non justifiées"),
+                        $"{st.A}", Plural(st.A, "Absence non justifiée", "Absences non justifiées"),
                         Color.FromHex("#FDECEA"), Color.FromHex("#C0392B")));
 
                     row.RelativeItem().Element(c => StatBox(c,
-                        $"{excuses}", Plural(excuses, "Absence Excusée", "Absences Excusées"),
+                        $"{st.E}", Plural(st.E, "Absence excusée", "Absences excusées"),
                         Color.FromHex("#FEF9E7"), Color.FromHex("#E67E22")));
 
                     row.RelativeItem().Element(c => StatBox(c,
-                        $"{retards}", Plural(retards, "Participation partielle", "Participations partielles"),
+                        $"{st.R}", Plural(st.R, "Participation partielle", "Participations partielles"),
                         Color.FromHex("#E8F4FC"), Color.FromHex("#1A6EA8")));
 
-                    if (stages > 0)
+                    row.RelativeItem().Element(c => StatBox(c,
+                        $"{st.C}", Plural(st.C, "Congé autorisé", "Congés autorisés"),
+                        Color.FromHex("#EEF2EC"), Color.FromHex("#4E6E4E")));
+
+                    if (st.S > 0)
                         row.RelativeItem().Element(c => StatBox(c,
-                            $"{stages}", Plural(stages, "Journée Stage", "Journées Stages"),
+                            $"{st.S}", Plural(st.S, "Journée de stage", "Journées de stage"),
                             Color.FromHex("#E5F7E0"), Color.FromHex("#3E8E41")));
 
-                    if (isTelecours && visites > 0)
+                    if (isTelecours && st.V > 0)
                         row.RelativeItem().Element(c => StatBox(c,
-                            $"{visites}", Plural(visites, "Visite à domicile", "Visites à domicile"),
+                            $"{st.V}", Plural(st.V, "Visite à domicile", "Visites à domicile"),
                             Color.FromHex("#F3E5F5"), Color.FromHex("#7B1FA2")));
                 });
 
-                // ── Titre de section ───────────────────────────────────────────
-                col.Item().PaddingTop(4)
-                    .Text("Répartition des présences")
-                    .FontSize(13).Bold().FontColor(AccentColor);
-
                 // ── Camembert + pourcentage ────────────────────────────────────
+                col.Item().PaddingTop(2)
+                    .Text("Répartition des présences")
+                    .FontSize(12).Bold().FontColor(AccentColor);
+
                 col.Item().Row(row =>
                 {
-                    row.ConstantItem(300).Height(250).Image(chartPng).FitArea();
+                    row.ConstantItem(250).Height(170).Image(chartPng).FitArea();
 
                     row.RelativeItem().AlignMiddle().PaddingLeft(12).Column(c =>
                     {
                         c.Item().AlignCenter()
                             .Text($"{sessionRate:F0}%")
-                            .FontSize(36).Bold().FontColor(Color.FromHex("#2C5F8A"));
+                            .FontSize(32).Bold().FontColor(Color.FromHex("#2C5F8A"));
                         c.Item().AlignCenter()
-                            .Text("de participation")
-                            .FontSize(11).FontColor(MediumGrey);
+                            .Text("de participation sur la période")
+                            .FontSize(10).FontColor(MediumGrey);
+                        c.Item().PaddingTop(6).AlignCenter()
+                            .Text($"{retenus} jour{(retenus > 1 ? "s" : "")} pris en compte sur {(st.Target > 0 ? st.Target : st.Total)} programmé{((st.Target > 0 ? st.Target : st.Total) > 1 ? "s" : "")}")
+                            .FontSize(9).FontColor(PrimaryColor);
+                        c.Item().AlignCenter()
+                            .Text($"{FormatJours(st.AbsScore)} d'absence équivalente")
+                            .FontSize(9).FontColor(MediumGrey);
+                        if (st.C > 0)
+                            c.Item().AlignCenter()
+                                .Text($"{FormatJours(st.C)} de congé autorisé exclu{(st.C > 1 ? "s" : "")} (pas une absence)")
+                                .FontSize(9).FontColor(Color.FromHex("#4E6E4E"));
+                        if (st.F + st.Vac > 0)
+                            c.Item().AlignCenter()
+                                .Text($"{FormatJours(st.F + st.Vac)} férié{(st.F + st.Vac > 1 ? "s" : "")} / vacances exclu{(st.F + st.Vac > 1 ? "s" : "")}")
+                                .FontSize(9).FontColor(MediumGrey);
                     });
                 });
 
-                // ── Légende ────────────────────────────────────────────────────
-                col.Item().Row(row =>
-                {
-                    // "Absent·e" et "Participation partielle" figurent déjà dans les boîtes
-                    // statistiques ci-dessus — inutile de les répéter dans la légende du camembert.
-                    var legendSlices = slices.Where(s =>
-                        s.label != "Présent·e" && s.label != "Excusé·e" &&
-                        s.label != "Absent·e non justifié·e" && s.label != "Participation partielle");
+                // ── Suivi cumulatif depuis le début de la session ──────────────
+                col.Item().PaddingTop(4)
+                    .Text("Suivi cumulatif depuis le début de la session")
+                    .FontSize(12).Bold().FontColor(AccentColor);
 
-                    foreach (var (label, _, count, _, pdfColor) in legendSlices)
+                var lignes = periodes.Select(p => (p.Label, Stats: ComputeStats(p.Start, p.End, p.TargetDays))).ToList();
+                col.Item().Table(table =>
+                {
+                    table.ColumnsDefinition(c =>
                     {
-                        bool isPP    = label == "Participation partielle";
-                        string valStr = isPP
-                            ? $"{retards} fois"
-                            : FormatJours(count);
-                        row.AutoItem().PaddingRight(12).Row(r =>
+                        c.RelativeColumn(2.2f);
+                        c.RelativeColumn(1.4f);
+                        c.RelativeColumn(1.2f);
+                        c.RelativeColumn(1.4f);
+                        c.RelativeColumn(1f);
+                    });
+
+                    void Head(string t) => table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten1)
+                        .PaddingVertical(4).PaddingHorizontal(6).Text(t).FontSize(8.5f).SemiBold().FontColor(MediumGrey);
+                    Head("Période");
+                    Head("Jours programmés");
+                    Head("Congés autorisés");
+                    Head("Absence équivalente");
+                    Head("Présence");
+
+                    void Line(string label, Stats s, bool cumul)
+                    {
+                        var bg = cumul ? Color.FromHex("#EEF6F6") : Colors.White;
+                        int prog = s.Target > 0 ? s.Target : s.Total;
+                        string progTxt = s.Retenus != prog ? $"{prog} ({s.Retenus} retenus)" : $"{prog}";
+                        void Cell(string t, bool bold = false, Color? color = null)
                         {
-                            r.ConstantItem(12).Height(12).AlignMiddle().Background(pdfColor);
-                            r.ConstantItem(5);
-                            r.AutoItem().AlignMiddle().Text(t =>
-                            {
-                                t.Span($"{label} : ").FontSize(9f);
-                                t.Span(valStr).Bold().FontSize(9f);
-                            });
-                        });
+                            var text = table.Cell().Background(bg).BorderBottom(0.5f).BorderColor(Colors.Grey.Lighten2)
+                                .PaddingVertical(4).PaddingHorizontal(6).Text(t).FontSize(9).FontColor(color ?? PrimaryColor);
+                            if (bold || cumul) text.Bold();
+                        }
+                        Cell(label);
+                        Cell(progTxt);
+                        Cell(s.C > 0 ? FormatJours(s.C) : "—");
+                        Cell(FormatJours(s.AbsScore));
+                        Cell($"{s.Rate:F0} %", true, cumul ? AccentColor : (Color?)null);
                     }
 
-                    // Fériés uniquement — Visite à dom. est déjà dans les slices ci-dessus
-                    if (feries > 0)
-                        row.AutoItem().Row(r =>
+                    foreach (var (label, s) in lignes) Line(label, s, false);
+
+                    if (lignes.Count > 1)
+                    {
+                        var cumul = new Stats
                         {
-                            r.ConstantItem(12).Height(12).AlignMiddle().Background(ColFerie);
-                            r.ConstantItem(5);
-                            r.AutoItem().AlignMiddle().Text(t =>
-                            {
-                                t.Span("Fériés : ").FontSize(9f).FontColor(MediumGrey);
-                                t.Span($"{feries} j").Bold().FontSize(9f).FontColor(MediumGrey);
-                            });
-                        });
+                            A = lignes.Sum(l => l.Stats.A), E = lignes.Sum(l => l.Stats.E), R = lignes.Sum(l => l.Stats.R),
+                            S = lignes.Sum(l => l.Stats.S), V = lignes.Sum(l => l.Stats.V), F = lignes.Sum(l => l.Stats.F),
+                            Vac = lignes.Sum(l => l.Stats.Vac), C = lignes.Sum(l => l.Stats.C), Total = lignes.Sum(l => l.Stats.Total),
+                            Target = lignes.All(l => l.Stats.Target > 0) ? lignes.Sum(l => l.Stats.Target) : 0,
+                        };
+                        Line($"Cumul {CumulLabel(periodes)}", cumul, true);
+                    }
                 });
+
+                col.Item().Text("Absence équivalente : une absence (excusée ou non) compte 1 jour, une participation partielle ½ jour. " +
+                                "Les congés autorisés, fériés et vacances ne sont pas des absences : ils sont retirés des jours pris en compte.")
+                    .FontSize(7.5f).FontColor(MediumGrey);
             });
+        }
+
+        // "Semaines 1 à 4" + "Semaines 9 à 12" → "semaines 1 à 12"
+        private static string CumulLabel(List<PeriodeReleve> periodes)
+        {
+            var first = periodes[0].Label;
+            var last  = periodes[^1].Label;
+            const string prefix = "Semaines ";
+            if (first.StartsWith(prefix) && last.StartsWith(prefix))
+            {
+                var from = first.Substring(prefix.Length).Split(' ')[0];
+                var to   = last.Substring(prefix.Length).Split(' ').Last();
+                return $"semaines {from} à {to}";
+            }
+            return "depuis le début";
         }
 
         // ── Boîte statistique colorée ─────────────────────────────────────────
@@ -506,8 +576,8 @@ namespace Api.Documents
                 int n = (int)count;
                 return $"{n} jour{(n > 1 ? "s" : "")}";
             }
-            // ex: 0.5 → "0,5 jour"  |  1.5 → "1,5 jour"
-            return count.ToString("0.#", new CultureInfo("fr-FR")) + " jour";
+            // ex: 0.5 → "0,5 jour"  |  1.5 → "1,5 jour"  |  4.5 → "4,5 jours"
+            return count.ToString("0.#", new CultureInfo("fr-FR")) + (count >= 2 ? " jours" : " jour");
         }
 
         private static string N(string statut)

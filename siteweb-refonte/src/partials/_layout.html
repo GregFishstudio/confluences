@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{title}}</title>
+  <meta name="description" content="{{description}}">
+  <link rel="canonical" href="{{canonical}}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Confluences">
+  <meta property="og:title" content="{{title}}">
+  <meta property="og:description" content="{{description}}">
+  <meta property="og:image" content="https://www.confluences.ch/assets/img/francais-integration.webp">
+  <meta name="theme-color" content="#f4f7f9">
+  <link rel="icon" type="image/png" href="assets/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..700,0..100;1,9..144,400..700,0..100&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <script src="assets/js/site.js" defer></script>
+</head>
+<body data-accent="{{accent}}">
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html" aria-label="Confluences — accueil">
+        <img src="assets/img/logo.png" alt="Confluences" width="168" height="79">
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav">
+        <span class="bars"><span></span></span> Menu
+      </button>
+      <nav class="main-nav" id="main-nav" aria-label="Navigation principale">
+        <ul>
+          {{nav}}
+        </ul>
+      </nav>
+    </div>
+  </header>
+  {{subnav}}
+
+  <main id="contenu">
+    {{page_hero}}
+    {{content}}
+  </main>
+
+  {{> footer}}
+</body>
+</html>

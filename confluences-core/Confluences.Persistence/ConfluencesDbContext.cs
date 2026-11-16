@@ -79,6 +79,9 @@ namespace Confluences.Persistence
         public virtual DbSet<MarrainageAnswer> MarrainageAnswers => Set<MarrainageAnswer>();
         public virtual DbSet<FieldChangeHistory> FieldChangeHistories => Set<FieldChangeHistory>();
         public virtual DbSet<MarrainageInactivityReason> MarrainageInactivityReasons => Set<MarrainageInactivityReason>();
+        public virtual DbSet<Region> Regions => Set<Region>();
+        public virtual DbSet<ParticipantMetier> ParticipantMetiers => Set<ParticipantMetier>();
+        public virtual DbSet<ParticipantDomaine> ParticipantDomaines => Set<ParticipantDomaine>();
         public virtual DbSet<AssistantSocial> AssistantsSociaux => Set<AssistantSocial>();
         public virtual DbSet<Candidature> Candidatures => Set<Candidature>();
         public virtual DbSet<CandidatureComment> CandidatureComments => Set<CandidatureComment>();
@@ -150,6 +153,8 @@ namespace Confluences.Persistence
             builder.Entity<SessionTeacher>().HasKey(st => new { st.SessionId, st.TeacherId });
             builder.Entity<SessionStudent>().HasKey(st => new { st.SessionId, st.StudentId });
             builder.Entity<MarrainageParticipant>().HasKey(mp => new { mp.MarrainageId, mp.ParticipantId });
+            builder.Entity<ParticipantMetier>().HasKey(pm => new { pm.ParticipantId, pm.TypeMetierId });
+            builder.Entity<ParticipantDomaine>().HasKey(pd => new { pd.ParticipantId, pd.TypeDomaineId });
             builder.Entity<EntrepriseMetier>().HasKey(st => new { st.EntrepriseId, st.TypeMetierId });
             builder.Entity<EntrepriseOffre>().HasKey(st => new { st.EntrepriseId, st.TypeOffreId });
             builder.Entity<EntrepriseDomaine>().HasKey(st => new { st.EntrepriseId, st.TypeDomaineId });

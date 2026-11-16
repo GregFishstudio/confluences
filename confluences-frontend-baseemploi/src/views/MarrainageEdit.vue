@@ -30,6 +30,9 @@
       </v-dialog>
     </div>
 
+    <!-- Un seul endroit pour enregistrer : informations + réponses au questionnaire -->
+    <PageSaveBar v-if="!isNew" :state="pageState" :error="saveError" :last-saved-at="lastSavedAt" @save="saveAll" />
+
     <!-- ── Nouveau marrainage : questionnaire d'inscription ── -->
     <v-row v-if="isNew">
       <v-col cols="12">
@@ -56,14 +59,17 @@
             <v-col cols="3"><v-text-field v-model="form.commune" label="Commune" variant="outlined" density="compact" /></v-col>
             <v-col cols="3">
               <v-select
-                v-model="form.region" :items="REGIONS" label="Région" variant="outlined" density="compact" clearable
+                v-model="form.region" :items="regionNames" label="Région" variant="outlined" density="compact" clearable
                 :placeholder="regionSuggeree || ''" persistent-placeholder
                 :hint="!form.region && regionSuggeree ? `Déduite de la commune : ${regionSuggeree}` : ''" persistent-hint
               />
             </v-col>
             <v-col cols="6"><v-text-field v-model="form.numero" label="Téléphone" variant="outlined" density="compact" /></v-col>
             <v-col cols="6"><v-text-field v-model="form.email" label="Email" variant="outlined" density="compact" /></v-col>
-            <v-col cols="6"><v-text-field v-model="form.dateNaissance" type="date" label="Date de naissance" variant="outlined" density="compact" /></v-col>
+            <v-col cols="3"><v-text-field v-model="form.dateNaissance" type="date" label="Date de naissance" variant="outlined" density="compact" /></v-col>
+            <v-col cols="3">
+              <v-select v-model="form.sexe" :items="SEXES" label="Sexe" variant="outlined" density="compact" clearable />
+            </v-col>
             <v-col cols="6"><v-text-field v-model="form.etatCivil" label="État civil" variant="outlined" density="compact" /></v-col>
             <v-col cols="6"><v-text-field v-model="form.profession" label="Profession" variant="outlined" density="compact" /></v-col>
             <v-col cols="12">
@@ -142,6 +148,13 @@
                 />
                 <InactivityReasonManager :reasons="inactivityReasons" @changed="loadInactivityReasons" />
               </v-col>
+              <v-col cols="12">
+                <v-textarea
+                  v-model="rel.commentaire" label="Commentaire sur la relation (visible aussi sur la fiche du/de la participant·e)"
+                  variant="outlined" density="compact" rows="1" auto-grow hide-details
+                  @blur="saveCommentaireRelation(rel)"
+                />
+              </v-col>
             </v-row>
           </v-card>
 
@@ -172,9 +185,6 @@
               <v-textarea v-model="form.suivi" label="Suivi" variant="outlined" auto-grow rows="2" />
             </v-col>
           </v-row>
-          <div class="d-flex justify-end mt-2">
-            <v-btn color="primary" :loading="saving" @click="save">Sauvegarder</v-btn>
-          </div>
         </v-card>
 
         <FileAttachments
@@ -232,11 +242,6 @@
             depuis "Informations" ci-dessus — ils ne sont pas répétés ici.
           </div>
           <MarrainageQuestionnaireForm :questions="nonCoreQuestions" v-model="answers" />
-          <div class="d-flex justify-end mt-2">
-            <v-btn color="primary" variant="outlined" :loading="savingAnswers" @click="saveAnswers">
-              Sauvegarder les réponses
-            </v-btn>
-          </div>
         </v-card>
       </v-col>
 
@@ -260,13 +265,15 @@ import axios from 'axios'
 import FileAttachments from '@/components/FileAttachments.vue'
 import CommentThread from '@/components/CommentThread.vue'
 import MarrainageQuestionnaireForm from '@/components/MarrainageQuestionnaireForm.vue'
+import PageSaveBar from '@/components/PageSaveBar.vue'
+import { useUnsavedGuard, confirmDiscard } from '@/composables/useUnsavedGuard'
 import MarrainageQuestionManager from '@/components/MarrainageQuestionManager.vue'
 import InactivityReasonManager from '@/components/InactivityReasonManager.vue'
 import MarrainageQuestionService from '@/services/marrainageQuestionService.js'
 import MarrainageAnswerService from '@/services/marrainageAnswerService.js'
 import { apiFetch } from '@/services/api'
 import { MARRAINAGE_STATUTS_FICHE } from '@/utils/marrainageStatut'
-import { REGIONS, regionDeCommune } from '@/utils/regions'
+import { useRegions, regionDeCommune } from '@/utils/regions'
 import { parseDateFr } from '@/utils/dates'
 import { normalizeSearch } from '@/utils/search'
 import moment from 'moment/min/moment-with-locales'
@@ -329,6 +336,7 @@ const form = ref({
   dateNaissance: null,
   etatCivil: '',
   profession: '',
+  sexe: null,
   actif: true,
   statut: null,
   region: null,
@@ -368,6 +376,7 @@ function loadMarrainage(marrainage) {
     dateNaissance: marrainage.dateNaissance ? marrainage.dateNaissance.substring(0, 10) : null,
     etatCivil: marrainage.etatCivil,
     profession: marrainage.profession,
+    sexe: marrainage.sexe,
     actif: marrainage.actif,
     statut: marrainage.statut,
     region: marrainage.region,
@@ -404,6 +413,8 @@ function loadMarrainage(marrainage) {
     dateFin: pl.dateFin ? pl.dateFin.substring(0, 10) : null,
     actif: pl.actif ?? true,
     raisonInactivite: pl.raisonInactivite ?? null,
+    commentaire: pl.commentaire || '',
+    commentaireEnregistre: pl.commentaire || '',
   }))
 }
 
@@ -420,6 +431,53 @@ async function save() {
     saving.value = false
   }
 }
+
+// ─── Enregistrement (barre PageSaveBar) ───
+// Informations et réponses au questionnaire s'enregistrent par le même bouton ; la page sait
+// toujours s'il reste des modifications non enregistrées.
+const formSnapshot = ref('')
+const answersSnapshot = ref('')
+const saveError = ref('')
+const lastSavedAt = ref(null)
+const takeSnapshot = () => {
+  formSnapshot.value = JSON.stringify(form.value)
+  answersSnapshot.value = JSON.stringify(answers.value)
+}
+const formDirty = computed(() => !!formSnapshot.value && JSON.stringify(form.value) !== formSnapshot.value)
+const answersDirty = computed(() => !!answersSnapshot.value && JSON.stringify(answers.value) !== answersSnapshot.value)
+const pageState = computed(() =>
+  saving.value || savingAnswers.value ? 'saving'
+    : saveError.value ? 'error'
+    : formDirty.value || answersDirty.value ? 'dirty'
+    : 'saved')
+
+function messageErreur(e) {
+  const status = e?.response?.status
+  const data = e?.response?.data
+  if (!e?.response) return 'pas de connexion au serveur'
+  if (status === 400 || status === 409) return (typeof data === 'string' && data) || data?.title || 'données refusées'
+  if (status >= 500) return 'erreur du serveur'
+  return `erreur ${status}`
+}
+
+async function saveAll() {
+  saveError.value = ''
+  try {
+    if (formDirty.value || !formSnapshot.value) await save()
+    if (answersDirty.value) await saveAnswers()
+    takeSnapshot()
+    lastSavedAt.value = new Date()
+    return true
+  } catch (e) {
+    saveError.value = messageErreur(e)
+    return false
+  }
+}
+
+useUnsavedGuard(() => !isNew.value && (formDirty.value || answersDirty.value), undefined, async () => {
+  if (await saveAll()) return true
+  return confirmDiscard(`Enregistrement impossible (${saveError.value}). Quitter quand même et perdre les modifications ?`)
+})
 
 async function deleteThisMarrainage() {
   deleting.value = true
@@ -453,6 +511,8 @@ async function addParticipant() {
       dateFin: null,
       actif: true,
       raisonInactivite: null,
+      commentaire: '',
+      commentaireEnregistre: '',
     })
   }
   newParticipantId.value = null
@@ -481,7 +541,16 @@ async function updateRelation(rel, changes) {
     dateFin: rel.dateFin,
     actif: rel.actif,
     raisonInactivite: rel.actif ? null : rel.raisonInactivite,
+    commentaire: rel.commentaire ?? '',
   })
+  rel.commentaireEnregistre = rel.commentaire ?? ''
+}
+
+// Commentaire de la relation : enregistré en quittant le champ, s'il a changé (même commentaire
+// que sur la fiche du/de la participant·e).
+function saveCommentaireRelation(rel) {
+  if ((rel.commentaire ?? '') === (rel.commentaireEnregistre ?? '')) return
+  updateRelation(rel, {})
 }
 
 function goToParticipant(id) {
@@ -627,6 +696,12 @@ async function saveAnswers() {
   }
 }
 
+const { regionNames } = useRegions()
+const SEXES = [
+  { title: 'Femme', value: 'F' },
+  { title: 'Homme', value: 'M' },
+  { title: 'Autre', value: 'autre' },
+]
 const regionSuggeree = computed(() => regionDeCommune(form.value.commune))
 const formatDateTime = (d) => d ? moment(d).format('DD.MM.YYYY') : ''
 
@@ -655,6 +730,8 @@ async function initFromRoute() {
   if (!isNew.value && route.params.marrainage) {
     loadMarrainage(route.params.marrainage)
     await loadAnswers(route.params.marrainage.marrainageId)
+    takeSnapshot()
+    saveError.value = ''
   }
 }
 

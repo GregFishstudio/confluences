@@ -39,7 +39,16 @@ namespace Confluences.Domain.Entities
         public bool ContratMaori { get; set; }
         public string? EtatCivil { get; set; }
         public int? NombreEnfants { get; set; }
+        // Adresse complète sur une ligne : recomposée à partir de Rue / Npa / Localite quand ils
+        // sont renseignés ; sinon ancienne saisie libre (à compléter dans les champs structurés).
         public string? Adresse { get; set; }
+        // Adresse structurée : rue et numéro, NPA (4 chiffres), localité.
+        [StringLength(200)]
+        public string? Rue { get; set; }
+        [StringLength(4)]
+        public string? Npa { get; set; }
+        [StringLength(60)]
+        public string? Localite { get; set; }
         public string? BeneficiaireDe { get; set; }
         public string? AssistantSocialEmail { get; set; }
         public int? AnneeArriveeSuisse { get; set; }
@@ -67,6 +76,12 @@ namespace Confluences.Domain.Entities
 
         public string? BesoinsSouhaitsBenevolat { get; set; }
         public string? BesoinsSouhaitsBenevoletCommentaire { get; set; }
+        // Bénévolat – domaines d'intérêt et types d'activité souhaités (choix multiples, libellés de
+        // la liste fixe de l'application) ; "Autre (à préciser)" se détaille dans BenevolatDomaineAutre.
+        public List<string> BenevolatDomaines { get; set; } = new();
+        [StringLength(200)]
+        public string? BenevolatDomaineAutre { get; set; }
+        public List<string> BenevolatTypesActivite { get; set; } = new();
 
         public string? BesoinsSouhaitsMarrainage { get; set; }
         public string? BesoinsSouhaitsMarrainageCommentaire { get; set; }
@@ -85,6 +100,15 @@ namespace Confluences.Domain.Entities
         public string? SouhaitGenreMarrainage { get; set; }
         [StringLength(20)]
         public string? SouhaitAgeMarrainage { get; set; }
+        // Priorité de la recherche de marrainage : "haute" (très preneur·euse) / "normale" / "basse".
+        [StringLength(20)]
+        public string? PrioriteMarrainage { get; set; }
+        // Région de marrainage (nom d'une Region) : saisie sur la fiche, sinon déduite de l'adresse.
+        [StringLength(50)]
+        public string? Region { get; set; }
+        // Degré d'intérêt pour un stage/du bénévolat : "fort" / "normal" / "a_confirmer".
+        [StringLength(20)]
+        public string? DegreInteretStage { get; set; }
         public string? TitresObtenus { get; set; }
 
         public bool? ActiviteProfOrigine { get; set; }

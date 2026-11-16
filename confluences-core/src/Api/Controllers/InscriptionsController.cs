@@ -111,9 +111,11 @@ namespace Api.Controllers
                 sessionPrecedente.TryGetValue(studentId, out var p) ? bilans.GetValueOrDefault((studentId, p.Year, p.Number)) : null,
                 bilans.GetValueOrDefault((studentId, year, number)));
 
+            // Candidatures qui visent cette session (parmi d'autres éventuellement).
+            var sessionKey = $"{year}-{number}";
             var candidatures = await _context.Candidatures.AsNoTracking()
                 .Include(c => c.AssistantSocial)
-                .Where(c => c.AnneeVisee == year && c.SessionNumberVisee == number && c.Statut != Retire)
+                .Where(c => c.SessionsVisees.Contains(sessionKey) && c.Statut != Retire)
                 .ToListAsync();
             var candidats = candidatures.Where(c => c.ParticipantId == null || !inscritIds.Contains(c.ParticipantId));
 

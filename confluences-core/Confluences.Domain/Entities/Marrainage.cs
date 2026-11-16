@@ -17,6 +17,9 @@ namespace Confluences.Domain.Entities
         public DateTime? DateNaissance { get; set; }
         public string? EtatCivil { get; set; }
         public string? Profession { get; set; }
+        // "F" / "M" / "autre".
+        [StringLength(10)]
+        public string? Sexe { get; set; }
         public bool Actif { get; set; } = true;
 
         // "en attente" / "à relancer" — nul si aucun de ces deux statuts ne s'applique.

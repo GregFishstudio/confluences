@@ -110,6 +110,24 @@ namespace Api.Controllers
             return ApplicationUser;
         }
 
+        // GET: api/ApplicationUsers/localites
+        // Couples NPA / localité déjà saisis sur les fiches : suggestions pour l'adresse structurée
+        // (le NPA tapé complète la localité quand il est connu).
+        [HttpGet("localites")]
+        public async Task<ActionResult<IEnumerable<object>>> GetLocalites()
+        {
+            var pairs = await _context.Users.AsNoTracking()
+                .Where(u => u.Npa != null && u.Localite != null)
+                .Select(u => new { u.Npa, u.Localite })
+                .ToListAsync();
+
+            return pairs
+                .GroupBy(p => (Npa: p.Npa!, Localite: p.Localite!.Trim()))
+                .OrderBy(g => g.Key.Npa).ThenByDescending(g => g.Count())
+                .Select(g => (object)new { npa = g.Key.Npa, localite = g.Key.Localite })
+                .ToList();
+        }
+
         // PATCH: api/ApplicationUsers/5/profile
         [HttpPatch("{id}/profile")]
         public async Task<IActionResult> PatchApplicationUserProfile(string id, ParticipantProfileDto dto)
@@ -165,7 +183,23 @@ namespace Api.Controllers
             // la fiche l'affiche en lecture seule, elle ne le modifie donc pas ici.
             applicationUser.EtatCivil = dto.EtatCivil;
             applicationUser.NombreEnfants = dto.NombreEnfants;
-            applicationUser.Adresse = dto.Adresse;
+            // Adresse structurée : NPA à 4 chiffres et localité = un nom de lieu (pas d'indication
+            // libre du type « dans les hauts de Lausanne »). L'adresse sur une ligne est recomposée
+            // pour les écrans et documents qui l'utilisent ; tant que les champs structurés sont
+            // vides, l'ancienne saisie libre est conservée.
+            var rue = Clean(dto.Rue);
+            var npa = Clean(dto.Npa);
+            var localite = Clean(dto.Localite);
+            if (npa != null && !AdresseRules.NpaValide(npa))
+                return BadRequest("Le NPA doit comporter 4 chiffres (ex. 1004).");
+            if (localite != null && !AdresseRules.LocaliteValide(localite))
+                return BadRequest("La localité doit être un nom de lieu (ex. Lausanne), sans indication libre.");
+            applicationUser.Rue = rue;
+            applicationUser.Npa = npa;
+            applicationUser.Localite = localite;
+            applicationUser.Adresse = rue != null || npa != null || localite != null
+                ? AdresseRules.Composer(rue, npa, localite)
+                : Clean(dto.Adresse);
             applicationUser.BeneficiaireDe = dto.BeneficiaireDe;
             applicationUser.AssistantSocialEmail = dto.AssistantSocialEmail;
             applicationUser.AnneeArriveeSuisse = dto.AnneeArriveeSuisse;
@@ -186,6 +220,10 @@ namespace Api.Controllers
             applicationUser.BesoinsSouhaitsStagesCommentaire = dto.BesoinsSouhaitsStagesCommentaire;
             applicationUser.BesoinsSouhaitsBenevolat = TriState(dto.BesoinsSouhaitsBenevolat);
             applicationUser.BesoinsSouhaitsBenevoletCommentaire = dto.BesoinsSouhaitsBenevoletCommentaire;
+            applicationUser.BenevolatDomaines = Benevolat.Filtrer(dto.BenevolatDomaines, Benevolat.Domaines);
+            applicationUser.BenevolatTypesActivite = Benevolat.Filtrer(dto.BenevolatTypesActivite, Benevolat.TypesActivite);
+            var autre = Clean(dto.BenevolatDomaineAutre);
+            applicationUser.BenevolatDomaineAutre = autre != null && autre.Length > 200 ? autre.Substring(0, 200) : autre;
             applicationUser.BesoinsSouhaitsMarrainage = TriState(dto.BesoinsSouhaitsMarrainage);
             applicationUser.BesoinsSouhaitsMarrainageCommentaire = dto.BesoinsSouhaitsMarrainageCommentaire;
             applicationUser.DateObtentionPermis = dto.DateObtentionPermis;
@@ -195,6 +233,9 @@ namespace Api.Controllers
             applicationUser.Disponibilites = dto.Disponibilites;
             applicationUser.SouhaitGenreMarrainage = dto.SouhaitGenreMarrainage;
             applicationUser.SouhaitAgeMarrainage = dto.SouhaitAgeMarrainage;
+            applicationUser.PrioriteMarrainage = dto.PrioriteMarrainage;
+            applicationUser.DegreInteretStage = dto.DegreInteretStage;
+            applicationUser.Region = string.IsNullOrWhiteSpace(dto.Region) ? null : dto.Region.Trim();
             applicationUser.TitresObtenus = dto.TitresObtenus;
             applicationUser.ActiviteProfOrigine = dto.ActiviteProfOrigine;
             applicationUser.BesoinsSouhaitsEmploi = TriState(dto.BesoinsSouhaitsEmploi);
@@ -246,6 +287,8 @@ namespace Api.Controllers
             return NoContent();
         }
 
+        private static string? Clean(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+
         // Besoins / souhaits : "oui", "non" ou "a_verifier" (toute autre valeur = non renseigné).
         private static string? TriState(string? value) =>
             value is "oui" or "non" or "a_verifier" ? value : null;
@@ -272,6 +315,9 @@ namespace Api.Controllers
         public string? EtatCivil { get; set; }
         public int? NombreEnfants { get; set; }
         public string? Adresse { get; set; }
+        public string? Rue { get; set; }
+        public string? Npa { get; set; }
+        public string? Localite { get; set; }
         public string? BeneficiaireDe { get; set; }
         public string? AssistantSocialEmail { get; set; }
         public int? AnneeArriveeSuisse { get; set; }
@@ -292,6 +338,9 @@ namespace Api.Controllers
         public string? BesoinsSouhaitsStagesCommentaire { get; set; }
         public string? BesoinsSouhaitsBenevolat { get; set; }
         public string? BesoinsSouhaitsBenevoletCommentaire { get; set; }
+        public List<string>? BenevolatDomaines { get; set; }
+        public string? BenevolatDomaineAutre { get; set; }
+        public List<string>? BenevolatTypesActivite { get; set; }
         public string? BesoinsSouhaitsMarrainage { get; set; }
         public string? BesoinsSouhaitsMarrainageCommentaire { get; set; }
         public DateTime? DateObtentionPermis { get; set; }
@@ -301,6 +350,9 @@ namespace Api.Controllers
         public string? Disponibilites { get; set; }
         public string? SouhaitGenreMarrainage { get; set; }
         public string? SouhaitAgeMarrainage { get; set; }
+        public string? PrioriteMarrainage { get; set; }
+        public string? DegreInteretStage { get; set; }
+        public string? Region { get; set; }
         public string? TitresObtenus { get; set; }
         public bool? ActiviteProfOrigine { get; set; }
         public string? BesoinsSouhaitsEmploi { get; set; }
@@ -309,5 +361,61 @@ namespace Api.Controllers
         public string? BesoinsSouhaitsFormationCommentaire { get; set; }
         public string? NiveauDebutContrat { get; set; }
         public string? NiveauFinContrat { get; set; }
+    }
+
+    // Règles de l'adresse structurée des participant·e·s.
+    public static class AdresseRules
+    {
+        private static readonly System.Text.RegularExpressions.Regex NpaRegex = new(@"^\d{4}$");
+        // Lettres (accents compris), espaces, tirets, apostrophes, points, parenthèses : « Lausanne »,
+        // « La Tour-de-Peilz », « Yverdon-les-Bains », « St-Légier », « Château-d'Oex ».
+        private static readonly System.Text.RegularExpressions.Regex LocaliteRegex = new(@"^\p{L}[\p{L}\s'’.\-()]*$");
+        // Mots qui trahissent une indication libre plutôt qu'un nom de localité.
+        private static readonly HashSet<string> MotsLibres = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "dans", "près", "pres", "vers", "environ", "hauts", "haut", "quartier", "proche",
+            "côté", "cote", "région", "region", "centre", "à", "au", "aux",
+        };
+
+        public static bool NpaValide(string npa) => NpaRegex.IsMatch(npa);
+
+        public static bool LocaliteValide(string localite)
+        {
+            if (localite.Length > 60 || !LocaliteRegex.IsMatch(localite)) return false;
+            var mots = localite.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            return mots.Length <= 4 && !mots.Any(m => MotsLibres.Contains(m));
+        }
+
+        public static string Composer(string? rue, string? npa, string? localite)
+        {
+            var ville = string.Join(" ", new[] { npa, localite }.Where(x => !string.IsNullOrEmpty(x)));
+            return string.Join(", ", new[] { rue, ville }.Where(x => !string.IsNullOrEmpty(x)));
+        }
+    }
+
+    // Bénévolat – domaines d'intérêt et types d'activité proposés sur la fiche participant·e
+    // (même liste côté application : src/utils/benevolat.js).
+    public static class Benevolat
+    {
+        public static readonly string[] Domaines =
+        {
+            "Social et solidarité", "Personnes âgées", "Enfance et jeunesse", "Santé et handicap",
+            "Cuisine et restauration", "Nature et environnement", "Animaux", "Recyclage et seconde main",
+            "Art et culture", "Sport et loisirs", "Commerce et logistique", "Entretien et travaux manuels",
+            "Événementiel", "Administration et informatique", "Autre (à préciser)",
+        };
+
+        public static readonly string[] TypesActivite =
+        {
+            "Activités manuelles ou pratiques", "Activités en contact avec des personnes",
+            "Activités administratives ou informatiques", "Sans préférence",
+        };
+
+        // Ne garde que les valeurs de la liste, dans l'ordre de la liste, sans doublon.
+        public static List<string> Filtrer(IEnumerable<string>? valeurs, string[] liste)
+        {
+            var choisies = new HashSet<string>(valeurs ?? Enumerable.Empty<string>());
+            return liste.Where(choisies.Contains).ToList();
+        }
     }
 }

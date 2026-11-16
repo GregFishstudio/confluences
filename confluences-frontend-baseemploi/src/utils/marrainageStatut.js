@@ -3,19 +3,31 @@
 // active avec un·e participant·e). Il reste proposé pour les binômes anciens dont le/la
 // filleul·e n'est pas lié·e à une fiche participant·e.
 export const MARRAINAGE_STATUTS = [
-  { value: 'nouveau', title: 'Nouveau', color: 'blue' },
+  { value: 'nouveau', title: 'Nouveau·elle', color: 'blue' },
   { value: 'en_attente', title: 'En attente de binôme', color: 'orange' },
+  { value: 'disponible', title: 'Disponible', color: 'light-blue-darken-2' },
   { value: 'a_relancer', title: 'À relancer', color: 'purple' },
   { value: 'a_verifier', title: 'À vérifier', color: 'amber-darken-3' },
   { value: 'actif', title: 'Actif·ve', color: 'success' },
   { value: 'sans_suite', title: 'Sans suite', color: 'grey' },
 ]
 
+// Statuts retirés de la liste mais encore présents sur d'anciennes fiches : affichés tels quels,
+// plus proposés à la saisie.
+const STATUTS_HISTORIQUES = [
+  { value: 'a_former', title: 'À former', color: 'teal' },
+]
+
 // Statuts proposés sur la fiche d'une marraine/d'un parrain : "Actif·ve" n'y figure pas, il
 // découle des relations de marrainage affichées plus bas.
 export const MARRAINAGE_STATUTS_FICHE = MARRAINAGE_STATUTS.filter(s => s.value !== 'actif')
 
-const BY_VALUE = Object.fromEntries(MARRAINAGE_STATUTS.map(s => [s.value, s]))
+// Statuts qui peuvent s'afficher à côté de "Actif·ve" quand une relation est active
+// (disponibilité de la personne ou alerte à traiter). Les autres (nouveau·elle, en attente,
+// sans suite) n'ont pas de sens avec une relation active et ne sont alors pas affichés.
+export const STATUTS_COMPATIBLES_ACTIF = ['disponible', 'a_relancer', 'a_verifier']
+
+const BY_VALUE = Object.fromEntries([...MARRAINAGE_STATUTS, ...STATUTS_HISTORIQUES].map(s => [s.value, s]))
 
 export const statutInfo = (value) => BY_VALUE[value] || (value ? { value, title: value, color: 'grey' } : null)
 
@@ -30,6 +42,16 @@ export function hasActiveRelation(marrainage) {
 
 export const effectiveStatut = (marrainage) =>
   hasActiveRelation(marrainage) ? 'actif' : (marrainage.statut || null)
+
+// Statuts à afficher dans la liste : "Actif·ve" si une relation est active, accompagné du
+// statut de la fiche quand il reste pertinent (disponible, à relancer, à vérifier) — ainsi une
+// alerte "à vérifier" n'est plus masquée par "Actif·ve".
+export function statutsAffiches(marrainage) {
+  const actif = hasActiveRelation(marrainage)
+  const fiche = marrainage.statut || null
+  if (!actif) return fiche ? [fiche] : []
+  return fiche && STATUTS_COMPATIBLES_ACTIF.includes(fiche) ? ['actif', fiche] : ['actif']
+}
 
 // Date de début de la relation de marrainage la plus récente ; à défaut, l'ancienne date
 // globale (Marrainage.Date) reprise des imports Excel.

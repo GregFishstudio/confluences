@@ -1,8 +1,13 @@
-// Régions utilisées pour organiser les marrainages (tableau "Marrainage par région") et
-// correspondance commune → région. La région peut toujours être corrigée à la main sur la fiche
-// d'une marraine/d'un parrain ; cette table ne sert qu'à la proposer automatiquement.
+// Régions utilisées pour organiser les marrainages (tableau de marrainage) et correspondance
+// commune → région. La liste de référence est la table Regions (api/Regions, éditable depuis le
+// tableau de marrainage) ; REGIONS/REGION_COLORS ne servent que de valeurs par défaut tant
+// qu'elle n'est pas chargée. La région peut toujours être corrigée à la main sur la fiche d'une
+// marraine/d'un parrain ou d'un·e participant·e ; les communes ne servent qu'à la proposer.
 // Établie d'après les exemples du tableau des formatrices (ex. Grandvaux/Cully rangés en Riviera,
 // Payerne/Lucens/Palézieux en Moudon, Gimel/Mont-la-Ville en Morges, Servion en Autres).
+
+import { ref, computed } from 'vue'
+import API_BASE, { apiFetch } from '@/services/api'
 
 export const REGIONS = ['Lausanne', 'Moudon', 'Riviera', 'Morges', 'Yverdon', 'Aigle/Leysin', 'Nyon', 'Vallorbe', 'Autres']
 
@@ -97,3 +102,34 @@ export function regionDeCommune(texte) {
 
 // Région affichée pour une marraine/un parrain : celle saisie sur la fiche, sinon déduite de la commune.
 export const regionMarrainage = (m) => m.region || regionDeCommune(m.commune) || null
+
+// Région affichée pour un·e participant·e : celle saisie sur sa fiche, sinon déduite de son adresse.
+export const regionParticipant = (p) => p.region || regionDeCommune(p.adresse) || null
+
+// ─── Liste des régions (table Regions), partagée entre les pages ─────────────────────────────
+const regionsList = ref(REGIONS.map((nom, i) => ({ regionId: null, nom, couleur: REGION_COLORS[nom], ordre: i + 1, pistesRecherche: null })))
+let loadPromise = null
+
+export async function reloadRegions() {
+  try {
+    const res = await apiFetch(`${API_BASE}/api/Regions`)
+    if (res?.ok) {
+      const data = await res.json()
+      if (data.length) regionsList.value = data
+    }
+  } catch (e) { console.error('reloadRegions:', e) }
+}
+
+export const regionColor = (nom) =>
+  regionsList.value.find(r => r.nom === nom)?.couleur || REGION_COLORS[nom] || '#9E9E9E'
+
+export function useRegions() {
+  if (!loadPromise) loadPromise = reloadRegions()
+  return {
+    regions: regionsList,
+    regionNames: computed(() => regionsList.value.map(r => r.nom)),
+    reloadRegions,
+    regionColor,
+    ready: loadPromise,
+  }
+}

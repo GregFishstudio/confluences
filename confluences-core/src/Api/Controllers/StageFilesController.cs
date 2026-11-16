@@ -68,7 +68,7 @@ namespace Api.Controllers
 
         // DELETE: api/StageFiles/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<StageFile>> DeleteStageFile(int id)
+        public async Task<IActionResult> DeleteStageFile(int id)
         {
             var stageFile = await _context.StageFiles.FindAsync(id);
             if (stageFile == null)
@@ -79,7 +79,8 @@ namespace Api.Controllers
             _context.StageFiles.Remove(stageFile);
             await _context.SaveChangesAsync();
 
-            return stageFile;
+            // Pas de renvoi du fichier supprimé (son contenu complet alourdissait la réponse).
+            return NoContent();
         }
     }
 }

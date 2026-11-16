@@ -69,7 +69,7 @@
           </v-col>
           <v-col cols="6" md="2">
             <v-select
-              v-model="filterRegion" :items="REGIONS" label="Région"
+              v-model="filterRegion" :items="regionNames" label="Région"
               variant="outlined" density="compact" hide-details clearable
               @update:model-value="page = 1"
             />
@@ -88,18 +88,15 @@
             />
           </v-col>
           <v-col cols="6" md="2" class="d-flex justify-end">
-            <v-btn-toggle v-model="viewMode" density="compact" variant="outlined" mandatory divided>
-              <v-btn value="liste" prepend-icon="mdi-format-list-bulleted" size="small">Liste</v-btn>
-              <v-btn value="regions" prepend-icon="mdi-map-outline" size="small">Régions</v-btn>
-            </v-btn-toggle>
+            <v-btn :to="{ name: 'Marrainage-Tableau' }" variant="tonal" color="primary" prepend-icon="mdi-map-outline" size="small">
+              Tableau par région
+            </v-btn>
           </v-col>
         </v-row>
       </v-card-text>
     </v-card>
 
-    <MarrainageRegionBoard v-if="viewMode === 'regions'" :marrainages="rawMarrainages" />
-
-    <v-card v-else class="elevation-2" rounded="lg" :loading="isLoading">
+    <v-card class="elevation-2" rounded="lg" :loading="isLoading">
       <v-data-table
         :headers="headers"
         :items="sorted"
@@ -116,7 +113,7 @@
           <div v-if="item.email" class="text-caption text-grey"><v-icon size="12" class="mr-1">mdi-email-outline</v-icon>{{ item.email }}</div>
         </template>
         <template #item.commune="{ item }">
-          <v-chip v-if="item.region" size="small" label variant="flat" :color="REGION_COLORS[item.region]" class="font-weight-bold mb-1">{{ item.region }}</v-chip>
+          <v-chip v-if="item.region" size="small" label variant="flat" :color="regionColor(item.region)" class="font-weight-bold mb-1">{{ item.region }}</v-chip>
           <div class="text-body-2">{{ item.commune || '—' }}</div>
         </template>
         <template #item.participant="{ item }">
@@ -134,14 +131,14 @@
               Prendre des nouvelles
             </v-chip>
             <v-chip
-              v-if="item.statut"
+              v-for="st in item.statuts" :key="st"
               size="small" label
-              :color="statutInfo(item.statut).color"
-              :variant="item.statut === 'en_attente' ? 'flat' : 'tonal'"
+              :color="statutInfo(st).color"
+              :variant="st === 'en_attente' ? 'flat' : 'tonal'"
             >
-              {{ statutInfo(item.statut).title }}
+              {{ statutInfo(st).title }}
             </v-chip>
-            <span v-else-if="!item.nouvelles" class="text-grey text-caption">—</span>
+            <span v-if="!item.statuts.length && !item.nouvelles" class="text-grey text-caption">—</span>
           </div>
         </template>
         <template #item.date="{ item }">
@@ -164,12 +161,11 @@ import MarrainageImportDialog from '@/components/MarrainageImportDialog.vue'
 import MarrainageQuestionnaireImportDialog from '@/components/MarrainageQuestionnaireImportDialog.vue'
 import MarrainageDuplicatesDialog from '@/components/MarrainageDuplicatesDialog.vue'
 import MarrainageFileBulkImport from '@/components/MarrainageFileBulkImport.vue'
-import MarrainageRegionBoard from '@/components/MarrainageRegionBoard.vue'
 import {
-  MARRAINAGE_STATUTS, statutInfo, effectiveStatut, dateDebutMarrainage, dateFinMarrainage,
+  MARRAINAGE_STATUTS, statutInfo, effectiveStatut, statutsAffiches, dateDebutMarrainage, dateFinMarrainage,
   prendreDesNouvelles, derniereActivite,
 } from '@/utils/marrainageStatut'
-import { REGIONS, REGION_COLORS, regionMarrainage } from '@/utils/regions'
+import { useRegions, regionMarrainage } from '@/utils/regions'
 import { matchesSearch } from '@/utils/search'
 
 moment.locale('fr')
@@ -182,7 +178,7 @@ const search = ref('')
 const filterStatut = ref('all')
 const sortMode = ref('suivi')
 const filterRegion = ref(null)
-const viewMode = ref('liste')
+const { regionNames, regionColor } = useRegions()
 const confirmClearDialog = ref(false)
 const showAdminTools = ref(false)
 const clearing = ref(false)
@@ -214,6 +210,7 @@ const marrainages = computed(() =>
   rawMarrainages.value.map(m => ({
     ...m,
     statut: effectiveStatut(m),
+    statuts: statutsAffiches(m),
     date: dateDebutMarrainage(m),
     dateFin: dateFinMarrainage(m),
     region: regionMarrainage(m),
@@ -233,8 +230,8 @@ const filtered = computed(() => {
   if (filterRegion.value) list = list.filter(m => (m.region || 'Autres') === filterRegion.value)
   if (filterStatut.value === 'all') return list
   if (filterStatut.value === 'nouvelles') return list.filter(m => m.nouvelles)
-  if (filterStatut.value === 'none') return list.filter(m => !m.statut)
-  return list.filter(m => m.statut === filterStatut.value)
+  if (filterStatut.value === 'none') return list.filter(m => !m.statuts.length)
+  return list.filter(m => m.statuts.includes(filterStatut.value))
 })
 
 // Les marraines/parrains en attente de binôme et les nouveaux contacts ressortent en couleur ;

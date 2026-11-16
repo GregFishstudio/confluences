@@ -245,23 +245,25 @@
 
         <div class="d-flex flex-column flex-sm-row">
           
-          <div class="flex-grow-1" style="max-width: 360px;">
+          <!-- Largeur fixe : le calendrier ne doit jamais se rétrécir (sinon la colonne du lundi
+               et le titre du mois sont coupés quand le panneau de droite prend la place). -->
+          <div class="picker-col">
             <v-date-picker
               :key="datePickerKey"
               v-model="datesPickerBuffer"
               v-model:month="calendarMonth"
               v-model:year="calendarYear"
               multiple
-              hide-header 
-              scrollable 
-              width="100%"
+              hide-header
+              scrollable
+              width="340"
               locale="fr-CH" 
               :first-day-of-week="1"
               :color="editingCell.column.type === 'acco' ? 'blue' : 'green'"
             ></v-date-picker>
           </div>
 
-          <div class="border-sm-left flex-grow-1 pa-4 bg-grey-lighten-5 d-flex flex-column" style="min-width: 240px; max-height: 320px;">
+          <div class="border-sm-left flex-grow-1 pa-4 bg-grey-lighten-5 d-flex flex-column" style="min-width: 0; max-height: 360px;">
             <div class="text-caption font-weight-bold text-uppercase text-grey mb-2">
               Dates sélectionnées ({{ datesPickerBuffer.length }})
             </div>
@@ -400,12 +402,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { matchesSearch } from '@/utils/search'
 import { useStore } from 'vuex'
 import { useRouter, useRoute } from 'vue-router'
 import moment from 'moment/min/moment-with-locales'
 import API_BASE, {apiFetch} from '@/services/api'
+import { sessionNumberAt, sessionIndexOf } from '@/utils/sessionNumber'
 
 moment.locale('fr')
 const store  = useStore()
@@ -486,7 +489,12 @@ const currentYear = computed(() => {
   return moment().year()
 })
 
-const currentQuarter = computed(() => navSessionIndex.value + 1)
+const currentQuarter = computed(() => sessionNumberAt(activeGroupSessions.value, navSessionIndex.value))
+
+// Session affichée (année + numéro), pour la conserver au changement de groupe : le watcher
+// s'exécute après onTabChange, qui lit donc encore la session de l'ancien groupe.
+let shownSession = { year: null, number: null }
+watch([currentYear, currentQuarter], ([year, number]) => { shownSession = { year, number } })
 
 // ─── Dates de la session pour loadMatrix ──────────────────────────────────────
 const currentSessionDates = computed(() => {
@@ -545,9 +553,8 @@ const periodDateLabel = computed(() => {
 })
 
 const isFuturePeriod = computed(() => {
-  const today = moment()
-  return currentYear.value > today.year() ||
-    (currentYear.value === today.year() && currentQuarter.value > Math.floor(today.month() / 3) + 1)
+  if (currentSession.value?.startDate) return moment(currentSession.value.startDate).isAfter(moment(), 'day')
+  return currentYear.value > moment().year()
 })
 
 const allColumnsOrdered = computed(() => [...accompanyingCols.value, ...workshopCols.value])
@@ -619,8 +626,9 @@ function initSessionIndex() {
 // Change de groupe SANS changer de session : conserve le même numéro de session plutôt que de
 // resauter sur la session en cours du jour.
 function onTabChange() {
-  const maxIndex = Math.max(0, activeGroupSessions.value.length - 1)
-  navSessionIndex.value = Math.min(navSessionIndex.value, maxIndex)
+  const sessions = activeGroupSessions.value
+  const same = sessionIndexOf(sessions, shownSession.year, shownSession.number)
+  navSessionIndex.value = same >= 0 ? same : Math.min(navSessionIndex.value, Math.max(0, sessions.length - 1))
   loadMatrix()
 }
 
@@ -781,13 +789,13 @@ const copyToClipboard = () => {
 // Arrivée depuis la fiche participant (?studentId=&group=&quarter=) : sélectionne le bon
 // groupe/session puis fait défiler jusqu'à la ligne du/de la participant·e concerné·e.
 function applyDeepLinkFromQuery() {
-  const { studentId, group, quarter } = route.query
+  const { studentId, group, quarter, year } = route.query
   if (!studentId || !group || !quarter) return false
 
   const idx = groups.findIndex(g => g.value === group)
   if (idx < 0) return false
   activeTab.value = idx
-  navSessionIndex.value = Math.max(0, Number(quarter) - 1)
+  navSessionIndex.value = Math.max(0, sessionIndexOf(activeGroupSessions.value, year || moment().year(), quarter))
   search.value = ''
 
   nextTick(() => {
@@ -818,6 +826,9 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* Calendrier de la fenêtre des dates : largeur fixe, jamais rétréci par le panneau de droite. */
+.picker-col { flex: 0 0 340px; max-width: 100%; overflow-x: auto; }
+@media (max-width: 599px) { .picker-col { flex-basis: auto; align-self: center; } }
 .deep-link-highlight { animation: deep-link-flash 1.5s ease-in-out 2; }
 @keyframes deep-link-flash {
   0%, 100% { background-color: transparent; }

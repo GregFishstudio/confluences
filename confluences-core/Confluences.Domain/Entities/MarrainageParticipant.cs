@@ -20,5 +20,7 @@ namespace Confluences.Domain.Entities
         public DateTime? DateFin { get; set; }
         public bool Actif { get; set; } = true;
         public string? RaisonInactivite { get; set; }
+        // Suivi libre de la relation : comment elle se passe, pourquoi/comment elle a été interrompue.
+        public string? Commentaire { get; set; }
     }
 }

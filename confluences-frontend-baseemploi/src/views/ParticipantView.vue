@@ -57,6 +57,12 @@
               variant="outlined" density="compact" hide-details
             />
           </v-col>
+          <v-col cols="12" md="4">
+            <v-select
+              v-model="filterDomainesBenevolat" :items="BENEVOLAT_DOMAINES" label="Bénévolat – domaines d'intérêt"
+              multiple chips closable-chips variant="outlined" density="compact" clearable hide-details
+            />
+          </v-col>
           <v-col cols="6" md="2">
             <v-select
               v-model="sortMode"
@@ -145,6 +151,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { matchesSearch } from '@/utils/search'
+import { BENEVOLAT_DOMAINES, domainesAffiches, aUnDesDomaines } from '@/utils/benevolat'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import moment from 'moment/min/moment-with-locales'
@@ -161,6 +168,7 @@ const filterNiveau        = ref(null)
 const filterSessionNumber = ref(null)
 const filterYear          = ref(null)
 const filterActif         = ref('all')
+const filterDomainesBenevolat = ref([])
 const sortMode            = ref('nom')
 
 // ─── Store ────────────────────────────────────────────────────────────────────
@@ -218,9 +226,14 @@ const filteredUsers = computed(() => {
     list = list.filter(u => u.niveau === filterNiveau.value)
   }
 
+  if (filterDomainesBenevolat.value.length) {
+    list = list.filter(u => aUnDesDomaines(u, filterDomainesBenevolat.value))
+  }
+
   if (search.value) {
     list = list.filter(u =>
-      matchesSearch(search.value, u.prenom, u.nom, u.email, u.userName, u.phoneNumber, u.nationality))
+      matchesSearch(search.value, u.prenom, u.nom, u.email, u.userName, u.phoneNumber, u.nationality,
+        u.localite, domainesAffiches(u)))
   }
 
   return list

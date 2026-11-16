@@ -2,6 +2,8 @@
 import AppNav from '@/components/AppNav.vue'
 import AppFooter from '@/components/AppFooter.vue'
 import NotificationContainer from '@/components/NotificationContainer.vue'
+import SessionExpiredDialog from '@/components/SessionExpiredDialog.vue'
+import SaveStatusIndicator from '@/components/SaveStatusIndicator.vue'
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '@/store/auth'
 // 🚨 Importer useRoute
@@ -24,6 +26,8 @@ onMounted(async () => {
         <AppNav v-if="route.name !== 'Login'" />
     
     <NotificationContainer />
+    <SessionExpiredDialog />
+    <SaveStatusIndicator v-if="route.name !== 'Login'" />
     <v-main>
       <router-view v-slot="{ Component }">
         <transition name="slide-fade" mode="out-in">

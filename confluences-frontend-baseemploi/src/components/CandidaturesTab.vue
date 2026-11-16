@@ -39,7 +39,10 @@
         <v-btn color="primary" variant="flat" prepend-icon="mdi-plus" @click="openDialog(null)">Nouvelle</v-btn>
       </v-col>
     </v-row>
-    <div class="d-flex justify-end px-4 pb-2">
+    <div class="d-flex justify-end align-center ga-4 px-4 pb-2">
+      <v-btn variant="tonal" color="primary" size="small" prepend-icon="mdi-file-import-outline" @click="importDialog = true">
+        Importer un CSV
+      </v-btn>
       <v-switch v-model="hideRetires" label="Masquer les retiré·e·s" color="primary" hide-details density="compact" class="flex-grow-0" />
     </div>
     <v-divider />
@@ -71,10 +74,9 @@
           <tr>
             <th>Bénéficiaire</th>
             <th>Statut</th>
-            <th>Remarques générales</th>
             <th>AS · remarques</th>
             <th>Évaluation</th>
-            <th>Inscription · transmission AS / ML</th>
+            <th>Inscription</th>
           </tr>
         </thead>
         <tbody>
@@ -104,16 +106,15 @@
             </td>
             <td>
               <span class="insc-pill">{{ c.statut || 'Sans statut' }}</span>
-              <div v-if="c.mesureVisee || c.sessionNumberVisee" class="insc-sub">
+              <div v-if="c.mesureVisee || sessionKeysOf(c).length" class="insc-sub">
                 <span class="insc-tag" :style="{ '--tag': couleurMesure(c.mesureVisee) }">{{ abreviationMesure(c.mesureVisee) }}</span>
-                <span v-if="c.sessionNumberVisee"> S{{ c.sessionNumberVisee }} {{ c.anneeVisee }}</span>
+                <span v-if="sessionKeysOf(c).length"> {{ sessionKeysOf(c).map(sessionLabel).join(', ') }}</span>
               </div>
               <div v-if="c.statut === 'AS à contacter' && c.derniereRemarqueAsAContacter" class="insc-note quote mt-1">
                 <span class="insc-date">{{ formatDate(c.derniereRemarqueAsAContacter.createdAt) }}</span> {{ c.derniereRemarqueAsAContacter.text }}
               </div>
               <div v-if="c.contratMaori" class="insc-sub text-red font-weight-bold">Contrat Maori</div>
             </td>
-            <td><div class="insc-note" :class="{ 'insc-empty': !c.remarquesGenerales }">{{ c.remarquesGenerales || '—' }}</div></td>
             <td>
               <div class="insc-strong">{{ c.assistantSocial ? asName(c.assistantSocial) : '—' }}</div>
               <div v-if="c.derniereRemarqueAS" class="insc-note quote mt-1">{{ c.derniereRemarqueAS }}</div>
@@ -130,12 +131,7 @@
               <span v-if="c.inscriptionConfirmee" class="insc-sub text-success font-weight-bold">
                 <v-icon size="x-small" color="success">mdi-check-circle</v-icon> Confirmée
               </span>
-              <div v-if="c.derniereTransmission" class="insc-note quote mt-1">
-                <span class="insc-date">{{ formatDate(c.derniereTransmission.createdAt) }}</span> {{ c.derniereTransmission.text }}
-              </div>
-              <div v-if="c.nbTransmissions > 1" class="insc-sub">
-                <v-icon size="x-small">mdi-history</v-icon> {{ c.nbTransmissions }} transmissions
-              </div>
+<span v-else class="insc-empty">—</span>
             </td>
           </tr>
         </tbody>
@@ -147,6 +143,8 @@
     v-model="dialog" :candidature="editing" :assistants="assistants" :calendar-sessions="calendarSessions"
     @saved="onSaved" @assistants-changed="emit('assistants-changed')"
   />
+
+  <CandidatureImportDialog v-model="importDialog" :assistants="assistants" @imported="onImported" />
 </template>
 
 <script setup>
@@ -156,6 +154,7 @@ import moment from 'moment/min/moment-with-locales'
 import API_BASE, { apiFetch } from '@/services/api'
 import '@/scss/inscriptions.css'
 import CandidatureDialog from '@/components/CandidatureDialog.vue'
+import CandidatureImportDialog from '@/components/CandidatureImportDialog.vue'
 import {
   STATUTS_CANDIDATURE, MESURES, asLabel, railCandidature, abreviationMesure,
   statutCandidatureColor, statutCandidatureInk, couleurMesure, couleurMandant,
@@ -191,13 +190,15 @@ const editing = ref(null)
 const asName = (a) => [a.prenom, a.nom].filter(Boolean).join(' ') || a.email
 const formatDate = (d) => d ? moment(d).format('DD.MM.YYYY') : '—'
 
-const sessionKeyOf = (c) => (c.anneeVisee && c.sessionNumberVisee) ? `${c.anneeVisee}-${c.sessionNumberVisee}` : null
+// Sessions visées d'une candidature (plusieurs possibles ; anciennes données : année + numéro).
+const sessionKeysOf = (c) => c.sessionsVisees?.length ? c.sessionsVisees
+  : (c.anneeVisee && c.sessionNumberVisee) ? [`${c.anneeVisee}-${c.sessionNumberVisee}`] : []
 const sessionLabel = (key) => { const [y, n] = key.split('-'); return `S${n} ${y}` }
 const sessionSortValue = (c) => (c.anneeVisee || 9999) * 10 + (c.sessionNumberVisee || 9)
 
 // Sessions présentes dans les candidatures, de la plus ancienne à la plus lointaine.
 const sessionOptions = computed(() => {
-  const keys = [...new Set(candidatures.value.map(sessionKeyOf).filter(Boolean))]
+  const keys = [...new Set(candidatures.value.flatMap(sessionKeysOf))]
   return keys
     .sort((a, b) => { const [ya, na] = a.split('-').map(Number); const [yb, nb] = b.split('-').map(Number); return ya - yb || na - nb })
     .map(k => ({ value: k, title: sessionLabel(k) }))
@@ -206,7 +207,7 @@ const sessionOptions = computed(() => {
 // Mesure + session : périmètre commun à la liste et aux totaux.
 const inScope = computed(() => candidatures.value.filter(c =>
   (!filterMesure.value || c.mesureVisee === filterMesure.value)
-  && (!filterSession.value || sessionKeyOf(c) === filterSession.value)))
+  && (!filterSession.value || sessionKeysOf(c).includes(filterSession.value))))
 
 const filtered = computed(() => {
   let list = inScope.value
@@ -255,6 +256,13 @@ async function load() {
 function openDialog(c) {
   editing.value = c ? { candidatureId: c.candidatureId } : null
   dialog.value = true
+}
+
+const importDialog = ref(false)
+async function onImported() {
+  await load()
+  emit('assistants-changed')
+  emit('changed')
 }
 
 async function onSaved() {

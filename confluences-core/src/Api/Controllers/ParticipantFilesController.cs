@@ -86,7 +86,7 @@ namespace Api.Controllers
 
         // DELETE: api/ParticipantFiles/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<ParticipantFile>> DeleteParticipantFile(int id)
+        public async Task<IActionResult> DeleteParticipantFile(int id)
         {
             var participantFile = await _context.ParticipantFiles.FindAsync(id);
             if (participantFile == null)
@@ -97,7 +97,8 @@ namespace Api.Controllers
             _context.ParticipantFiles.Remove(participantFile);
             await _context.SaveChangesAsync();
 
-            return participantFile;
+            // Pas de renvoi du fichier supprimé (son contenu complet alourdissait la réponse).
+            return NoContent();
         }
     }
 }

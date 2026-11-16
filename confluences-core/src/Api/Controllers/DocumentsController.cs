@@ -359,7 +359,10 @@ namespace Api.Controllers
             [FromQuery] string sessionType    = "fi",
             [FromQuery] int?   sessionMonth   = null,
             [FromQuery] int?   year           = null,
-            [FromQuery] int?   month          = null)
+            [FromQuery] int?   month          = null,
+            // Périodes de la session jusqu'à celle de l'attestation : "aaaa-mm-jj_aaaa-mm-jj_semaines",
+            // séparées par des virgules (découpage de la fiche de présence).
+            [FromQuery] string parts          = null)
         {
             var frenchCulture = new System.Globalization.CultureInfo("fr-FR");
             DateTime periodStart;
@@ -409,6 +412,7 @@ namespace Api.Controllers
                 SessionName       = sessionName ?? periodLabel,
                 SessionStartDate  = periodStart,
                 SessionEndDate    = sessionEnd,
+                Periodes          = ParsePeriodes(parts, sessionType ?? "fi", periodStart, periodEnd),
             };
 
             var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
@@ -569,6 +573,8 @@ namespace Api.Controllers
                 if ((debut.HasValue && d < debut.Value) || (fin.HasValue && d > fin.Value)) continue;
 
                 var st = presences.TryGetValue(d, out var sv) && !string.IsNullOrWhiteSpace(sv) ? sv.Trim().ToLower() : "p";
+                // Congé autorisé : pas une absence, retiré des jours pris en compte.
+                if (st == "c") { deduits++; continue; }
                 if (st == "a" || st == "e") absences += 1;
                 else if (st == "r")         absences += 0.5;
             }
@@ -576,6 +582,31 @@ namespace Api.Controllers
             int joursReels = Math.Max(1, targetDays - deduits);
             double tauxAbsence = Math.Ceiling(absences / joursReels * 100.0 - 0.5);
             return Math.Max(0.0, 100.0 - tauxAbsence);
+        }
+
+        // Périodes envoyées par la fiche de présence → libellés "Semaines 1 à 4" et jours programmés
+        // propres à chaque période (cibles cumulées 20/40/60 ou 10/20/32 → 20/20/20 ou 10/10/12).
+        private static List<PeriodeReleve> ParsePeriodes(string parts, string sessionType, DateTime periodStart, DateTime periodEnd)
+        {
+            var list = new List<PeriodeReleve>();
+            if (string.IsNullOrWhiteSpace(parts)) return list;
+            int semaine = 1;
+            foreach (var raw in parts.Split(',', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var bits = raw.Split('_');
+                if (bits.Length < 2 || !DateTime.TryParse(bits[0], out var s) || !DateTime.TryParse(bits[1], out var e)) return new List<PeriodeReleve>();
+                int weeks = bits.Length > 2 && int.TryParse(bits[2], out var w) && w > 0 ? w : 4;
+                int i = list.Count + 1;
+                list.Add(new PeriodeReleve
+                {
+                    Label      = $"Semaines {semaine} à {semaine + weeks - 1}",
+                    Start      = s.Date < periodStart ? periodStart : s.Date,
+                    End        = e.Date > periodEnd ? periodEnd : e.Date,
+                    TargetDays = CalculerJoursCibles(sessionType, i) - (i > 1 ? CalculerJoursCibles(sessionType, i - 1) : 0),
+                });
+                semaine += weeks;
+            }
+            return list;
         }
 
         private static int CalculerJoursCibles(string sessionType, int moisSession)

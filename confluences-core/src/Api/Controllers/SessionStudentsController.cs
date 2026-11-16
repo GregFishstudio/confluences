@@ -151,8 +151,10 @@ namespace Api.Controllers
                 if (student?.DateDebutParticipation != null && day < student.DateDebutParticipation.Value.Date) continue;
                 if (student?.DateFinParticipation != null && day > student.DateFinParticipation.Value.Date) continue;
 
-                joursDeCours++;
                 var statut = statutsParJour.TryGetValue(day, out var st) ? st : "p";
+                // Congé autorisé : pas une absence, retiré des jours pris en compte.
+                if (statut == "c") continue;
+                joursDeCours++;
                 if (statut == "a" || statut == "e") absences += 1;
                 else if (statut == "r") absences += 0.5;
             }
@@ -179,8 +181,11 @@ namespace Api.Controllers
             var quarter = session.SessionNumberId;
             if (quarter <= 0) return null;
 
+            // Numéro de session = rang parmi les sessions du même groupe démarrant la même année
+            // (la 1re session 2027 est la Session 1, même si 2026 est encore dans le calendrier).
+            var year = session.DateStart.Year;
             var sameTypeOrdered = await _context.SessionFormations
-                .Where(sf => sf.Type.ToLower() == type)
+                .Where(sf => sf.Type.ToLower() == type && sf.StartDate.Year == year)
                 .OrderBy(sf => sf.StartDate)
                 .ToListAsync();
 
@@ -188,7 +193,6 @@ namespace Api.Controllers
             if (index < 0 || index >= sameTypeOrdered.Count) return null;
 
             var candidate = sameTypeOrdered[index];
-            if (candidate.StartDate.Year != session.DateStart.Year) return null;
 
             return (candidate.StartDate, candidate.EndDate, type);
         }

@@ -8,7 +8,7 @@ namespace IdentityServerAspNetIdentity.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql("INSERT INTO public.\"TypeIntershipActivities\"(\"Nom\") VALUES('Stage Découverte')");
+            migrationBuilder.Sql("INSERT INTO public.\"TypeIntershipActivities\"(\"Nom\") VALUES('Stage Découverte');");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

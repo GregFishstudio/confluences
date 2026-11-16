@@ -67,6 +67,9 @@
               />
             </v-col>
             <v-col cols="12" md="6" class="pa-3 pa-md-6 d-flex justify-end">
+              <v-btn color="primary" variant="text" size="small" prepend-icon="mdi-file-import-outline" class="mr-2" @click="importForSession">
+                Importer un CSV
+              </v-btn>
               <v-btn color="primary" variant="outlined" size="small" prepend-icon="mdi-account-plus-outline" @click="newCandidateForSession">
                 Nouveau·elle candidat·e pour cette session
               </v-btn>
@@ -347,6 +350,8 @@
       @saved="onCandidatureSaved" @assistants-changed="loadAssistants"
     />
 
+    <CandidatureImportDialog v-model="importDialog" :assistants="assistants" :defaults="importDefaults" @imported="onImported" />
+
     <v-snackbar v-model="snackbar" timeout="5000">{{ snackbarText }}</v-snackbar>
   </v-container>
 </template>
@@ -360,6 +365,7 @@ import '@/scss/inscriptions.css'
 import CandidaturesTab from '@/components/CandidaturesTab.vue'
 import AssistantsSociauxTab from '@/components/AssistantsSociauxTab.vue'
 import CandidatureDialog from '@/components/CandidatureDialog.vue'
+import CandidatureImportDialog from '@/components/CandidatureImportDialog.vue'
 import { useUnsavedGuard, confirmDiscard } from '@/composables/useUnsavedGuard'
 import {
   STATUTS_BENEFICIAIRE, OBJECTIFS_ATTEINTS, ORIENTATIONS, MANDANTS, GROUPES, RAIL,
@@ -581,8 +587,28 @@ function newCandidateForSession() {
       ? { statut: GROUPES.find(g => g.value === groupe.value).statutAttente } : {}),
     anneeVisee: s?.year,
     sessionNumberVisee: s?.number,
+    sessionsVisees: s ? [`${s.year}-${s.number}`] : [],
   }
   candidatureDialog.value = true
+}
+
+// Import CSV depuis une session : mesure, statut de liste d'attente et session pré-remplis.
+const importDialog = ref(false)
+const importDefaults = ref(null)
+function importForSession() {
+  const s = selectedSession.value
+  const g = GROUPES.find(x => x.value === groupe.value)
+  importDefaults.value = {
+    mesure: g?.mesure,
+    statut: g?.statutAttente || (g?.mesure === 'Télécours' ? 'En attente A1 Télécours' : undefined),
+    annee: s?.year,
+    session: s?.number,
+  }
+  importDialog.value = true
+}
+function onImported() {
+  loadAssistants()
+  onCandidatureSaved()
 }
 
 function onCandidatureSaved() {

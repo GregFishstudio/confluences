@@ -7,6 +7,7 @@
  **/
 
 import { createRouter, createWebHistory } from 'vue-router'
+import { refreshAccessToken } from '@/services/session'
 // ... (imports des vues)
 import EntreprisesList from '../views/EntreprisesList.vue'
 import EntrepriseEdit from '../views/EntrepriseEdit.vue'
@@ -74,7 +75,14 @@ const routes = [
     props: true
   },
 
+  { path: '/stages-benevolat', name: 'Stages-Tableau', component: () => import('@/views/StagesBenevolatTableau.vue'), meta: { requiresAuth: true } },
   // Marrainage
+  {
+    path: '/marrainage/tableau',
+    name: 'Marrainage-Tableau',
+    component: () => import('@/views/MarrainageTableau.vue'),
+    meta: { requiresAuth: true }
+  },
   {
     path: '/marrainages',
     name: 'Marrainages',
@@ -619,7 +627,7 @@ function isTeacher() {
 
 // --- Global Before Guard ---
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   NProgress.start();
 
   const user = JSON.parse(localStorage.getItem('user') || 'null');
@@ -631,7 +639,9 @@ router.beforeEach((to, from, next) => {
   }
 
   if (to.matched.some(r => r.meta.requiresAuth)) {
-    const isExpired = user?.expires_at && Date.now() > user.expires_at;
+    let isExpired = user?.expires_at && Date.now() > user.expires_at;
+    // Jeton expiré mais renouvelable : on le renouvelle plutôt que de déconnecter.
+    if (token && isExpired && await refreshAccessToken()) isExpired = false;
 
     if (!token || isExpired) {
       if (isExpired) {

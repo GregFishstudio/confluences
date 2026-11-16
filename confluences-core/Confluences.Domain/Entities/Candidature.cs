@@ -22,6 +22,10 @@ namespace Confluences.Domain.Entities
         [StringLength(50)]
         public string? MesureVisee { get; set; }
 
+        // Sessions visées ("2027-1", "2027-2"…) : une candidature peut viser plusieurs sessions et
+        // apparaît alors dans chacune (Inscriptions › Participant·e·s). AnneeVisee/SessionNumberVisee
+        // reprennent la première d'entre elles (tri, affichage court).
+        public List<string> SessionsVisees { get; set; } = new();
         public int? AnneeVisee { get; set; }
         public int? SessionNumberVisee { get; set; }
 

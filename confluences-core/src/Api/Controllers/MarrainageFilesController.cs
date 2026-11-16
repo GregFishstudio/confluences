@@ -107,7 +107,7 @@ namespace Api.Controllers
 
         // DELETE: api/MarrainageFiles/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<MarrainageFile>> DeleteMarrainageFile(int id)
+        public async Task<IActionResult> DeleteMarrainageFile(int id)
         {
             var marrainageFile = await _context.MarrainageFiles.FindAsync(id);
             if (marrainageFile == null)
@@ -118,7 +118,8 @@ namespace Api.Controllers
             _context.MarrainageFiles.Remove(marrainageFile);
             await _context.SaveChangesAsync();
 
-            return marrainageFile;
+            // Pas de renvoi du fichier supprimé (son contenu complet alourdissait la réponse).
+            return NoContent();
         }
     }
 }

@@ -52,10 +52,16 @@
           </v-col>
           <v-col cols="6" md="4">
             <v-select
-              v-model="sessionKey" :items="sessionItems" item-title="title" item-value="key"
-              :label="req('Session visée')" variant="outlined" density="compact" clearable :error="isMissing('session')"
-              :disabled="!form.mesureVisee" :hint="form.mesureVisee ? '' : 'Choisir d\'abord la mesure'" persistent-hint
-            />
+              v-model="form.sessionsVisees" :items="sessionItems" item-title="title" item-value="key"
+              :label="req('Sessions visées')" variant="outlined" density="compact" clearable multiple chips closable-chips
+              :error="isMissing('session')"
+              :disabled="!form.mesureVisee" persistent-hint
+              :hint="form.mesureVisee ? 'Plusieurs sessions possibles : la candidature apparaît dans chacune' : 'Choisir d\'abord la mesure'"
+            >
+              <template #chip="{ item, props: p }">
+                <v-chip v-bind="p" size="small">{{ item.raw.short }}</v-chip>
+              </template>
+            </v-select>
           </v-col>
           <v-col cols="6" md="2">
             <v-select v-model="form.priorite" :items="[0, 1, 2, 3, 4, 5]" label="Priorité" variant="outlined" density="compact" clearable />
@@ -94,9 +100,6 @@
           <v-col cols="6" md="3"><v-text-field v-model="form.origine" :label="evalReq('Pays d\'origine')" variant="outlined" density="compact" :error="isMissing('origine')" /></v-col>
           <v-col cols="6" md="3"><v-select v-model="form.mandant" :items="MANDANTS" :label="req('Mandant')" variant="outlined" density="compact" clearable :error="isMissing('mandant')" /></v-col>
         </v-row>
-
-        <div class="text-subtitle-2 font-weight-bold mb-2 mt-2 text-primary">Remarques générales</div>
-        <v-textarea v-model="form.remarquesGenerales" label="Remarques générales" rows="2" auto-grow variant="outlined" density="compact" />
 
         <div class="text-subtitle-2 font-weight-bold mb-2 mt-2 text-primary">Assistant·e social·e</div>
         <v-row dense>
@@ -166,18 +169,6 @@
           <v-col cols="12" class="d-flex flex-wrap ga-4">
             <v-switch v-model="form.inscriptionConfirmee" label="Inscription confirmée" color="success" hide-details density="compact" class="flex-grow-0" />
             <v-switch v-model="form.contratMaori" label="Contrat Maori" color="red" hide-details density="compact" class="flex-grow-0" />
-          </v-col>
-          <v-col cols="12">
-            <CommentThread
-              v-if="form.candidatureId"
-              :comments="threads.transmission" id-key="candidatureCommentId" title="Transmission AS / ML"
-              empty-text="Aucune transmission enregistrée." input-label="Nouvelle transmission (datée automatiquement)"
-              @submit="(t) => addComment('transmission', t)" @delete="deleteComment"
-            />
-            <v-textarea
-              v-else v-model="pending.transmission" label="Transmission AS / ML (datée et signée à l'enregistrement)"
-              rows="1" auto-grow variant="outlined" density="compact"
-            />
           </v-col>
         </v-row>
       </v-card-text>
@@ -260,18 +251,13 @@ const sessionItems = computed(() => {
   if (!groupe) return []
   const today = new Date()
   return sessionsDuGroupe(props.calendarSessions, groupe, { minAVenir: 3 })
-    .filter(s => s.planned || !s.end || s.end >= today || s.key === sessionKey.value)
-    .map(s => ({ key: s.key, title: `${s.label} (${s.dates})` }))
+    .filter(s => s.planned || !s.end || s.end >= today || (form.value.sessionsVisees || []).includes(s.key))
+    .map(s => ({ key: s.key, title: `${s.label} (${s.dates})`, short: `S${s.number} ${s.year}` }))
 })
 
-const sessionKey = computed({
-  get: () => (form.value.anneeVisee && form.value.sessionNumberVisee) ? `${form.value.anneeVisee}-${form.value.sessionNumberVisee}` : null,
-  set: (key) => {
-    const [y, n] = key ? key.split('-').map(Number) : [null, null]
-    form.value.anneeVisee = y
-    form.value.sessionNumberVisee = n
-  },
-})
+// Ancienne session visée unique (année + numéro) → liste.
+const sessionsDe = (c) => c?.sessionsVisees?.length ? [...c.sessionsVisees]
+  : (c?.anneeVisee && c?.sessionNumberVisee) ? [`${c.anneeVisee}-${c.sessionNumberVisee}`] : []
 
 // ─── Champs obligatoires ───
 // À la création : tous les champs de "Demande" sauf la priorité, tous ceux de "Bénéficiaire"
@@ -282,7 +268,7 @@ const REQUIRED_AT_CREATION = [
   { key: 'dateDemande', label: 'date de la demande' },
   { key: 'statut', label: 'statut' },
   { key: 'mesureVisee', label: 'mesure' },
-  { key: 'session', label: 'session visée', value: () => sessionKey.value },
+  { key: 'session', label: 'session visée', value: () => (form.value.sessionsVisees || []).join(',') },
   { key: 'civilite', label: 'civilité' },
   { key: 'nom', label: 'nom' },
   { key: 'prenom', label: 'prénom' },
@@ -347,12 +333,13 @@ watch(() => props.modelValue, async (open) => {
   if (props.candidature?.candidatureId) {
     const res = await apiFetch(`${API_BASE}/api/Candidatures/${props.candidature.candidatureId}`)
     const c = res?.ok ? await res.json() : props.candidature
-    form.value = { ...c, dateDemande: toInputDate(c.dateDemande), dateNaissance: toInputDate(c.dateNaissance), dateEvaluation: toInputDate(c.dateEvaluation) }
+    form.value = { ...c, sessionsVisees: sessionsDe(c), dateDemande: toInputDate(c.dateDemande), dateNaissance: toInputDate(c.dateNaissance), dateEvaluation: toInputDate(c.dateEvaluation) }
     KINDS.forEach(loadThread)
   } else {
     form.value = {
       dateDemande: moment().format('YYYY-MM-DD'), statut: 'À évaluer', nom: '', inscriptionConfirmee: false, contratMaori: false,
       ...props.defaults,
+      sessionsVisees: sessionsDe(props.defaults),
     }
   }
   snapshot.value = serialize()

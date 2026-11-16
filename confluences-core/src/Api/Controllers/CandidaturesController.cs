@@ -84,6 +84,139 @@ namespace Api.Controllers
             return NoContent();
         }
 
+        // POST: api/Candidatures/import
+        // Import d'un tableau (CSV) déjà mis en correspondance côté frontend. Chaque ligne crée une
+        // candidature, ou complète celle indiquée (CandidatureId) sans effacer ce qui est déjà saisi :
+        // seules les valeurs présentes dans le fichier sont reprises. L'AS est retrouvé·e par e-mail
+        // (créé·e dans le carnet si inconnu·e) ; la remarque AS devient une remarque datée du fil.
+        // Tout ou rien : une erreur annule l'import entier.
+        [HttpPost("import")]
+        public async Task<ActionResult<object>> Import(List<CandidatureImportRow> rows)
+        {
+            if (rows == null || rows.Count == 0) return BadRequest("Aucune ligne à importer.");
+            var bad = rows.FindIndex(r => r.CandidatureId == null && string.IsNullOrWhiteSpace(r.Data?.Nom));
+            if (bad >= 0) return BadRequest($"Ligne {bad + 1} : le nom est requis.");
+
+            var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var now = DateTime.UtcNow;
+            var assistants = await _context.AssistantsSociaux.ToListAsync();
+            int created = 0, updated = 0, asCreated = 0;
+
+            await using var tx = await _context.Database.BeginTransactionAsync();
+            foreach (var row in rows)
+            {
+                var dto = row.Data ?? new CandidatureDto();
+
+                // Assistant·e social·e
+                var asEmail = row.AsEmail?.Trim();
+                if (!string.IsNullOrEmpty(asEmail))
+                {
+                    var a = assistants.FirstOrDefault(x => string.Equals(x.Email, asEmail, StringComparison.OrdinalIgnoreCase));
+                    if (a == null)
+                    {
+                        a = new AssistantSocial
+                        {
+                            Email = asEmail, Prenom = row.AsPrenom?.Trim(), Nom = row.AsNom?.Trim(),
+                            Telephone = row.AsTelephone?.Trim(), Organisme = dto.Mandant,
+                        };
+                        _context.AssistantsSociaux.Add(a);
+                        await _context.SaveChangesAsync();
+                        assistants.Add(a);
+                        asCreated++;
+                    }
+                    dto.AssistantSocialId = a.AssistantSocialId;
+                }
+
+                Candidature c;
+                if (row.CandidatureId.HasValue)
+                {
+                    c = await _context.Candidatures.FindAsync(row.CandidatureId.Value)
+                        ?? throw new InvalidOperationException($"Candidature {row.CandidatureId} introuvable.");
+                    ApplyNonEmpty(c, dto);
+                    updated++;
+                }
+                else
+                {
+                    c = new Candidature { CreatedAt = now };
+                    Apply(c, dto);
+                    _context.Candidatures.Add(c);
+                    created++;
+                }
+                c.UpdatedAt = now;
+                await _context.SaveChangesAsync();
+
+                var remarque = row.RemarqueAS?.Trim();
+                if (!string.IsNullOrEmpty(remarque))
+                {
+                    _context.CandidatureComments.Add(new CandidatureComment
+                    {
+                        CandidatureId = c.CandidatureId, Text = remarque, AuthorId = authorId, CreatedAt = now,
+                    });
+                }
+            }
+            await _context.SaveChangesAsync();
+            await tx.CommitAsync();
+
+            return Ok(new { created, updated, asCreated });
+        }
+
+        // Sessions visées envoyées : la liste, ou à défaut l'ancien couple année + numéro.
+        private static List<string> SessionsDuDto(CandidatureDto dto)
+        {
+            if (dto.SessionsVisees != null) return dto.SessionsVisees;
+            return dto.AnneeVisee.HasValue && dto.SessionNumberVisee.HasValue
+                ? new List<string> { $"{dto.AnneeVisee}-{dto.SessionNumberVisee}" }
+                : new List<string>();
+        }
+
+        // Normalise ("2027-1"), dédoublonne et trie les sessions ; la première alimente
+        // AnneeVisee/SessionNumberVisee.
+        private static void SetSessionsVisees(Candidature c, IEnumerable<string> keys)
+        {
+            var sessions = keys
+                .Select(k => (k ?? "").Trim().Split('-'))
+                .Where(p => p.Length == 2 && int.TryParse(p[0], out _) && int.TryParse(p[1], out _))
+                .Select(p => (Annee: int.Parse(p[0]), Numero: int.Parse(p[1])))
+                .Distinct()
+                .OrderBy(s => s.Annee).ThenBy(s => s.Numero)
+                .ToList();
+            c.SessionsVisees = sessions.Select(s => $"{s.Annee}-{s.Numero}").ToList();
+            c.AnneeVisee = sessions.Count > 0 ? sessions[0].Annee : null;
+            c.SessionNumberVisee = sessions.Count > 0 ? sessions[0].Numero : null;
+        }
+
+        // Complète une candidature existante avec les seules valeurs renseignées dans l'import.
+        private static void ApplyNonEmpty(Candidature c, CandidatureDto dto)
+        {
+            static bool Has(string? s) => !string.IsNullOrWhiteSpace(s);
+            if (dto.DateDemande.HasValue) c.DateDemande = dto.DateDemande;
+            if (Has(dto.Statut)) c.Statut = dto.Statut;
+            if (Has(dto.MesureVisee)) c.MesureVisee = dto.MesureVisee;
+            var sessions = SessionsDuDto(dto);
+            if (sessions.Count > 0) SetSessionsVisees(c, c.SessionsVisees.Concat(sessions));
+            if (dto.Priorite.HasValue) c.Priorite = dto.Priorite;
+            if (Has(dto.Civilite)) c.Civilite = dto.Civilite;
+            if (Has(dto.Prenom)) c.Prenom = dto.Prenom!.Trim();
+            if (Has(dto.Nom)) c.Nom = dto.Nom!.Trim();
+            if (dto.DateNaissance.HasValue) c.DateNaissance = dto.DateNaissance;
+            if (Has(dto.Adresse)) c.Adresse = dto.Adresse;
+            if (Has(dto.Telephone)) c.Telephone = dto.Telephone!.Trim();
+            if (Has(dto.Email)) c.Email = dto.Email!.Trim();
+            if (Has(dto.Origine)) c.Origine = dto.Origine!.Trim();
+            if (Has(dto.Mandant)) c.Mandant = dto.Mandant;
+            if (dto.AssistantSocialId.HasValue) c.AssistantSocialId = dto.AssistantSocialId;
+            if (Has(dto.NotesRdv)) c.NotesRdv = dto.NotesRdv;
+            if (dto.DateEvaluation.HasValue) c.DateEvaluation = dto.DateEvaluation;
+            if (Has(dto.EvaluationNiveau)) c.EvaluationNiveau = dto.EvaluationNiveau;
+            if (Has(dto.RemarquesGenerales))
+                c.RemarquesGenerales = Has(c.RemarquesGenerales) && !c.RemarquesGenerales!.Contains(dto.RemarquesGenerales!.Trim())
+                    ? $"{c.RemarquesGenerales}\n{dto.RemarquesGenerales!.Trim()}" : dto.RemarquesGenerales;
+            if (dto.InscriptionConfirmee) c.InscriptionConfirmee = true;
+            if (dto.ContratMaori) c.ContratMaori = true;
+            if (Has(dto.TransmissionAS)) c.TransmissionAS = dto.TransmissionAS;
+            if (Has(dto.ParticipantId)) c.ParticipantId = dto.ParticipantId;
+        }
+
         // DELETE: api/Candidatures/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCandidature(int id)
@@ -171,6 +304,7 @@ namespace Api.Controllers
             c.MesureVisee,
             c.AnneeVisee,
             c.SessionNumberVisee,
+            sessionsVisees = c.SessionsVisees,
             c.Priorite,
             c.Civilite,
             c.Prenom,
@@ -219,8 +353,7 @@ namespace Api.Controllers
             c.DateDemande = dto.DateDemande;
             c.Statut = dto.Statut;
             c.MesureVisee = dto.MesureVisee;
-            c.AnneeVisee = dto.AnneeVisee;
-            c.SessionNumberVisee = dto.SessionNumberVisee;
+            SetSessionsVisees(c, SessionsDuDto(dto));
             c.Priorite = dto.Priorite;
             c.Civilite = dto.Civilite;
             c.Prenom = dto.Prenom?.Trim();
@@ -250,6 +383,7 @@ namespace Api.Controllers
         public DateTime? DateDemande { get; set; }
         public string? Statut { get; set; }
         public string? MesureVisee { get; set; }
+        public List<string>? SessionsVisees { get; set; }
         public int? AnneeVisee { get; set; }
         public int? SessionNumberVisee { get; set; }
         public int? Priorite { get; set; }
@@ -272,6 +406,18 @@ namespace Api.Controllers
         public bool ContratMaori { get; set; }
         public string? TransmissionAS { get; set; }
         public string? ParticipantId { get; set; }
+    }
+
+    public class CandidatureImportRow
+    {
+        // Renseigné : complète cette candidature au lieu d'en créer une nouvelle.
+        public int? CandidatureId { get; set; }
+        public CandidatureDto? Data { get; set; }
+        public string? RemarqueAS { get; set; }
+        public string? AsEmail { get; set; }
+        public string? AsPrenom { get; set; }
+        public string? AsNom { get; set; }
+        public string? AsTelephone { get; set; }
     }
 
     public class CandidatureCommentDto

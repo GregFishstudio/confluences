@@ -1,0 +1,61 @@
+<!--
+title: Contact
+description: Contacter l’association Confluences à Lausanne : bureau administratif au Chemin de Renens 52e, cours à la Maison St-Jean, +41 77 520 02 84, confluences.vaud@gmail.com.
+nav: contact
+accent: 1
+crumb: Contact
+h1: Nous contacter
+lede: Une question sur un cours, une orientation, le parrainage ou le bénévolat ? Écrivez-nous ou appelez-nous.
+-->
+<section class="section-tight">
+  <div class="wrap split top">
+    <div>
+      <div class="direct">
+        <a href="tel:+41775200284">+41 77 520 02 84</a>
+        <a href="mailto:confluences.vaud@gmail.com">confluences.vaud@gmail.com</a>
+      </div>
+      <div class="places">
+        <div class="place">
+          <h3>Bureau administratif</h3>
+          <address>Association Confluences<br>Chemin de Renens 52e<br>1004 Lausanne</address>
+        </div>
+        <div class="place">
+          <h3>Lieu des cours</h3>
+          <address>Maison St-Jean<br>Avenue de Cour 138<br>1007 Lausanne</address>
+        </div>
+      </div>
+      <div class="map mt-2">
+        <iframe title="Plan d’accès à la Maison St-Jean, Lausanne" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2745.5231135430486!2d6.607447375949009!3d46.517549462545276!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x478c302cc53af0fb%3A0xaffc4842aad39c6!2sMaison%20de%20St-Jean-Cour!5e0!3m2!1sfr!2sfr!4v1689557370730!5m2!1sfr!2sfr" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+    </div>
+
+    <div class="panel" id="formulaire">
+      <h2>Écrire un message</h2>
+      <p id="form-status" class="form-status" role="status"></p>
+      <form class="form" action="envoi.php" method="post">
+        <div class="row">
+          <div class="field"><label for="nom">Nom et prénom</label><input id="nom" name="nom" type="text" autocomplete="name" required></div>
+          <div class="field"><label for="mail">E-mail</label><input id="mail" name="mail" type="email" autocomplete="email" required></div>
+        </div>
+        <div class="row">
+          <div class="field"><label for="tel">Téléphone <span class="hint">(facultatif)</span></label><input id="tel" name="tel" type="tel" autocomplete="tel"></div>
+          <div class="field">
+            <label for="objet">Sujet</label>
+            <select id="objet" name="objet">
+              <option>Inscription à un cours</option>
+              <option>Orientation d’une personne (assistant·e social·e, ORP…)</option>
+              <option>Parrainage</option>
+              <option>Bénévolat</option>
+              <option>Formation de formateurs·trices</option>
+              <option>Partenariat</option>
+              <option>Autre</option>
+            </select>
+          </div>
+        </div>
+        <div class="field"><label for="message">Message</label><textarea id="message" name="message" required></textarea></div>
+        <div class="hp" aria-hidden="true"><label for="site">Ne pas remplir</label><input id="site" name="site" type="text" tabindex="-1" autocomplete="off"></div>
+        <div><button class="btn btn-primary" type="submit">Envoyer le message <span class="arrow" aria-hidden="true">→</span></button></div>
+      </form>
+    </div>
+  </div>
+</section>

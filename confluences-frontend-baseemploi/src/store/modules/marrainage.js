@@ -62,15 +62,9 @@ export const actions = {
       })
   },
 
-  editMarrainage({ dispatch }, marrainage) {
+  editMarrainage(_context, marrainage) {
+    // Succès et échec sont affichés par la barre d'enregistrement de la fiche (PageSaveBar).
     return MarrainageService.putMarrainage(marrainage)
-      .then(() => {
-        dispatch('notification/add', { type: 'success', message: 'Marrainage modifié !' }, { root: true })
-      })
-      .catch(error => {
-        dispatch('notification/add', { type: 'error', message: "Erreur à la modification du marrainage : " + error.message }, { root: true })
-        throw error
-      })
   },
 
   importMarrainages({ dispatch }, marrainages) {

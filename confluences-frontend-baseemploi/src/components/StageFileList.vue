@@ -73,6 +73,8 @@ export default {
   methods: {
     /** 🗑️ Supprime un fichier lié au stage */
     deleteStageFile(stageFileId) {
+      const file = this.stage.stageFiles.find((f) => f.stageFileId === stageFileId);
+      if (!window.confirm(`Supprimer définitivement « ${file?.fileName || "ce fichier"} » ?`)) return;
       NProgress.start();
 
       store

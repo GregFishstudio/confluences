@@ -11,7 +11,24 @@
         <div class="text-h5 font-weight-bold">{{ user.prenom }} {{ user.nom }}</div>
         <div class="text-caption text-grey">{{ user.userName }}</div>
       </div>
+      <v-spacer />
+      <!-- Marrainage en cours : visible dès l'ouverture de la fiche -->
+      <div v-if="!loading && marrainagesActifs.length" class="d-flex flex-column align-end ga-1">
+        <v-chip
+          v-for="m in marrainagesActifs" :key="m.marrainageId"
+          color="pink-darken-1" variant="flat" size="large" prepend-icon="mdi-account-heart"
+          title="Voir la fiche du parrain / de la marraine" @click="goToMarrainage(m.marrainageId)"
+        >
+          Marrainage en cours avec {{ m.prenom }} {{ m.nom }}<span v-if="m.dateDebut">&nbsp;· depuis {{ formatMoisAnnee(m.dateDebut) }}</span>
+        </v-chip>
+      </div>
     </div>
+
+    <!-- Un seul endroit pour enregistrer : état de la fiche + bouton Enregistrer -->
+    <PageSaveBar
+      v-if="!loading" :state="pageState" :error="autosaveError" :draft-count="draftCount"
+      :last-saved-at="lastSavedAt" autosave @save="saveAll"
+    />
 
     <v-row v-if="loading">
       <v-col cols="12" class="text-center pa-8">
@@ -42,9 +59,35 @@
             <v-col cols="6" md="3"><v-text-field v-model="form.autresLangues" label="Autre(s) langue(s)" variant="outlined" density="compact" /></v-col>
             <v-col cols="6" md="3"><v-text-field v-model="form.phoneNumber" label="Téléphone" variant="outlined" density="compact" /></v-col>
 
-            <v-col cols="6" md="4"><v-text-field v-model="form.adresse" label="Adresse postale" variant="outlined" density="compact" /></v-col>
-            <v-col cols="6" md="4"><v-text-field v-model="form.email" type="email" label="Email" variant="outlined" density="compact" :rules="[emailRule]" /></v-col>
-            <v-col cols="6" md="4"><v-text-field v-model="form.etatCivil" label="État civil" variant="outlined" density="compact" /></v-col>
+            <!-- Adresse structurée : rue + n° / NPA / localité -->
+            <v-col cols="12" md="4"><v-text-field v-model="form.rue" label="Rue et n°" variant="outlined" density="compact" /></v-col>
+            <v-col cols="4" md="2">
+              <v-text-field
+                v-model="form.npa" label="NPA" variant="outlined" density="compact" maxlength="4" inputmode="numeric"
+                :rules="[npaRule]" @update:model-value="completerLocalite"
+              />
+            </v-col>
+            <v-col cols="8" md="3">
+              <v-combobox
+                v-model="form.localite" :items="localiteOptions" label="Localité" variant="outlined" density="compact"
+                :rules="[localiteRule]"
+              />
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-select
+                v-model="form.region" :items="regionNames" label="Région" variant="outlined" density="compact" clearable
+                :placeholder="regionSuggeree || ''" persistent-placeholder
+                :hint="!form.region && regionSuggeree ? `Déduite de la localité : ${regionSuggeree}` : ''" persistent-hint
+              />
+            </v-col>
+            <v-col v-if="adresseACompleter" cols="12">
+              <v-alert type="warning" variant="tonal" density="compact" icon="mdi-map-marker-alert-outline">
+                Adresse à compléter — ancienne saisie : « {{ form.adresse }} ». Reportez-la dans les champs
+                Rue et n°, NPA et Localité ci-dessus.
+              </v-alert>
+            </v-col>
+            <v-col cols="6" md="3"><v-text-field v-model="form.email" type="email" label="Email" variant="outlined" density="compact" :rules="[emailRule]" /></v-col>
+            <v-col cols="6" md="3"><v-text-field v-model="form.etatCivil" label="État civil" variant="outlined" density="compact" /></v-col>
 
             <v-col cols="6" md="3"><v-text-field v-model.number="form.nombreEnfants" type="number" label="Nombre d'enfants" variant="outlined" density="compact" /></v-col>
             <v-col cols="6" md="3">
@@ -68,9 +111,6 @@
               <span class="text-caption text-grey ml-2">Se coche sous Inscriptions › Participant·e·s</span>
             </v-col>
           </v-row>
-          <div class="d-flex justify-end mt-2">
-            <v-btn color="primary" :loading="saving" @click="save">Sauvegarder</v-btn>
-          </div>
         </v-card>
       </v-col>
 
@@ -118,12 +158,12 @@
                 v-if="getNiveauForSession(link)" size="x-small" color="green" label
                 :class="{ 'cursor-pointer': !!sessionGroupKey(link) }"
                 title="Voir sous Bilans & attestations" @click="sessionGroupKey(link) && goToSessionPage('StagiairesFollowUp', link)"
-              >O: {{ getNiveauForSession(link)?.oralLevel || '—' }}</v-chip>
+              >Oral : {{ getNiveauForSession(link)?.oralLevel || '—' }}</v-chip>
               <v-chip
                 v-if="getNiveauForSession(link)" size="x-small" color="blue" label
                 :class="{ 'cursor-pointer': !!sessionGroupKey(link) }"
                 title="Voir sous Bilans & attestations" @click="sessionGroupKey(link) && goToSessionPage('StagiairesFollowUp', link)"
-              >É: {{ getNiveauForSession(link)?.writtenLevel || '—' }}</v-chip>
+              >Écrit : {{ getNiveauForSession(link)?.writtenLevel || '—' }}</v-chip>
               <v-chip v-if="link.tauxParticipation !== null" size="x-small" :color="tauxColor(link.tauxParticipation)" label>
                 Participation : {{ link.tauxParticipation }}%
               </v-chip>
@@ -170,15 +210,20 @@
             <div v-if="user.id"><CreateStage :stagiaire-id="user.id" button-size="small" /></div>
           </div>
           <div v-if="!userStages.length" class="text-caption text-grey mb-3">Aucune expérience professionnelle.</div>
-          <div v-for="stage in userStages" :key="stage.id" class="mb-3">
+          <!-- Métier / intitulé, type (stage découverte, bénévolat…) et statut (en cours, terminé…) -->
+          <div v-for="stage in userStagesTries" :key="stage.id" class="experience mb-2" :class="`experience-${statutExperience(stage).key}`">
             <div class="d-flex align-center ga-2 flex-wrap">
               <a href="#" class="font-weight-bold marrainage-link" title="Voir cette expérience professionnelle" @click.prevent="goToStage(stage.id)">
-                {{ stage.metier || stage.entreprise?.nom || 'Expérience professionnelle' }}
+                {{ intituleExperience(stage) }}
               </a>
-              <v-chip v-if="stage.typeStage" size="x-small" label variant="tonal">{{ stage.typeStage }}</v-chip>
+              <v-chip v-if="stage.type" size="x-small" label color="indigo" variant="tonal">{{ stage.type }}</v-chip>
+              <v-chip size="x-small" label :color="statutExperience(stage).color" variant="flat">{{ statutExperience(stage).label }}</v-chip>
+              <v-chip v-if="stage.typeStage" size="x-small" label variant="outlined" title="Taux / rythme">{{ stage.typeStage }}</v-chip>
             </div>
             <div class="text-caption text-grey">
+              <span v-if="stage.nom && stage.metier && stage.nom !== stage.metier">Métier : {{ stage.metier }} · </span>
               <a v-if="stage.entreprise?.nom" href="#" class="marrainage-link" title="Voir la fiche entreprise" @click.prevent="goToEntreprise(stage.entreprise.id)">{{ stage.entreprise.nom }}</a>
+              <span v-else>Entreprise non renseignée</span>
               — {{ formatDate(stage.dateDebut) }}<span v-if="stage.dateFin"> → {{ formatDate(stage.dateFin) }}</span>
             </div>
           </div>
@@ -197,21 +242,31 @@
 
           <v-divider class="my-3" />
 
-          <div class="text-caption text-grey mb-1">Marrainage en cours</div>
+          <div class="text-subtitle-2 font-weight-bold mb-2 d-flex align-center">
+            <v-icon size="20" color="pink-darken-1" class="mr-1">mdi-account-heart</v-icon> Marrainage en cours
+          </div>
           <div v-if="!marrainagesActifs.length" class="text-caption text-grey mb-2">Pas de marrainage en cours.</div>
-          <div v-for="m in marrainagesActifs" :key="m.marrainageId" class="mb-2">
-            <div class="d-flex align-center ga-2">
+          <div v-for="m in marrainagesActifs" :key="m.marrainageId" class="marrainage-actif mb-3">
+            <div class="d-flex align-center flex-wrap ga-2">
+              <v-chip color="success" variant="flat" size="small" label>En cours</v-chip>
               <span>Marrainage avec</span>
-              <a href="#" class="marrainage-link font-weight-bold" @click.prevent="goToMarrainage(m.marrainageId)">
+              <a href="#" class="marrainage-link font-weight-bold text-body-1" @click.prevent="goToMarrainage(m.marrainageId)">
                 {{ m.prenom }} {{ m.nom }}
               </a>
+              <span class="text-caption text-grey">depuis le {{ formatDate(m.dateDebut) }}</span>
+              <v-spacer />
               <v-switch
                 :model-value="m.actif"
                 @update:model-value="(v) => updateRelationActif(m, v)"
                 label="Actif" color="success" hide-details density="compact" class="flex-grow-0"
+                title="Désactiver quand la relation s'arrête : elle passe dans l'historique, où l'on choisit le motif d'arrêt"
               />
             </div>
-            <div class="text-caption text-grey">Démarré le {{ formatDate(m.dateDebut) }}</div>
+            <v-textarea
+              v-model="m.commentaire" label="Commentaire sur la relation (visible aussi sur la fiche du parrain / de la marraine)"
+              variant="outlined" density="compact" rows="1" auto-grow hide-details bg-color="white" class="mt-2"
+              @blur="saveCommentaireRelation(m)"
+            />
             <div v-if="conventionFiles[m.marrainageId]?.length" class="mt-1 d-flex flex-wrap ga-1">
               <v-chip
                 v-for="f in conventionFiles[m.marrainageId]" :key="f.marrainageFileId"
@@ -232,7 +287,8 @@
                 <th>Parrain / marraine</th>
                 <th>Début</th>
                 <th>Fin</th>
-                <th>Statut de la relation</th>
+                <th>Motif de l'arrêt</th>
+                <th>Commentaire</th>
                 <th class="text-right">Réactiver</th>
               </tr>
             </thead>
@@ -262,6 +318,12 @@
                     />
                     <InactivityReasonManager :reasons="inactivityReasons" @changed="loadInactivityReasons" />
                   </div>
+                </td>
+                <td style="min-width: 220px">
+                  <v-textarea
+                    v-model="m.commentaire" placeholder="Commentaire" variant="outlined" density="compact"
+                    rows="1" auto-grow hide-details class="py-1" @blur="saveCommentaireRelation(m)"
+                  />
                 </td>
                 <td class="text-right">
                   <v-switch
@@ -430,13 +492,61 @@
               </v-col>
               <v-col cols="12" md="9">
                 <v-row v-if="b.rubrique === 'marrainage'" dense class="mb-1">
-                  <v-col cols="12" md="6">
+                  <v-col cols="12" md="4">
+                    <v-select v-model="form.prioriteMarrainage" :items="PRIORITES_MARRAINAGE" label="Priorité" variant="outlined" density="compact" clearable hide-details bg-color="white" />
+                  </v-col>
+                  <v-col cols="12" md="4">
                     <v-select v-model="form.souhaitGenreMarrainage" :items="SOUHAITS_GENRE" label="Souhait : parrain / marraine" variant="outlined" density="compact" clearable hide-details bg-color="white" />
                   </v-col>
-                  <v-col cols="12" md="6">
+                  <v-col cols="12" md="4">
                     <v-select v-model="form.souhaitAgeMarrainage" :items="SOUHAITS_AGE" label="Souhait : âge" variant="outlined" density="compact" clearable hide-details bg-color="white" />
                   </v-col>
                 </v-row>
+                <template v-if="b.rubrique === 'stages'">
+                  <div class="text-caption text-grey mb-1">Intérêts pour un stage ou du bénévolat (tableau stages &amp; bénévolat)</div>
+                  <v-row dense class="mb-1">
+                    <v-col cols="12" md="5">
+                      <v-autocomplete
+                        v-model="interets.metierIds" :items="metierOptions" item-title="libelle" item-value="typeMetierId"
+                        label="Métiers visés" multiple chips closable-chips clear-on-select variant="outlined" density="compact" hide-details bg-color="white"
+                        @update:model-value="saveInterets"
+                      />
+                    </v-col>
+                    <v-col cols="12" md="4">
+                      <v-autocomplete
+                        v-model="interets.domaineIds" :items="domaineOptions" item-title="libelle" item-value="typeDomaineId"
+                        label="Domaines d'intérêt" multiple chips closable-chips clear-on-select variant="outlined" density="compact" hide-details bg-color="white"
+                        @update:model-value="saveInterets"
+                      />
+                    </v-col>
+                    <v-col cols="12" md="3">
+                      <v-select v-model="form.degreInteretStage" :items="DEGRES_INTERET" label="Degré d'intérêt" variant="outlined" density="compact" clearable hide-details bg-color="white" />
+                    </v-col>
+                  </v-row>
+                </template>
+                <template v-if="b.rubrique === 'benevolat'">
+                  <div class="text-caption text-grey mb-1">Bénévolat – domaines d'intérêt (plusieurs choix possibles)</div>
+                  <v-row dense class="mb-1">
+                    <v-col cols="12" md="7">
+                      <v-autocomplete
+                        v-model="form.benevolatDomaines" :items="BENEVOLAT_DOMAINES"
+                        label="Domaines d'intérêt" multiple chips closable-chips clear-on-select variant="outlined" density="compact" hide-details bg-color="white"
+                      />
+                    </v-col>
+                    <v-col cols="12" md="5">
+                      <v-autocomplete
+                        v-model="form.benevolatTypesActivite" :items="BENEVOLAT_TYPES_ACTIVITE"
+                        label="Type d'activité souhaité (facultatif)" multiple chips closable-chips clear-on-select variant="outlined" density="compact" hide-details bg-color="white"
+                      />
+                    </v-col>
+                    <v-col v-if="form.benevolatDomaines.includes(AUTRE_DOMAINE)" cols="12" md="7">
+                      <v-text-field
+                        v-model="form.benevolatDomaineAutre" label="Autre domaine : à préciser" maxlength="200"
+                        variant="outlined" density="compact" hide-details bg-color="white"
+                      />
+                    </v-col>
+                  </v-row>
+                </template>
                 <CommentLog v-if="user.id" :student-id="user.id" :rubrique="b.rubrique" :entries="commentsBy(b.rubrique)" v-model:draft="drafts[b.rubrique]" @changed="loadComments" />
               </v-col>
             </v-row>
@@ -452,10 +562,6 @@
             </v-row>
           </section>
 
-          <div class="d-flex justify-end align-center ga-3 mt-2">
-            <span class="text-caption" :class="autosaveError ? 'text-error' : 'text-medium-emphasis'">{{ autosaveLabel }}</span>
-            <v-btn color="primary" variant="outlined" :loading="saving" @click="save">Sauvegarder maintenant</v-btn>
-          </div>
         </v-card>
       </v-col>
 
@@ -481,26 +587,36 @@
             <div class="d-flex flex-wrap ga-1">
               <v-chip
                 v-for="f in stage.files" :key="f.id" size="small" variant="outlined" prepend-icon="mdi-file-outline"
+                closable close-label="Supprimer ce document"
                 @click="openProtected(`${API_BASE}/api/StageFiles/${f.id}`)"
+                @click:close="stageFileToDelete = { stage, file: f }"
               >
                 {{ f.fileName }}
               </v-chip>
             </div>
           </div>
         </v-card>
+
+        <!-- Suppression d'un document d'expérience professionnelle (ex. CV déposé par erreur) -->
+        <v-dialog :model-value="!!stageFileToDelete" max-width="440" @update:model-value="v => { if (!v) stageFileToDelete = null }">
+          <v-card v-if="stageFileToDelete" rounded="lg">
+            <v-card-title class="py-4">Supprimer ce document ?</v-card-title>
+            <v-divider />
+            <v-card-text class="pt-4">
+              « {{ stageFileToDelete.file.fileName }} » sera définitivement supprimé de l'expérience
+              « {{ stageFileToDelete.stage.metier || stageFileToDelete.stage.entreprise?.nom || 'Expérience professionnelle' }} ».
+              <v-alert v-if="stageFileDeleteError" type="error" variant="tonal" density="compact" class="mt-3">{{ stageFileDeleteError }}</v-alert>
+            </v-card-text>
+            <v-divider />
+            <v-card-actions class="d-flex justify-end">
+              <v-btn variant="text" color="grey" @click="stageFileToDelete = null">Annuler</v-btn>
+              <v-btn color="error" :loading="deletingStageFile" @click="deleteStageFile">Supprimer</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-col>
     </v-row>
 
-    <!-- Rappel permanent tant que la fiche contient des modifications non enregistrées -->
-    <v-card v-if="isDirty() || hasDrafts() || autosaveError" class="unsaved-bar d-flex align-center pa-3 ga-3" :color="autosaveError ? 'red-lighten-5' : 'orange-lighten-5'" elevation="6" rounded="lg">
-      <v-icon :color="autosaveError ? 'error' : 'orange-darken-2'">{{ autosaveError ? 'mdi-alert-circle-outline' : 'mdi-content-save-alert-outline' }}</v-icon>
-      <span class="text-body-2">
-        <template v-if="autosaveError">Échec de l'enregistrement : {{ autosaveError }}</template>
-        <template v-else-if="isDirty()">Enregistrement automatique en cours…</template>
-        <template v-else>Un commentaire commencé n'a pas encore été ajouté.</template>
-      </span>
-      <v-btn v-if="isDirty() || autosaveError" color="primary" size="small" :loading="saving" @click="save">Sauvegarder</v-btn>
-    </v-card>
   </v-container>
 </template>
 
@@ -510,6 +626,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import moment from 'moment/min/moment-with-locales'
 import API_BASE, { apiFetch } from '@/services/api'
+import { findSession } from '@/utils/sessionNumber'
 import FileAttachments from '@/components/FileAttachments.vue'
 import FieldHistoryDialog from '@/components/FieldHistoryDialog.vue'
 import InactivityReasonManager from '@/components/InactivityReasonManager.vue'
@@ -519,6 +636,10 @@ import CommentLog from '@/components/CommentLog.vue'
 import { confirmDiscard } from '@/composables/useUnsavedGuard'
 import { useUnsavedGuard } from '@/composables/useUnsavedGuard'
 import { LANGUES } from '@/utils/langues'
+import PageSaveBar from '@/components/PageSaveBar.vue'
+import { useRegions, regionDeCommune } from '@/utils/regions'
+import { BENEVOLAT_DOMAINES, BENEVOLAT_TYPES_ACTIVITE, AUTRE_DOMAINE } from '@/utils/benevolat'
+import { npaRule, localiteRule } from '@/utils/adresse'
 
 moment.locale('fr')
 const route = useRoute()
@@ -590,6 +711,62 @@ const SOUHAITS_GENRE = [
   { title: 'Une femme (marraine)', value: 'femme' },
   { title: "C'est égal", value: 'egal' },
 ]
+// Région de marrainage : saisie, sinon proposée d'après l'adresse (tableau de marrainage).
+const { regionNames } = useRegions()
+const regionSuggeree = computed(() => regionDeCommune(form.value.localite || form.value.adresse))
+
+// ─── Adresse structurée ───
+// Suggestions de localités = celles déjà saisies sur les fiches ; un NPA connu complète la localité.
+const localites = ref([])
+const localiteOptions = computed(() => [...new Set(localites.value.map(l => l.localite))].sort((a, b) => a.localeCompare(b, 'fr')))
+async function loadLocalites() {
+  const res = await apiFetch(`${API_BASE}/api/ApplicationUsers/localites`)
+  if (res?.ok) localites.value = await res.json()
+}
+function completerLocalite(npa) {
+  if (!/^\d{4}$/.test(npa || '') || form.value.localite) return
+  const connue = localites.value.find(l => l.npa === npa)
+  if (connue) form.value.localite = connue.localite
+}
+// Ancienne adresse en saisie libre, pas encore reportée dans les champs structurés.
+const adresseACompleter = computed(() =>
+  !!(form.value.adresse || '').trim() && !form.value.rue && !form.value.npa && !form.value.localite)
+
+// Stages & bénévolat : métiers/domaines d'intérêt (mêmes listes que les entreprises), enregistrés
+// à chaque changement — à part du formulaire, qui ne porte que le degré d'intérêt.
+const DEGRES_INTERET = [
+  { title: 'Très motivé·e', value: 'fort' },
+  { title: 'Normal', value: 'normal' },
+  { title: 'À confirmer', value: 'a_confirmer' },
+]
+const metierOptions = ref([])
+const domaineOptions = ref([])
+const interets = ref({ metierIds: [], domaineIds: [] })
+
+async function loadInterets(id) {
+  const [rI, rM, rD] = await Promise.all([
+    apiFetch(`${API_BASE}/api/StagesBenevolat/interets/${id}`),
+    metierOptions.value.length ? null : apiFetch(`${API_BASE}/api/TypeMetiers`),
+    domaineOptions.value.length ? null : apiFetch(`${API_BASE}/api/TypeDomaines`),
+  ])
+  if (rI?.ok) interets.value = await rI.json()
+  if (rM?.ok) metierOptions.value = (await rM.json()).filter(m => m.libelle)
+  if (rD?.ok) domaineOptions.value = (await rD.json()).filter(d => d.libelle)
+}
+
+async function saveInterets() {
+  const res = await apiFetch(`${API_BASE}/api/StagesBenevolat/interets/${user.value.id}`, {
+    method: 'PUT',
+    body: JSON.stringify(interets.value),
+  })
+  if (!res?.ok) store.dispatch('notification/add', { type: 'error', message: "Intérêts stage/bénévolat non enregistrés." })
+}
+
+const PRIORITES_MARRAINAGE = [
+  { title: 'Très preneur·euse', value: 'haute' },
+  { title: 'Normale', value: 'normale' },
+  { title: 'Pas une priorité', value: 'basse' },
+]
 const SOUHAITS_AGE = [
   { title: 'Environ son âge', value: 'meme_age' },
   { title: 'Plus âgé·e', value: 'plus_age' },
@@ -627,6 +804,9 @@ const form = ref({
   etatCivil: null,
   nombreEnfants: null,
   adresse: null,
+  rue: null,
+  npa: null,
+  localite: null,
   beneficiaireDe: null,
   assistantSocialEmail: null,
   anneeArriveeSuisse: null,
@@ -647,6 +827,9 @@ const form = ref({
   besoinsSouhaitsStagesCommentaire: null,
   besoinsSouhaitsBenevolat: null,
   besoinsSouhaitsBenevoletCommentaire: null,
+  benevolatDomaines: [],
+  benevolatDomaineAutre: null,
+  benevolatTypesActivite: [],
   besoinsSouhaitsMarrainage: null,
   besoinsSouhaitsMarrainageCommentaire: null,
   dateObtentionPermis: null,
@@ -656,6 +839,9 @@ const form = ref({
   disponibilites: null,
   souhaitGenreMarrainage: null,
   souhaitAgeMarrainage: null,
+  prioriteMarrainage: null,
+  degreInteretStage: null,
+  region: null,
   titresObtenus: null,
   activiteProfOrigine: null,
   besoinsSouhaitsEmploi: null,
@@ -709,7 +895,41 @@ async function loadParticipationRates() {
 const userStages = computed(() =>
   allStages.value.filter(s => String(s.stagiaireId || '').toLowerCase() === String(user.value.id).toLowerCase())
 )
+// Expériences : en cours d'abord, puis à venir, puis terminées (la plus récente d'abord).
+const debutJour = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d }
+function statutExperience(stage) {
+  const today = debutJour()
+  if (stage.dateDebut && new Date(stage.dateDebut) > today) return { key: 'prevu', label: 'Prévu', color: 'blue', ordre: 1 }
+  if (stage.dateFin && new Date(stage.dateFin) < today) return { key: 'termine', label: 'Terminé', color: 'grey', ordre: 2 }
+  return { key: 'en_cours', label: 'En cours', color: 'success', ordre: 0 }
+}
+const intituleExperience = (stage) => stage.nom || stage.metier || stage.entreprise?.nom || 'Expérience professionnelle'
+const userStagesTries = computed(() => [...userStages.value].sort((a, b) =>
+  statutExperience(a).ordre - statutExperience(b).ordre || new Date(b.dateDebut || 0) - new Date(a.dateDebut || 0)))
 const stageDocuments = computed(() => userStages.value.flatMap(s => s.files || []))
+
+// Suppression d'un document d'expérience professionnelle directement depuis la fiche.
+const stageFileToDelete = ref(null)
+const deletingStageFile = ref(false)
+const stageFileDeleteError = ref('')
+watch(stageFileToDelete, () => { stageFileDeleteError.value = '' })
+async function deleteStageFile() {
+  const { stage, file } = stageFileToDelete.value
+  deletingStageFile.value = true
+  try {
+    const res = await apiFetch(`${API_BASE}/api/StageFiles/${file.id}`, { method: 'DELETE' })
+    if (res?.ok || res?.status === 404) {
+      stage.files = stage.files.filter(f => f.id !== file.id)
+      stageFileToDelete.value = null
+    } else {
+      stageFileDeleteError.value = `Le document n'a pas pu être supprimé (${res ? `erreur ${res.status}` : 'session expirée'}).`
+    }
+  } catch {
+    stageFileDeleteError.value = 'Le document n\'a pas pu être supprimé (pas de connexion au serveur).'
+  } finally {
+    deletingStageFile.value = false
+  }
+}
 
 const getNiveauForSession = (link) => {
   const s = link.session
@@ -771,8 +991,8 @@ async function loadCalendrier() {
 }
 
 // Retrouve, dans le calendrier, la session correspondant au groupe+numéro de link — même
-// filtrage/tri que sur les pages cibles (par type, trié par date de début, indexé par
-// sessionNumberId - 1) — pour obtenir ses vraies dates de début/fin.
+// filtrage/tri que sur les pages cibles (par type, trié par date de début, n-ième session de
+// l'année) — pour obtenir ses vraies dates de début/fin.
 const resolveCalendarSession = (link) => {
   const group = sessionGroupKey(link)
   const num = link.session?.sessionNumberId
@@ -780,7 +1000,7 @@ const resolveCalendarSession = (link) => {
   const sessions = calendrierSessions.value
     .filter(s => (s.type || '').toLowerCase() === group && s.startDate)
     .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
-  return sessions[num - 1] || null
+  return findSession(sessions, getSessionYear(link), num)
 }
 
 const sessionLabel = (link) => {
@@ -808,7 +1028,7 @@ const goToSessionPage = (routeName, link) => {
   if (!group) return
   const resolved = router.resolve({
     name: routeName,
-    query: { studentId: user.value.id, group, quarter: link.session.sessionNumberId },
+    query: { studentId: user.value.id, group, quarter: link.session.sessionNumberId, year: getSessionYear(link) },
   })
   window.open(resolved.href, '_blank')
 }
@@ -881,6 +1101,7 @@ const avatarColor = computed(() => COLORS[((user.value.prenom || '')[0] || '').c
 const initials = computed(() => `${(user.value.prenom || '')[0] || ''}${(user.value.nom || '')[0] || ''}`.toUpperCase() || 'U')
 
 const formatDate = (d) => d ? moment(d).format('DD.MM.YYYY') : '—'
+const formatMoisAnnee = (d) => d ? moment(d).format('MMMM YYYY') : ''
 
 const goToMarrainage = (id) => {
   router.push({ name: 'Marrainage-Modifier', params: { id } })
@@ -906,8 +1127,17 @@ async function updateMarrainageRelation(marrainage, changes) {
       dateFin: marrainage.dateFin,
       actif: marrainage.actif,
       raisonInactivite: marrainage.actif ? null : marrainage.raisonInactivite,
+      commentaire: marrainage.commentaire ?? '',
     })
   })
+  marrainage.commentaireEnregistre = marrainage.commentaire ?? ''
+}
+
+// Commentaire de la relation : enregistré en quittant le champ, s'il a changé. C'est le même
+// commentaire que sur la fiche du parrain / de la marraine (même relation).
+function saveCommentaireRelation(m) {
+  if ((m.commentaire ?? '') === (m.commentaireEnregistre ?? '')) return
+  updateMarrainageRelation(m, {})
 }
 
 const updateRaison = (marrainage, raison) => updateMarrainageRelation(marrainage, { raisonInactivite: raison })
@@ -937,6 +1167,9 @@ function fillFormFromUser(u) {
   form.value.etatCivil                           = pick(u, 'etatCivil', 'EtatCivil')
   form.value.nombreEnfants                       = pick(u, 'nombreEnfants', 'NombreEnfants')
   form.value.adresse                             = pick(u, 'adresse', 'Adresse')
+  form.value.rue                                 = pick(u, 'rue', 'Rue')
+  form.value.npa                                 = pick(u, 'npa', 'Npa')
+  form.value.localite                            = pick(u, 'localite', 'Localite')
   form.value.beneficiaireDe                      = pick(u, 'beneficiaireDe', 'BeneficiaireDe')
   form.value.assistantSocialEmail                = pick(u, 'assistantSocialEmail', 'AssistantSocialEmail')
   form.value.anneeArriveeSuisse                  = pick(u, 'anneeArriveeSuisse', 'AnneeArriveeSuisse')
@@ -957,6 +1190,9 @@ function fillFormFromUser(u) {
   form.value.besoinsSouhaitsStagesCommentaire    = pick(u, 'besoinsSouhaitsStagesCommentaire', 'BesoinsSouhaitsStagesCommentaire')
   form.value.besoinsSouhaitsBenevolat            = pick(u, 'besoinsSouhaitsBenevolat', 'BesoinsSouhaitsBenevolat')
   form.value.besoinsSouhaitsBenevoletCommentaire = pick(u, 'besoinsSouhaitsBenevoletCommentaire', 'BesoinsSouhaitsBenevoletCommentaire')
+  form.value.benevolatDomaines                   = pick(u, 'benevolatDomaines', 'BenevolatDomaines') || []
+  form.value.benevolatDomaineAutre               = pick(u, 'benevolatDomaineAutre', 'BenevolatDomaineAutre')
+  form.value.benevolatTypesActivite              = pick(u, 'benevolatTypesActivite', 'BenevolatTypesActivite') || []
   form.value.besoinsSouhaitsMarrainage           = pick(u, 'besoinsSouhaitsMarrainage', 'BesoinsSouhaitsMarrainage')
   form.value.besoinsSouhaitsMarrainageCommentaire = pick(u, 'besoinsSouhaitsMarrainageCommentaire', 'BesoinsSouhaitsMarrainageCommentaire')
   const datePermis = pick(u, 'dateObtentionPermis', 'DateObtentionPermis')
@@ -967,6 +1203,9 @@ function fillFormFromUser(u) {
   form.value.besoinsSouhaitsSport                = pick(u, 'besoinsSouhaitsSport', 'BesoinsSouhaitsSport')
   form.value.disponibilites                      = pick(u, 'disponibilites', 'Disponibilites')
   form.value.souhaitGenreMarrainage              = pick(u, 'souhaitGenreMarrainage', 'SouhaitGenreMarrainage')
+  form.value.prioriteMarrainage                  = pick(u, 'prioriteMarrainage', 'PrioriteMarrainage')
+  form.value.degreInteretStage                   = pick(u, 'degreInteretStage', 'DegreInteretStage')
+  form.value.region                              = pick(u, 'region', 'Region')
   form.value.souhaitAgeMarrainage                = pick(u, 'souhaitAgeMarrainage', 'SouhaitAgeMarrainage')
   form.value.activiteProfOrigine                 = pick(u, 'activiteProfOrigine', 'ActiviteProfOrigine') ?? null
   form.value.besoinsSouhaitsEmploi               = pick(u, 'besoinsSouhaitsEmploi', 'BesoinsSouhaitsEmploi')
@@ -1022,6 +1261,8 @@ function normalizeMarrainage(m, participantId) {
     dateFin: link ? pick(link, 'dateFin', 'DateFin') : null,
     actif: link ? (pick(link, 'actif', 'Actif') ?? true) : pick(m, 'actif', 'Actif'),
     raisonInactivite: link ? pick(link, 'raisonInactivite', 'RaisonInactivite') : pick(m, 'raisonInactivite', 'RaisonInactivite'),
+    commentaire: link ? (pick(link, 'commentaire', 'Commentaire') || '') : '',
+    commentaireEnregistre: link ? (pick(link, 'commentaire', 'Commentaire') || '') : '',
   }
 }
 
@@ -1029,13 +1270,16 @@ function normalizeStage(s) {
   const entreprise = pick(s, 'entreprise', 'Entreprise')
   const typeMetier = pick(s, 'typeMetier', 'TypeMetier')
   const typeStage = pick(s, 'typeStage', 'TypeStage')
+  const typeActivite = pick(s, 'typeIntershipActivity', 'TypeIntershipActivity')
   const stageFiles = pick(s, 'stageFiles', 'StageFiles') || []
   return {
     id: pick(s, 'stageId', 'StageId'),
     stagiaireId: pick(s, 'stagiaireId', 'StagiaireId'),
     dateDebut: pick(s, 'debut', 'Debut'),
     dateFin: pick(s, 'fin', 'Fin'),
+    nom: (pick(s, 'nom', 'Nom') || '').trim() || null,
     metier: typeMetier ? pick(typeMetier, 'libelle', 'Libelle') : null,
+    type: typeActivite ? pick(typeActivite, 'nom', 'Nom') : null,
     typeStage: typeStage ? pick(typeStage, 'nom', 'Nom') : null,
     entreprise: entreprise ? { id: pick(entreprise, 'entrepriseId', 'EntrepriseId'), nom: pick(entreprise, 'nom', 'Nom') } : null,
     files: stageFiles.map(f => ({
@@ -1054,34 +1298,71 @@ const takeSnapshot = () => nextTick(() => { formSnapshot.value = JSON.stringify(
 const isDirty = () => !!formSnapshot.value && JSON.stringify(form.value) !== formSnapshot.value
 const autosaveError = ref('')
 const lastSavedAt = ref(null)
-const autosaveLabel = computed(() => {
-  if (saving.value) return 'Enregistrement…'
-  if (autosaveError.value) return `Non enregistré : ${autosaveError.value}`
-  if (lastSavedAt.value) return `Enregistré automatiquement à ${moment(lastSavedAt.value).format('HH:mm')}`
-  return 'Enregistrement automatique activé'
+const savingDrafts = ref(false)
+const draftCount = computed(() => Object.values(drafts.value).filter(d => d && d.trim()).length)
+
+// État affiché par la barre d'enregistrement (PageSaveBar).
+const pageState = computed(() => {
+  if (saving.value || savingDrafts.value) return 'saving'
+  if (autosaveError.value) return 'error'
+  if (isDirty()) return 'dirty'
+  if (draftCount.value) return 'drafts'
+  return 'saved'
 })
+
+// Commentaires écrits mais pas encore ajoutés : ajoutés (datés et signés) par le bouton Enregistrer.
+async function addDrafts() {
+  const pending = Object.entries(drafts.value).filter(([, text]) => text && text.trim())
+  if (!pending.length) return true
+  savingDrafts.value = true
+  let ok = true
+  try {
+    for (const [rubrique, text] of pending) {
+      const res = await apiFetch(`${API_BASE}/api/ParticipantComments`, {
+        method: 'POST',
+        body: JSON.stringify({ studentId: user.value.id, rubrique, text: text.trim() }),
+      })
+      if (res?.ok) drafts.value[rubrique] = ''
+      else ok = false
+    }
+    if (!ok) autosaveError.value = "un commentaire n'a pas pu être ajouté"
+    await loadComments()
+    if (ok) lastSavedAt.value = new Date()
+  } catch {
+    autosaveError.value = 'connexion impossible'
+    ok = false
+  } finally {
+    savingDrafts.value = false
+  }
+  return ok
+}
+
+// Bouton « Enregistrer » : la fiche (si modifiée ou en échec) puis les commentaires en cours.
+async function saveAll() {
+  clearTimeout(autosaveTimer)
+  const formOk = isDirty() || autosaveError.value ? await save() : true
+  const draftsOk = formOk ? await addDrafts() : false
+  return formOk && draftsOk
+}
 
 let autosaveTimer = null
 watch(form, () => {
   if (!isDirty()) return
   clearTimeout(autosaveTimer)
-  autosaveTimer = setTimeout(() => save({ silent: true }), 2000)
+  autosaveTimer = setTimeout(() => save(), 2000)
 }, { deep: true })
 
+// En quittant la page : tout est enregistré d'abord (fiche + commentaires en cours) ; on ne
+// demande confirmation que si l'enregistrement a échoué.
 useUnsavedGuard(() => isDirty() || hasDrafts(), undefined, async () => {
-  clearTimeout(autosaveTimer)
-  if (isDirty() && !(await save({ silent: true }))) {
-    return confirmDiscard("La fiche n'a pas pu être enregistrée. Quitter quand même et perdre les modifications ?")
-  }
-  if (hasDrafts()) {
-    return confirmDiscard("Un commentaire a été commencé mais pas ajouté (bouton « Ajouter »). Quitter quand même et le perdre ?")
-  }
-  return true
+  if (await saveAll()) return true
+  return confirmDiscard(`Enregistrement impossible (${autosaveError.value}). Quitter quand même et perdre les modifications ?`)
 })
 
 async function load() {
   loading.value = true
   loadInactivityReasons()
+  loadLocalites()
   try {
     const id = route.params.id
     const res = await apiFetch(`${API_BASE}/api/ApplicationUsers/${id}`)
@@ -1091,6 +1372,7 @@ async function load() {
       fillFormFromUser(data)
       takeSnapshot()
       loadComments()
+      loadInterets(id)
       files.value = pick(data, 'participantFiles', 'ParticipantFiles') || []
       sessionLinks.value = (user.value.sessionStudents || []).slice().sort((a, b) => {
         const aY = new Date(a.session?.dateStart || 0).getFullYear()
@@ -1125,17 +1407,25 @@ async function load() {
 // Champs vides envoyés comme null (un nombre vide "" faisait échouer tout l'enregistrement).
 const toPayload = (f) => Object.fromEntries(Object.entries(f).map(([k, v]) => [k, v === '' ? null : v]))
 
-async function save({ silent = false } = {}) {
+async function save() {
   clearTimeout(autosaveTimer)
   if (emailRule(form.value.email) !== true) {
-    autosaveError.value = "adresse e-mail invalide"
-    if (!silent) store.dispatch('notification/add', { type: 'error', message: "L'adresse e-mail n'est pas valide." })
+    autosaveError.value = "l'adresse e-mail n'est pas valide"
+    return false
+  }
+  if (npaRule(form.value.npa) !== true) {
+    autosaveError.value = 'le NPA doit comporter 4 chiffres'
+    return false
+  }
+  if (localiteRule(form.value.localite) !== true) {
+    autosaveError.value = 'la localité doit être un nom de lieu, sans indication libre'
     return false
   }
   if (saving.value) {
-    // Un enregistrement est déjà en cours : on réessaie juste après.
-    autosaveTimer = setTimeout(() => save({ silent }), 800)
-    return false
+    // Un enregistrement est déjà en cours : on attend sa fin, puis on n'enregistre que s'il reste
+    // des modifications.
+    while (saving.value) await new Promise(resolve => setTimeout(resolve, 150))
+    if (!isDirty() && !autosaveError.value) return true
   }
   saving.value = true
   const sent = JSON.stringify(form.value)
@@ -1144,21 +1434,21 @@ async function save({ silent = false } = {}) {
       method: 'PATCH',
       body: JSON.stringify(toPayload(form.value))
     })
-    if (!res) return false
+    if (!res) { autosaveError.value = 'session expirée, reconnectez-vous'; return false }
     if (res.ok) {
       user.value.email = form.value.email
       formSnapshot.value = sent
       autosaveError.value = ''
       lastSavedAt.value = new Date()
-      if (!silent) store.dispatch('notification/add', { type: 'success', message: 'Fiche enregistrée.' })
       return true
     }
-    const message = res.status === 409 ? await res.text() : `erreur ${res.status}`
-    autosaveError.value = message
-    store.dispatch('notification/add', { type: 'error', message: `Fiche non enregistrée : ${message}` })
+    // L'état est affiché par la barre d'enregistrement (pas de message éphémère en plus).
+    autosaveError.value = res.status === 409 || res.status === 400
+      ? (await res.text()).replace(/^"|"$/g, '') || 'données refusées'
+      : res.status >= 500 ? 'erreur du serveur' : `erreur ${res.status}`
     return false
   } catch (e) {
-    autosaveError.value = 'connexion impossible'
+    autosaveError.value = 'pas de connexion au serveur'
     return false
   } finally {
     saving.value = false
@@ -1187,7 +1477,11 @@ onMounted(load)
 .rubrique-purple { --rubrique-color: #7B1FA2; --rubrique-bg: #F8F2FA; --rubrique-border: #E1BEE7; }
 .besoin-row + .besoin-row { border-top: 1px dashed var(--rubrique-border); margin-top: 4px; padding-top: 4px; }
 .marrainage-link { color: #1976D2; text-decoration: underline; }
+/* Relation de marrainage en cours : bien visible dans la section insertion */
+.marrainage-actif { border: 2px solid #D81B60; border-left-width: 6px; border-radius: 8px; background: #FCE4EC; padding: 10px 12px; }
+.experience { border-left: 4px solid #BDBDBD; padding-left: 10px; }
+.experience-en_cours { border-left-color: #2E7D32; }
+.experience-prevu { border-left-color: #1976D2; }
 .historique-table :deep(td), .historique-table :deep(th) { font-size: 0.8rem; }
-.unsaved-bar { position: fixed; bottom: 24px; right: 24px; z-index: 20; }
 .cursor-pointer { cursor: pointer; }
 </style>

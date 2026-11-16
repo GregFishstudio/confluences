@@ -119,6 +119,77 @@ namespace Api.Controllers
             return Ok(users);
         }
 
+        // GET: api/Marrainages/tableau
+        // Données du tableau de marrainage, en un appel : marraines/parrains, relations (en cours et
+        // passées) et participant·e·s concerné·e·s (souhaitant un marrainage ou déjà en binôme).
+        [HttpGet("tableau")]
+        public async Task<ActionResult<object>> GetTableau()
+        {
+            await PasserNouveauxEnAttente();
+            var today = System.DateTime.Today;
+            int? AgeDe(System.DateTime? naissance)
+            {
+                if (naissance == null || naissance.Value.Year < 1900) return null;
+                var a = today.Year - naissance.Value.Year;
+                if (naissance.Value.Date > today.AddYears(-a)) a--;
+                return a;
+            }
+
+            var marraines = (await _context.Marrainages.AsNoTracking()
+                    .Select(m => new
+                    {
+                        m.MarrainageId, m.Nom, m.Prenom, m.Sexe, m.Age, m.DateNaissance, m.Commune, m.Region,
+                        m.Statut, m.Email, m.Numero, m.RemarqueParrain, m.CreatedAt, m.ParticipantId,
+                    })
+                    .ToListAsync())
+                .Select(m => new TableauMarraineDto
+                {
+                    Id = m.MarrainageId, Nom = m.Nom, Prenom = m.Prenom, Sexe = m.Sexe, Age = AgeDe(m.DateNaissance) ?? m.Age,
+                    Commune = m.Commune, Region = m.Region, Statut = m.Statut, Email = m.Email, Numero = m.Numero,
+                    Remarque = m.RemarqueParrain, CreatedAt = m.CreatedAt, LegacyParticipantId = m.ParticipantId,
+                })
+                .ToList();
+
+            var relations = await _context.MarrainageParticipants.AsNoTracking()
+                .Select(mp => new TableauRelationDto
+                {
+                    MarrainageId = mp.MarrainageId, ParticipantId = mp.ParticipantId, DateDebut = mp.DateDebut,
+                    DateFin = mp.DateFin, Actif = mp.Actif, RaisonInactivite = mp.RaisonInactivite, Commentaire = mp.Commentaire,
+                })
+                .ToListAsync();
+            // Ancien lien unique Marrainage.ParticipantId sans ligne de relation : considéré en cours.
+            var linked = relations.Select(r => (r.MarrainageId, r.ParticipantId)).ToHashSet();
+            relations.AddRange(marraines
+                .Where(m => m.LegacyParticipantId != null && !linked.Contains((m.Id, m.LegacyParticipantId)))
+                .Select(m => new TableauRelationDto { MarrainageId = m.Id, ParticipantId = m.LegacyParticipantId!, Actif = true, Legacy = true }));
+
+            var participantIds = relations.Select(r => r.ParticipantId).Distinct().ToList();
+            var participants = (await _context.Users.AsNoTracking()
+                    .Where(u => u.BesoinsSouhaitsMarrainage == "oui" || u.BesoinsSouhaitsMarrainage == "a_verifier"
+                             || participantIds.Contains(u.Id))
+                    .Select(u => new
+                    {
+                        u.Id, u.Firstname, u.LastName, Genre = u.Gender!.GenderName, u.Birthday, u.Adresse, u.Region,
+                        u.BesoinsSouhaitsMarrainage, u.PrioriteMarrainage, u.SouhaitGenreMarrainage, u.SouhaitAgeMarrainage,
+                        u.BesoinsSouhaitsMarrainageCommentaire, u.Disponibilites,
+                        Classe = u.SessionStudents!
+                            .OrderByDescending(ss => ss.Session!.DateStart)
+                            .Select(ss => ss.Session!.SchoolClassRoom!.SchoolClassRoomName)
+                            .FirstOrDefault(),
+                    })
+                    .ToListAsync())
+                .Select(u => new
+                {
+                    id = u.Id, firstname = u.Firstname, lastName = u.LastName, genre = u.Genre, age = AgeDe(u.Birthday),
+                    adresse = u.Adresse, region = u.Region, besoin = u.BesoinsSouhaitsMarrainage, priorite = u.PrioriteMarrainage,
+                    souhaitGenre = u.SouhaitGenreMarrainage, souhaitAge = u.SouhaitAgeMarrainage,
+                    commentaire = u.BesoinsSouhaitsMarrainageCommentaire, disponibilites = u.Disponibilites, classe = u.Classe,
+                })
+                .ToList();
+
+            return Ok(new { marraines, relations, participants });
+        }
+
         // GET: api/Marrainages/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Marrainage>> GetMarrainage(int id)
@@ -163,6 +234,7 @@ namespace Api.Controllers
             // Toute nouvelle inscription de marraine/parrain apparaît "Nouveau" dans la liste
             // tant que les formatrices ne lui ont pas attribué un autre statut.
             if (string.IsNullOrWhiteSpace(marrainage.Statut)) marrainage.Statut = "nouveau";
+            marrainage.Nom = NomEnMajuscules(marrainage.Nom);
             marrainage.CreatedAt = System.DateTime.UtcNow;
             marrainage.UpdatedAt = marrainage.CreatedAt;
 
@@ -187,6 +259,7 @@ namespace Api.Controllers
 
             foreach (var incoming in marrainages)
             {
+                incoming.Nom = NomEnMajuscules(incoming.Nom);
                 var key = NormalizeName(incoming.Nom);
                 if (!string.IsNullOrEmpty(key) && existingByNom.TryGetValue(key, out var match))
                 {
@@ -283,6 +356,9 @@ namespace Api.Controllers
             link.DateFin = dto.DateFin;
             link.Actif = dto.Actif;
             link.RaisonInactivite = dto.Actif ? null : dto.RaisonInactivite;
+            // Absent (null) = inchangé, pour les appels qui ne gèrent pas le commentaire ; "" l'efface.
+            if (dto.Commentaire != null)
+                link.Commentaire = string.IsNullOrWhiteSpace(dto.Commentaire) ? null : dto.Commentaire.Trim();
             var parent = await _context.Marrainages.FindAsync(id);
             if (parent != null) parent.UpdatedAt = System.DateTime.UtcNow;
 
@@ -401,6 +477,10 @@ namespace Api.Controllers
             return NoContent();
         }
 
+        // Nom de famille toujours en majuscules, comme dans les autres listes.
+        private static string NomEnMajuscules(string? nom) =>
+            string.IsNullOrWhiteSpace(nom) ? (nom ?? string.Empty) : nom.Trim().ToUpper(new System.Globalization.CultureInfo("fr-CH"));
+
         private static string NormalizeName(string? s) => (s ?? string.Empty).Trim().ToLowerInvariant();
 
         private static void ApplyIfNotEmpty(System.Action<string> setter, string? value)
@@ -417,6 +497,7 @@ namespace Api.Controllers
                 return BadRequest();
             }
 
+            marrainage.Nom = NomEnMajuscules(marrainage.Nom);
             _context.Entry(marrainage).State = EntityState.Modified;
             // Champs gérés par le serveur : jamais écrasés par le formulaire.
             _context.Entry(marrainage).Property(m => m.CreatedAt).IsModified = false;
@@ -477,6 +558,38 @@ namespace Api.Controllers
         public System.DateTime? DateFin { get; set; }
         public bool Actif { get; set; } = true;
         public string? RaisonInactivite { get; set; }
+        public string? Commentaire { get; set; }
+    }
+
+    public class TableauMarraineDto
+    {
+        public int Id { get; set; }
+        public string Nom { get; set; } = string.Empty;
+        public string Prenom { get; set; } = string.Empty;
+        public string? Sexe { get; set; }
+        public int? Age { get; set; }
+        public string? Commune { get; set; }
+        public string? Region { get; set; }
+        public string? Statut { get; set; }
+        public string? Email { get; set; }
+        public string? Numero { get; set; }
+        public string? Remarque { get; set; }
+        public System.DateTime? CreatedAt { get; set; }
+        [System.Text.Json.Serialization.JsonIgnore]
+        public string? LegacyParticipantId { get; set; }
+    }
+
+    public class TableauRelationDto
+    {
+        public int MarrainageId { get; set; }
+        public string ParticipantId { get; set; } = string.Empty;
+        public System.DateTime? DateDebut { get; set; }
+        public System.DateTime? DateFin { get; set; }
+        public bool Actif { get; set; }
+        public string? RaisonInactivite { get; set; }
+        public string? Commentaire { get; set; }
+        // Ancien lien Marrainage.ParticipantId : pas de ligne de relation, donc non modifiable ici.
+        public bool Legacy { get; set; }
     }
 
     public class StatutDto

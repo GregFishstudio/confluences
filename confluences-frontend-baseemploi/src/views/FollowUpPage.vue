@@ -314,13 +314,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { matchesSearch } from '@/utils/search'
 import { useStore } from 'vuex'
 import { useRouter, useRoute } from 'vue-router'
 import moment from 'moment/min/moment-with-locales'
 import BilanEditModal from '../components/BilanEditModal.vue'
 import API_BASE, { apiFetch } from '@/services/api'
+import { sessionNumberAt, sessionIndexOf } from '@/utils/sessionNumber'
 
 moment.locale('fr')
 
@@ -429,7 +430,12 @@ const currentSession = computed(() =>
 const currentYear    = computed(() =>
   currentSession.value?.startDate ? moment(currentSession.value.startDate).year() : moment().year()
 )
-const currentQuarter = computed(() => navSessionIndex.value + 1)
+const currentQuarter = computed(() => sessionNumberAt(activeGroupSessions.value, navSessionIndex.value))
+
+// Session affichée (année + numéro), pour la conserver au changement de groupe : le watcher
+// s'exécute après onTabChange, qui lit donc encore la session de l'ancien groupe.
+let shownSession = { year: null, number: null }
+watch([currentYear, currentQuarter], ([year, number]) => { shownSession = { year, number } })
 
 // Identique à Accompanying.vue
 const periodDateLabel = computed(() => {
@@ -552,8 +558,10 @@ const computeRate = (user) => {
   let dGlobal = 0, dActive = 0, pen = 0, penActive = 0, hasData = false
 
   for (const day of workingDaysCache.value) {
-    dGlobal++
     const status = user.presences?.[day.dateKey]
+    // Congé autorisé : ni absence, ni jour pris en compte.
+    if (status === 'c') continue
+    dGlobal++
     const p = status === 'a' ? 1 : status === 'r' ? 0.5 : 0
     if (p > 0) { pen += p; hasData = true }
 
@@ -767,12 +775,12 @@ const nextQuarter = () => {
   if (navSessionIndex.value < activeGroupSessions.value.length - 1) { navSessionIndex.value++; fetchDataForPeriod() }
 }
 
-// Change de groupe SANS changer de session : conserve le même numéro de session (ex. reste
-// sur "Session 2" en passant d'A1 à A2) plutôt que de resauter sur la session en cours du jour.
+// Change de groupe SANS changer de session : conserve la même année + numéro de session (ex. reste
+// sur "Session 2 — 2027" en passant d'A1 à A2) plutôt que de resauter sur la session en cours du jour.
 const onTabChange = () => {
-  const desiredSessionNumber = navSessionIndex.value + 1
-  const maxIndex = Math.max(0, activeGroupSessions.value.length - 1)
-  navSessionIndex.value = Math.min(Math.max(0, desiredSessionNumber - 1), maxIndex)
+  const sessions = activeGroupSessions.value
+  const same = sessionIndexOf(sessions, shownSession.year, shownSession.number)
+  navSessionIndex.value = same >= 0 ? same : Math.min(navSessionIndex.value, Math.max(0, sessions.length - 1))
   fetchDataForPeriod()
 }
 
@@ -787,13 +795,13 @@ const getRateClass = (r) => r >= 80 ? 'text-success' : r >= 50 ? 'text-warning' 
 // Arrivée depuis la fiche participant (?studentId=&group=&quarter=) : sélectionne le bon
 // groupe/session puis fait défiler jusqu'à la ligne du/de la participant·e concerné·e.
 function applyDeepLinkFromQuery() {
-  const { studentId, group, quarter } = route.query
+  const { studentId, group, quarter, year } = route.query
   if (!studentId || !group || !quarter) return false
 
   const idx = tabOptions.findIndex(t => t.value === group)
   if (idx < 0) return false
   activeTab.value = idx
-  navSessionIndex.value = Math.max(0, Number(quarter) - 1)
+  navSessionIndex.value = Math.max(0, sessionIndexOf(activeGroupSessions.value, year || moment().year(), quarter))
   search.value = ''
 
   nextTick(() => {

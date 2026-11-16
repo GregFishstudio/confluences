@@ -284,10 +284,13 @@ const participantsLinks = [
   { label: 'Liste des participant·e·s', routeName: 'Participants', icon: 'mdi-account',  external: false },
   { label: 'Expériences professionnelles', routeName: 'Stages', icon: 'mdi-briefcase-outline', external: false },
   { label: 'Stages par stagiaire', routeName: 'Stagiaires', icon: 'mdi-account-hard-hat', external: false },
+  { label: 'Tableau de marrainage', routeName: 'Marrainage-Tableau', icon: 'mdi-map-marker-account-outline', external: false },
+  { label: 'Stages & bénévolat', routeName: 'Stages-Tableau', icon: 'mdi-briefcase-search-outline', external: false },
 ]
 
 // Menu Insertion : insertion socio-professionnelle
 const insertionLinks = [
+  { label: 'Stages & bénévolat', routeName: 'Stages-Tableau', icon: 'mdi-briefcase-search-outline', external: false },
   { label: 'Entreprises', routeName: 'Entreprises', icon: 'mdi-office-building-outline', external: false },
   { label: 'Contacts', routeName: 'Contacts', icon: 'mdi-card-account-mail', external: false },
   { label: 'ARE', routeName: 'JobSearchAssistances', icon: 'mdi-account-cash', external: false },
@@ -302,6 +305,7 @@ const externalLink = {
 }
 
 const marrainageLinks = [
+  { label: 'Tableau de marrainage', routeName: 'Marrainage-Tableau', icon: 'mdi-map-marker-account-outline', external: false },
   { label: 'Liste des marrainages', routeName: 'Marrainages', icon: 'mdi-account-heart-outline', external: false },
   { label: 'Nouveau marrainage', routeName: 'Marrainage-Nouveau', icon: 'mdi-account-plus-outline', external: false },
 ]

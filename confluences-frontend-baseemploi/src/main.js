@@ -29,20 +29,22 @@ import upperFirst from 'lodash/upperFirst'
 import camelCase from 'lodash/camelCase'
 
 import axios from 'axios'
+import { installFetchInterceptor, installAxiosInterceptors, startTokenKeepAlive } from '@/services/session'
 
-axios.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token')
-  if (token) config.headers.Authorization = `Bearer ${token}`
-  return config
-})
+// Session et enregistrements (services/session.js) : jeton renouvelé automatiquement, reconnexion
+// sur place si la session a expiré (la requête repart ensuite, rien n'est perdu), et état des
+// enregistrements affiché en permanence par SaveStatusIndicator.
+installFetchInterceptor()
+installAxiosInterceptors(axios)
+installAxiosInterceptors(api)
+startTokenKeepAlive()
 
-// Lecture qui échoue de façon passagère (réseau, serveur, jeton pas encore disponible juste
-// après la connexion) : une seconde tentative automatique, sinon les listes déroulantes des
-// anciens écrans restaient vides jusqu'à un rafraîchissement de la page.
+// Lecture qui échoue de façon passagère (réseau, serveur) : une seconde tentative automatique,
+// sinon les listes déroulantes des anciens écrans restaient vides jusqu'à un rafraîchissement.
 axios.interceptors.response.use(undefined, async (error) => {
   const config = error?.config
   const status = error?.response?.status
-  const transient = !error?.response || status >= 500 || status === 401
+  const transient = !error?.response || status >= 500
   if (config && !config.__retried && (config.method || 'get').toLowerCase() === 'get' && transient) {
     config.__retried = true
     await new Promise(resolve => setTimeout(resolve, 800))
@@ -50,35 +52,6 @@ axios.interceptors.response.use(undefined, async (error) => {
   }
   return Promise.reject(error)
 })
-
-// --- Confirmation des enregistrements ---
-// Les pages récentes appellent l'API avec fetch (apiFetch/authFetch) sans rien afficher en cas
-// de succès : on confirme ici, en un seul endroit, chaque enregistrement réussi vers l'API.
-// (Les anciens écrans passent par axios et leurs modules Vuex notifient déjà eux-mêmes.)
-// Messages regroupés : une rafale de clics (ex. fiche de présence) ne donne qu'un message.
-const API_URL = import.meta.env.VITE_API_URL || ''
-const SAVE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
-const NOT_A_SAVE = [/\/taux(\?|$)/i, /\/api\/documents\//i]   // recalculs et PDF, pas des modifications
-let lastSaveToast = 0
-const originalFetch = window.fetch.bind(window)
-window.fetch = async (input, init = {}) => {
-  const res = await originalFetch(input, init)
-  try {
-    const url = typeof input === 'string' ? input : input?.url || ''
-    const method = String(init.method || input?.method || 'GET').toUpperCase()
-    if (res.ok && API_URL && url.startsWith(API_URL) && SAVE_METHODS.has(method) && !NOT_A_SAVE.some(r => r.test(url))) {
-      const now = Date.now()
-      if (now - lastSaveToast > 2000) {
-        lastSaveToast = now
-        store.dispatch('notification/add', {
-          type: 'success',
-          message: method === 'DELETE' ? 'Suppression enregistrée' : 'Modification sauvegardée',
-        })
-      }
-    }
-  } catch { /* la confirmation ne doit jamais casser la requête */ }
-  return res
-}
 
 // Création des instances
 const app = createApp(App)

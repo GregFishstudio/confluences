@@ -447,6 +447,7 @@ import { useStore } from 'vuex'
 import { useRouter, useRoute } from 'vue-router'
 import moment from 'moment/min/moment-with-locales'
 import API_BASE, { apiFetch } from '@/services/api'
+import { sessionNumberAt, sessionIndexOf } from '@/utils/sessionNumber'
 
 moment.locale('fr')
 
@@ -635,7 +636,12 @@ const currentSessionParts = computed(() => {
 
 const currentPart    = computed(() => currentSessionParts.value[currentPartIndex.value] || null)
 const currentYear    = computed(() => currentSession.value ? moment(currentSession.value.startDate).year() : moment().year())
-const currentQuarter = computed(() => navSessionIndex.value + 1)
+const currentQuarter = computed(() => sessionNumberAt(activeGroupSessions.value, navSessionIndex.value))
+
+// Session affichée (année + numéro), pour la conserver au changement de groupe : le watcher
+// s'exécute après onTabChange, qui lit donc encore la session de l'ancien groupe.
+let shownSession = { year: null, number: null }
+watch([currentYear, currentQuarter], ([year, number]) => { shownSession = { year, number } })
 
 const canGoPrev = computed(() => navSessionIndex.value > 0 || currentPartIndex.value > 0)
 const canGoNext = computed(() =>
@@ -645,7 +651,7 @@ const canGoNext = computed(() =>
 
 const navLabel = computed(() => {
   if (!currentSession.value) return 'Aucune session'
-  const n = `Session ${navSessionIndex.value + 1}`
+  const n = `Session ${currentQuarter.value} — ${currentYear.value}`
   const p = currentPart.value
   if (isMobile.value) {
     const w = currentWeekGroups.value[mobileWeekIndex.value]
@@ -768,11 +774,11 @@ function onTabChange() {
   selectionMode.value = false
   selectedCells.value = new Set()
   activeCell.value    = null
-  // Conserve la session/partie affichée plutôt que de revenir à "aujourd'hui" :
-  // on ne fait que recaler l'index si le nouveau groupe a moins de sessions/parties.
+  // Conserve la session/partie affichée (même année + numéro) plutôt que de revenir à "aujourd'hui".
   const sessions = activeGroupSessions.value
   if (!sessions.length) { navSessionIndex.value = 0; currentPartIndex.value = 0; fetchAttendancesForPeriod(); return }
-  navSessionIndex.value = Math.min(navSessionIndex.value, sessions.length - 1)
+  const same = sessionIndexOf(sessions, shownSession.year, shownSession.number)
+  navSessionIndex.value = same >= 0 ? same : Math.min(navSessionIndex.value, sessions.length - 1)
   const parts = currentSessionParts.value
   currentPartIndex.value = Math.min(currentPartIndex.value, Math.max(parts.length - 1, 0))
   fetchAttendancesForPeriod()
@@ -1144,7 +1150,9 @@ const ratesByPart = computed(() => {
             deductDays++
           } else if (!isBeforeParticipation(user, dk) && !isAfterInterruption(user, dk)) {
             const st = presenceCache.value[`${user.id}__${dk}`] ?? user.presences?.[dk] ?? 'p'
-            if (st === 'a') aCount++
+            // Congé autorisé : pas une absence, retiré des jours pris en compte (comme le PDF).
+            if (st === 'c') deductDays++
+            else if (st === 'a') aCount++
             else if (st === 'e') eCount++
             else if (st === 'r') rCount++
           }
@@ -1176,9 +1184,9 @@ const ratesCache = computed(() => {
       if (cur.isoWeekday() < 6) {
         const dk   = cur.clone().locale('en').format('ddd MMM DD YYYY')
         const meta = periodDayMeta.value[dk]
-        if (!isBeforeParticipation(user, dk) && !isAfterInterruption(user, dk) && !meta?.isFerie && !meta?.isVac) {
+        const st = presenceCache.value[`${user.id}__${dk}`] ?? user.presences?.[dk] ?? 'p'
+        if (!isBeforeParticipation(user, dk) && !isAfterInterruption(user, dk) && !meta?.isFerie && !meta?.isVac && st !== 'c') {
           totalWorkingDays++
-          const st = presenceCache.value[`${user.id}__${dk}`] ?? user.presences?.[dk] ?? 'p'
           if (st === 'a') aCount++
           else if (st === 'e') eCount++
           else if (st === 'r') rCount++
@@ -1359,7 +1367,10 @@ const pdfOptions = computed(() => {
           label:        `Partie ${i + 1}`,
           cumulRange:   isFuture
             ? `Commence le ${p.start.locale('fr').format('DD MMM YYYY')}`
-            : `Cumulatif : ${sessStart.locale('fr').format('DD MMM')} → ${p.end.locale('fr').format('DD MMM YYYY')}`,
+            : `${p.start.locale('fr').format('DD MMM')} → ${p.end.locale('fr').format('DD MMM YYYY')} + suivi cumulatif depuis le ${sessStart.locale('fr').format('DD MMM')}`,
+          // Périodes 1..i pour le relevé et le suivi cumulatif du PDF.
+          parts:        parts.slice(0, i + 1)
+            .map(x => `${x.start.format('YYYY-MM-DD')}_${x.end.format('YYYY-MM-DD')}_${x.weekCount}`).join(','),
           isTele,
           targetDays:   targets[i],
           sessionName:  sess.name,
@@ -1406,6 +1417,7 @@ async function downloadAttestation() {
       startDate: opt.sessionStart, endDate: opt.periodEnd,
       sessionEndDate: opt.sessionEnd,
       sessionName: opt.sessionName, sessionType: opt.sessionType, sessionMonth: opt.sessionMonth,
+      parts: opt.parts,
     })
     const res = await authFetch(`${API_BASE}/api/documents/attestationpresence/${selectedUser.value.id}?${params}`, { headers: { 'Content-Type': '' } })
     if (res?.ok) {
@@ -1447,13 +1459,16 @@ async function downloadAllAttestations() {
         .flatMap(sess => {
           const sessStart = moment(sess.startDate)
           const sessEnd   = moment(sess.endDate)
-          return computeSessionPartsForPdf(sessStart, sessEnd, sess.type)
+          const parts = computeSessionPartsForPdf(sessStart, sessEnd, sess.type)
+          return parts
             .filter(p => !p.start.isAfter(today, 'day'))
             .map((p, i) => ({
               sessionStart: sessStart.format('YYYY-MM-DD'),
               sessionEnd:   sessEnd.format('YYYY-MM-DD'),
               periodEnd:    p.end.format('YYYY-MM-DD'),
               sessionName:  sess.name, sessionType: sess.type, sessionMonth: i + 1,
+              parts:        parts.slice(0, i + 1)
+                .map(x => `${x.start.format('YYYY-MM-DD')}_${x.end.format('YYYY-MM-DD')}_${x.weekCount}`).join(','),
             }))
         })
       console.log(`[DownloadAll]   options PDF calculées (${userOpts.length}):`, userOpts)
@@ -1473,8 +1488,9 @@ async function downloadAllAttestations() {
         startDate: opt.sessionStart, endDate: opt.periodEnd,
         sessionEndDate: opt.sessionEnd,
         sessionName: opt.sessionName, sessionType: opt.sessionType, sessionMonth: opt.sessionMonth,
+        parts: opt.parts,
       })
-      const url = `${API_BASE}/api/documents/attestationpresence/${user.id}?${params}`
+      const url =`${API_BASE}/api/documents/attestationpresence/${user.id}?${params}`
       console.log(`[DownloadAll]   → requête: ${url}`)
 
       const res = await authFetch(url, { headers: { 'Content-Type': '' } })
@@ -1509,13 +1525,13 @@ async function downloadAllAttestations() {
 // Arrivée depuis la fiche participant (?studentId=&group=&quarter=) : sélectionne le bon
 // groupe/session puis fait défiler jusqu'à la ligne du/de la participant·e concerné·e.
 function applyDeepLinkFromQuery() {
-  const { studentId, group, quarter } = route.query
+  const { studentId, group, quarter, year } = route.query
   if (!studentId || !group || !quarter) return false
 
   const idx = groups.findIndex(g => g.value === group)
   if (idx < 0) return false
   activeTabIndex.value = idx
-  navSessionIndex.value = Math.max(0, Number(quarter) - 1)
+  navSessionIndex.value = Math.max(0, sessionIndexOf(activeGroupSessions.value, year || moment().year(), quarter))
   currentPartIndex.value = 0
   search.value = ''
 

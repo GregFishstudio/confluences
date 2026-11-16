@@ -90,11 +90,14 @@
       <v-card rounded="lg">
         <v-card-title class="py-4">Supprimer ce document ?</v-card-title>
         <v-divider />
-        <v-card-text class="pt-4">« {{ removeTarget?.fileName }} » sera définitivement supprimé.</v-card-text>
+        <v-card-text class="pt-4">
+          « {{ removeTarget?.fileName }} » sera définitivement supprimé.
+          <v-alert v-if="removeError" type="error" variant="tonal" density="compact" class="mt-3">{{ removeError }}</v-alert>
+        </v-card-text>
         <v-divider />
         <v-card-actions class="d-flex justify-end">
           <v-btn variant="text" color="grey" @click="removeDialog = false">Annuler</v-btn>
-          <v-btn color="error" @click="confirmRemove">Supprimer</v-btn>
+          <v-btn color="error" :loading="removing" @click="confirmRemove">Supprimer</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -305,17 +308,34 @@ async function download(item) {
 const removeDialog = ref(false)
 const removeTarget = ref(null)
 
+const removing = ref(false)
+const removeError = ref('')
+
 function askRemove(item) {
   removeTarget.value = item
+  removeError.value = ''
   removeDialog.value = true
 }
 
+// En cas d'échec, le message reste affiché dans la fenêtre (avant : rien ne se passait).
 async function confirmRemove() {
   const item = removeTarget.value
   if (!item) return
-  await axios.delete(`${API_URL}/api/${props.controller}/${item[props.idKey]}`)
+  removing.value = true
+  removeError.value = ''
+  try {
+    await axios.delete(`${API_URL}/api/${props.controller}/${item[props.idKey]}`)
+  } catch (e) {
+    // Déjà supprimé (ex. dans un autre onglet) : on le retire simplement de la liste.
+    if (e?.response?.status !== 404) {
+      removeError.value = `Le document n'a pas pu être supprimé (${e?.response ? `erreur ${e.response.status}` : 'pas de connexion au serveur'}).`
+      removing.value = false
+      return
+    }
+  }
   files.value = files.value.filter(f => f[props.idKey] !== item[props.idKey])
   emitFiles()
+  removing.value = false
   removeDialog.value = false
 }
 </script>

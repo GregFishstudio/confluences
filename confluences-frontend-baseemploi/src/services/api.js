@@ -1,5 +1,4 @@
 // @/services/api.js
-import router from '@/router'
 
 const API_BASE = import.meta.env.VITE_API_URL
 
@@ -13,11 +12,9 @@ export async function apiFetch(url, options = {}) {
     },
   })
 
-  if (res.status === 401) {
-    localStorage.removeItem('access_token')
-    router.push({ name: 'login' })
-    return null
-  }
+  // 401 : déjà traité par l'intercepteur fetch (services/session.js) — jeton renouvelé ou
+  // reconnexion sur place, puis nouvel essai. Un 401 restant ici est un vrai refus.
+  if (res.status === 401) return null
 
   return res
 }

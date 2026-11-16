@@ -115,8 +115,8 @@ namespace Api.Controllers
 
         /// <summary>
         /// PUT /api/calendrier/feries
-        /// Reçoit un tableau de dates ISO (string[]) ou de JourFerieDto.
-        /// Remplace entièrement la liste existante pour l'année courante.
+        /// Reçoit la liste complète des dates ISO (string[]), toutes années confondues,
+        /// et remplace entièrement la liste existante.
         /// </summary>
         [HttpPut("feries")]
         public async Task<IActionResult> UpsertFeries([FromBody] List<string> dateStrings)
@@ -130,17 +130,15 @@ namespace Api.Controllers
                 .Distinct()
                 .ToList();
 
-            // Stratégie simple : supprimer toutes les fériés correspondant
-            // aux années présentes dans la nouvelle liste, puis réinsérer.
-            var years = dates.Select(d => d.Year).Distinct().ToList();
-            if (!years.Any() && dateStrings.Any()) years.Add(DateTime.UtcNow.Year);
+            // Le client envoie toujours la liste complète : on supprime les absents
+            // et on ajoute les nouveaux (les libellés existants sont conservés).
+            var existing = await _db.JoursFeries.ToListAsync();
+            var dateSet  = dates.ToHashSet();
 
-            var toDelete = await _db.JoursFeries
-                .Where(f => years.Contains(f.Date.Year))
-                .ToListAsync();
-            _db.JoursFeries.RemoveRange(toDelete);
+            _db.JoursFeries.RemoveRange(existing.Where(f => !dateSet.Contains(f.Date.Date)));
 
-            foreach (var date in dates)
+            var existingDates = existing.Select(f => f.Date.Date).ToHashSet();
+            foreach (var date in dates.Where(d => !existingDates.Contains(d)))
             {
                 _db.JoursFeries.Add(new JourFerie { Date = date });
             }

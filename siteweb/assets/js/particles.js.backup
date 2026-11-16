@@ -1,0 +1,87 @@
+tsParticles.load("tsparticles", {
+  fpsLimit: 60,
+  fullScreen: {
+    enable: false,  // Add this line
+    zIndex: 0       // Add this line
+  },
+  background: {
+    color: "transparent"
+  },
+
+  particles: {
+    number: { value: 80 },
+    color: { value: "#ffffff" },
+    shape: { type: "circle" },
+    opacity: { value: 0.0 },
+    density: {
+        enable: true,
+        value_area: 800  // Adjust particles based on area
+      },
+
+    size: {
+      value: { min: 2, max: 4 }
+    },
+
+    links: {
+      enable: true,
+      color: "#ffffff",
+      distance: 150,
+      opacity: 0.4,
+      width: 1
+    },
+
+    move: {
+      enable: true,
+      speed: 0.5,
+      direction: "none",
+      random: false,
+      straight: false,
+      outModes: { default: "out" },
+      decay: 0,
+      attract: {
+        enable: false
+      }
+    }
+  },
+responsive: [
+    {
+      maxWidth: 1025,  // Tablets and below
+      options: {
+        particles: {
+          number: {
+            value: 40  // Reduce to 40 particles
+          }
+        }
+      }
+    },
+    {
+      maxWidth: 480,  // Mobile devices
+      options: {
+        particles: {
+          number: {
+            value: 30  // Further reduce to 25 particles
+          }
+        }
+      }
+    }
+  ],
+    interactivity: {
+            events: {
+              onHover: {
+                enable: true,
+                mode: "grab",
+              },
+            },
+            modes: {
+              repulse: {
+                distance: 150,
+                duration: 2, // how long the repel lasts
+              },
+              push: {
+                quantity: 4,
+              },
+            },
+          },
+
+  detectRetina: true
+});
