@@ -85,6 +85,7 @@ namespace Confluences.Persistence
         public virtual DbSet<AssistantSocial> AssistantsSociaux => Set<AssistantSocial>();
         public virtual DbSet<Candidature> Candidatures => Set<Candidature>();
         public virtual DbSet<CandidatureComment> CandidatureComments => Set<CandidatureComment>();
+        public virtual DbSet<CandidatureStatutChange> CandidatureStatutChanges => Set<CandidatureStatutChange>();
         public virtual DbSet<ParticipantComment> ParticipantComments => Set<ParticipantComment>();
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -181,6 +182,14 @@ namespace Confluences.Persistence
                 // Supprimer un·e AS ou un·e participant·e ne doit pas effacer l'historique des demandes.
                 e.HasOne(c => c.AssistantSocial).WithMany().HasForeignKey(c => c.AssistantSocialId).OnDelete(DeleteBehavior.SetNull);
                 e.HasOne(c => c.Participant).WithMany().HasForeignKey(c => c.ParticipantId).OnDelete(DeleteBehavior.SetNull);
+            });
+            // Historique des statuts : supprimé avec la candidature ; garde l'entrée si le compte
+            // de l'auteur·e est supprimé.
+            builder.Entity<CandidatureStatutChange>(e =>
+            {
+                e.HasOne(h => h.Candidature).WithMany(c => c.StatutChanges).HasForeignKey(h => h.CandidatureId).OnDelete(DeleteBehavior.Cascade);
+                e.HasOne(h => h.ChangedByUser).WithMany().HasForeignKey(h => h.ChangedByUserId).OnDelete(DeleteBehavior.SetNull);
+                e.HasIndex(h => new { h.CandidatureId, h.ChangedAt });
             });
         }
     }

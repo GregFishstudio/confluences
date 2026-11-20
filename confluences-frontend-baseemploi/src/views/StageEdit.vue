@@ -5,7 +5,7 @@
         <v-btn
           icon="mdi-arrow-left"
           variant="text"
-          @click="router.go(-1)"
+          @click="retourOuListe(router, 'Stages')"
           aria-label="Retour"
         />
       </v-col>
@@ -379,7 +379,7 @@
             color="grey-darken-1"
             variant="outlined"
             min-width="130"
-            @click="router.go(-1)"
+            @click="retourOuListe(router, 'Stages')"
             prepend-icon="mdi-close"
           >
             Annuler
@@ -392,7 +392,8 @@
 
 <script setup>
 import { ref, computed, onBeforeMount, watch } from 'vue'
-import { useRouter } from 'vue-router' 
+import { useRouter } from 'vue-router'
+import { retourOuListe } from '@/composables/useListMemory'
 import { useStore } from 'vuex';
 import DeleteStage from '@/components/DeleteStage.vue'
 import StageFileList from '@/components/StageFileList.vue'
@@ -510,7 +511,7 @@ async function submit() {
     store
       .dispatch('stage/editStage', localStage.value)
       .then(() => {
-        router.push({ name: 'Stages' }); 
+        retourOuListe(router, 'Stages');
       })
       .catch((error) => {
         console.error("Erreur de sauvegarde du stage:", error);

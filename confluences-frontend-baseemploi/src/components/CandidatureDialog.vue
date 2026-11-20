@@ -45,7 +45,10 @@
             <v-text-field v-model="form.dateDemande" type="date" :label="req('Date de la demande')" variant="outlined" density="compact" :error="isMissing('dateDemande')" />
           </v-col>
           <v-col cols="6" md="3">
-            <v-select v-model="form.statut" :items="STATUTS_CANDIDATURE" :label="req('Statut')" variant="outlined" density="compact" clearable :error="isMissing('statut')" />
+            <v-select
+              v-model="form.statut" :items="STATUTS_CANDIDATURE" :label="req('Statut')" variant="outlined" density="compact" clearable :error="isMissing('statut')"
+              :hint="statutDepuisTexte" persistent-hint
+            />
           </v-col>
           <v-col cols="6" md="2">
             <v-select v-model="form.mesureVisee" :items="MESURES" :label="req('Mesure')" variant="outlined" density="compact" clearable :error="isMissing('mesureVisee')" />
@@ -67,6 +70,42 @@
             <v-select v-model="form.priorite" :items="[0, 1, 2, 3, 4, 5]" label="Priorité" variant="outlined" density="compact" clearable />
           </v-col>
         </v-row>
+
+        <!-- Motif du contact avec l'AS : à chaque passage en « AS à contacter » / « Attente du retour AS » -->
+        <div v-if="STATUTS_AVEC_MOTIF.includes(form.statut)" class="motif-box pa-3 mb-4">
+          <div class="d-flex align-center flex-wrap ga-2 mb-2">
+            <v-icon size="small" color="deep-orange-darken-2">mdi-account-question-outline</v-icon>
+            <span class="text-subtitle-2 font-weight-bold">Motif du contact avec l'AS</span>
+            <v-spacer />
+            <v-btn
+              v-if="!statutChange" size="small" variant="tonal" color="deep-orange-darken-2"
+              :prepend-icon="nouveauContact ? 'mdi-close' : 'mdi-plus'" @click="toggleNouveauContact"
+            >
+              {{ nouveauContact ? 'Annuler le nouveau contact' : 'Nouveau contact avec l’AS' }}
+            </v-btn>
+          </div>
+          <div v-if="!motifRequis && derniereSaisie?.motif" class="text-body-2 mb-1">
+            Dernier motif : <b>{{ derniereSaisie.motif }}</b>
+            <span class="text-medium-emphasis"> · {{ formatDateTime(derniereSaisie.changedAt) }}<span v-if="derniereSaisie.par"> · {{ derniereSaisie.par }}</span></span>
+            <div v-if="derniereSaisie.commentaire" class="text-body-2 text-medium-emphasis">{{ derniereSaisie.commentaire }}</div>
+          </div>
+          <div v-else-if="!motifRequis" class="text-caption text-medium-emphasis">Aucun motif enregistré pour ce statut.</div>
+          <v-row v-if="motifRequis" dense>
+            <v-col cols="12" md="5">
+              <v-select
+                v-model="form.motifStatut" :items="MOTIFS_CONTACT_AS" label="Motif *" variant="outlined" density="compact"
+                bg-color="white" :error="isMissing('motifStatut')" hide-details="auto"
+              />
+            </v-col>
+            <v-col cols="12" md="7">
+              <v-textarea
+                v-model="form.commentaireStatut" :label="commentaireRequis ? 'Commentaire : motif et démarche *' : 'Commentaire : motif et démarche'"
+                rows="1" auto-grow variant="outlined" density="compact" bg-color="white" :error="isMissing('commentaireStatut')"
+                :hint="commentaireHint" persistent-hint
+              />
+            </v-col>
+          </v-row>
+        </div>
 
         <!-- Statut "AS à contacter" : remarques datées, conservées en historique -->
         <div v-if="form.statut === 'AS à contacter' || threads.as_a_contacter.length" class="status-box pa-3 mb-4">
@@ -113,8 +152,8 @@
           <v-col cols="12">
             <CommentThread
               v-if="form.candidatureId"
-              :comments="threads.as" id-key="candidatureCommentId" title="Remarques AS"
-              empty-text="Aucune remarque pour le moment." input-label="Ajouter une remarque"
+              :comments="threads.as" id-key="candidatureCommentId" title="Remarques AS" hide-author
+              empty-text="Aucune remarque pour le moment." input-label="Ajouter une remarque (datée automatiquement)"
               @submit="(t) => addComment('as', t)" @delete="deleteComment"
             />
             <v-textarea
@@ -145,6 +184,9 @@
           <div class="font-weight-bold mb-2">Pour enregistrer l'évaluation, complétez aussi :</div>
           <div v-if="!form.dateEvaluation" class="mb-2">· la date de l'évaluation (ci-dessus)</div>
           <v-row dense>
+            <v-col v-if="!form.prenom?.trim()" cols="12" md="6">
+              <v-text-field v-model="form.prenom" label="Prénom *" variant="outlined" density="compact" bg-color="white" hide-details />
+            </v-col>
             <v-col v-if="!form.dateNaissance" cols="12" md="6">
               <DateTextField v-model="form.dateNaissance" label="Date de naissance *" variant="outlined" density="compact" bg-color="white" hide-details="auto" />
             </v-col>
@@ -171,6 +213,30 @@
             <v-switch v-model="form.contratMaori" label="Contrat Maori" color="red" hide-details density="compact" class="flex-grow-0" />
           </v-col>
         </v-row>
+
+        <template v-if="historique.length">
+          <div class="text-subtitle-2 font-weight-bold mb-2 mt-4 text-primary">Historique des statuts</div>
+          <v-table density="compact" class="historique-statuts">
+            <thead>
+              <tr><th>Date</th><th>Par</th><th>Statut</th><th>Motif · commentaire</th></tr>
+            </thead>
+            <tbody>
+              <tr v-for="h in historique" :key="h.candidatureStatutChangeId">
+                <td class="text-no-wrap">{{ formatDateTime(h.changedAt) }}</td>
+                <td>{{ h.par || '—' }}</td>
+                <td>
+                  <span v-if="h.ancienStatut && h.ancienStatut !== h.statut" class="text-medium-emphasis">{{ h.ancienStatut }} → </span>
+                  <b>{{ h.statut || 'Sans statut' }}</b>
+                </td>
+                <td>
+                  <span v-if="h.motif" class="font-weight-medium">{{ h.motif }}</span>
+                  <span v-if="h.motif && h.commentaire"> — </span>
+                  <span v-if="h.commentaire">{{ h.commentaire }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </v-table>
+        </template>
       </v-card-text>
       <v-divider />
       <v-card-actions class="d-flex justify-end">
@@ -207,6 +273,7 @@ import { useUnsavedGuard, confirmDiscard } from '@/composables/useUnsavedGuard'
 import {
   STATUTS_CANDIDATURE, MESURES, MANDANTS, CIVILITES,
   asLabel, readApiError, sessionsDuGroupe, groupeCandidature, mesureDuStatut,
+  STATUTS_AVEC_MOTIF, MOTIFS_CONTACT_AS, MOTIFS_JOIGNABILITE, commentaireMotifObligatoire,
 } from '@/utils/inscriptionOptions'
 
 const props = defineProps({
@@ -238,6 +305,40 @@ const participants = ref([])
 const participantsLoading = ref(false)
 
 const isNew = computed(() => !form.value.candidatureId)
+
+// ─── Statut : historique, motif du contact AS ───
+// Statut au chargement : un changement de statut est daté et signé par l'API, avec un motif pour
+// « AS à contacter » / « Attente du retour AS ». Un nouveau contact peut aussi être saisi sans
+// changer de statut.
+const statutInitial = ref(null)
+const historique = ref([])
+const nouveauContact = ref(false)
+const statutChange = computed(() => (form.value.statut || null) !== (statutInitial.value || null))
+const motifRequis = computed(() => STATUTS_AVEC_MOTIF.includes(form.value.statut) && (statutChange.value || nouveauContact.value))
+const commentaireRequis = computed(() => motifRequis.value && commentaireMotifObligatoire(form.value.motifStatut, historique.value))
+const commentaireHint = computed(() => {
+  const m = form.value.motifStatut
+  if (!m) return 'Choisissez d’abord le motif.'
+  if (commentaireRequis.value) {
+    return MOTIFS_JOIGNABILITE.includes(m) ? 'Obligatoire : ce n’est pas le premier problème de téléphone.' : 'Obligatoire pour ce motif.'
+  }
+  return 'Facultatif pour ce motif.'
+})
+// Dernière saisie du statut actuel (pour l'afficher sans le modifier).
+const derniereSaisie = computed(() => historique.value.find(h => h.statut === form.value.statut) || null)
+const statutDepuisTexte = computed(() => {
+  if (statutChange.value) return 'Le changement sera daté et signé à l’enregistrement.'
+  const h = derniereSaisie.value
+  return h ? `Depuis le ${formatDateTime(h.changedAt)}${h.par ? ` · ${h.par}` : ''}` : ''
+})
+function toggleNouveauContact() {
+  nouveauContact.value = !nouveauContact.value
+  if (!nouveauContact.value) { form.value.motifStatut = null; form.value.commentaireStatut = null }
+}
+// Le motif saisi pour un statut ne vaut plus si l'on choisit un autre statut.
+watch(() => form.value.statut, () => {
+  if (!motifRequis.value) { form.value.motifStatut = null; form.value.commentaireStatut = null }
+})
 
 const asItems = computed(() => props.assistants
   .filter(a => a.actif || a.assistantSocialId === form.value.assistantSocialId)
@@ -281,6 +382,7 @@ const REQUIRED_AT_CREATION = [
 const hasEvaluation = computed(() => !blank(form.value.evaluationNiveau))
 const evaluationMissing = computed(() => !hasEvaluation.value ? [] : [
   { key: 'dateEvaluation', label: "date de l'évaluation" },
+  { key: 'prenom', label: 'prénom' },
   { key: 'dateNaissance', label: 'date de naissance' },
   { key: 'origine', label: "pays d'origine" },
 ].filter(f => blank(form.value[f.key])))
@@ -288,11 +390,17 @@ const evaluationMissing = computed(() => !hasEvaluation.value ? [] : [
 const missingFields = computed(() => {
   const rules = isNew.value ? REQUIRED_AT_CREATION : [{ key: 'nom', label: 'nom' }]
   const missing = rules.filter(f => blank(f.value ? f.value() : form.value[f.key]))
-  return [...missing, ...evaluationMissing.value]
+  const motif = !motifRequis.value ? [] : [
+    { key: 'motifStatut', label: 'motif du contact avec l’AS' },
+    ...(commentaireRequis.value ? [{ key: 'commentaireStatut', label: 'commentaire sur le motif' }] : []),
+  ].filter(f => blank(form.value[f.key]))
+  // Prénom : une seule fois, même s'il manque à la création et pour l'évaluation.
+  return [...missing, ...evaluationMissing.value.filter(f => !missing.some(m => m.key === f.key)), ...motif]
 })
 const isMissing = (key) => triedSave.value && missingFields.value.some(f => f.key === key)
 const req = (label) => isNew.value ? `${label} *` : label
 const evalReq = (label) => hasEvaluation.value ? `${label} *` : label
+const formatDateTime = (d) => d ? moment(d).format('DD.MM.YYYY') : ''
 
 // ─── Modifications non enregistrées ───
 const snapshot = ref('')
@@ -327,17 +435,25 @@ watch(() => props.modelValue, async (open) => {
   error.value = ''
   triedSave.value = false
   snapshot.value = ''
+  historique.value = []
+  statutInitial.value = null
+  nouveauContact.value = false
   loadParticipants()
   threads.value = { as: [], as_a_contacter: [], transmission: [] }
   pending.value = { as: '', as_a_contacter: '', transmission: '' }
   if (props.candidature?.candidatureId) {
     const res = await apiFetch(`${API_BASE}/api/Candidatures/${props.candidature.candidatureId}`)
     const c = res?.ok ? await res.json() : props.candidature
-    form.value = { ...c, sessionsVisees: sessionsDe(c), dateDemande: toInputDate(c.dateDemande), dateNaissance: toInputDate(c.dateNaissance), dateEvaluation: toInputDate(c.dateEvaluation) }
+    const { historiqueStatuts, statutDepuis, statutPar, motifStatut, commentaireStatut, ...donnees } = c
+    historique.value = historiqueStatuts || []
+    statutInitial.value = c.statut || null
+    // motifStatut / commentaireStatut du formulaire = nouvelle saisie (vides au chargement).
+    form.value = { ...donnees, motifStatut: null, commentaireStatut: null, sessionsVisees: sessionsDe(c), dateDemande: toInputDate(c.dateDemande), dateNaissance: toInputDate(c.dateNaissance), dateEvaluation: toInputDate(c.dateEvaluation) }
     KINDS.forEach(loadThread)
   } else {
     form.value = {
       dateDemande: moment().format('YYYY-MM-DD'), statut: 'À évaluer', nom: '', inscriptionConfirmee: false, contratMaori: false,
+      motifStatut: null, commentaireStatut: null,
       ...props.defaults,
       sessionsVisees: sessionsDe(props.defaults),
     }
@@ -406,7 +522,11 @@ async function save() {
 
     const res = await apiFetch(`${API_BASE}/api/Candidatures${id ? `/${id}` : ''}`, {
       method: id ? 'PUT' : 'POST',
-      body: JSON.stringify(form.value),
+      body: JSON.stringify({
+        ...form.value,
+        motifStatut: motifRequis.value ? form.value.motifStatut : null,
+        commentaireStatut: motifRequis.value ? form.value.commentaireStatut : null,
+      }),
     })
     if (!res) {
       error.value = 'Session expirée : reconnectez-vous puis réessayez.'
@@ -500,6 +620,13 @@ function onAsCreated(as) {
   background: #f4f8fd;
   border-radius: 8px;
 }
+.motif-box {
+  border: 1px solid #ffccbc;
+  border-left: 4px solid #e64a19;
+  background: #fff6f2;
+  border-radius: 8px;
+}
+.historique-statuts td { vertical-align: top; padding-top: 6px !important; padding-bottom: 6px !important; }
 .status-box {
   border: 1px solid #f5c6c6;
   border-left: 4px solid #d32f2f;

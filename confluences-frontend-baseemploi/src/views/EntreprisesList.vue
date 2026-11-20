@@ -34,7 +34,7 @@
   class="entreprise-table"
   @click:row="logClick"
   @update:items-per-page="updateNumberItems"
-  :options.sync="options"
+  v-model:page="page"
   :item-class="getRowClass"
   mobile-breakpoint="0"
 >
@@ -104,6 +104,8 @@ import { mapState } from 'vuex'
 import CreateEntreprise from '@/components/CreateEntreprise.vue' 
 import FilterEntreprise from '@/components/FilterEntreprise.vue'
 import moment from 'moment'
+import { ref } from 'vue'
+import { useListMemory } from '@/composables/useListMemory'
 
 export default {
   components: {
@@ -111,10 +113,20 @@ export default {
     FilterEntreprise
   },
 
+  // Retour depuis une fiche : même recherche, même page, même position (le filtre avancé reste
+  // dans le store). `:options.sync` de Vuetify 2 ne mémorisait plus la page.
+  setup() {
+    const search = ref('')
+    const page = ref(1)
+    useListMemory('entreprises', { search }, {
+      page,
+      ready: () => Array.isArray(store.state.entreprise.entreprises) && store.state.entreprise.entreprises.length > 0,
+    })
+    return { search, page }
+  },
+
   data: () => ({
     loading: false,
-    options: {},
-    search: '',
     headers: [
       { text: 'Nom', value: 'nom', class: 'font-weight-bold' },
       { text: 'Domaine', value: 'domaines' },
@@ -147,13 +159,7 @@ export default {
   },
 
   async created() {
-    this.options.page = this.settings.currentPageEntreprise || 1;
     await this.fetchData();
-  },
-
-  beforeRouteLeave(routeTo, routeFrom, next) {
-    store.dispatch('settings/setCurrentPageEntreprise', { number: this.options.page });
-    next();
   },
 
   methods: {
@@ -218,7 +224,7 @@ selectRow(item) {
     },
 
     updatePageSearch() {
-      this.options.page = 1;
+      this.page = 1;
     },
 
     formatDate(value) {

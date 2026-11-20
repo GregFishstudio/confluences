@@ -316,9 +316,10 @@ namespace Api.Controllers
                 {
                     MarrainageId = id,
                     ParticipantId = dto.ParticipantId,
-                    DateDebut = dto.DateDebut ?? System.DateTime.Today,
+                    DateDebut = dto.DateDebut ?? DebutDuMois(System.DateTime.Today),
                     Actif = true
                 });
+                AlignerStatutSurRelationActive(marrainage);
                 marrainage.UpdatedAt = System.DateTime.UtcNow;
                 await _context.SaveChangesAsync();
             }
@@ -352,15 +353,19 @@ namespace Api.Controllers
 
             if (link == null) return NotFound();
 
-            link.DateDebut = dto.DateDebut;
-            link.DateFin = dto.DateFin;
+            link.DateDebut = dto.DateDebut.HasValue ? DebutDuMois(dto.DateDebut.Value) : null;
+            link.DateFin = dto.DateFin.HasValue ? DebutDuMois(dto.DateFin.Value) : null;
             link.Actif = dto.Actif;
             link.RaisonInactivite = dto.Actif ? null : dto.RaisonInactivite;
             // Absent (null) = inchangé, pour les appels qui ne gèrent pas le commentaire ; "" l'efface.
             if (dto.Commentaire != null)
                 link.Commentaire = string.IsNullOrWhiteSpace(dto.Commentaire) ? null : dto.Commentaire.Trim();
             var parent = await _context.Marrainages.FindAsync(id);
-            if (parent != null) parent.UpdatedAt = System.DateTime.UtcNow;
+            if (parent != null)
+            {
+                if (link.Actif) AlignerStatutSurRelationActive(parent);
+                parent.UpdatedAt = System.DateTime.UtcNow;
+            }
 
             await _context.SaveChangesAsync();
 
@@ -498,6 +503,22 @@ namespace Api.Controllers
             }
 
             marrainage.Nom = NomEnMajuscules(marrainage.Nom);
+
+            // Statut incompatible avec une relation en cours (nouveau·elle, en attente de binôme,
+            // sans suite) choisi sur la fiche : les relations actives s'arrêtent ce mois-ci.
+            var ancienStatut = await _context.Marrainages.AsNoTracking()
+                .Where(m => m.MarrainageId == id).Select(m => m.Statut).FirstOrDefaultAsync();
+            if (marrainage.Statut != ancienStatut && StatutsSansRelationActive.Contains(marrainage.Statut))
+            {
+                var actives = await _context.MarrainageParticipants
+                    .Where(mp => mp.MarrainageId == id && mp.Actif).ToListAsync();
+                foreach (var link in actives)
+                {
+                    link.Actif = false;
+                    link.DateFin ??= DebutDuMois(System.DateTime.Today);
+                }
+            }
+
             _context.Entry(marrainage).State = EntityState.Modified;
             // Champs gérés par le serveur : jamais écrasés par le formulaire.
             _context.Entry(marrainage).Property(m => m.CreatedAt).IsModified = false;
@@ -539,6 +560,19 @@ namespace Api.Controllers
 
             return marrainage;
         }
+
+        // Statuts de la fiche qui n'ont pas de sens avec une relation de marrainage en cours.
+        private static readonly string[] StatutsSansRelationActive = { "nouveau", "en_attente", "sans_suite" };
+
+        // Une relation devient active : la personne n'est plus « nouvelle », « en attente de
+        // binôme » ni « sans suite » (les statuts disponible / à vérifier / à relancer restent).
+        private static void AlignerStatutSurRelationActive(Marrainage m)
+        {
+            if (StatutsSansRelationActive.Contains(m.Statut)) m.Statut = null;
+        }
+
+        // Début et fin de marrainage se saisissent au mois près : on enregistre le 1er du mois.
+        private static System.DateTime DebutDuMois(System.DateTime d) => new System.DateTime(d.Year, d.Month, 1);
 
         private bool MarrainageExists(int id)
         {

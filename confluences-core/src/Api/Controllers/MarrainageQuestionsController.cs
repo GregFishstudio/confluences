@@ -59,6 +59,26 @@ namespace Api.Controllers
             return NoContent();
         }
 
+        // PUT: api/MarrainageQuestions/ordre  [12, 4, 7, ...]
+        // Nouvel ordre du questionnaire : la première question de la liste reçoit l'ordre 1, etc.
+        [HttpPut("ordre")]
+        public async Task<IActionResult> PutOrdre([FromBody] List<int> ids)
+        {
+            if (ids == null || ids.Count == 0) return BadRequest("Liste vide.");
+            var questions = await _context.MarrainageQuestions.ToListAsync();
+            var rang = 1;
+            foreach (var id in ids)
+            {
+                var q = questions.FirstOrDefault(x => x.MarrainageQuestionId == id);
+                if (q != null) q.Order = rang++;
+            }
+            // Questions absentes de la liste (ex. ajoutées entre-temps) : à la suite.
+            foreach (var q in questions.Where(x => !ids.Contains(x.MarrainageQuestionId)).OrderBy(x => x.Order))
+                q.Order = rang++;
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+
         // DELETE: api/MarrainageQuestions/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteQuestion(int id)

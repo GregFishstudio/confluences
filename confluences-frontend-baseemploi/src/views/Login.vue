@@ -72,9 +72,14 @@
 
           <!-- Options supplémentaires -->
           <div class="form-options">
-            <span></span>
-            <a :href="forgotPasswordUrl" target="_blank" rel="noopener" class="forgot-password">Mot de passe oublié ?</a>
+            <a href="#" class="forgot-password" @click.prevent="basculerChangement">
+              {{ changerApresConnexion ? 'Annuler le changement de mot de passe' : 'Changer mon mot de passe' }}
+            </a>
+            <a :href="forgotPasswordUrl" class="forgot-password">Mot de passe oublié ?</a>
           </div>
+          <p v-if="changerApresConnexion" class="change-hint">
+            Connectez-vous avec votre mot de passe actuel : la fenêtre pour en choisir un nouveau s'ouvrira aussitôt.
+          </p>
 
           <!-- Bouton de connexion -->
           <button
@@ -168,6 +173,19 @@ const route = useRoute()
 const loading = ref(false)
 const error = ref('')
 const sessionExpired = ref(route.query.reason === 'session_expired')
+
+// « Changer mon mot de passe » : on se connecte d'abord avec l'ancien, puis la fenêtre de
+// changement s'ouvre (AppNav lit ce repère après la connexion).
+const changerApresConnexion = ref(false)
+// Repère d'une visite précédente non suivie d'une connexion : on repart sans.
+try { sessionStorage.removeItem('changerMotDePasseApresConnexion') } catch { /* stockage indisponible */ }
+function basculerChangement() {
+  changerApresConnexion.value = !changerApresConnexion.value
+  try {
+    if (changerApresConnexion.value) sessionStorage.setItem('changerMotDePasseApresConnexion', '1')
+    else sessionStorage.removeItem('changerMotDePasseApresConnexion')
+  } catch { /* stockage indisponible */ }
+}
 
 const forgotPasswordUrl = (() => {
   const authority = import.meta.env.VITE_AUTHORITY_URL || 'http://localhost:5000'
@@ -485,6 +503,15 @@ async function handleLogin() {
   content: '✓';
   color: white;
   font-size: 12px;
+}
+
+.change-hint {
+  margin: -4px 0 12px;
+  font-size: 0.85rem;
+  color: #4B5563;
+  background: #EFF6FF;
+  border-radius: 8px;
+  padding: 8px 10px;
 }
 
 .forgot-password {

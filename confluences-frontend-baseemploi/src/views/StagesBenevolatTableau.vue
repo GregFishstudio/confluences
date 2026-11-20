@@ -207,6 +207,7 @@
 <script setup>
 import { BENEVOLAT_DOMAINES, domainesAffiches, aUnDesDomaines } from '@/utils/benevolat'
 import { ref, computed, onMounted } from 'vue'
+import { useListMemory } from '@/composables/useListMemory'
 import { useRouter } from 'vue-router'
 import moment from 'moment/min/moment-with-locales'
 import API_BASE, { apiFetch } from '@/services/api'
@@ -247,6 +248,13 @@ const fAVerifier = ref(false)
 const fSansInteret = ref(false)
 const fEnActivite = ref(false)
 const fDomainesBenevolat = ref([])
+
+// Retour depuis une fiche : mêmes filtres, même position.
+useListMemory(
+  'stages-benevolat',
+  { search, fSession, fGroupe, fType, fRegions, fDegre, fAVerifier, fSansInteret, fEnActivite, fDomainesBenevolat },
+  { ready: () => !loading.value && (raw.value.participants.length > 0 || raw.value.entreprises.length > 0) },
+)
 
 const hasFilters = computed(() =>
   !!search.value || fGroupe.value.length || fType.value.length || fRegions.value.length || fDegre.value.length || fDomainesBenevolat.value.length ||

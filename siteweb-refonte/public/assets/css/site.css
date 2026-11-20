@@ -136,15 +136,29 @@ h4 { font-family: var(--font-body); font-size: 1.05rem; font-weight: 700; letter
 .brand img { height: 42px; width: auto; }
 .main-nav ul { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: .2rem; }
 .main-nav li { margin: 0; }
+/* Liens du menu : texte seul. La rubrique en cours est marquée par un petit rayon incliné sous le
+   mot (le motif du logo), dans la couleur de la rubrique — pas de pastille. */
 .main-nav a {
-  display: block; padding: .55em .8em; border-radius: 999px;
-  color: var(--ink); text-decoration: none; font-weight: 700; font-size: .97rem;
+  position: relative; display: block; padding: .55em .75em;
+  color: var(--ink-soft); text-decoration: none; font-weight: 700; font-size: .97rem;
+  transition: color .15s ease;
 }
-.main-nav a:hover { background: var(--card); }
-.main-nav a[aria-current="page"] { background: var(--card); box-shadow: inset 0 -3px 0 var(--accent); }
-.main-nav .nav-cta a { background: var(--ink); color: #fff; margin-left: .4rem; }
-.main-nav .nav-cta a:hover { background: #2d3f52; }
-.main-nav .nav-cta a[aria-current="page"] { box-shadow: none; }
+.main-nav a::after {
+  content: ""; position: absolute; left: 50%; bottom: .15em;
+  width: 0; height: 5px; border-radius: 3px; background: var(--line);
+  transform: translateX(-50%) skewX(-24deg); transition: width .2s ease, background-color .2s ease;
+}
+.main-nav a:hover { color: var(--ink); }
+.main-nav a:hover::after { width: 16px; }
+.main-nav a[aria-current="page"] { color: var(--ink); }
+.main-nav a[aria-current="page"]::after { width: 26px; background: var(--accent); }
+.main-nav .nav-cta a {
+  margin-left: .5rem; padding: .55em 1.1em; border-radius: 999px;
+  border: 2px solid var(--ink); color: var(--ink);
+  transition: background-color .15s ease, color .15s ease;
+}
+.main-nav .nav-cta a::after { display: none; }
+.main-nav .nav-cta a:hover, .main-nav .nav-cta a[aria-current="page"] { background: var(--ink); color: #fff; }
 
 .menu-toggle {
   display: none; align-items: center; gap: .5em;
@@ -175,8 +189,12 @@ h4 { font-family: var(--font-body); font-size: 1.05rem; font-weight: 700; letter
   }
   .main-nav.is-open { transform: none; opacity: 1; visibility: visible; transition: opacity .2s ease, transform .2s ease; }
   .main-nav ul { flex-direction: column; align-items: stretch; gap: .25rem; }
-  .main-nav a { padding: .85em 1em; font-size: 1.1rem; border-radius: var(--radius-sm); }
-  .main-nav .nav-cta a { margin: .5rem 0 0; text-align: center; }
+  .main-nav a { padding: .85em 1em .85em 1.6em; font-size: 1.1rem; }
+  /* Menu mobile : le rayon passe à gauche du mot. */
+  .main-nav a::after { left: .45em; top: 50%; bottom: auto; transform: translateY(-50%) skewX(-24deg); }
+  .main-nav a:hover::after { width: 10px; }
+  .main-nav a[aria-current="page"]::after { width: 14px; }
+  .main-nav .nav-cta a { margin: .5rem 0 0; padding: .85em 1em; text-align: center; }
 }
 
 /* ---------- Sous-navigation de rubrique ---------- */
@@ -202,15 +220,36 @@ h4 { font-family: var(--font-body); font-size: 1.05rem; font-weight: 700; letter
 .rays .r5 { fill: var(--ray-5); stroke: var(--ray-5); }
 
 /* ---------- Héros d'accueil ---------- */
-.hero { position: relative; padding: clamp(2.5rem, 7vw, 6rem) 0 clamp(3rem, 6vw, 5rem); overflow: hidden; }
-.hero-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.6fr); align-items: center; gap: clamp(1rem, 4vw, 4rem); }
-.hero-rays { width: 100%; max-width: 380px; justify-self: end; }
+.hero { position: relative; padding: clamp(1.75rem, 4vw, 3.5rem) 0 clamp(1.25rem, 2.5vw, 2rem); overflow: hidden; }
+.hero-grid { display: grid; grid-template-columns: minmax(0, .65fr) minmax(0, 1.6fr); align-items: center; gap: clamp(1rem, 4vw, 4rem); }
+/* Rayons du logo : présents mais pas envahissants, pour que la suite de la page se devine. */
+.hero-rays { width: 100%; max-width: 230px; justify-self: end; }
 .hero h1 { margin-bottom: .35em; }
 .hero h1 em { font-style: italic; font-weight: 420; color: var(--deep-1); }
 .hero .lede { max-width: 40ch; }
 .hero-meta { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; margin-top: 2rem; font-size: .95rem; color: var(--ink-soft); }
 .hero-meta span { display: inline-flex; align-items: center; gap: .45em; }
 .hero-meta span::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ray-5); }
+
+/* Invitation à descendre vers la suite de la page */
+.hero-next {
+  display: inline-flex; align-items: center; gap: .5rem; margin-top: 1.75rem;
+  font-weight: 700; color: var(--deep-1); text-decoration: none;
+}
+.hero-next .fleche {
+  display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
+  background: var(--card); border: 1px solid var(--line); font-size: 1.05rem;
+}
+.hero-next:hover .fleche { border-color: var(--deep-1); }
+@media (prefers-reduced-motion: no-preference) {
+  .hero-next .fleche { animation: inviter 2.4s ease-in-out 1.5s infinite; }
+}
+@keyframes inviter { 0%, 60%, 100% { transform: none; } 30% { transform: translateY(5px); } }
+
+.doors-title {
+  font-family: var(--font-body); font-size: .82rem; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-soft); margin: 0 0 .9rem;
+}
 
 @media (prefers-reduced-motion: no-preference) {
   .hero-rays path { transform-box: fill-box; opacity: 0; animation: ray-in .9s cubic-bezier(.2, .8, .2, 1) forwards; }
@@ -230,8 +269,17 @@ h4 { font-family: var(--font-body); font-size: 1.05rem; font-weight: 700; letter
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
 @media (max-width: 760px) {
-  .hero-grid { grid-template-columns: 1fr; }
-  .hero-rays { max-width: 150px; justify-self: start; }
+  /* Smartphone : petit rappel du logo au-dessus du titre, le texte et les boutons d'abord. */
+  .hero { padding-top: 1.25rem; }
+  .hero-grid { grid-template-columns: 1fr; gap: .75rem; }
+  .hero-rays { max-width: 58px; justify-self: start; }
+  .hero h1 { font-size: 2.05rem; }
+  .hero .lede { font-size: 1.05rem; }
+  .hero .btn-row { margin-top: 1.1rem; }
+  .hero .btn-row .btn { flex: 1 1 auto; justify-content: center; }
+  .hero-meta { margin-top: 1.1rem; font-size: .9rem; }
+  /* Les cartes sont déjà visibles juste en dessous : pas besoin de l'invitation à descendre. */
+  .hero-next { display: none; }
 }
 
 /* ---------- En-tête de page intérieure ---------- */

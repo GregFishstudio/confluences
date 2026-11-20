@@ -127,7 +127,8 @@
 <script setup>
 import { ref, computed, onBeforeMount } from 'vue';
 import { useStore } from 'vuex';
-import { useRouter, onBeforeRouteLeave } from 'vue-router';
+import { useRouter } from 'vue-router';
+import { useListMemory } from '@/composables/useListMemory';
 import CreateStage from '@/components/CreateStage.vue';
 import FilterStage from '@/components/FilterStage.vue';
 import moment from 'moment';
@@ -181,14 +182,12 @@ onBeforeMount(() => {
     store.dispatch('stage/fetchStages', {});
 });
 
-// Hook de navigation de sortie (sauvegarde la page actuelle)
-onBeforeRouteLeave((routeTo, routeFrom, next) => {
-    store.dispatch('settings/setCurrentPageStage', { number: page.value });
-    next();
+// Retour depuis une fiche : même recherche, même page, même position (les filtres avancés
+// restent dans le store). Ouverte depuis le menu, la liste repart de la page 1.
+useListMemory('stages', { search }, {
+    page,
+    ready: () => Array.isArray(stage.value.stages) && stage.value.stages.length > 0,
 });
-
-// Initialisation (simule le 'created')
-page.value = store.state.settings.currentPageStage;
 
 // --- Méthodes ---
 const selectRow = (event, row) => {

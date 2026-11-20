@@ -31,6 +31,7 @@ namespace Api.Controllers
                 .Include(c => c.AssistantSocial)
                 .Include(c => c.Participant)
                 .Include(c => c.Comments)
+                .Include(c => c.StatutChanges!).ThenInclude(h => h.ChangedByUser)
                 .OrderByDescending(c => c.DateDemande)
                 .ToListAsync();
 
@@ -46,6 +47,7 @@ namespace Api.Controllers
             var c = await _context.Candidatures.AsNoTracking()
                 .Include(x => x.AssistantSocial)
                 .Include(x => x.Participant)
+                .Include(x => x.StatutChanges!).ThenInclude(h => h.ChangedByUser)
                 .SingleOrDefaultAsync(x => x.CandidatureId == id);
             if (c == null) return NotFound();
 
@@ -56,13 +58,15 @@ namespace Api.Controllers
         [HttpPost]
         public async Task<ActionResult<object>> PostCandidature(CandidatureDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.Nom)) return BadRequest("Le nom est requis.");
-            if (!string.IsNullOrWhiteSpace(dto.EvaluationNiveau) && dto.DateEvaluation == null)
-                return BadRequest("La date d'évaluation est obligatoire pour enregistrer une évaluation.");
+            var invalide = Valider(dto);
+            if (invalide != null) return BadRequest(invalide);
 
             var c = new Candidature { CreatedAt = DateTime.UtcNow };
             Apply(c, dto);
+            var erreurStatut = await EnregistrerStatut(c, null, dto, valider: true);
+            if (erreurStatut != null) return BadRequest(erreurStatut);
             _context.Candidatures.Add(c);
+            await SynchroniserContratMaori(c);
             await _context.SaveChangesAsync();
 
             return Ok(new { c.CandidatureId });
@@ -72,14 +76,17 @@ namespace Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCandidature(int id, CandidatureDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.Nom)) return BadRequest("Le nom est requis.");
-            if (!string.IsNullOrWhiteSpace(dto.EvaluationNiveau) && dto.DateEvaluation == null)
-                return BadRequest("La date d'évaluation est obligatoire pour enregistrer une évaluation.");
+            var invalide = Valider(dto);
+            if (invalide != null) return BadRequest(invalide);
 
             var c = await _context.Candidatures.FindAsync(id);
             if (c == null) return NotFound();
 
+            var ancienStatut = c.Statut;
             Apply(c, dto);
+            var erreurStatut = await EnregistrerStatut(c, ancienStatut, dto, valider: true);
+            if (erreurStatut != null) return BadRequest(erreurStatut);
+            await SynchroniserContratMaori(c);
             await _context.SaveChangesAsync();
             return NoContent();
         }
@@ -132,16 +139,21 @@ namespace Api.Controllers
                 {
                     c = await _context.Candidatures.FindAsync(row.CandidatureId.Value)
                         ?? throw new InvalidOperationException($"Candidature {row.CandidatureId} introuvable.");
+                    var ancienStatut = c.Statut;
                     ApplyNonEmpty(c, dto);
+                    // Import : statut daté et signé, sans exiger de motif (le fichier n'en a pas).
+                    await EnregistrerStatut(c, ancienStatut, dto, valider: false);
                     updated++;
                 }
                 else
                 {
                     c = new Candidature { CreatedAt = now };
                     Apply(c, dto);
+                    await EnregistrerStatut(c, null, dto, valider: false);
                     _context.Candidatures.Add(c);
                     created++;
                 }
+                await SynchroniserContratMaori(c);
                 c.UpdatedAt = now;
                 await _context.SaveChangesAsync();
 
@@ -159,6 +171,78 @@ namespace Api.Controllers
 
             return Ok(new { created, updated, asCreated });
         }
+
+        // Règles communes à la création et à la modification.
+        private static string? Valider(CandidatureDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Nom)) return "Le nom est requis.";
+            if (!string.IsNullOrWhiteSpace(dto.EvaluationNiveau))
+            {
+                if (dto.DateEvaluation == null)
+                    return "La date d'évaluation est obligatoire pour enregistrer une évaluation.";
+                if (string.IsNullOrWhiteSpace(dto.Prenom))
+                    return "Le prénom est obligatoire pour enregistrer une évaluation.";
+            }
+            return null;
+        }
+
+        // Date et auteur·e de chaque changement de statut. Pour « AS à contacter » et « Attente
+        // du retour AS », le motif (et selon lui un commentaire) est obligatoire ; un nouveau motif
+        // peut aussi être saisi sans changer de statut (nouveau contact avec l'AS).
+        // Renvoie un message d'erreur, ou null.
+        private async Task<string?> EnregistrerStatut(Candidature c, string? ancienStatut, CandidatureDto dto, bool valider)
+        {
+            var requiertMotif = MotifsContactAS.RequiertMotif(c.Statut);
+            var change = (c.Statut ?? "") != (ancienStatut ?? "");
+            var nouveauMotif = requiertMotif && !string.IsNullOrWhiteSpace(dto.MotifStatut);
+            if (!change && !nouveauMotif) return null;
+
+            var motif = requiertMotif ? dto.MotifStatut?.Trim() : null;
+            if (string.IsNullOrEmpty(motif)) motif = null;
+            var commentaire = string.IsNullOrWhiteSpace(dto.CommentaireStatut) ? null : dto.CommentaireStatut.Trim();
+
+            if (valider && requiertMotif)
+            {
+                var precedents = c.CandidatureId == 0 ? 0 : await _context.CandidatureStatutChanges
+                    .CountAsync(h => h.CandidatureId == c.CandidatureId && h.Motif != null && MotifsContactAS.Joignabilite.Contains(h.Motif));
+                var erreur = MotifsContactAS.Verifier(motif, commentaire, precedents);
+                if (erreur != null) return erreur;
+            }
+
+            _context.CandidatureStatutChanges.Add(new CandidatureStatutChange
+            {
+                Candidature = c,
+                AncienStatut = ancienStatut,
+                Statut = c.Statut,
+                Motif = motif,
+                Commentaire = commentaire,
+                ChangedAt = DateTime.UtcNow,
+                ChangedByUserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+            });
+            return null;
+        }
+
+        // Contrat Maori reçu pour la candidature : reporté sur la fiche du/de la participant·e liée,
+        // aussi pour les personnes déjà inscrites (avant, seulement à l'inscription dans une session).
+        private async Task SynchroniserContratMaori(Candidature c)
+        {
+            if (!c.ContratMaori || string.IsNullOrEmpty(c.ParticipantId)) return;
+            var u = await _context.Users.FindAsync(c.ParticipantId);
+            if (u != null && !u.ContratMaori) u.ContratMaori = true;
+        }
+
+        private static string? NomAuteur(ApplicationUser? u)
+        {
+            if (u == null) return null;
+            var nom = $"{u.Firstname} {u.LastName}".Trim();
+            return nom.Length > 0 ? nom : u.UserName;
+        }
+
+        // Dernière saisie du statut actuel (changement ou nouveau contact AS).
+        private static CandidatureStatutChange? DernierChangement(Candidature c) => c.StatutChanges?
+            .Where(h => h.Statut == c.Statut)
+            .OrderByDescending(h => h.ChangedAt)
+            .FirstOrDefault();
 
         // Sessions visées envoyées : la liste, ou à défaut l'ancien couple année + numéro.
         private static List<string> SessionsDuDto(CandidatureDto dto)
@@ -338,6 +422,25 @@ namespace Api.Controllers
             c.TransmissionAS,
             c.ParticipantId,
             participantNom = c.Participant == null ? null : $"{c.Participant.Firstname} {c.Participant.LastName}",
+            // Date (et auteur·e) de la saisie du statut actuel : pour « Attente du retour AS »,
+            // « En attente A1/A2 »… c'est la date du contact avec l'AS. Null pour les candidatures
+            // dont le statut date d'avant l'historique des statuts.
+            statutDepuis = DernierChangement(c)?.ChangedAt,
+            statutPar = NomAuteur(DernierChangement(c)?.ChangedByUser),
+            motifStatut = DernierChangement(c)?.Motif,
+            commentaireStatut = DernierChangement(c)?.Commentaire,
+            historiqueStatuts = !includeInternal ? null : c.StatutChanges?
+                .OrderByDescending(h => h.ChangedAt)
+                .Select(h => new
+                {
+                    h.CandidatureStatutChangeId,
+                    h.AncienStatut,
+                    h.Statut,
+                    h.Motif,
+                    h.Commentaire,
+                    h.ChangedAt,
+                    par = NomAuteur(h.ChangedByUser),
+                }),
             c.CreatedAt,
             c.UpdatedAt,
         };
@@ -406,6 +509,10 @@ namespace Api.Controllers
         public bool ContratMaori { get; set; }
         public string? TransmissionAS { get; set; }
         public string? ParticipantId { get; set; }
+
+        // Saisie du statut : non stockés sur la candidature, vont dans l'historique des statuts.
+        public string? MotifStatut { get; set; }
+        public string? CommentaireStatut { get; set; }
     }
 
     public class CandidatureImportRow

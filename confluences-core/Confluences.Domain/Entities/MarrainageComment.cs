@@ -14,6 +14,11 @@ namespace Confluences.Domain.Entities
 
         public string Text { get; set; } = string.Empty;
 
+        // Fil du commentaire : null = commentaires généraux (fil historique),
+        // "parrain" = ne concerne que le parrain / la marraine (pas la relation ni le binôme).
+        [StringLength(20)]
+        public string? Portee { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public string? AuthorId { get; set; }

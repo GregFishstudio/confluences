@@ -95,7 +95,7 @@
               class="ma-2"
               color="primary"
               min-width="150"
-              @click="router.go(-1)"
+              @click="retourOuListe(router, 'Stagiaires')"
             >
               Annuler
             </v-btn>
@@ -110,6 +110,7 @@
 import { ref, computed, onBeforeMount } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
+import { retourOuListe } from '@/composables/useListMemory'
 import NProgress from 'nprogress';
 import moment from 'moment';
 import DeleteStagiaire from '@/components/DeleteStagiaire.vue';
@@ -171,7 +172,7 @@ const submit = async () => {
         store
             .dispatch('stagiaire/editStagiaire', stagiaireRef.value)
             .then(() => {
-                router.push({ name: 'Stagiaires' });
+                retourOuListe(router, 'Stagiaires');
             })
             .catch((error) => {
                 console.error("Erreur de sauvegarde du stagiaire:", error);

@@ -44,6 +44,8 @@ namespace Api.Controllers
             {
                 MarrainageId = dto.MarrainageId,
                 Text = dto.Text,
+                // null = commentaires généraux ; "parrain" = ne concerne que le parrain / la marraine.
+                Portee = dto.Portee == "parrain" ? "parrain" : null,
                 AuthorId = authorId,
                 CreatedAt = System.DateTime.UtcNow
             };
@@ -83,5 +85,6 @@ namespace Api.Controllers
     {
         public int MarrainageId { get; set; }
         public string Text { get; set; } = string.Empty;
+        public string? Portee { get; set; }
     }
 }

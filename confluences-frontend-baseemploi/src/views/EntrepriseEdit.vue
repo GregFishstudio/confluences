@@ -160,7 +160,7 @@
         Sauvegarder
       </v-btn>
       <DeleteEntreprise :entreprise="entrepriseRef" class="me-2" />
-      <v-btn variant="outlined" color="primary" min-width="120" @click="router.back()">
+      <v-btn variant="outlined" color="primary" min-width="120" @click="retourOuListe(router, 'Entreprises')">
         Annuler
       </v-btn>
     </v-footer>
@@ -170,6 +170,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { retourOuListe } from '@/composables/useListMemory'
 import { useStore } from 'vuex';
 import NProgress from 'nprogress';
 import moment from 'moment';
@@ -245,7 +246,7 @@ const submit = async () => {
     
     try {
       await store.dispatch('entreprise/editEntreprise', entrepriseRef.value);
-      router.push({ name: 'Entreprises' });
+      retourOuListe(router, 'Entreprises');
     } catch (error) {
       console.error("Sauvegarde échouée", error);
     } finally {

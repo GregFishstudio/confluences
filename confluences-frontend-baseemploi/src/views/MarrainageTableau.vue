@@ -279,13 +279,13 @@
               <span v-if="item.region" class="region-pill" :style="{ background: regionColor(item.region) }">{{ item.region }}</span>
               <span v-else class="text-caption text-grey">—</span>
             </template>
-            <template #item.dateDebut="{ item }">{{ fmtDate(item.dateDebut) }}</template>
+            <template #item.dateDebut="{ item }">{{ item.dateDebut ? formatMoisAnnee(item.dateDebut) : '—' }}</template>
             <template #item.etat="{ item }">
               <v-chip size="x-small" variant="flat" :color="item.actif ? 'success' : (item.raisonInactivite ? 'deep-orange' : 'grey')" class="font-weight-bold">
                 {{ item.actif ? 'En cours' : (item.raisonInactivite ? 'Interrompu' : 'Terminé') }}
               </v-chip>
               <div v-if="!item.actif" class="text-caption text-grey mt-1">
-                {{ item.dateFin ? `le ${fmtDate(item.dateFin)}` : '' }}<span v-if="item.raisonInactivite"> — {{ item.raisonInactivite }}</span>
+                {{ item.dateFin ? `en ${formatMoisAnnee(item.dateFin)}` : '' }}<span v-if="item.raisonInactivite"> — {{ item.raisonInactivite }}</span>
               </div>
             </template>
             <template #item.commentaire="{ item }">
@@ -318,11 +318,11 @@
               <v-btn value="interrompu" prepend-icon="mdi-stop-circle-outline">Interrompu</v-btn>
             </v-btn-toggle>
             <v-row dense>
-              <v-col cols="6">
-                <v-text-field v-model="relForm.dateDebut" type="date" label="Début" variant="outlined" density="compact" />
+              <v-col cols="12" sm="6">
+                <MoisAnneeField v-model="relForm.dateDebut" label="Début (mois et année)" />
               </v-col>
-              <v-col cols="6">
-                <v-text-field v-if="relForm.etat !== 'en_cours'" v-model="relForm.dateFin" type="date" label="Fin" variant="outlined" density="compact" />
+              <v-col cols="12" sm="6">
+                <MoisAnneeField v-if="relForm.etat !== 'en_cours'" v-model="relForm.dateFin" label="Fin (mois et année)" />
               </v-col>
               <v-col v-if="relForm.etat === 'interrompu'" cols="12">
                 <v-combobox
@@ -412,6 +412,9 @@ import moment from 'moment/min/moment-with-locales'
 import API_BASE, { apiFetch } from '@/services/api'
 import { useRegions, regionDeCommune } from '@/utils/regions'
 import { statutInfo } from '@/utils/marrainageStatut'
+import MoisAnneeField from '@/components/MoisAnneeField.vue'
+import { debutDuMois, formatMoisAnnee } from '@/utils/dates'
+import { useListMemory } from '@/composables/useListMemory'
 import { matchesSearch } from '@/utils/search'
 
 moment.locale('fr')
@@ -462,6 +465,13 @@ const fSexe = ref([])
 const fAge = ref([])
 const fMesure = ref([])
 const fPriorite = ref([])
+
+// Retour depuis une fiche : même onglet, mêmes filtres, même position.
+useListMemory(
+  'marrainage-tableau',
+  { tab, focus, listeRole, binomeEtat, search, fRegions, fSexe, fAge, fMesure, fPriorite },
+  { ready: () => loaded.value && !loading.value },
+)
 
 const hasFilters = computed(() =>
   !!search.value || [fRegions, fSexe, fAge, fMesure, fPriorite].some(f => f.value.length)
@@ -699,7 +709,6 @@ const binomeHeaders = [
 ]
 
 // ─── Formatage ────────────────────────────────────────────────────────────────
-const fmtDate = d => (d ? moment(d).format('DD.MM.YYYY') : '—')
 const fmtMois = d => moment(d).format('MMM YYYY')
 function identite(x) {
   const parts = []
@@ -743,15 +752,15 @@ function openRelation(b) {
   relDialog.value = { open: true, binome: b, saving: false }
   relForm.value = {
     etat: b.actif ? 'en_cours' : (b.raisonInactivite ? 'interrompu' : 'termine'),
-    dateDebut: b.dateDebut ? b.dateDebut.substring(0, 10) : '',
-    dateFin: b.dateFin ? b.dateFin.substring(0, 10) : '',
+    dateDebut: b.dateDebut ? b.dateDebut.substring(0, 10) : null,
+    dateFin: b.dateFin ? b.dateFin.substring(0, 10) : null,
     raison: b.raisonInactivite || null,
     commentaire: b.commentaire || '',
   }
 }
 
 watch(() => relForm.value.etat, etat => {
-  if (etat !== 'en_cours' && !relForm.value.dateFin) relForm.value.dateFin = moment().format('YYYY-MM-DD')
+  if (etat !== 'en_cours' && !relForm.value.dateFin) relForm.value.dateFin = debutDuMois()
 })
 
 async function saveRelation() {

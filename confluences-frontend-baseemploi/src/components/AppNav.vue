@@ -12,10 +12,22 @@
       <img :src="currentLogo" alt="Logo" class="logo-img"/>
     </div>
 
-    <div v-if="loggedIn" class="px-4 pb-3 text-center">
-      <span class="text-body-2 font-weight-bold" style="color: #1976D2;">
-        Bonjour : {{ authStore.user?.profile?.given_name || authStore.user?.profile?.name || '—' }}
-      </span>
+    <!-- Menu du compte : changer son mot de passe, se déconnecter -->
+    <div v-if="loggedIn" class="px-4 pb-3 d-flex justify-center">
+      <v-menu location="bottom center">
+        <template #activator="{ props }">
+          <v-btn v-bind="props" variant="tonal" color="primary" rounded="pill" class="text-none font-weight-bold" append-icon="mdi-chevron-down">
+            <v-icon start>mdi-account-circle</v-icon>
+            Bonjour {{ prenomConnecte }}
+          </v-btn>
+        </template>
+        <v-list density="compact" min-width="240">
+          <v-list-item v-if="authStore.user?.profile?.email" :subtitle="authStore.user.profile.email" title="Connecté·e" disabled />
+          <v-divider class="my-1" />
+          <v-list-item prepend-icon="mdi-lock-reset" title="Changer mon mot de passe" @click="motDePasseDialog = true" />
+          <v-list-item prepend-icon="mdi-power" title="Déconnexion" base-color="error" @click="authStore.logout()" />
+        </v-list>
+      </v-menu>
     </div>
 
     <v-list density="comfortable" nav class="px-4">
@@ -190,6 +202,17 @@
         Connecté·e : {{ authStore.user.profile.email }}
       </div>
       <v-btn
+        v-if="loggedIn"
+        block
+        variant="outlined"
+        color="primary"
+        class="mb-2"
+        prepend-icon="mdi-lock-reset"
+        @click="motDePasseDialog = true; mobileDrawer = false"
+      >
+        Changer mon mot de passe
+      </v-btn>
+      <v-btn
         block
         :color="loggedIn ? 'error' : 'primary'"
         variant="tonal"
@@ -203,6 +226,8 @@
   </template>
 </v-navigation-drawer>
 
+<ChangePasswordDialog v-model="motDePasseDialog" />
+
 <v-app-bar v-if="isMobile" flat color="primary">
   <v-app-bar-nav-icon color="white" @click="mobileDrawer = !mobileDrawer" />
   <v-toolbar-title class="text-white font-weight-bold">Confluences</v-toolbar-title>
@@ -213,7 +238,8 @@
 
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import ChangePasswordDialog from '@/components/ChangePasswordDialog.vue'
 import { useDisplay, useTheme } from 'vuetify'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
@@ -239,6 +265,20 @@ const MVC_URL = import.meta.env.PROD
 const currentLogo = computed(() => {
   return darkTheme.value ? logoImageWhite : logoImageDark
 })
+
+// « Changer mon mot de passe » : fenêtre dans l'application. Elle s'ouvre aussi juste après la
+// connexion quand on l'a demandé depuis la page de connexion (lien « Changer mon mot de passe »).
+const motDePasseDialog = ref(false)
+const prenomConnecte = computed(() => authStore.user?.profile?.given_name || authStore.user?.profile?.name || '')
+watch(loggedIn, (connecte) => {
+  if (!connecte) return
+  let demande = false
+  try { demande = sessionStorage.getItem('changerMotDePasseApresConnexion') === '1' } catch { /* stockage indisponible */ }
+  if (demande) {
+    try { sessionStorage.removeItem('changerMotDePasseApresConnexion') } catch { /* idem */ }
+    motDePasseDialog.value = true
+  }
+}, { immediate: true })
 
 const goToLogin = () => {
   router.push('/login')

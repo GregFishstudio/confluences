@@ -115,6 +115,7 @@ namespace Api.Controllers
             var sessionKey = $"{year}-{number}";
             var candidatures = await _context.Candidatures.AsNoTracking()
                 .Include(c => c.AssistantSocial)
+                .Include(c => c.StatutChanges)
                 .Where(c => c.SessionsVisees.Contains(sessionKey) && c.Statut != Retire)
                 .ToListAsync();
             var candidats = candidatures.Where(c => c.ParticipantId == null || !inscritIds.Contains(c.ParticipantId));
@@ -137,6 +138,8 @@ namespace Api.Controllers
                     c.Mandant,
                     assistantSocialEmail = c.AssistantSocial?.Email,
                     c.Statut,
+                    // Date de la saisie du statut actuel (date du contact AS pour les listes d'attente).
+                    statutDepuis = c.StatutChanges?.Where(h => h.Statut == c.Statut).Max(h => (DateTime?)h.ChangedAt),
                     c.EvaluationNiveau,
                     c.InscriptionConfirmee,
                     c.ContratMaori,
@@ -217,6 +220,18 @@ namespace Api.Controllers
                     var candidature = await _context.Candidatures.FindAsync(item.CandidatureId.Value);
                     if (candidature != null)
                     {
+                        if (candidature.Statut != "Inscrit-e")
+                        {
+                            // Changement de statut daté et signé, comme depuis le formulaire.
+                            _context.CandidatureStatutChanges.Add(new CandidatureStatutChange
+                            {
+                                CandidatureId = candidature.CandidatureId,
+                                AncienStatut = candidature.Statut,
+                                Statut = "Inscrit-e",
+                                ChangedAt = DateTime.UtcNow,
+                                ChangedByUserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                            });
+                        }
                         candidature.Statut = "Inscrit-e";
                         candidature.InscriptionConfirmee = true;
                         if (candidature.ContratMaori) user.ContratMaori = true;
@@ -318,6 +333,20 @@ namespace Api.Controllers
         {
             var u = await _context.Users.FindAsync(studentId);
             if (u == null) return NotFound();
+            if (u.ContratMaori != dto.ContratMaori)
+            {
+                // Coché depuis le tableau d'une session ou depuis la fiche : daté et signé.
+                _context.FieldChangeHistories.Add(new FieldChangeHistory
+                {
+                    EntityType = nameof(ApplicationUser),
+                    EntityId = u.Id,
+                    FieldName = nameof(ApplicationUser.ContratMaori),
+                    OldValue = u.ContratMaori ? "reçu" : "non reçu",
+                    NewValue = dto.ContratMaori ? "reçu" : "non reçu",
+                    ChangedByUserId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                    ChangedAt = DateTime.UtcNow,
+                });
+            }
             u.ContratMaori = dto.ContratMaori;
             await _context.SaveChangesAsync();
             return NoContent();

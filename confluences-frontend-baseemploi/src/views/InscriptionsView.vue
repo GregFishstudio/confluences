@@ -181,6 +181,8 @@
                       <div class="insc-sub">
                         {{ r.kind === 'renouvellement' ? `reconduit·e depuis S${previous?.number} ${previous?.year}` : `Candidature : ${r.statut || '—'}` }}
                       </div>
+                      <!-- Date de la saisie du statut de la candidature (date du contact AS) -->
+                      <div v-if="r.kind === 'candidat' && r.statutDepuis" class="insc-sub">depuis le {{ formatDate(r.statutDepuis) }}</div>
                     </td>
                     <td><span class="insc-sub" :class="{ 'insc-empty': !r.assistantSocialEmail }">{{ asDisplay(r.assistantSocialEmail) }}</span></td>
                     <td class="insc-strong">

@@ -37,6 +37,27 @@ export const STATUTS_CANDIDATURE = [
   'Retiré-e',
 ]
 
+// ─── Motif du contact avec l'AS ───
+// Demandé quand la candidature passe en « AS à contacter » ou « Attente du retour AS » (allers-
+// retours compris). Mêmes règles que l'API (MotifsContactAS.cs).
+export const STATUTS_AVEC_MOTIF = ['AS à contacter', 'Attente du retour AS']
+// Joignabilité : commentaire obligatoire dès la deuxième occurrence.
+export const MOTIFS_JOIGNABILITE = ['Numéro de téléphone manquant', 'Numéro de téléphone erroné', 'Ne répond pas']
+// Commentaire toujours obligatoire.
+export const MOTIFS_COMMENTAIRE_OBLIGATOIRE = [
+  'Participant·e peu motivé·e', 'Problème de santé', 'Demande à vérifier', 'Autre mesure en cours', 'Autre',
+]
+export const MOTIFS_SANS_COMMENTAIRE = ['Évalué·e']
+export const MOTIFS_CONTACT_AS = [...MOTIFS_JOIGNABILITE, ...MOTIFS_COMMENTAIRE_OBLIGATOIRE, ...MOTIFS_SANS_COMMENTAIRE]
+
+// Le commentaire est-il obligatoire pour ce motif ? `historique` = changements de statut déjà
+// enregistrés pour la candidature (pour compter les problèmes de téléphone précédents).
+export function commentaireMotifObligatoire(motif, historique = []) {
+  if (MOTIFS_COMMENTAIRE_OBLIGATOIRE.includes(motif)) return true
+  if (MOTIFS_JOIGNABILITE.includes(motif)) return historique.some(h => MOTIFS_JOIGNABILITE.includes(h.motif))
+  return false
+}
+
 // Mesure visée par une candidature ; pour F&I, le niveau (A1/A2) est porté par le statut.
 export const MESURES = ['F&I', 'Télécours']
 

@@ -31,7 +31,7 @@
         class="contact-table"
         @click:row="selectRow"
         @update:items-per-page="updateNumberItems"
-        :options.sync="options"
+        v-model:page="page"
         mobile-breakpoint="0"
       >
         <template v-slot:top>
@@ -101,7 +101,8 @@
 <script setup>
 import { ref, computed, onBeforeMount } from 'vue';
 import { useStore } from 'vuex';
-import { useRouter, onBeforeRouteLeave } from 'vue-router';
+import { useRouter } from 'vue-router';
+import { useListMemory } from '@/composables/useListMemory';
 import CreateContactFromList from '@/components/CreateContactFromList.vue';
 
 const store = useStore();
@@ -109,7 +110,7 @@ const router = useRouter();
 
 // --- État Réactif ---
 const search = ref('');
-const options = ref({}); 
+const page = ref(1);
 
 // --- Computed Properties ---
 const contact = computed(() => store.state.contact);
@@ -133,14 +134,12 @@ onBeforeMount(() => {
     store.dispatch('contact/fetchContacts', true);
 });
 
-// Hook de navigation de sortie (sauvegarde la page actuelle)
-onBeforeRouteLeave((routeTo, routeFrom, next) => {
-    store.dispatch('settings/setCurrentPageContact', { number: options.value.page });
-    next();
+// Retour depuis une fiche : même recherche, même page, même position.
+// (`:options.sync` de Vuetify 2 ne mémorisait plus la page.)
+useListMemory('contacts', { search }, {
+    page,
+    ready: () => Array.isArray(contact.value.contacts) && contact.value.contacts.length > 0,
 });
-
-// Initialisation (simule le 'created')
-options.value.page = store.state.settings.currentPageContact;
 
 // --- Méthodes ---
 const selectRow = (event, row) => {
@@ -159,7 +158,7 @@ const updateNumberItems = (event) => {
 };
 
 const updatePageSearch = () => {
-    options.value.page = 1;
+    page.value = 1;
 };
 </script>
 

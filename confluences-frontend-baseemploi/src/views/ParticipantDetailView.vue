@@ -1,7 +1,7 @@
 <template>
   <v-container fluid class="pa-4">
     <div class="d-flex align-center mb-6">
-      <v-btn icon variant="text" :to="{ name: 'Participants' }" class="mr-2">
+      <v-btn icon variant="text" class="mr-2" title="Retour" @click="retourOuListe(router, 'Participants')">
         <v-icon>mdi-arrow-left</v-icon>
       </v-btn>
       <v-avatar size="48" :color="avatarColor" class="mr-4">
@@ -104,11 +104,19 @@
               </div>
             </v-col>
 
-            <v-col cols="12" md="6" class="d-flex align-center">
-              <v-chip :color="form.contratMaori ? 'red' : 'grey'" :variant="form.contratMaori ? 'flat' : 'tonal'" label size="small" prepend-icon="mdi-file-sign">
-                Contrat Maori : {{ form.contratMaori ? 'reçu' : 'non reçu' }}
-              </v-chip>
-              <span class="text-caption text-grey ml-2">Se coche sous Inscriptions › Participant·e·s</span>
+            <!-- Modifiable ici aussi : une personne qui n'est plus inscrite dans une session en cours
+                 n'apparaît plus dans le tableau d'Inscriptions, où seul il se cochait. -->
+            <v-col cols="12" md="6" class="d-flex align-center ga-2">
+              <v-switch
+                :model-value="!!form.contratMaori" color="red" hide-details density="compact" class="flex-grow-0"
+                :label="`Contrat Maori : ${form.contratMaori ? 'reçu' : 'non reçu'}`" :loading="savingMaori"
+                @update:model-value="toggleContratMaori"
+              />
+              <FieldHistoryDialog
+                v-if="user.id"
+                entity-type="ApplicationUser" :entity-id="user.id" field-name="ContratMaori"
+                label="Contrat Maori"
+              />
             </v-col>
           </v-row>
         </v-card>
@@ -253,7 +261,7 @@
               <a href="#" class="marrainage-link font-weight-bold text-body-1" @click.prevent="goToMarrainage(m.marrainageId)">
                 {{ m.prenom }} {{ m.nom }}
               </a>
-              <span class="text-caption text-grey">depuis le {{ formatDate(m.dateDebut) }}</span>
+              <span v-if="m.dateDebut" class="text-caption text-grey">depuis {{ formatMoisAnnee(m.dateDebut) }}</span>
               <v-spacer />
               <v-switch
                 :model-value="m.actif"
@@ -297,11 +305,10 @@
                 <td>
                   <a href="#" class="marrainage-link font-weight-bold" @click.prevent="goToMarrainage(m.marrainageId)">{{ m.prenom }} {{ m.nom }}</a>
                 </td>
-                <td>{{ formatDate(m.dateDebut) }}</td>
-                <td style="min-width: 150px">
-                  <v-text-field
-                    :model-value="m.dateFin ? String(m.dateFin).substring(0, 10) : null" type="date"
-                    variant="outlined" density="compact" hide-details
+                <td class="text-no-wrap">{{ formatMoisAnnee(m.dateDebut) || '—' }}</td>
+                <td style="min-width: 230px">
+                  <MoisAnneeField
+                    :model-value="m.dateFin ? String(m.dateFin).substring(0, 10) : null" class="py-1"
                     @update:model-value="(v) => updateMarrainageRelation(m, { dateFin: v || null })"
                   />
                 </td>
@@ -623,12 +630,15 @@
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { retourOuListe } from '@/composables/useListMemory'
 import { useStore } from 'vuex'
 import moment from 'moment/min/moment-with-locales'
 import API_BASE, { apiFetch } from '@/services/api'
 import { findSession } from '@/utils/sessionNumber'
 import FileAttachments from '@/components/FileAttachments.vue'
 import FieldHistoryDialog from '@/components/FieldHistoryDialog.vue'
+import MoisAnneeField from '@/components/MoisAnneeField.vue'
+import { debutDuMois } from '@/utils/dates'
 import InactivityReasonManager from '@/components/InactivityReasonManager.vue'
 import DateTextField from '@/components/DateTextField.vue'
 import CreateStage from '@/components/CreateStage.vue'
@@ -1140,10 +1150,36 @@ function saveCommentaireRelation(m) {
   updateMarrainageRelation(m, {})
 }
 
+// Contrat Maori : enregistré tout de suite (même enregistrement que le tableau d'Inscriptions).
+const savingMaori = ref(false)
+async function toggleContratMaori(value) {
+  const previous = form.value.contratMaori
+  form.value.contratMaori = value
+  savingMaori.value = true
+  try {
+    const res = await apiFetch(`${API_BASE}/api/Inscriptions/participants/${user.value.id}/contrat-maori`, {
+      method: 'PATCH',
+      body: JSON.stringify({ contratMaori: value }),
+    })
+    if (!res?.ok) throw new Error()
+    // Déjà enregistré : ne compte pas comme une modification en attente de la fiche.
+    if (formSnapshot.value) {
+      const snap = JSON.parse(formSnapshot.value)
+      snap.contratMaori = value
+      formSnapshot.value = JSON.stringify(snap)
+    }
+  } catch {
+    form.value.contratMaori = previous
+    store.dispatch('notification/add', { type: 'error', message: "Le contrat Maori n'a pas pu être enregistré." })
+  } finally {
+    savingMaori.value = false
+  }
+}
+
 const updateRaison = (marrainage, raison) => updateMarrainageRelation(marrainage, { raisonInactivite: raison })
 const updateRelationActif = (marrainage, actif) => updateMarrainageRelation(marrainage, {
   actif,
-  dateFin: actif ? null : (marrainage.dateFin || new Date().toISOString().substring(0, 10)),
+  dateFin: actif ? null : (marrainage.dateFin || debutDuMois()),
 })
 
 // AddNewtonsoftJson() applique par défaut un CamelCasePropertyNamesContractResolver

@@ -24,7 +24,7 @@
         :items="stagiaires"
         :items-per-page="settings.itemsPerPage"
         :search="search"
-        :options.sync="options"
+        v-model:page="page"
         @update:items-per-page="updateNumberItems"
         @click:row="handleRowClick"
         mobile-breakpoint="0"
@@ -113,12 +113,24 @@
 import store from "@/store"
 import { mapState } from "vuex"
 import API_BASE, {apiFetch} from '@/services/api'
+import { ref } from 'vue'
+import { useListMemory } from '@/composables/useListMemory'
 
 export default {
+  // Retour depuis une fiche : même recherche, même page, même position.
+  // (`:options.sync` de Vuetify 2 ne mémorisait plus la page.)
+  setup() {
+    const search = ref("")
+    const page = ref(1)
+    useListMemory("stagiaires", { search }, {
+      page,
+      ready: () => Array.isArray(store.state.stagiaire.stagiaires) && store.state.stagiaire.stagiaires.length > 0,
+    })
+    return { search, page }
+  },
+
   data() {
     return {
-      options: {},
-      search: "",
       isLoading: false, // Nouveau: pour l'état de chargement
 
       // Modale
@@ -167,10 +179,6 @@ export default {
 
   beforeRouteEnter(routeTo, routeFrom, next) {
     store.dispatch("stagiaire/fetchStagiaires", true).then(() => next())
-  },
-
-  created() {
-    this.options.page = this.settings?.currentPageStagiaire || 1
   },
 
   methods: {
@@ -301,7 +309,7 @@ export default {
     },
 
     updatePageSearch() {
-      this.options.page = 1
+      this.page = 1
     }
   }
 }

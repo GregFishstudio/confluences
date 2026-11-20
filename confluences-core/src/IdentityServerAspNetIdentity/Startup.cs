@@ -46,6 +46,14 @@ namespace IdentityServerAspNetIdentity
             services.AddControllersWithViews();
             services.AddRazorPages();
 
+            // E-mails (mot de passe oublié) : SMTP (section "Smtp") ou SendGrid (SendGridKey).
+            // Sans cela, la page « Mot de passe oublié » plantait (aucun IEmailSender enregistré).
+            services.Configure<IdentityServerAspNetIdentity.Services.SmtpOptions>(Configuration.GetSection("Smtp"));
+            services.Configure<IdentityServerAspNetIdentity.Services.AuthMessageSenderOptions>(Configuration);
+            services.AddTransient<IdentityServerAspNetIdentity.Services.ConfigurableEmailSender>();
+            services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender>(
+                sp => sp.GetRequiredService<IdentityServerAspNetIdentity.Services.ConfigurableEmailSender>());
+
             //services.AddDbContext<ConfluencesDbContext>(options =>
             //    options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             var test = Configuration.GetConnectionString("DefaultConnection");

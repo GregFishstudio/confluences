@@ -34,18 +34,34 @@
         :label="q.label"
         :required="q.required"
         variant="outlined" density="compact"
+        :placeholder="estDateNaissance(q) ? 'JJ.MM.AAAA' : undefined"
+        :hint="estDateNaissance(q) ? lectureDateNaissance(modelValue[q.marrainageQuestionId]) : undefined"
+        :persistent-hint="estDateNaissance(q)"
       />
     </div>
   </div>
 </template>
 
 <script setup>
+import moment from 'moment/min/moment-with-locales'
+import { parseDateFr, ageDepuis } from '@/utils/dates'
 const props = defineProps({
   questions: { type: Array, default: () => [] },
   modelValue: { type: Object, default: () => ({}) }
 })
 
 const emit = defineEmits(['update:modelValue'])
+
+// Date de naissance : la date lue et l'âge s'affichent pendant la saisie ; ils rempliront la
+// fiche à la création.
+const estDateNaissance = (q) => /naissance/i.test(q.label || '')
+function lectureDateNaissance(value) {
+  if (!value || !String(value).trim()) return 'Format JJ.MM.AAAA : la date et l’âge s’afficheront sur la fiche.'
+  const iso = parseDateFr(String(value))
+  if (!iso) return 'Date non reconnue : utilisez le format JJ.MM.AAAA (ex. 03.03.1992).'
+  const age = ageDepuis(iso)
+  return `${moment(iso).format('DD.MM.YYYY')}${age != null ? ` · ${age} ans` : ''}`
+}
 
 // Options séparées par "|" (format prévu), mais aussi ";", " / " ou retour à la ligne.
 function parseOptions(raw) {

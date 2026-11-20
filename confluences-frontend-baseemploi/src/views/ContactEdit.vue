@@ -93,7 +93,7 @@
             class="ma-2"
             color="primary"
             min-width="150"
-            @click="router.go(-1)"
+            @click="retourOuListe(router, 'Contacts')"
           >
             Annuler
           </v-btn>
@@ -107,6 +107,7 @@
 import { ref, computed, onBeforeMount } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
+import { retourOuListe } from '@/composables/useListMemory'
 import NProgress from 'nprogress';
 import DeleteContact from '@/components/DeleteContact.vue';
 
@@ -154,7 +155,7 @@ const submit = async () => {
     store
       .dispatch('contact/editContact', contactRef.value)
       .then(() => {
-        router.push({ name: 'Contacts' });
+        retourOuListe(router, 'Contacts');
       })
       .catch((error) => {
           console.error("Erreur de sauvegarde du contact:", error);

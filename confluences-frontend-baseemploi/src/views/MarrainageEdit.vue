@@ -66,7 +66,12 @@
             </v-col>
             <v-col cols="6"><v-text-field v-model="form.numero" label="Téléphone" variant="outlined" density="compact" /></v-col>
             <v-col cols="6"><v-text-field v-model="form.email" label="Email" variant="outlined" density="compact" /></v-col>
-            <v-col cols="3"><v-text-field v-model="form.dateNaissance" type="date" label="Date de naissance" variant="outlined" density="compact" /></v-col>
+            <v-col cols="3">
+              <v-text-field
+                v-model="form.dateNaissance" type="date" label="Date de naissance" variant="outlined" density="compact"
+                :hint="ageAffiche != null ? `${ageAffiche} ans${ageCalcule == null ? ' (déclaré)' : ''}` : ''" persistent-hint
+              />
+            </v-col>
             <v-col cols="3">
               <v-select v-model="form.sexe" :items="SEXES" label="Sexe" variant="outlined" density="compact" clearable />
             </v-col>
@@ -83,9 +88,16 @@
                 :items="[{ title: 'Aucun', value: null }, ...MARRAINAGE_STATUTS_FICHE]"
                 label="Statut"
                 variant="outlined" density="compact"
-                :hint="hasActiveRelationNow ? 'Actif·ve dans une relation de marrainage (ci-dessous) : affiché « Actif·ve » dans la liste.' : ''"
+                :hint="hasActiveRelationNow ? 'Nouveau·elle, en attente de binôme ou sans suite : arrête les relations en cours.' : ''"
                 persistent-hint
               />
+            </v-col>
+            <v-col cols="12" class="d-flex align-center flex-wrap ga-1">
+              <span class="text-caption text-medium-emphasis mr-1">Affiché dans la liste :</span>
+              <v-chip
+                v-for="st in statutsListe" :key="st.value" :color="st.color" size="small" variant="flat" label
+              >{{ st.title }}</v-chip>
+              <span v-if="!statutsListe.length" class="text-caption text-grey">aucun statut</span>
             </v-col>
           </v-row>
 
@@ -103,17 +115,15 @@
               <v-btn icon="mdi-close" size="x-small" variant="text" title="Supprimer cette relation (erreur de saisie)" @click="removeParticipant(rel.participantId)" />
             </div>
             <v-row dense>
-              <v-col cols="6" md="3">
-                <v-text-field
-                  :model-value="rel.dateDebut"
+              <v-col cols="12" md="3">
+                <MoisAnneeField
+                  :model-value="rel.dateDebut" label="Début (mois et année)" :disabled="rel.legacy"
                   @update:model-value="v => updateRelation(rel, { dateDebut: v })"
-                  type="date" label="Date de démarrage" variant="outlined" density="compact"
                 />
-                <v-text-field
-                  v-if="!rel.actif"
-                  :model-value="rel.dateFin"
+                <MoisAnneeField
+                  v-if="!rel.actif" class="mt-2"
+                  :model-value="rel.dateFin" label="Fin (mois et année)" :disabled="rel.legacy"
                   @update:model-value="v => updateRelation(rel, { dateFin: v })"
-                  type="date" label="Date de fin" variant="outlined" density="compact"
                 />
               </v-col>
               <v-col cols="12" md="4">
@@ -133,7 +143,7 @@
               <v-col cols="6" md="3">
                 <v-switch
                   :model-value="rel.actif"
-                  @update:model-value="v => updateRelation(rel, { actif: v, dateFin: v ? null : (rel.dateFin || new Date().toISOString().substring(0, 10)) })"
+                  @update:model-value="v => changerActifRelation(rel, v)"
                   label="Actif" :color="rel.actif ? 'success' : 'error'" hide-details
                 />
               </v-col>
@@ -246,7 +256,23 @@
       </v-col>
 
       <v-col cols="12" md="5">
-        <CommentThread v-if="!isNew" :comments="comments" @submit="addComment" @delete="deleteComment" />
+        <template v-if="!isNew">
+          <CommentThread
+            :comments="commentsGeneraux" title="Commentaires généraux"
+            empty-text="Aucun commentaire général pour le moment."
+            @submit="(t) => addComment(t, null)" @delete="deleteComment"
+          />
+          <CommentThread
+            class="mt-4" :comments="commentsParrain" title="Concerne uniquement le parrain / la marraine"
+            empty-text="Aucun commentaire sur le parrain / la marraine seul·e."
+            input-label="Ajouter un commentaire (pas sur la relation ni le binôme)"
+            @submit="(t) => addComment(t, 'parrain')" @delete="deleteComment"
+          />
+          <div class="text-caption text-medium-emphasis mt-2">
+            Les commentaires sur une relation de marrainage se saisissent dans la relation (à gauche) :
+            ils sont visibles aussi sur la fiche du/de la participant·e.
+          </div>
+        </template>
         <v-card v-else class="pa-4 elevation-1 rounded-lg" variant="outlined">
           <p class="text-body-2 text-medium-emphasis mb-0">
             Les commentaires et pièces jointes seront disponibles après la première sauvegarde.
@@ -258,9 +284,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { useRoute, useRouter } from 'vue-router'
+import { retourOuListe } from '@/composables/useListMemory'
 import axios from 'axios'
 import FileAttachments from '@/components/FileAttachments.vue'
 import CommentThread from '@/components/CommentThread.vue'
@@ -272,7 +299,9 @@ import InactivityReasonManager from '@/components/InactivityReasonManager.vue'
 import MarrainageQuestionService from '@/services/marrainageQuestionService.js'
 import MarrainageAnswerService from '@/services/marrainageAnswerService.js'
 import { apiFetch } from '@/services/api'
-import { MARRAINAGE_STATUTS_FICHE } from '@/utils/marrainageStatut'
+import { MARRAINAGE_STATUTS_FICHE, statutsAffiches, statutInfo } from '@/utils/marrainageStatut'
+import MoisAnneeField from '@/components/MoisAnneeField.vue'
+import { debutDuMois, ageDepuis } from '@/utils/dates'
 import { useRegions, regionDeCommune } from '@/utils/regions'
 import { parseDateFr } from '@/utils/dates'
 import { normalizeSearch } from '@/utils/search'
@@ -287,11 +316,7 @@ const router = useRouter()
 // Revient à la page précédente (restaure la pagination de la liste) plutôt que de
 // toujours pousser une nouvelle navigation vers la page 1 de la liste.
 function goBack() {
-  if (window.history.state && window.history.state.back) {
-    router.back()
-  } else {
-    router.push({ name: 'Marrainages' })
-  }
+  retourOuListe(router, 'Marrainages')
 }
 
 const isNew = computed(() => route.name === 'Marrainage-Nouveau')
@@ -305,6 +330,24 @@ const comments = ref([])
 // avec ses propres dates et statut d'activité — indépendants du statut de la marraine elle-même.
 const relations = ref([])
 const hasActiveRelationNow = computed(() => relations.value.some(r => r.actif))
+
+// Commentaires de la fiche : généraux (portee vide) ou ne concernant que le parrain / la marraine.
+const commentsGeneraux = computed(() => comments.value.filter(c => c.portee !== 'parrain'))
+const commentsParrain = computed(() => comments.value.filter(c => c.portee === 'parrain'))
+
+// Statuts qui n'ont pas de sens avec une relation en cours (même règle que l'API).
+const STATUTS_SANS_RELATION_ACTIVE = ['nouveau', 'en_attente', 'sans_suite']
+// Ce que la liste affichera : « Actif·ve » si une relation est en cours, avec le statut de la
+// fiche s'il reste pertinent (disponible, à vérifier, à relancer).
+const statutsListe = computed(() => statutsAffiches({
+  statut: form.value.statut,
+  participantLinks: relations.value.filter(r => !r.legacy).map(r => ({ participantId: r.participantId, actif: r.actif })),
+  participant: relations.value.some(r => r.legacy) ? { id: relations.value.find(r => r.legacy).participantId } : null,
+}).map(statutInfo))
+
+// Âge : calculé d'après la date de naissance ; à défaut, l'âge déclaré (anciennes fiches).
+const ageCalcule = computed(() => ageDepuis(form.value.dateNaissance))
+const ageAffiche = computed(() => ageCalcule.value ?? form.value.age ?? null)
 const addParticipantDialog = ref(false)
 const newParticipantId = ref(null)
 const questions = ref([])
@@ -401,7 +444,7 @@ function loadMarrainage(marrainage) {
   // Le lien historique (Marrainage.ParticipantId/Participant) n'a pas de ligne
   // MarrainageParticipant associée avant la Phase 2 — on le représente ici sans dates.
   if (marrainage.participant && !links.some(pl => pl.participantId === marrainage.participant.id)) {
-    links.unshift({ participant: marrainage.participant, participantId: marrainage.participant.id, actif: true })
+    links.unshift({ participant: marrainage.participant, participantId: marrainage.participant.id, actif: true, legacy: true })
   }
   relations.value = links.map(pl => ({
     participantId: pl.participantId,
@@ -412,6 +455,7 @@ function loadMarrainage(marrainage) {
     dateDebut: pl.dateDebut ? pl.dateDebut.substring(0, 10) : null,
     dateFin: pl.dateFin ? pl.dateFin.substring(0, 10) : null,
     actif: pl.actif ?? true,
+    legacy: !!pl.legacy,
     raisonInactivite: pl.raisonInactivite ?? null,
     commentaire: pl.commentaire || '',
     commentaireEnregistre: pl.commentaire || '',
@@ -494,7 +538,7 @@ async function deleteThisMarrainage() {
 
 async function addParticipant() {
   if (!newParticipantId.value) return
-  const dateDebut = new Date().toISOString().substring(0, 10)
+  const dateDebut = debutDuMois()
   await axios.post(`${API_URL}/api/Marrainages/${form.value.marrainageId}/participants`, {
     participantId: newParticipantId.value,
     dateDebut
@@ -515,6 +559,7 @@ async function addParticipant() {
       commentaireEnregistre: '',
     })
   }
+  apresActivationRelation()
   newParticipantId.value = null
   addParticipantDialog.value = false
 }
@@ -545,6 +590,49 @@ async function updateRelation(rel, changes) {
   })
   rel.commentaireEnregistre = rel.commentaire ?? ''
 }
+
+// Switch « Actif » d'une relation : à l'arrêt, fin au mois en cours.
+async function changerActifRelation(rel, actif) {
+  await updateRelation(rel, { actif, dateFin: actif ? null : (rel.dateFin || debutDuMois()) })
+  if (actif) apresActivationRelation()
+}
+
+// Une relation devient active : « nouveau·elle », « en attente de binôme » et « sans suite » ne
+// s'appliquent plus (l'API retire déjà ce statut ; la fiche suit, sans modification en attente).
+function apresActivationRelation() {
+  if (!STATUTS_SANS_RELATION_ACTIVE.includes(form.value.statut)) return
+  ignorerChangementStatut = true
+  form.value.statut = null
+  if (formSnapshot.value) {
+    const snap = JSON.parse(formSnapshot.value)
+    snap.statut = null
+    formSnapshot.value = JSON.stringify(snap)
+  }
+}
+
+// Choisir « nouveau·elle », « en attente de binôme » ou « sans suite » alors qu'une relation est
+// en cours : on propose de l'arrêter (sinon le statut reste inchangé).
+let ignorerChangementStatut = false
+let chargementEnCours = false
+watch(() => form.value.statut, async (nouveau, ancien) => {
+  if (ignorerChangementStatut || chargementEnCours) { ignorerChangementStatut = false; return }
+  const actives = relations.value.filter(r => r.actif && !r.legacy)
+  if (!STATUTS_SANS_RELATION_ACTIVE.includes(nouveau) || !actives.length) return
+  const titre = statutInfo(nouveau)?.title || nouveau
+  const noms = actives.map(r => `${r.firstname || ''} ${r.lastName || ''}`.trim()).join(', ')
+  const ok = window.confirm(
+    `Passer en « ${titre} » arrête ${actives.length > 1 ? 'les relations en cours' : 'la relation en cours'} (${noms}).\n\n`
+    + 'La date de fin sera le mois en cours ; vous pourrez ensuite choisir le motif de l\'arrêt.\n\nContinuer ?'
+  )
+  if (!ok) {
+    ignorerChangementStatut = true
+    form.value.statut = ancien
+    return
+  }
+  for (const rel of actives) await updateRelation(rel, { actif: false, dateFin: rel.dateFin || debutDuMois() })
+  // Le statut lui-même s'enregistre avec le reste de la fiche.
+  await saveAll()
+})
 
 // Commentaire de la relation : enregistré en quittant le champ, s'il a changé (même commentaire
 // que sur la fiche du/de la participant·e).
@@ -712,10 +800,11 @@ async function loadAnswers(marrainageId) {
   answers.value = map
 }
 
-async function addComment(text) {
+async function addComment(text, portee = null) {
   const response = await axios.post(`${API_URL}/api/MarrainageComments`, {
     marrainageId: form.value.marrainageId,
-    text
+    text,
+    portee,
   })
   comments.value = [response.data, ...comments.value]
 }
@@ -726,12 +815,19 @@ async function deleteComment(commentId) {
 }
 
 async function initFromRoute() {
-  await loadQuestions()
-  if (!isNew.value && route.params.marrainage) {
-    loadMarrainage(route.params.marrainage)
-    await loadAnswers(route.params.marrainage.marrainageId)
-    takeSnapshot()
-    saveError.value = ''
+  chargementEnCours = true
+  try {
+    await loadQuestions()
+    if (!isNew.value && route.params.marrainage) {
+      loadMarrainage(route.params.marrainage)
+      await loadAnswers(route.params.marrainage.marrainageId)
+      takeSnapshot()
+      saveError.value = ''
+    }
+  } finally {
+    // Après le passage des observateurs déclenchés par le remplissage du formulaire.
+    await nextTick()
+    chargementEnCours = false
   }
 }
 

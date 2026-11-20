@@ -1,6 +1,7 @@
 <!--
   Gestion des questions du questionnaire d'inscription parrain/marraine (ajout, modification,
-  suppression, ordre). Accessible depuis la page "Nouveau marrainage".
+  suppression, ordre avec les flèches — enregistré aussitôt). Accessible depuis la page
+  "Nouveau marrainage" et depuis une fiche.
 -->
 <template>
   <v-dialog v-model="dialog" max-width="700" scrollable>
@@ -14,9 +15,16 @@
       <v-card-title class="py-4">Questions du questionnaire</v-card-title>
       <v-divider />
       <v-card-text class="pt-4" style="max-height: 70vh;">
-        <div v-for="q in questions" :key="q.marrainageQuestionId" class="question-row mb-3 pa-3">
+        <div class="text-caption text-medium-emphasis mb-3">
+          Les flèches changent la place d'une question dans le questionnaire (enregistré aussitôt).
+        </div>
+        <div v-for="(q, idx) in questions" :key="q.marrainageQuestionId" class="question-row mb-3 pa-3">
           <div class="d-flex align-center ga-2 mb-2">
-            <v-text-field v-model.number="q.order" type="number" label="Ordre" variant="outlined" density="compact" style="max-width: 90px" hide-details />
+            <div class="d-flex flex-column align-center" style="width: 36px">
+              <v-btn icon="mdi-chevron-up" size="x-small" variant="text" :disabled="idx === 0 || moving" title="Monter" @click="move(idx, -1)" />
+              <span class="text-caption font-weight-bold">{{ idx + 1 }}</span>
+              <v-btn icon="mdi-chevron-down" size="x-small" variant="text" :disabled="idx === questions.length - 1 || moving" title="Descendre" @click="move(idx, 1)" />
+            </div>
             <v-text-field v-model="q.label" label="Question" variant="outlined" density="compact" hide-details class="flex-grow-1" />
             <v-icon color="red" style="cursor: pointer" @click="remove(q)">mdi-delete-outline</v-icon>
           </div>
@@ -95,6 +103,26 @@ function load() {
   MarrainageQuestionService.getQuestions(false).then(response => {
     questions.value = response.data
   })
+}
+
+// Déplace une question d'un cran et enregistre tout l'ordre (positions 1, 2, 3…).
+const moving = ref(false)
+async function move(idx, delta) {
+  const cible = idx + delta
+  if (cible < 0 || cible >= questions.value.length) return
+  const liste = [...questions.value]
+  ;[liste[idx], liste[cible]] = [liste[cible], liste[idx]]
+  questions.value = liste
+  moving.value = true
+  try {
+    await MarrainageQuestionService.putOrdre(liste.map(q => q.marrainageQuestionId))
+    liste.forEach((q, i) => { q.order = i + 1 })
+    emit('changed')
+  } catch (e) {
+    load()
+  } finally {
+    moving.value = false
+  }
 }
 
 function save(q) {

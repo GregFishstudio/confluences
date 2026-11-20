@@ -18,6 +18,10 @@ export default {
   putQuestion(question) {
     return axios.put(API_URL + CONTROLLER + '/' + question.marrainageQuestionId, question)
   },
+  // Nouvel ordre : identifiants des questions, de la première à la dernière.
+  putOrdre(ids) {
+    return axios.put(API_URL + CONTROLLER + '/ordre', ids)
+  },
   deleteQuestion(id) {
     return axios.delete(API_URL + CONTROLLER + '/' + id)
   }

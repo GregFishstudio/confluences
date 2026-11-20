@@ -16,3 +16,30 @@ export function parseDateFr(value) {
   const date = moment({ year, month: Number(m) - 1, day: Number(d) })
   return date.isValid() && year > 1900 ? date.format('YYYY-MM-DD') : undefined
 }
+
+// ─── Mois / année (dates de début et de fin d'un marrainage) ───
+const MOIS_LONGS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre']
+
+// Premier jour du mois d'une date (AAAA-MM-01) — un marrainage commence et finit « en mars 2026 ».
+export function debutDuMois(date = new Date()) {
+  const d = moment(date)
+  return d.isValid() ? d.startOf('month').format('YYYY-MM-DD') : null
+}
+
+// « mars 2026 » ; vide si pas de date.
+export function formatMoisAnnee(date) {
+  if (!date) return ''
+  const d = moment(date)
+  return d.isValid() ? `${MOIS_LONGS[d.month()]} ${d.year()}` : ''
+}
+
+// Âge en années révolues à une date de naissance (null si inconnue ou invalide).
+export function ageDepuis(naissance, aLaDate = new Date()) {
+  if (!naissance) return null
+  const n = moment(naissance)
+  if (!n.isValid() || n.year() < 1900) return null
+  const age = moment(aLaDate).diff(n, 'years')
+  return age >= 0 && age < 120 ? age : null
+}
+
+export { MOIS_LONGS }

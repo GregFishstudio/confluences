@@ -82,6 +82,10 @@ namespace Confluences.Domain.Entities
         [ForeignKey(nameof(ParticipantId))]
         public virtual ApplicationUser? Participant { get; set; }
 
+        // Historique des statuts : date, auteur·e, motif et commentaire de chaque changement.
+        [InverseProperty(nameof(CandidatureStatutChange.Candidature))]
+        public virtual ICollection<CandidatureStatutChange>? StatutChanges { get; set; }
+
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }

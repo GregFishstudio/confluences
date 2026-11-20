@@ -14,11 +14,16 @@
       </div>
       <div v-for="c in comments" :key="c[idKey]" class="comment-bubble mb-3">
         <div class="d-flex align-center mb-1">
-          <v-avatar size="24" color="primary" class="mr-2">
-            <span class="text-caption text-white">{{ authorInitials(c) }}</span>
-          </v-avatar>
-          <span class="text-caption font-weight-bold mr-2">{{ authorName(c) }}</span>
-          <span class="text-caption text-grey">{{ formatDate(c.createdAt) }}</span>
+          <template v-if="!hideAuthor">
+            <v-avatar size="24" color="primary" class="mr-2">
+              <span class="text-caption text-white">{{ authorInitials(c) }}</span>
+            </v-avatar>
+            <span class="text-caption font-weight-bold mr-2">{{ authorName(c) }}</span>
+          </template>
+          <!-- Sans nom affiché, l'auteur·e reste enregistré·e (traçabilité) : visible au survol. -->
+          <span class="text-caption" :class="hideAuthor ? 'font-weight-bold' : 'text-grey'" :title="hideAuthor ? `Saisi par ${authorName(c)}` : undefined">
+            {{ formatDate(c.createdAt) }}
+          </span>
           <v-spacer />
           <v-icon size="16" color="grey" style="cursor: pointer" @click="emit('delete', c[idKey])">
             mdi-delete-outline
@@ -60,6 +65,8 @@ const props = defineProps({
   title: { type: String, default: 'Commentaires' },
   emptyText: { type: String, default: 'Aucun commentaire pour le moment.' },
   inputLabel: { type: String, default: 'Ajouter un commentaire' },
+  // Affiche seulement la date (ex. remarques AS) ; le nom reste disponible au survol.
+  hideAuthor: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['submit', 'delete'])

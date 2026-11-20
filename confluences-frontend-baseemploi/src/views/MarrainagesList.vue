@@ -100,7 +100,7 @@
       <v-data-table
         :headers="headers"
         :items="sorted"
-        :items-per-page="25"
+        v-model:items-per-page="itemsPerPage"
         v-model:page="page"
         hover
         :row-props="rowProps"
@@ -142,10 +142,10 @@
           </div>
         </template>
         <template #item.date="{ item }">
-          {{ formatDate(item.date) }}
+          {{ formatMoisAnnee(item.date) || '—' }}
         </template>
         <template #item.dateFin="{ item }">
-          {{ formatDate(item.dateFin) }}
+          {{ formatMoisAnnee(item.dateFin) || '—' }}
         </template>
       </v-data-table>
     </v-card>
@@ -167,6 +167,7 @@ import {
 } from '@/utils/marrainageStatut'
 import { useRegions, regionMarrainage } from '@/utils/regions'
 import { matchesSearch } from '@/utils/search'
+import { useListMemory } from '@/composables/useListMemory'
 
 moment.locale('fr')
 const store = useStore()
@@ -178,6 +179,7 @@ const search = ref('')
 const filterStatut = ref('all')
 const sortMode = ref('suivi')
 const filterRegion = ref(null)
+const itemsPerPage = ref(25)
 const { regionNames, regionColor } = useRegions()
 const confirmClearDialog = ref(false)
 const showAdminTools = ref(false)
@@ -268,6 +270,15 @@ const goToParticipant = (id) => {
 }
 
 const formatDate = (d) => d ? moment(d).format('DD.MM.YYYY') : '—'
+// Début / fin de marrainage : au mois près.
+const formatMoisAnnee = (d) => d ? moment(d).format('MM.YYYY') : ''
+
+// Retour depuis une fiche : mêmes filtres et même position (la page est déjà dans l'adresse).
+useListMemory(
+  'marrainages',
+  { search, filterStatut, sortMode, filterRegion, itemsPerPage },
+  { ready: () => !isLoading.value && marrainages.value.length > 0 },
+)
 
 const load = () => {
   isLoading.value = true

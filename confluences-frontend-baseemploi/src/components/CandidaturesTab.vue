@@ -93,6 +93,11 @@
                 </div>
                 <div>
                   <div class="insc-name">{{ c.civilite ? `${c.civilite} ` : '' }}{{ c.nom }} <span class="first">{{ c.prenom }}</span></div>
+                  <!-- Nom ou prénom manquant : à compléter (obligatoire pour l'évaluation) -->
+                  <div v-if="!c.prenom?.trim() || !c.nom?.trim()" class="insc-sub text-red-darken-2 font-weight-bold d-flex align-center ga-1">
+                    <v-icon size="x-small" color="red-darken-2">mdi-account-alert-outline</v-icon>
+                    {{ !c.nom?.trim() ? 'Nom manquant' : 'Prénom manquant' }}
+                  </div>
                   <div class="insc-sub d-flex align-center flex-wrap ga-1">
                     <span v-if="c.mandant" class="insc-tag" :style="{ '--tag': couleurMandant(c.mandant) }">{{ c.mandant }}</span>
                     <span>{{ c.origine || '' }}</span>
@@ -106,6 +111,13 @@
             </td>
             <td>
               <span class="insc-pill">{{ c.statut || 'Sans statut' }}</span>
+              <!-- Date de la saisie du statut (= date du contact AS pour « Attente du retour AS », « En attente A1/A2 »…) -->
+              <div v-if="c.statutDepuis" class="insc-sub" :title="c.statutPar ? `Saisi par ${c.statutPar}` : undefined">
+                depuis le {{ formatDate(c.statutDepuis) }}<span v-if="c.statutPar"> · {{ c.statutPar }}</span>
+              </div>
+              <div v-if="c.motifStatut" class="insc-note mt-1">
+                <b>{{ c.motifStatut }}</b><span v-if="c.commentaireStatut"> — {{ c.commentaireStatut }}</span>
+              </div>
               <div v-if="c.mesureVisee || sessionKeysOf(c).length" class="insc-sub">
                 <span class="insc-tag" :style="{ '--tag': couleurMesure(c.mesureVisee) }">{{ abreviationMesure(c.mesureVisee) }}</span>
                 <span v-if="sessionKeysOf(c).length"> {{ sessionKeysOf(c).map(sessionLabel).join(', ') }}</span>

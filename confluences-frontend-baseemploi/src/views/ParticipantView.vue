@@ -83,7 +83,9 @@
       <v-data-table
         :headers="headers"
         :items="sortedUsers"
-        :items-per-page="25"
+        v-model:page="page"
+        v-model:items-per-page="itemsPerPage"
+        v-model:sort-by="sortBy"
         hover
         @click:row="(_, { item }) => openDetail(item)"
         class="participants-table"
@@ -155,6 +157,7 @@ import { BENEVOLAT_DOMAINES, domainesAffiches, aUnDesDomaines } from '@/utils/be
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import moment from 'moment/min/moment-with-locales'
+import { useListMemory } from '@/composables/useListMemory'
 
 const router = useRouter()
 
@@ -170,6 +173,9 @@ const filterYear          = ref(null)
 const filterActif         = ref('all')
 const filterDomainesBenevolat = ref([])
 const sortMode            = ref('nom')
+const page                = ref(1)
+const itemsPerPage        = ref(25)
+const sortBy              = ref([])
 
 // ─── Store ────────────────────────────────────────────────────────────────────
 const users = computed(() => store.state.user?.users || [])
@@ -267,6 +273,13 @@ const niveauColor = (niveau) => {
   if (n.includes('b2'))  return 'deep-orange'
   return 'grey'
 }
+
+// Retour depuis une fiche : mêmes filtres, même page, même position.
+useListMemory(
+  'participants',
+  { search, filterNiveau, filterSessionNumber, filterYear, filterActif, filterDomainesBenevolat, sortMode, itemsPerPage, sortBy },
+  { page, ready: () => !isLoading.value && users.value.length > 0 },
+)
 
 const openDetail = (user) => {
   router.push({ name: 'Participant-Detail', params: { id: user.id } })

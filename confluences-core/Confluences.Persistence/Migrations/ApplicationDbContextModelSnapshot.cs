@@ -770,6 +770,47 @@ namespace IdentityServerAspNetIdentity.Migrations
                     b.ToTable("CandidatureComments");
                 });
 
+            modelBuilder.Entity("Confluences.Domain.Entities.CandidatureStatutChange", b =>
+                {
+                    b.Property<int>("CandidatureStatutChangeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CandidatureStatutChangeId"));
+
+                    b.Property<string>("AncienStatut")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("CandidatureId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ChangedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("ChangedByUserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Commentaire")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Motif")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("Statut")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("CandidatureStatutChangeId");
+
+                    b.HasIndex("ChangedByUserId");
+
+                    b.HasIndex("CandidatureId", "ChangedAt");
+
+                    b.ToTable("CandidatureStatutChanges");
+                });
+
             modelBuilder.Entity("Confluences.Domain.Entities.Contact", b =>
                 {
                     b.Property<int>("ContactId")
@@ -1522,6 +1563,10 @@ namespace IdentityServerAspNetIdentity.Migrations
 
                     b.Property<int>("MarrainageId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("Portee")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<string>("Text")
                         .IsRequired()
@@ -2754,6 +2799,24 @@ namespace IdentityServerAspNetIdentity.Migrations
                     b.Navigation("Candidature");
                 });
 
+            modelBuilder.Entity("Confluences.Domain.Entities.CandidatureStatutChange", b =>
+                {
+                    b.HasOne("Confluences.Domain.Entities.Candidature", "Candidature")
+                        .WithMany("StatutChanges")
+                        .HasForeignKey("CandidatureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Confluences.Domain.Entities.ApplicationUser", "ChangedByUser")
+                        .WithMany()
+                        .HasForeignKey("ChangedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Candidature");
+
+                    b.Navigation("ChangedByUser");
+                });
+
             modelBuilder.Entity("Confluences.Domain.Entities.Contact", b =>
                 {
                     b.HasOne("Confluences.Domain.Entities.ApplicationUser", "Createur")
@@ -3400,6 +3463,8 @@ namespace IdentityServerAspNetIdentity.Migrations
             modelBuilder.Entity("Confluences.Domain.Entities.Candidature", b =>
                 {
                     b.Navigation("Comments");
+
+                    b.Navigation("StatutChanges");
                 });
 
             modelBuilder.Entity("Confluences.Domain.Entities.Entreprise", b =>
